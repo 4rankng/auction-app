@@ -1,0 +1,94 @@
+/* Print Styles */
+@media print {
+    /* General page setup */
+    @page {
+        margin: 1.5cm;
+    }
+
+    /* Hide elements not needed for printing */
+    .header, .footer, .toast-container, .btn, .language-selector {
+        display: none !important;
+    }
+
+    /* Remove shadows and backgrounds for better print quality */
+    .card, .info-box {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+
+    /* Ensure all content is visible */
+    .main {
+        padding: 0 !important;
+        min-height: auto !important;
+    }
+
+    .completed-container {
+        width: 100% !important;
+    }
+
+    /* Adjust fonts for better print readability */
+    body {
+        font-size: 12pt;
+        line-height: 1.5;
+        color: #000 !important;
+        background: #fff !important;
+    }
+
+    h1, h2, h3, h4 {
+        page-break-after: avoid;
+    }
+
+    /* Add title on top of the page */
+    .completed-container::before {
+        content: "HỆ THỐNG ĐẤU GIÁ - KẾT QUẢ";
+        font-size: 18pt;
+        font-weight: bold;
+        text-align: center;
+        display: block;
+        margin-bottom: 1cm;
+    }
+
+    /* Format tables for better print appearance */
+    table, th, td {
+        border-collapse: collapse;
+        border: 1px solid #ddd;
+    }
+
+    th, td {
+        padding: 8pt;
+    }
+
+    /* Ensure page breaks don't occur within important content */
+    .section {
+        page-break-inside: avoid;
+    }
+
+    /* Add a footer with page number */
+    .card-content::after {
+        content: "Trang " counter(page);
+        text-align: center;
+        display: block;
+        margin-top: 1cm;
+    }
+
+    /* Enlarge winner information */
+    #winnerInfo .card {
+        padding: 1cm !important;
+        margin: 0.5cm 0 !important;
+    }
+
+    /* Stamp-like effect for the winner section */
+    #winnerInfo .bi-trophy-fill {
+        font-size: 24pt !important;
+        color: goldenrod !important;
+    }
+
+    /* Add timestamp for the printed document */
+    .completed-container::after {
+        content: "Thời gian in: " attr(data-print-time);
+        font-size: 9pt;
+        display: block;
+        text-align: right;
+        margin-top: 1cm;
+    }
+}

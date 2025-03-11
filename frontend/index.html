@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Đấu Giá</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Font: Roboto -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Loading overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        body.loading .loading-overlay {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div class="loading-overlay">
+        <div class="spinner-border loading-spinner" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+        </div>
+    </div>
+
+    <main class="main">
+        <div class="container">
+            <div class="setup-container">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Thiết Lập Đấu Giá</h2>
+                    </div>
+
+                    <div class="card-content">
+                        <!-- Thông tin chung -->
+                        <div class="section">
+                            <h3>Thông Tin Chung</h3>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="initialPrice" class="form-label">Giá khởi điểm</label>
+                                        <div class="input-group">
+                                            <input type="number" id="initialPrice" min="0" class="form-control">
+                                            <span class="input-group-text">VND</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="priceIncrement" class="form-label">Bước giá</label>
+                                        <div class="input-group">
+                                            <input type="number" id="priceIncrement" min="0" class="form-control">
+                                            <span class="input-group-text">VND</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin người tham gia đấu giá -->
+                        <div class="section">
+                            <h3>Thông Tin Người Tham Gia Đấu Giá</h3>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="bidderId" class="form-label">Mã người tham gia</label>
+                                        <input type="text" id="bidderId" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="bidderName" class="form-label">Tên người tham gia</label>
+                                        <input type="text" id="bidderName" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="bidderAddress" class="form-label">Địa chỉ</label>
+                                        <input type="text" id="bidderAddress" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 mt-3">
+                                <button id="addBidder" class="btn btn-primary">
+                                    <i class="bi bi-plus-lg"></i> Thêm người tham gia
+                                </button>
+                                <button id="importExcel" class="btn btn-outline-secondary">
+                                    <i class="bi bi-file-earmark-excel"></i> Nhập Excel
+                                </button>
+                                <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none">
+                            </div>
+                        </div>
+
+                        <!-- Danh sách người tham gia -->
+                        <div class="section">
+                            <h3>Danh Sách Người Tham Gia</h3>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Mã</th>
+                                            <th>Tên</th>
+                                            <th>Địa chỉ</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="biddersList">
+                                        <!-- Bidders will be added here dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div id="noBidders" class="alert alert-info text-center">
+                                <i class="bi bi-info-circle me-2"></i>Chưa có người tham gia đấu giá. Vui lòng thêm ít nhất 2 người.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-center">
+                        <button id="startAuction" class="btn btn-danger" disabled>
+                            <i class="bi bi-play-fill"></i> Bắt Đầu Đấu Giá
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast container for notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script type="module" src="js/setup.js"></script>
+</body>
+</html>

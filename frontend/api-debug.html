@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Debug Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+        .api-card {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .api-card .card-header {
+            font-weight: bold;
+            background-color: #f0f0f0;
+        }
+        .api-card.get .card-header {
+            background-color: #d4edda;
+        }
+        .api-card.post .card-header {
+            background-color: #cce5ff;
+        }
+        .api-card.put .card-header {
+            background-color: #fff3cd;
+        }
+        .api-card.delete .card-header {
+            background-color: #f8d7da;
+        }
+        .method-badge {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+        .badge-get { background-color: #28a745; color: white; }
+        .badge-post { background-color: #007bff; color: white; }
+        .badge-put { background-color: #ffc107; color: black; }
+        .badge-delete { background-color: #dc3545; color: white; }
+        .response-area {
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .btn-test {
+            min-width: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Auction API Debug Tool</h1>
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="baseUrl" class="form-label">API Base URL:</label>
+                            <input type="text" id="baseUrl" class="form-control" value="http://localhost:8080/api/v1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Auction Settings</h3>
+
+                <!-- GET Auction Settings -->
+                <div class="card api-card get">
+                    <div class="card-header">
+                        <span class="method-badge badge-get">GET</span> /auction/settings
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Get current auction settings</p>
+                        <button class="btn btn-primary btn-test" onclick="testEndpoint('GET', '/auction/settings')">Test</button>
+                        <div class="response-area mt-3" id="getSettingsResponse">Response will appear here...</div>
+                    </div>
+                </div>
+
+                <!-- PUT Auction Settings -->
+                <div class="card api-card put">
+                    <div class="card-header">
+                        <span class="method-badge badge-put">PUT</span> /auction/settings
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Update auction settings</p>
+                        <div class="mb-3">
+                            <label class="form-label">Request Body:</label>
+                            <textarea class="form-control" id="putSettingsBody" rows="4">{
+  "startingPrice": 1000000,
+  "priceStep": 50000
+}</textarea>
+                        </div>
+                        <button class="btn btn-warning btn-test" onclick="testEndpoint('PUT', '/auction/settings', document.getElementById('putSettingsBody').value)">Test</button>
+                        <div class="response-area mt-3" id="putSettingsResponse">Response will appear here...</div>
+                    </div>
+                </div>
+
+                <!-- Auction Status -->
+                <div class="card api-card get">
+                    <div class="card-header">
+                        <span class="method-badge badge-get">GET</span> /auction/status
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Get current auction status</p>
+                        <button class="btn btn-primary btn-test" onclick="testEndpoint('GET', '/auction/status')">Test</button>
+                        <div class="response-area mt-3" id="getStatusResponse">Response will appear here...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <h3>Bidders</h3>
+
+                <!-- GET Bidders -->
+                <div class="card api-card get">
+                    <div class="card-header">
+                        <span class="method-badge badge-get">GET</span> /bidders
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Get all bidders</p>
+                        <button class="btn btn-primary btn-test" onclick="testEndpoint('GET', '/bidders')">Test</button>
+                        <div class="response-area mt-3" id="getBiddersResponse">Response will appear here...</div>
+                    </div>
+                </div>
+
+                <!-- Add Bidder -->
+                <div class="card api-card post">
+                    <div class="card-header">
+                        <span class="method-badge badge-post">POST</span> /bidders
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Add a new bidder</p>
+                        <div class="mb-3">
+                            <label class="form-label">Request Body:</label>
+                            <textarea class="form-control" id="postBidderBody" rows="4">{
+  "id": "B001",
+  "name": "Nguyen Van A",
+  "address": "123 Nguyen Hue St, HCMC"
+}</textarea>
+                        </div>
+                        <button class="btn btn-primary btn-test" onclick="testEndpoint('POST', '/bidders', document.getElementById('postBidderBody').value)">Test</button>
+                        <div class="response-area mt-3" id="postBidderResponse">Response will appear here...</div>
+                    </div>
+                </div>
+
+                <!-- Auction History -->
+                <div class="card api-card get">
+                    <div class="card-header">
+                        <span class="method-badge badge-get">GET</span> /auction/history
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Get bid history for current auction</p>
+                        <button class="btn btn-primary btn-test" onclick="testEndpoint('GET', '/auction/history')">Test</button>
+                        <div class="response-area mt-3" id="getHistoryResponse">Response will appear here...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080';
+
+        async function testEndpoint(method, endpoint, body = null) {
+            const baseUrl = document.getElementById('baseUrl').value;
+            const url = `${baseUrl}${endpoint}`;
+
+            // Determine response element ID based on method and endpoint
+            let responseId = '';
+            if (endpoint === '/auction/settings') {
+                responseId = method === 'GET' ? 'getSettingsResponse' : 'putSettingsResponse';
+            } else if (endpoint === '/auction/status') {
+                responseId = 'getStatusResponse';
+            } else if (endpoint === '/bidders') {
+                responseId = method === 'GET' ? 'getBiddersResponse' : 'postBidderResponse';
+            } else if (endpoint === '/auction/history') {
+                responseId = 'getHistoryResponse';
+            }
+
+            const responseElement = document.getElementById(responseId);
+            responseElement.textContent = 'Loading...';
+
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                };
+
+                if (body) {
+                    options.body = body;
+                }
+
+                const response = await fetch(url, options);
+
+                // Display status
+                let result = `Status: ${response.status} ${response.statusText}\n\n`;
+
+                // Get headers
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                result += `Headers: ${JSON.stringify(headers, null, 2)}\n\n`;
+
+                // Get response body if available
+                try {
+                    const data = await response.json();
+                    result += `Body: ${JSON.stringify(data, null, 2)}`;
+                } catch (err) {
+                    result += 'Body: No JSON content';
+                }
+
+                responseElement.textContent = result;
+            } catch (error) {
+                responseElement.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
