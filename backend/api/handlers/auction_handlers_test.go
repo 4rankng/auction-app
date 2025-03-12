@@ -190,8 +190,8 @@ func TestCreateAuction(t *testing.T) {
 			StartingPrice: 100000,
 			PriceStep:     10000,
 			Bidders: []models.Bidder{
-				{ID: "1", Name: "Bidder 1"},
-				{ID: "2", Name: "Bidder 2"},
+				{ID: "1", Name: "Bidder 1", Address: "Address 1"},
+				{ID: "2", Name: "Bidder 2", Address: "Address 2"},
 			},
 		}
 
@@ -219,7 +219,7 @@ func TestCreateAuction(t *testing.T) {
 		assert.Len(t, mockDB.auctions, 1)
 	})
 
-	// Test invalid request
+	// Test invalid request - missing required fields
 	t.Run("Invalid request - missing required fields", func(t *testing.T) {
 		router, mockDB := setupTestRouter()
 
@@ -236,6 +236,222 @@ func TestCreateAuction(t *testing.T) {
 
 		// Check response
 		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Len(t, mockDB.auctions, 0)
+	})
+
+	// Test with invalid title (too short)
+	t.Run("Invalid title - too short", func(t *testing.T) {
+		router, mockDB := setupTestRouter()
+
+		// Create auction with short title
+		createRequest := CreateAuctionRequest{
+			Title:         "AB", // Too short
+			StartingPrice: 100000,
+			PriceStep:     10000,
+			Bidders: []models.Bidder{
+				{ID: "1", Name: "Bidder 1", Address: "Address 1"},
+				{ID: "2", Name: "Bidder 2", Address: "Address 2"},
+			},
+		}
+
+		jsonPayload, _ := json.Marshal(createRequest)
+
+		// Make request
+		w := performRequest(router, "POST", "/api/v1/auctions", jsonPayload)
+
+		// Check response
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		// Parse response
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		assert.Contains(t, response["error"].(string), "Title must be at least 3 characters")
+
+		assert.Len(t, mockDB.auctions, 0)
+	})
+
+	// Test with invalid starting price
+	t.Run("Invalid starting price - negative", func(t *testing.T) {
+		router, mockDB := setupTestRouter()
+
+		// Create auction with negative starting price
+		createRequest := map[string]interface{}{
+			"title":         "Test Auction",
+			"startingPrice": -100, // Negative value
+			"priceStep":     10,
+			"bidders": []models.Bidder{
+				{ID: "1", Name: "Bidder 1", Address: "Address 1"},
+				{ID: "2", Name: "Bidder 2", Address: "Address 2"},
+			},
+		}
+
+		jsonPayload, _ := json.Marshal(createRequest)
+
+		// Make request
+		w := performRequest(router, "POST", "/api/v1/auctions", jsonPayload)
+
+		// Check response
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Len(t, mockDB.auctions, 0)
+	})
+
+	// Test with price step > starting price
+	t.Run("Invalid price step - greater than starting price", func(t *testing.T) {
+		router, mockDB := setupTestRouter()
+
+		// Create auction with price step > starting price
+		createRequest := CreateAuctionRequest{
+			Title:         "Test Auction",
+			StartingPrice: 100,
+			PriceStep:     200, // Greater than starting price
+			Bidders: []models.Bidder{
+				{ID: "1", Name: "Bidder 1", Address: "Address 1"},
+				{ID: "2", Name: "Bidder 2", Address: "Address 2"},
+			},
+		}
+
+		jsonPayload, _ := json.Marshal(createRequest)
+
+		// Make request
+		w := performRequest(router, "POST", "/api/v1/auctions", jsonPayload)
+
+		// Check response
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		// Parse response
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		assert.Contains(t, response["error"].(string), "Price step cannot be greater than starting price")
+
+		assert.Len(t, mockDB.auctions, 0)
+	})
+
+	// Test with not enough bidders
+	t.Run("Invalid bidders - less than 2", func(t *testing.T) {
+		router, mockDB := setupTestRouter()
+
+		// Create auction with only one bidder
+		createRequest := CreateAuctionRequest{
+			Title:         "Test Auction",
+			StartingPrice: 100000,
+			PriceStep:     10000,
+			Bidders: []models.Bidder{
+				{ID: "1", Name: "Bidder 1", Address: "Address 1"},
+			},
+		}
+
+		jsonPayload, _ := json.Marshal(createRequest)
+
+		// Make request
+		w := performRequest(router, "POST", "/api/v1/auctions", jsonPayload)
+
+		// Check response
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		// Parse response
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		assert.Contains(t, response["error"].(string), "At least 2 bidders are required")
+
+		assert.Len(t, mockDB.auctions, 0)
+	})
+
+	// Test with duplicate bidder IDs
+	t.Run("Invalid bidders - duplicate IDs", func(t *testing.T) {
+		router, mockDB := setupTestRouter()
+
+		// Create auction with duplicate bidder IDs
+		createRequest := CreateAuctionRequest{
+			Title:         "Test Auction",
+			StartingPrice: 100000,
+			PriceStep:     10000,
+			Bidders: []models.Bidder{
+				{ID: "1", Name: "Bidder 1", Address: "Address 1"},
+				{ID: "1", Name: "Bidder 2", Address: "Address 2"}, // Duplicate ID
+			},
+		}
+
+		jsonPayload, _ := json.Marshal(createRequest)
+
+		// Make request
+		w := performRequest(router, "POST", "/api/v1/auctions", jsonPayload)
+
+		// Check response
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		// Parse response
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		assert.Contains(t, response["error"].(string), "Duplicate bidder IDs")
+
+		assert.Len(t, mockDB.auctions, 0)
+	})
+
+	// Test with bidder missing ID
+	t.Run("Invalid bidders - missing ID", func(t *testing.T) {
+		router, mockDB := setupTestRouter()
+
+		// Create auction with a bidder missing ID
+		createRequest := CreateAuctionRequest{
+			Title:         "Test Auction",
+			StartingPrice: 100000,
+			PriceStep:     10000,
+			Bidders: []models.Bidder{
+				{ID: "1", Name: "Bidder 1", Address: "Address 1"},
+				{ID: "", Name: "Bidder 2", Address: "Address 2"}, // Missing ID
+			},
+		}
+
+		jsonPayload, _ := json.Marshal(createRequest)
+
+		// Make request
+		w := performRequest(router, "POST", "/api/v1/auctions", jsonPayload)
+
+		// Check response
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		// Parse response
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		assert.Contains(t, response["error"].(string), "All bidders must have an ID")
+
+		assert.Len(t, mockDB.auctions, 0)
+	})
+
+	// Test with bidder missing name
+	t.Run("Invalid bidders - missing name", func(t *testing.T) {
+		router, mockDB := setupTestRouter()
+
+		// Create auction with a bidder missing name
+		createRequest := CreateAuctionRequest{
+			Title:         "Test Auction",
+			StartingPrice: 100000,
+			PriceStep:     10000,
+			Bidders: []models.Bidder{
+				{ID: "1", Name: "Bidder 1", Address: "Address 1"},
+				{ID: "2", Name: "", Address: "Address 2"}, // Missing name
+			},
+		}
+
+		jsonPayload, _ := json.Marshal(createRequest)
+
+		// Make request
+		w := performRequest(router, "POST", "/api/v1/auctions", jsonPayload)
+
+		// Check response
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		// Parse response
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		assert.Contains(t, response["error"].(string), "All bidders must have a name")
+
 		assert.Len(t, mockDB.auctions, 0)
 	})
 }

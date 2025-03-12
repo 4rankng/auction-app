@@ -31,9 +31,9 @@ func NewAuctionHandlers(db database.Database, logger *log.Logger) *AuctionHandle
 // Request and response types for the API
 type CreateAuctionRequest struct {
 	Title         string          `json:"title" binding:"required"`
-	StartingPrice int             `json:"startingPrice" binding:"required"`
-	PriceStep     int             `json:"priceStep" binding:"required"`
-	Bidders       []models.Bidder `json:"bidders"`
+	StartingPrice int             `json:"startingPrice" binding:"required,min=1"`
+	PriceStep     int             `json:"priceStep" binding:"required,min=1"`
+	Bidders       []models.Bidder `json:"bidders" binding:"required,dive"`
 }
 
 type AuctionResponse struct {
@@ -61,6 +61,61 @@ func (h *AuctionHandlers) CreateAuction(c *gin.Context) {
 	h.logger.Printf("Received create auction request: Title=%s, StartingPrice=%d, PriceStep=%d",
 		req.Title, req.StartingPrice, req.PriceStep)
 
+	// Additional validations
+	if len(req.Title) < 3 {
+		h.logger.Printf("Invalid title: too short")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Title must be at least 3 characters long"})
+		return
+	}
+
+	if req.StartingPrice <= 0 {
+		h.logger.Printf("Invalid starting price: %d", req.StartingPrice)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Starting price must be greater than 0"})
+		return
+	}
+
+	if req.PriceStep <= 0 {
+		h.logger.Printf("Invalid price step: %d", req.PriceStep)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Price step must be greater than 0"})
+		return
+	}
+
+	if req.PriceStep > req.StartingPrice {
+		h.logger.Printf("Price step exceeds starting price")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Price step cannot be greater than starting price"})
+		return
+	}
+
+	// Validate bidders
+	if len(req.Bidders) < 2 {
+		h.logger.Printf("Not enough bidders: %d", len(req.Bidders))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "At least 2 bidders are required for an auction"})
+		return
+	}
+
+	// Check for duplicate bidder IDs
+	bidderIDs := make(map[string]bool)
+	for i, bidder := range req.Bidders {
+		if bidder.ID == "" {
+			h.logger.Printf("Bidder has no ID at position %d", i)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "All bidders must have an ID"})
+			return
+		}
+
+		if bidder.Name == "" {
+			h.logger.Printf("Bidder has no name at position %d", i)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "All bidders must have a name"})
+			return
+		}
+
+		if _, exists := bidderIDs[bidder.ID]; exists {
+			h.logger.Printf("Duplicate bidder ID: %s", bidder.ID)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Duplicate bidder IDs are not allowed"})
+			return
+		}
+		bidderIDs[bidder.ID] = true
+	}
+
 	// Generate a unique ID for the auction
 	auctionID := uuid.New().String()
 
@@ -84,6 +139,12 @@ func (h *AuctionHandlers) CreateAuction(c *gin.Context) {
 		h.logger.Printf("Error creating auction: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create auction"})
 		return
+	}
+
+	// Also save data to persistent storage
+	if err := h.db.SaveData(); err != nil {
+		h.logger.Printf("Error saving data after creating auction: %v", err)
+		// Even if saving fails, we continue since the auction is in memory
 	}
 
 	h.logger.Printf("Auction created successfully with ID: %s", auctionID)

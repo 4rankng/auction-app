@@ -34,15 +34,34 @@ Each endpoint must be implemented with robust validation, proper error handling,
 
 #### 3.1.1 Auction Management
 - **Create Auction:**
-  Initializes a new auction with parameters including:
+  Initializes a new auction with at least containing parameters below:
   - Auction title
   - Initial price
   - Price increment (step)
   - List of bidders (with full details)
-  - Scheduled auction start time
+
+Example of request body:
+```json
+{
+    "title": "Iphone 100XT",
+    "startingPrice": 10000000000,
+    "priceStep": 10000000,
+    "bidders": [
+        {"id": "1", "name": "Frank", "address": "Singapore"},
+        {"id": "2", "name": "Kien", "address": "Hai Phong"},
+        {"id": "3", "name": "Cuong", "address": "Kyoto"}
+    ]
+}
+```
   *Strict validations and transactional integrity are required.*
+
 - **Retrieve All Auctions:**
   Returns a paginated list of auctions.
+Example of response body:
+```json
+{"data":[{"id":"44ac14fd-b258-4789-b118-14a58673f91a","title":"Xe oto CX5","status":"completed","currentRound":0,"startingPrice":10000000000,"priceStep":10000000,"highestBid":0,"highestBidder":"","createdAt":"2025-03-12T23:13:32.015724+08:00","bidders":[{"id":"1","name":"Frank","address":"Singapore"},{"id":"2","name":"Kien","address":"Hai Phong"}]},{"id":"f22ef16b-e878-4d8c-94c4-b20af4d9619c","title":"Iphone 100XT","status":"notStarted","currentRound":0,"startingPrice":10000000000,"priceStep":10000000,"highestBid":0,"highestBidder":"","createdAt":"2025-03-12T23:14:28.831794+08:00","bidders":[{"id":"1","name":"Frank","address":"Singapore"},{"id":"2","name":"Kien","address":"Hai Phong"},{"id":"3","name":"Cuong","address":"Kyoto"}]}]}
+```
+
 - **Retrieve Single Auction:**
   Provides detailed information on a specific auction, including bid history.
 - **Start Auction:**
