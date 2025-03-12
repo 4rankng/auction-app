@@ -1,1 +1,4 @@
-/data/*
+backend/data/*
+backend/data
+.env
+*node_modules*

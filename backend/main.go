@@ -68,6 +68,10 @@ func (a *App) Initialize() error {
 	// Create API handlers
 	apiHandler := handlers.NewHandlers(a.db, a.logger, excelService)
 
+	// Register heartbeat endpoint directly on router (not in API group)
+	// This makes it available at /health for easy access
+	a.router.GET("/health", apiHandler.Heartbeat)
+
 	// Group API routes
 	api := a.router.Group("/api/v1")
 	{
@@ -84,7 +88,10 @@ func (a *App) Initialize() error {
 		api.GET("/auctions/:id/bids/current", apiHandler.GetCurrentBids)
 		api.GET("/auctions/:id/bids/history", apiHandler.GetAuctionHistory)
 
-		// Bidder routes
+		// Auction-specific bidder operations
+		api.PUT("/auctions/:id/bidders", apiHandler.SetBidders)
+
+		// Global bidder routes
 		api.GET("/bidders", apiHandler.GetBidders)
 		api.POST("/bidders", apiHandler.AddBidder)
 		api.PUT("/bidders", apiHandler.SetBidders)

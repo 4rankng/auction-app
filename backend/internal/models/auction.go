@@ -34,7 +34,7 @@ type Auction struct {
 	CurrentRound  int                 `json:"currentRound"`
 	HighestBid    int                 `json:"highestBid"`
 	HighestBidder string              `json:"highestBidder"`
-	AuctionStatus common.AuctionStatus `json:"auctionStatus"`
+	AuctionStatus common.AuctionStatus `json:"status"`
 }
 
 // AuctionData is the main data structure that will be stored in JSON

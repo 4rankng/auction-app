@@ -1,5 +1,1673 @@
 {
   "auctions": {
+    "01574d13-ab47-4187-9302-b3390451943c": {
+      "id": "01574d13-ab47-4187-9302-b3390451943c",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:01.941016+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "01b09195-6e4c-4d9b-9d22-0c34f21dfb9f": {
+      "id": "01b09195-6e4c-4d9b-9d22-0c34f21dfb9f",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:55:58.317631+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "03fc36e9-4d39-46e0-aedc-fccdd50fb0da": {
+      "id": "03fc36e9-4d39-46e0-aedc-fccdd50fb0da",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:22:31.597537+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "04e6c205-de79-4e8c-b7fb-478afa2ea0cc": {
+      "id": "04e6c205-de79-4e8c-b7fb-478afa2ea0cc",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:32.920481+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": "inProgress"
+    },
+    "0521075c-2fe3-4056-a8b2-a92d38e37178": {
+      "id": "0521075c-2fe3-4056-a8b2-a92d38e37178",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:07.050029+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "06fa47af-3c81-4fce-af6e-728b60863479": {
+      "id": "06fa47af-3c81-4fce-af6e-728b60863479",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:05.10655+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "0805de67-04db-4da0-b8d8-fb04392e1215": {
+      "id": "0805de67-04db-4da0-b8d8-fb04392e1215",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:36.46779+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:30:36.860508+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:30:36.968813+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "0a0fd32d-ec26-49d2-99a1-8954fb0efc7f": {
+      "id": "0a0fd32d-ec26-49d2-99a1-8954fb0efc7f",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:06.306865+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "0aa917d3-fc5c-42a7-be41-1ed956de6db6": {
+      "id": "0aa917d3-fc5c-42a7-be41-1ed956de6db6",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:26:59.365428+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:26:59.686416+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:26:59.817298+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "0b66264b-279e-4d67-a77d-575d2e9200ed": {
+      "id": "0b66264b-279e-4d67-a77d-575d2e9200ed",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:55:59.959215+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T08:56:00.302512+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T08:56:00.427045+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "0ba6ba21-5ceb-4f64-8b3b-27fa7d598236": {
+      "id": "0ba6ba21-5ceb-4f64-8b3b-27fa7d598236",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:33.838998+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:35:34.161972+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:35:34.272275+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "10ab410e-f067-4701-aeba-137ce23cb89d": {
+      "id": "10ab410e-f067-4701-aeba-137ce23cb89d",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:56.081861+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "112a47e7-f59a-4024-839d-79993a4c7ec5": {
+      "id": "112a47e7-f59a-4024-839d-79993a4c7ec5",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:04.300769+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:35:04.640237+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:35:04.750548+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "1484cb43-f5a5-4a16-ba0e-325166ca95f1": {
+      "id": "1484cb43-f5a5-4a16-ba0e-325166ca95f1",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:32.736437+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:35:33.061309+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:35:33.171209+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "1741957c-8f19-433c-8829-62e557f182e2": {
+      "id": "1741957c-8f19-433c-8829-62e557f182e2",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:11.908927+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "18049bbe-f864-42de-ad9e-4fcf895e7b7e": {
+      "id": "18049bbe-f864-42de-ad9e-4fcf895e7b7e",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:56:00.555876+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T08:56:00.911235+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T08:56:01.040378+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "18e8d548-4216-423d-8f59-3ff434617275": {
+      "id": "18e8d548-4216-423d-8f59-3ff434617275",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:27:01.1523+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "19bc5589-afc1-490e-b450-85ebe53a4363": {
+      "id": "19bc5589-afc1-490e-b450-85ebe53a4363",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:07.695228+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "1a39ce46-3da4-44f3-a1e6-2a8aa32a9630": {
+      "id": "1a39ce46-3da4-44f3-a1e6-2a8aa32a9630",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:27:00.831364+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "1a5254dc-b9f0-42b6-8f9f-da7e60404796": {
+      "id": "1a5254dc-b9f0-42b6-8f9f-da7e60404796",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:02.586576+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "1a725ae5-167c-44e0-b64f-8a3ebca7b234": {
+      "id": "1a725ae5-167c-44e0-b64f-8a3ebca7b234",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:07.255529+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "1aa427d0-8a05-45af-9b86-612b89ce795b": {
+      "id": "1aa427d0-8a05-45af-9b86-612b89ce795b",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:09.61981+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:31:09.954127+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:31:10.068663+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "1ab3410d-5ab7-4636-b8cb-fd65d8af3bdf": {
+      "id": "1ab3410d-5ab7-4636-b8cb-fd65d8af3bdf",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:07.471543+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "1bae4ba0-32f3-41a0-9490-9b1e63f6d954": {
+      "id": "1bae4ba0-32f3-41a0-9490-9b1e63f6d954",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:02.173243+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "1d304a24-9985-4516-a5d0-c74e34a69d7a": {
+      "id": "1d304a24-9985-4516-a5d0-c74e34a69d7a",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:35.328994+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:30:35.663324+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:30:35.777941+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "1e289bd5-df83-40bb-85c2-9c481197eeb9": {
+      "id": "1e289bd5-df83-40bb-85c2-9c481197eeb9",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:20:01.654327+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "1e86f0ca-109a-4522-b267-35792aa28f2c": {
+      "id": "1e86f0ca-109a-4522-b267-35792aa28f2c",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:56.59146+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "209fba5a-edba-4b78-b2cd-b025e02f9add": {
+      "id": "209fba5a-edba-4b78-b2cd-b025e02f9add",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:02.828376+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "22daa3b3-4355-470d-9b78-d9dab8d7f160": {
+      "id": "22daa3b3-4355-470d-9b78-d9dab8d7f160",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:05.985624+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:29:06.323972+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:29:06.439129+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "23ded6fe-c6dd-432e-bd04-5043d1525307": {
+      "id": "23ded6fe-c6dd-432e-bd04-5043d1525307",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:10.193284+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:31:10.527833+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:31:10.645126+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "240485da-5dfd-4a72-b9e4-b2d8d2c01010": {
+      "id": "240485da-5dfd-4a72-b9e4-b2d8d2c01010",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:38.503955+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "2432d345-6ede-413c-be1a-b5514a50cd3c": {
+      "id": "2432d345-6ede-413c-be1a-b5514a50cd3c",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:58.909309+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "246e571b-5484-4ba6-8a00-212476232916": {
+      "id": "246e571b-5484-4ba6-8a00-212476232916",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:26:57.040612+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "265ff6f9-57f0-4c64-b18a-523e710e7169": {
+      "id": "265ff6f9-57f0-4c64-b18a-523e710e7169",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:26:59.977335+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "2b5c4244-08b4-47e3-ad48-6f01724b2acc": {
+      "id": "2b5c4244-08b4-47e3-ad48-6f01724b2acc",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:31.414053+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "2df4ca35-c42f-4500-a491-fe149d42f01d": {
+      "id": "2df4ca35-c42f-4500-a491-fe149d42f01d",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:13.282743+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:36:13.622252+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:36:13.734308+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "2efb8704-c605-440f-a7e4-5ba2fc681189": {
+      "id": "2efb8704-c605-440f-a7e4-5ba2fc681189",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:06.087373+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "2f5cd922-b395-4fea-a1fc-3635386dbd64": {
+      "id": "2f5cd922-b395-4fea-a1fc-3635386dbd64",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:22:31.273171+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "30105e90-9038-476b-a9fb-1aadba207f35": {
+      "id": "30105e90-9038-476b-a9fb-1aadba207f35",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:03.106218+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "35ba1724-5476-46a0-9df6-58bffe655f25": {
+      "id": "35ba1724-5476-46a0-9df6-58bffe655f25",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:11.126393+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "36b4eb96-e230-4083-9afe-d213531911ba": {
+      "id": "36b4eb96-e230-4083-9afe-d213531911ba",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:01.709012+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "37b3d049-75ef-46bd-8aee-c61436864091": {
+      "id": "37b3d049-75ef-46bd-8aee-c61436864091",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:11.2265+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "384529f0-8dcf-4b68-a9cd-320dd220aa21": {
+      "id": "384529f0-8dcf-4b68-a9cd-320dd220aa21",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:55.614483+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "38883784-9a5d-43d9-85ef-3df26291d70e": {
+      "id": "38883784-9a5d-43d9-85ef-3df26291d70e",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:36.48109+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": "notStarted"
+    },
+    "39cac5fd-b810-43f2-bdeb-ad804c90d455": {
+      "id": "39cac5fd-b810-43f2-bdeb-ad804c90d455",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:41.9086+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:33:42.241845+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:33:42.355086+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "3a9aad98-a00c-4ec4-a743-0c6772368b80": {
+      "id": "3a9aad98-a00c-4ec4-a743-0c6772368b80",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:07.025968+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "3af834be-60ca-4f54-b549-a40426fb2f85": {
+      "id": "3af834be-60ca-4f54-b549-a40426fb2f85",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:30.735855+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "3eb2d833-8892-44d5-9f04-27be4e436aea": {
+      "id": "3eb2d833-8892-44d5-9f04-27be4e436aea",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:34.549118+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "3f85b7a3-25e1-45ee-bc04-03e1aaf5bcd9": {
+      "id": "3f85b7a3-25e1-45ee-bc04-03e1aaf5bcd9",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:34.613007+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "41280674-3f9a-4172-9553-50fd60714674": {
+      "id": "41280674-3f9a-4172-9553-50fd60714674",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:38.867672+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "4350889b-03bf-4a62-b578-635cfe51959a": {
+      "id": "4350889b-03bf-4a62-b578-635cfe51959a",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:05.497761+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "438317fa-ba22-4ab8-a28f-786be8948922": {
+      "id": "438317fa-ba22-4ab8-a28f-786be8948922",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:06.51596+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "43d179f9-3e4d-4330-a27e-a99972ccdf1f": {
+      "id": "43d179f9-3e4d-4330-a27e-a99972ccdf1f",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:02.360161+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
     "44ac14fd-b258-4789-b118-14a58673f91a": {
       "id": "44ac14fd-b258-4789-b118-14a58673f91a",
       "title": "Xe oto CX5",
@@ -22,7 +1690,4625 @@
       "currentRound": 0,
       "highestBid": 0,
       "highestBidder": "",
-      "auctionStatus": "completed"
+      "status": ""
+    },
+    "45a70b97-5afa-44b1-a731-0772b6b40117": {
+      "id": "45a70b97-5afa-44b1-a731-0772b6b40117",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:30.960841+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "4d2f2570-67a5-4325-a964-666c119a7793": {
+      "id": "4d2f2570-67a5-4325-a964-666c119a7793",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:52.926618+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "4d6b9b0a-3d7d-4cf9-a6b0-c04c0e7bad49": {
+      "id": "4d6b9b0a-3d7d-4cf9-a6b0-c04c0e7bad49",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:06.755846+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "4ddf8366-02b0-45a1-942c-94328ff71606": {
+      "id": "4ddf8366-02b0-45a1-942c-94328ff71606",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:40.788324+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:33:41.119116+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:33:41.230498+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "4f0c5b57-da50-4533-a9d6-1d33246b0241": {
+      "id": "4f0c5b57-da50-4533-a9d6-1d33246b0241",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:31.186082+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "4f96708f-8ff6-4f96-bb22-f15b11786103": {
+      "id": "4f96708f-8ff6-4f96-bb22-f15b11786103",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:12.137499+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:36:12.47181+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:36:12.582618+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "500d47fe-56f5-4346-af49-4909db276c20": {
+      "id": "500d47fe-56f5-4346-af49-4909db276c20",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:04.19252+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:29:04.549124+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:29:04.664294+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "5191f201-78b9-4528-bf8b-8895b01c6efa": {
+      "id": "5191f201-78b9-4528-bf8b-8895b01c6efa",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:55.600203+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "521217ce-df58-4b70-8286-7d37098ece10": {
+      "id": "521217ce-df58-4b70-8286-7d37098ece10",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:26:56.820162+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "533b9565-4431-404d-82c2-2403d36b1f6a": {
+      "id": "533b9565-4431-404d-82c2-2403d36b1f6a",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:34.087655+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "53fe53ce-af38-4fe1-9212-756d609e029f": {
+      "id": "53fe53ce-af38-4fe1-9212-756d609e029f",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:43.928332+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "550c5d5b-f228-4ab3-ba9a-a0491ef5e6c7": {
+      "id": "550c5d5b-f228-4ab3-ba9a-a0491ef5e6c7",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:33.856439+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "55b1a9bb-2472-498f-8349-75e7a0f12eaa": {
+      "id": "55b1a9bb-2472-498f-8349-75e7a0f12eaa",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:55:58.05952+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "56bb66ed-0201-410f-b45c-d58cdc6da72e": {
+      "id": "56bb66ed-0201-410f-b45c-d58cdc6da72e",
+      "title": "Luxury Watch Collection",
+      "createdAt": "2025-03-13T02:03:37.211777+08:00",
+      "bidders": [],
+      "startingPrice": 10000,
+      "priceStep": 500,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "5738094c-30e2-43a9-81fa-c43e4d28be55": {
+      "id": "5738094c-30e2-43a9-81fa-c43e4d28be55",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:06.692297+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "57f1bc2d-8735-4724-87b4-55fa2e1224ce": {
+      "id": "57f1bc2d-8735-4724-87b4-55fa2e1224ce",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:10.881138+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "58850afd-b8fa-4fba-90aa-3d949d6b930a": {
+      "id": "58850afd-b8fa-4fba-90aa-3d949d6b930a",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:12.70719+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:36:13.051779+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:36:13.165215+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "5b46be20-9bf7-466b-b8fa-b865c81a741d": {
+      "id": "5b46be20-9bf7-466b-b8fa-b865c81a741d",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:58.656802+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "5c03cabf-f369-4323-bb94-d929c7a0f28d": {
+      "id": "5c03cabf-f369-4323-bb94-d929c7a0f28d",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:20:01.651113+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "5cc1703e-bcb6-4afb-8731-26cd921b3975": {
+      "id": "5cc1703e-bcb6-4afb-8731-26cd921b3975",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:04.284064+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T08:52:04.634952+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T08:52:04.757395+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "5cecacfc-e467-49a3-8735-58b9e327ff18": {
+      "id": "5cecacfc-e467-49a3-8735-58b9e327ff18",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:32.423486+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": "notStarted"
+    },
+    "5d5caa5e-e53a-4855-90ad-2751d4dc6b0d": {
+      "id": "5d5caa5e-e53a-4855-90ad-2751d4dc6b0d",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:01.480641+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "5e877647-3d52-49ea-8988-52c749c62d60": {
+      "id": "5e877647-3d52-49ea-8988-52c749c62d60",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:14.887148+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "5f047c63-2f6e-497a-aa49-8002a99ce83c": {
+      "id": "5f047c63-2f6e-497a-aa49-8002a99ce83c",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:59.884461+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "609126c9-53b4-446b-8310-ce4535e2ef1c": {
+      "id": "609126c9-53b4-446b-8310-ce4535e2ef1c",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:26:57.279017+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "62d99070-6560-4ac6-9170-1ca8a3f317b0": {
+      "id": "62d99070-6560-4ac6-9170-1ca8a3f317b0",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:43.031202+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "6331a552-2663-497c-918a-b24dc81f4f45": {
+      "id": "6331a552-2663-497c-918a-b24dc81f4f45",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:53.159181+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "645a191f-bc71-487a-bb34-9c8d3028f148": {
+      "id": "645a191f-bc71-487a-bb34-9c8d3028f148",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:34.306164+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T08:57:34.643016+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T08:57:34.762777+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": "inProgress"
+    },
+    "663379e9-946a-46f0-8c25-ee003724c4ac": {
+      "id": "663379e9-946a-46f0-8c25-ee003724c4ac",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:39.561138+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "67204a1d-5fa5-42b0-9113-d7e8a5b9c38f": {
+      "id": "67204a1d-5fa5-42b0-9113-d7e8a5b9c38f",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:53.387031+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:31:53.71447+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:31:53.827307+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "675a0874-a27a-4a85-b184-ae6a466d10c6": {
+      "id": "675a0874-a27a-4a85-b184-ae6a466d10c6",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:14.546145+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "68304876-3d36-411b-ae4e-605b115ba78b": {
+      "id": "68304876-3d36-411b-ae4e-605b115ba78b",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:32.195424+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": "notStarted"
+    },
+    "6903434e-8ed9-4ee3-8caa-ba9155d10798": {
+      "id": "6903434e-8ed9-4ee3-8caa-ba9155d10798",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:56.806983+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "6a1b272c-b342-477b-bbcd-e44c5a9130a9": {
+      "id": "6a1b272c-b342-477b-bbcd-e44c5a9130a9",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:03.69281+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T08:52:04.037495+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T08:52:04.154289+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "6b75c0e2-b0df-45d7-b7ac-6487cd35f7ef": {
+      "id": "6b75c0e2-b0df-45d7-b7ac-6487cd35f7ef",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:32.181917+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:35:32.509825+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:35:32.620107+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "6b931df8-17bc-45a0-bfe0-290e28b917a1": {
+      "id": "6b931df8-17bc-45a0-bfe0-290e28b917a1",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:08.004253+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "6dd5889c-6e11-4fd4-ba00-fa924212186a": {
+      "id": "6dd5889c-6e11-4fd4-ba00-fa924212186a",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:15.124193+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "6ee188ed-b468-4231-b015-d32732fdc125": {
+      "id": "6ee188ed-b468-4231-b015-d32732fdc125",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:34.319371+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "6ee879e3-f4e9-42f4-b9a7-e0bdaf5a2aba": {
+      "id": "6ee879e3-f4e9-42f4-b9a7-e0bdaf5a2aba",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:08.500099+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:31:08.839515+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:31:08.948086+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "6faea425-7a9d-4926-8a87-2b8e5451c305": {
+      "id": "6faea425-7a9d-4926-8a87-2b8e5451c305",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:52.466972+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "7195cafc-cca9-4b31-b7a4-dd409da2701a": {
+      "id": "7195cafc-cca9-4b31-b7a4-dd409da2701a",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:26:57.051673+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "72924cc7-5975-4cff-acd7-c9c832329a3c": {
+      "id": "72924cc7-5975-4cff-acd7-c9c832329a3c",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:04.871138+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "738099ee-ee86-4e8a-936e-4d703fa30573": {
+      "id": "738099ee-ee86-4e8a-936e-4d703fa30573",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:35.483698+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": "inProgress"
+    },
+    "742ccbe5-de61-464b-b55c-dc12b495c197": {
+      "id": "742ccbe5-de61-464b-b55c-dc12b495c197",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:39.108403+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "7777ff90-2c28-4453-bcdb-18306f2b3722": {
+      "id": "7777ff90-2c28-4453-bcdb-18306f2b3722",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:26:57.751297+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:26:58.069939+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:26:58.175105+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "790d5237-8927-44c1-8c1d-5aa011ddc952": {
+      "id": "790d5237-8927-44c1-8c1d-5aa011ddc952",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:58.07911+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:23:58.415973+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:23:58.526973+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "7b25374d-b935-4917-8a5a-1565b848cf98": {
+      "id": "7b25374d-b935-4917-8a5a-1565b848cf98",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:09.061984+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:31:09.393197+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:31:09.50245+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "7ced3b6e-141a-4078-b05e-f6941319f406": {
+      "id": "7ced3b6e-141a-4078-b05e-f6941319f406",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:10.895912+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "7ec8f231-62e9-4f86-92cc-bf5245a19cce": {
+      "id": "7ec8f231-62e9-4f86-92cc-bf5245a19cce",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:06.163018+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "7f948ae5-e9bc-4812-a900-5ccf3937131b": {
+      "id": "7f948ae5-e9bc-4812-a900-5ccf3937131b",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:37.82426+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "812ed9d5-d703-41d0-bc67-027bc6ffb033": {
+      "id": "812ed9d5-d703-41d0-bc67-027bc6ffb033",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:02.940463+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:35:03.268897+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:35:03.375884+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "85377014-81bd-4780-aa10-ac89dc096209": {
+      "id": "85377014-81bd-4780-aa10-ac89dc096209",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:59.567291+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "856df5fb-fb83-412d-b913-db2d2a3022e2": {
+      "id": "856df5fb-fb83-412d-b913-db2d2a3022e2",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:33.284875+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:35:33.611859+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:35:33.721416+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "8625da5d-9eb8-4eb0-a024-7a994b0104b4": {
+      "id": "8625da5d-9eb8-4eb0-a024-7a994b0104b4",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:20:01.629974+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "864a8400-d0d1-4ad2-8a5f-34f8fe14b679": {
+      "id": "864a8400-d0d1-4ad2-8a5f-34f8fe14b679",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:56:01.551865+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "8652c1c3-7829-4d95-b407-23833f1f8773": {
+      "id": "8652c1c3-7829-4d95-b407-23833f1f8773",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:54.497502+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:31:54.829089+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:31:54.939374+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "86aae220-24a7-4af5-af64-f3dc94de12e1": {
+      "id": "86aae220-24a7-4af5-af64-f3dc94de12e1",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:53.945322+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:31:54.26976+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:31:54.38016+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "86f90b28-2956-45aa-965d-bb1464cc91de": {
+      "id": "86f90b28-2956-45aa-965d-bb1464cc91de",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:55:58.79619+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T08:55:59.13601+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T08:55:59.253488+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "8729612d-7875-404d-8d0b-7cb960d17d5a": {
+      "id": "8729612d-7875-404d-8d0b-7cb960d17d5a",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:10.897595+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "87a5364a-c7cb-4020-975c-f50a4159d7d5": {
+      "id": "87a5364a-c7cb-4020-975c-f50a4159d7d5",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:32.670648+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": "notStarted"
+    },
+    "87be8ce9-c2aa-4a28-8be7-ec31ce9eca85": {
+      "id": "87be8ce9-c2aa-4a28-8be7-ec31ce9eca85",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:22:30.582099+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "885394ee-e89a-4832-8c22-1cf9e921c5b4": {
+      "id": "885394ee-e89a-4832-8c22-1cf9e921c5b4",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:03.565854+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:35:03.907592+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:35:04.020398+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "89de2747-12a6-451a-a14f-e8700cb48920": {
+      "id": "89de2747-12a6-451a-a14f-e8700cb48920",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:39.550295+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "8bdc7d78-083c-4e99-8db7-3e926c804727": {
+      "id": "8bdc7d78-083c-4e99-8db7-3e926c804727",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:56.273919+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "8c0f0cbc-5e93-44d7-800c-b4df937e8c6c": {
+      "id": "8c0f0cbc-5e93-44d7-800c-b4df937e8c6c",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:31.639618+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:35:31.964283+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:35:32.070929+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "8e0ea4d1-c6c9-44bf-801c-62d664216235": {
+      "id": "8e0ea4d1-c6c9-44bf-801c-62d664216235",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:52.700014+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "8edba797-6c5b-40f5-85c1-dc2d8f8abdbf": {
+      "id": "8edba797-6c5b-40f5-85c1-dc2d8f8abdbf",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:07.925224+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:31:08.257909+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:31:08.368819+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "9257f833-aae4-43fc-bc1e-24e991b70b5a": {
+      "id": "9257f833-aae4-43fc-bc1e-24e991b70b5a",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:36.70465+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": "completed"
+    },
+    "92761c07-8599-4fa6-910e-54095a3895c3": {
+      "id": "92761c07-8599-4fa6-910e-54095a3895c3",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:40.243952+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:33:40.563719+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:33:40.677612+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "92be63f2-75ed-4d70-8d00-67417d4e0320": {
+      "id": "92be63f2-75ed-4d70-8d00-67417d4e0320",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:56.919419+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:23:57.282551+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:23:57.399948+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "93224e87-d819-422f-a6f0-3b7561098138": {
+      "id": "93224e87-d819-422f-a6f0-3b7561098138",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:07.406669+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "937e307b-adfe-401c-8578-d16f81ae90ba": {
+      "id": "937e307b-adfe-401c-8578-d16f81ae90ba",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:11.567111+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "945c7aed-d2ea-410a-8c66-4fb522ad520a": {
+      "id": "945c7aed-d2ea-410a-8c66-4fb522ad520a",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:35.81354+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": "inProgress"
+    },
+    "952da533-a733-4cb5-8c5f-bffa202356e3": {
+      "id": "952da533-a733-4cb5-8c5f-bffa202356e3",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:03.351645+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "95409885-485e-4694-ba8b-55fd028bd0c8": {
+      "id": "95409885-485e-4694-ba8b-55fd028bd0c8",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:56:01.911113+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "96ec17e3-4ff7-41da-8cb7-3fecba607479": {
+      "id": "96ec17e3-4ff7-41da-8cb7-3fecba607479",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:35.290479+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "97e67ebb-82d3-4ccf-b736-c63bcec24f39": {
+      "id": "97e67ebb-82d3-4ccf-b736-c63bcec24f39",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:59.242571+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "9918d3ee-9a46-48ff-b946-5039359693ef": {
+      "id": "9918d3ee-9a46-48ff-b946-5039359693ef",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:41.348894+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:33:41.679046+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:33:41.791849+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "992c950a-7df0-49c2-a03d-7d918d86c3d2": {
+      "id": "992c950a-7df0-49c2-a03d-7d918d86c3d2",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:02.610275+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "99d37393-7308-4eed-9a83-ff1b3b985cc8": {
+      "id": "99d37393-7308-4eed-9a83-ff1b3b985cc8",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:57.531626+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:23:57.860638+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:23:57.968207+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "9b482ef9-217c-4159-975b-6d915200ad05": {
+      "id": "9b482ef9-217c-4159-975b-6d915200ad05",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:12.144564+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "9cce8c79-6146-4f71-98c6-56da544f791b": {
+      "id": "9cce8c79-6146-4f71-98c6-56da544f791b",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:37.104253+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:30:37.451373+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:30:37.573129+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "9e3b785a-082d-4ac3-b859-bdcf4e0ebc91": {
+      "id": "9e3b785a-082d-4ac3-b859-bdcf4e0ebc91",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:22:29.672729+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:22:30.011676+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:22:30.156183+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "9f8cf1be-f7d3-433c-8bd6-2c449bf6fb59": {
+      "id": "9f8cf1be-f7d3-433c-8bd6-2c449bf6fb59",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:30.950991+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "9fe2a51b-68a9-4152-b88a-4ddad289c492": {
+      "id": "9fe2a51b-68a9-4152-b88a-4ddad289c492",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:33.735103+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T08:57:34.068736+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T08:57:34.184772+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": "inProgress"
+    },
+    "a0d9561d-0dea-4cf4-af39-435a5a17eecb": {
+      "id": "a0d9561d-0dea-4cf4-af39-435a5a17eecb",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:05.390158+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:29:05.73096+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:29:05.853523+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "a176544a-e92d-4cf8-b3c8-6808ee0df122": {
+      "id": "a176544a-e92d-4cf8-b3c8-6808ee0df122",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:55.055377+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:31:55.387094+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:31:55.498779+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "a2f3aaca-666b-455b-b8bd-64e31239e335": {
+      "id": "a2f3aaca-666b-455b-b8bd-64e31239e335",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:55.359346+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "a31cb024-b1e6-434d-b464-14707c590af0": {
+      "id": "a31cb024-b1e6-434d-b464-14707c590af0",
+      "title": "Luxury Watch Collection",
+      "createdAt": "2025-03-13T02:03:05.5939+08:00",
+      "bidders": [],
+      "startingPrice": 10000,
+      "priceStep": 500,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "a5ac0f33-c70e-4695-ace1-3677b918ce25": {
+      "id": "a5ac0f33-c70e-4695-ace1-3677b918ce25",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:27:01.369221+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "a8957d6e-1557-45a8-a06c-f87c6a75e0f3": {
+      "id": "a8957d6e-1557-45a8-a06c-f87c6a75e0f3",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:13.871001+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "a8c55e56-d089-4368-855d-b6452229b82a": {
+      "id": "a8c55e56-d089-4368-855d-b6452229b82a",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:27:00.511411+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "aae6cc40-2f41-4ea8-b668-d3ee8b9c9611": {
+      "id": "aae6cc40-2f41-4ea8-b668-d3ee8b9c9611",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:24:00.095569+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "aba95e8c-e678-45fc-b7c8-0dfaf02745d4": {
+      "id": "aba95e8c-e678-45fc-b7c8-0dfaf02745d4",
+      "title": "Luxury Watch Collection",
+      "createdAt": "2025-03-13T02:09:29.76635+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Nguyễn Ngọc Mai",
+          "address": "Hà Nội"
+        },
+        {
+          "id": "2",
+          "name": "Đinh Thị Hường",
+          "address": "Hồ Chí Minh"
+        },
+        {
+          "id": "3",
+          "name": "Hoàng Thị Chi",
+          "address": "Đà Nẵng"
+        }
+      ],
+      "startingPrice": 10000,
+      "priceStep": 500,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Nguyễn Ngọc Mai",
+          "amount": 10500,
+          "timestamp": "2025-03-13T02:09:29.779642+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Đinh Thị Hường",
+          "amount": 11000,
+          "timestamp": "2025-03-13T02:09:30.785746+08:00"
+        },
+        {
+          "round": 3,
+          "bidderId": "3",
+          "bidderName": "Hoàng Thị Chi",
+          "amount": 11500,
+          "timestamp": "2025-03-13T02:09:31.797836+08:00"
+        },
+        {
+          "round": 4,
+          "bidderId": "1",
+          "bidderName": "Nguyễn Ngọc Mai",
+          "amount": 12000,
+          "timestamp": "2025-03-13T02:09:32.806797+08:00"
+        },
+        {
+          "round": 5,
+          "bidderId": "2",
+          "bidderName": "Đinh Thị Hường",
+          "amount": 13000,
+          "timestamp": "2025-03-13T02:09:33.816505+08:00"
+        }
+      ],
+      "currentRound": 6,
+      "highestBid": 13000,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "aec50e58-6683-4840-9063-2f9b94f18b37": {
+      "id": "aec50e58-6683-4840-9063-2f9b94f18b37",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:55.627951+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "af1294bc-fd66-4e88-aa08-98df955b3e6e": {
+      "id": "af1294bc-fd66-4e88-aa08-98df955b3e6e",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:42.473442+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "b0e59725-87e8-4bd3-b748-e2b998923faa": {
+      "id": "b0e59725-87e8-4bd3-b748-e2b998923faa",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:36.141916+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": "inProgress"
+    },
+    "b13bd7f6-145b-4879-a4e2-bc2a92038911": {
+      "id": "b13bd7f6-145b-4879-a4e2-bc2a92038911",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:40.019878+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "b2da4f38-79b8-48cc-80c8-256830ae5696": {
+      "id": "b2da4f38-79b8-48cc-80c8-256830ae5696",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:35.626156+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "b2eba9e6-2fcb-4bef-8a84-f5ae1a44b761": {
+      "id": "b2eba9e6-2fcb-4bef-8a84-f5ae1a44b761",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:56:01.201578+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "b3d99953-1182-4d53-b0a2-7170312b655b": {
+      "id": "b3d99953-1182-4d53-b0a2-7170312b655b",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:35.897596+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:30:36.228866+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:30:36.344202+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "b518656b-d5d5-45f3-a122-bd3e8233741b": {
+      "id": "b518656b-d5d5-45f3-a122-bd3e8233741b",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:01.701964+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "b6b6ef1a-c48f-4134-a73f-fcdf4eea9ceb": {
+      "id": "b6b6ef1a-c48f-4134-a73f-fcdf4eea9ceb",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:04.793108+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:29:05.151512+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:29:05.269939+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "b784835c-aace-4887-9fc7-74488ba36717": {
+      "id": "b784835c-aace-4887-9fc7-74488ba36717",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:11.584966+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:36:11.916147+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:36:12.026171+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "b91aa7ad-62d7-41bc-a31b-9dff8579e590": {
+      "id": "b91aa7ad-62d7-41bc-a31b-9dff8579e590",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:33.155775+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T08:57:33.500262+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T08:57:33.617767+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": "inProgress"
+    },
+    "bacffdc4-8d14-44eb-a374-533cc4805a04": {
+      "id": "bacffdc4-8d14-44eb-a374-533cc4805a04",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:02.380916+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "bb0c6556-a914-4b77-8bf6-1be8e24da9fa": {
+      "id": "bb0c6556-a914-4b77-8bf6-1be8e24da9fa",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:34.958144+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "bc046e0e-bc07-4c79-b5c3-426ace4743fd": {
+      "id": "bc046e0e-bc07-4c79-b5c3-426ace4743fd",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:04.885814+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T08:52:05.236122+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T08:52:05.350767+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "bc494d18-a8c5-4b39-8a47-fe2481da0bda": {
+      "id": "bc494d18-a8c5-4b39-8a47-fe2481da0bda",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:02.856115+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "bce6610e-2185-4b8e-8d16-57aafb2ae0db": {
+      "id": "bce6610e-2185-4b8e-8d16-57aafb2ae0db",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:55.847127+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "bd859b32-a4cf-4b84-9c9c-efc2e7cb8dd8": {
+      "id": "bd859b32-a4cf-4b84-9c9c-efc2e7cb8dd8",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:10.654994+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "bf4c45f4-289b-4558-b9e2-71ef02817438": {
+      "id": "bf4c45f4-289b-4558-b9e2-71ef02817438",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:20:01.59185+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "bfecd584-afed-47e8-9c29-d22995510805": {
+      "id": "bfecd584-afed-47e8-9c29-d22995510805",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:26:58.806788+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:26:59.119943+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:26:59.228925+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "c3590e7e-4a15-47f1-8a67-eb5157c5594b": {
+      "id": "c3590e7e-4a15-47f1-8a67-eb5157c5594b",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:22:31.706505+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "c3bda042-3fb3-4e6d-9b4f-cd95e79b649c": {
+      "id": "c3bda042-3fb3-4e6d-9b4f-cd95e79b649c",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:02.862532+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "c6162faf-8e71-4974-8954-da4588b64e3a": {
+      "id": "c6162faf-8e71-4974-8954-da4588b64e3a",
+      "title": "Luxury Watch Collection",
+      "createdAt": "2025-03-13T02:08:52.071086+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Nguyễn Ngọc Mai",
+          "address": "Hà Nội"
+        },
+        {
+          "id": "2",
+          "name": "Đinh Thị Hường",
+          "address": "Hồ Chí Minh"
+        },
+        {
+          "id": "3",
+          "name": "Hoàng Thị Chi",
+          "address": "Đà Nẵng"
+        }
+      ],
+      "startingPrice": 10000,
+      "priceStep": 500,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Nguyễn Ngọc Mai",
+          "amount": 10500,
+          "timestamp": "2025-03-13T02:08:52.078779+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Đinh Thị Hường",
+          "amount": 11000,
+          "timestamp": "2025-03-13T02:08:53.083665+08:00"
+        },
+        {
+          "round": 3,
+          "bidderId": "3",
+          "bidderName": "Hoàng Thị Chi",
+          "amount": 11500,
+          "timestamp": "2025-03-13T02:08:54.090627+08:00"
+        },
+        {
+          "round": 4,
+          "bidderId": "1",
+          "bidderName": "Nguyễn Ngọc Mai",
+          "amount": 12000,
+          "timestamp": "2025-03-13T02:08:55.096431+08:00"
+        },
+        {
+          "round": 5,
+          "bidderId": "2",
+          "bidderName": "Đinh Thị Hường",
+          "amount": 13000,
+          "timestamp": "2025-03-13T02:08:56.101394+08:00"
+        }
+      ],
+      "currentRound": 6,
+      "highestBid": 13000,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "c625123e-c10c-4053-8596-7c379d746b55": {
+      "id": "c625123e-c10c-4053-8596-7c379d746b55",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:42.700907+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "c641f7b3-b2f3-4aa0-be15-5593c9f6590d": {
+      "id": "c641f7b3-b2f3-4aa0-be15-5593c9f6590d",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:55:57.832997+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "c7724fa7-b6de-4485-b798-75d07313763b": {
+      "id": "c7724fa7-b6de-4485-b798-75d07313763b",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:55.9551+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "c89fccfd-7b1b-4e52-b705-af7270321bfa": {
+      "id": "c89fccfd-7b1b-4e52-b705-af7270321bfa",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:39.791926+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "c9261390-f455-48cc-91ef-9da2175f1468": {
+      "id": "c9261390-f455-48cc-91ef-9da2175f1468",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:56:02.515817+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "cb8565f0-e06b-41d3-b7ae-2913040527d1": {
+      "id": "cb8565f0-e06b-41d3-b7ae-2913040527d1",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:56:02.277202+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "cca82737-615c-4156-a174-88f7222093e3": {
+      "id": "cca82737-615c-4156-a174-88f7222093e3",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:11.359435+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "ccf85b69-c6de-42ae-b415-0efd76996150": {
+      "id": "ccf85b69-c6de-42ae-b415-0efd76996150",
+      "title": "Luxury Watch Collection",
+      "createdAt": "2025-03-13T02:01:02.133771+08:00",
+      "bidders": [],
+      "startingPrice": 10000,
+      "priceStep": 500,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "ce907462-90a8-42b4-bc65-c25462f314f5": {
+      "id": "ce907462-90a8-42b4-bc65-c25462f314f5",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:02.401249+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:35:02.723593+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:35:02.831808+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "d11b6763-3083-45cd-b1e6-41d76a5ee544": {
+      "id": "d11b6763-3083-45cd-b1e6-41d76a5ee544",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:43.698629+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "d11d032d-ed8f-4bed-92c9-510d1b0cfca7": {
+      "id": "d11d032d-ed8f-4bed-92c9-510d1b0cfca7",
+      "title": "Luxury Watch Collection",
+      "createdAt": "2025-03-13T02:05:12.916676+08:00",
+      "bidders": [],
+      "startingPrice": 10000,
+      "priceStep": 500,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "d2116b58-1b3f-4503-81f0-884e88d3e115": {
+      "id": "d2116b58-1b3f-4503-81f0-884e88d3e115",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:02.119942+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "d25887a2-c45f-48d2-8607-271748b7c268": {
+      "id": "d25887a2-c45f-48d2-8607-271748b7c268",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:27:00.195687+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "d4823a80-f448-40cf-b482-7a9878331752": {
+      "id": "d4823a80-f448-40cf-b482-7a9878331752",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:20:01.6249+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "d5f8e77f-3a86-4d0b-bf0c-650cbe483d1f": {
+      "id": "d5f8e77f-3a86-4d0b-bf0c-650cbe483d1f",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:07.757516+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "d666e3ef-f0fe-4d75-b795-fff9c6ef53f9": {
+      "id": "d666e3ef-f0fe-4d75-b795-fff9c6ef53f9",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:05.826582+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "d8435624-6aa5-4083-a92b-6f1e6362cd50": {
+      "id": "d8435624-6aa5-4083-a92b-6f1e6362cd50",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:38.154713+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "d9c2c8b7-7b90-4ae2-9eb8-4c3646d5a365": {
+      "id": "d9c2c8b7-7b90-4ae2-9eb8-4c3646d5a365",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:34.078235+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "da52f478-0e18-470e-be30-9b2674cad19d": {
+      "id": "da52f478-0e18-470e-be30-9b2674cad19d",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:52:03.10497+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T08:52:03.456166+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T08:52:03.576691+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "dbcedc69-8968-4352-945f-dacac5f6387c": {
+      "id": "dbcedc69-8968-4352-945f-dacac5f6387c",
+      "title": "Luxury Watch Collection",
+      "createdAt": "2025-03-13T02:02:02.575693+08:00",
+      "bidders": [],
+      "startingPrice": 10000,
+      "priceStep": 500,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "dbe5241f-518a-40f2-9af3-d432a1365625": {
+      "id": "dbe5241f-518a-40f2-9af3-d432a1365625",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:39.326607+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "e031385c-5e5f-4300-8f92-e09b314c140e": {
+      "id": "e031385c-5e5f-4300-8f92-e09b314c140e",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:07.247506+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "e1c1cc7c-bc0e-41f4-bc4b-842bd354ec14": {
+      "id": "e1c1cc7c-bc0e-41f4-bc4b-842bd354ec14",
+      "title": "Luxury Watch Collection",
+      "createdAt": "2025-03-13T02:00:26.873009+08:00",
+      "bidders": [],
+      "startingPrice": 10000,
+      "priceStep": 500,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "e228edd3-f7b8-4d14-8fb8-6132c2c1a975": {
+      "id": "e228edd3-f7b8-4d14-8fb8-6132c2c1a975",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:55:59.371098+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T08:55:59.717544+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T08:55:59.838272+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "e2d0098f-aef4-4229-839d-cdf6847c9493": {
+      "id": "e2d0098f-aef4-4229-839d-cdf6847c9493",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:55:58.075657+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "e3153d4b-b758-4e95-aecb-d6a57d39cfa1": {
+      "id": "e3153d4b-b758-4e95-aecb-d6a57d39cfa1",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:05.760955+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "e90e7700-5df8-4e59-af89-bdae070ac7fd": {
+      "id": "e90e7700-5df8-4e59-af89-bdae070ac7fd",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:30:34.775377+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:30:35.099567+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:30:35.209533+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "eb6f61d8-6ae1-486f-9388-d69e6e2d96d0": {
+      "id": "eb6f61d8-6ae1-486f-9388-d69e6e2d96d0",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:55:58.562753+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "ed776978-6ce9-4953-b312-735edc7b23da": {
+      "id": "ed776978-6ce9-4953-b312-735edc7b23da",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:26:57.514603+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "f06d329d-d04e-4652-89a5-2078107e4175": {
+      "id": "f06d329d-d04e-4652-89a5-2078107e4175",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:32.436421+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": "notStarted"
     },
     "f22ef16b-e878-4d8c-94c4-b20af4d9619c": {
       "id": "f22ef16b-e878-4d8c-94c4-b20af4d9619c",
@@ -51,7 +6337,312 @@
       "currentRound": 0,
       "highestBid": 0,
       "highestBidder": "",
-      "auctionStatus": "notStarted"
+      "status": ""
+    },
+    "f3371bd8-b332-4b7e-8139-0e2095eb46cb": {
+      "id": "f3371bd8-b332-4b7e-8139-0e2095eb46cb",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:33:43.363921+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "f3e464a1-f771-4f55-9636-4ee706adbb29": {
+      "id": "f3e464a1-f771-4f55-9636-4ee706adbb29",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:29:03.585668+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:29:03.944214+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:29:04.067693+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "f617e48e-0fc9-4825-8b66-9d0b67cf801f": {
+      "id": "f617e48e-0fc9-4825-8b66-9d0b67cf801f",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:05.435999+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "f9b1dec7-fdaa-4193-8eb6-bedde5c26e4e": {
+      "id": "f9b1dec7-fdaa-4193-8eb6-bedde5c26e4e",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T08:57:34.887948+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T08:57:35.228123+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T08:57:35.345249+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": "completed"
+    },
+    "fb844bbe-de90-4540-8bd0-5181f37b744b": {
+      "id": "fb844bbe-de90-4540-8bd0-5181f37b744b",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:26:58.280671+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:26:58.594505+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:26:58.699236+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "fba906ac-a191-493b-9caf-13f40c3a8cc1": {
+      "id": "fba906ac-a191-493b-9caf-13f40c3a8cc1",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:31:52.688986+08:00",
+      "bidders": [],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "fbdd8830-dcdd-494a-8477-aeb9d9a3a3b6": {
+      "id": "fbdd8830-dcdd-494a-8477-aeb9d9a3a3b6",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:23:56.321588+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [
+        {
+          "round": 1,
+          "bidderId": "1",
+          "bidderName": "Test Bidder 1",
+          "amount": 1100,
+          "timestamp": "2025-03-13T02:23:56.67024+08:00"
+        },
+        {
+          "round": 2,
+          "bidderId": "2",
+          "bidderName": "Test Bidder 2",
+          "amount": 1200,
+          "timestamp": "2025-03-13T02:23:56.792915+08:00"
+        }
+      ],
+      "currentRound": 3,
+      "highestBid": 1200,
+      "highestBidder": "2",
+      "status": ""
+    },
+    "fcbe7298-0e58-4c26-9889-f23860ff6c3a": {
+      "id": "fcbe7298-0e58-4c26-9889-f23860ff6c3a",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:35:35.852799+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
+    },
+    "ffd736f1-e581-407c-9b8a-0737f088a545": {
+      "id": "ffd736f1-e581-407c-9b8a-0737f088a545",
+      "title": "Test Auction",
+      "createdAt": "2025-03-13T02:36:14.208658+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Test Bidder 1",
+          "address": "Address 1"
+        },
+        {
+          "id": "2",
+          "name": "Test Bidder 2",
+          "address": "Address 2"
+        },
+        {
+          "id": "3",
+          "name": "Test Bidder 3",
+          "address": "Address 3"
+        }
+      ],
+      "startingPrice": 1000,
+      "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 1,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": ""
     }
   },
   "currentAuction": ""
