@@ -502,6 +502,13 @@ func TestGetAllAuctions(t *testing.T) {
 		data, ok := response["data"].([]interface{})
 		require.True(t, ok)
 		assert.Len(t, data, 2)
+
+		// Check pagination info
+		pagination, ok := response["pagination"].(map[string]interface{})
+		require.True(t, ok)
+		assert.Equal(t, float64(2), pagination["totalItems"])
+		assert.Equal(t, float64(1), pagination["totalPages"])
+		assert.Equal(t, float64(1), pagination["currentPage"])
 	})
 
 	// Test with no auctions
@@ -528,6 +535,90 @@ func TestGetAllAuctions(t *testing.T) {
 		} else {
 			assert.Len(t, data, 0, "Data should be an empty array")
 		}
+
+		// Check pagination info for empty result
+		pagination, ok := response["pagination"].(map[string]interface{})
+		require.True(t, ok)
+		assert.Equal(t, float64(0), pagination["totalItems"])
+		assert.Equal(t, float64(1), pagination["totalPages"]) // Still 1 page even when empty
+		assert.Equal(t, float64(1), pagination["currentPage"])
+	})
+
+	// Test pagination with multiple pages
+	t.Run("Pagination with multiple pages", func(t *testing.T) {
+		router, mockDB := setupTestRouter()
+
+		// Add multiple auctions (more than the default limit)
+		for i := 1; i <= 15; i++ {
+			auction := &models.Auction{
+				ID:            fmt.Sprintf("auction%d", i),
+				Title:         fmt.Sprintf("Auction %d", i),
+				CreatedAt:     time.Now().Add(time.Duration(-i) * time.Hour), // Staggered creation times
+				StartingPrice: 100000,
+				PriceStep:     10000,
+				BidHistory:    []models.Bid{},
+				CurrentRound:  0,
+				AuctionStatus: common.NotStarted,
+			}
+			mockDB.auctions[auction.ID] = auction
+		}
+
+		// Test default pagination (page 1, limit 10)
+		w1 := performRequest(router, "GET", "/api/v1/auctions", nil)
+		assert.Equal(t, http.StatusOK, w1.Code)
+
+		var response1 map[string]interface{}
+		err := json.Unmarshal(w1.Body.Bytes(), &response1)
+		require.NoError(t, err)
+
+		// First page should have 10 items
+		data1, ok := response1["data"].([]interface{})
+		require.True(t, ok)
+		assert.Len(t, data1, 10)
+
+		pagination1, ok := response1["pagination"].(map[string]interface{})
+		require.True(t, ok)
+		assert.Equal(t, float64(15), pagination1["totalItems"])
+		assert.Equal(t, float64(2), pagination1["totalPages"])
+		assert.Equal(t, float64(1), pagination1["currentPage"])
+
+		// Test page 2
+		w2 := performRequest(router, "GET", "/api/v1/auctions?page=2", nil)
+		assert.Equal(t, http.StatusOK, w2.Code)
+
+		var response2 map[string]interface{}
+		err = json.Unmarshal(w2.Body.Bytes(), &response2)
+		require.NoError(t, err)
+
+		// Second page should have 5 items
+		data2, ok := response2["data"].([]interface{})
+		require.True(t, ok)
+		assert.Len(t, data2, 5)
+
+		pagination2, ok := response2["pagination"].(map[string]interface{})
+		require.True(t, ok)
+		assert.Equal(t, float64(15), pagination2["totalItems"])
+		assert.Equal(t, float64(2), pagination2["totalPages"])
+		assert.Equal(t, float64(2), pagination2["currentPage"])
+
+		// Test custom limit
+		w3 := performRequest(router, "GET", "/api/v1/auctions?limit=5", nil)
+		assert.Equal(t, http.StatusOK, w3.Code)
+
+		var response3 map[string]interface{}
+		err = json.Unmarshal(w3.Body.Bytes(), &response3)
+		require.NoError(t, err)
+
+		// With limit 5, first page should have 5 items
+		data3, ok := response3["data"].([]interface{})
+		require.True(t, ok)
+		assert.Len(t, data3, 5)
+
+		pagination3, ok := response3["pagination"].(map[string]interface{})
+		require.True(t, ok)
+		assert.Equal(t, float64(15), pagination3["totalItems"])
+		assert.Equal(t, float64(3), pagination3["totalPages"]) // 15/5 = 3 pages
+		assert.Equal(t, float64(1), pagination3["currentPage"])
 	})
 }
 

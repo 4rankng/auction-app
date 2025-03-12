@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -169,8 +171,26 @@ func (h *AuctionHandlers) CreateAuction(c *gin.Context) {
 	})
 }
 
-// GetAllAuctions returns all auctions
+// GetAllAuctions returns all auctions with pagination
 func (h *AuctionHandlers) GetAllAuctions(c *gin.Context) {
+	// Parse pagination parameters
+	page := 1 // Default page is 1
+	limit := 10 // Default limit is 10 items per page
+
+	// Get page parameter
+	pageStr := c.DefaultQuery("page", "1")
+	pageInt, err := strconv.Atoi(pageStr)
+	if err == nil && pageInt > 0 {
+		page = pageInt
+	}
+
+	// Get limit parameter
+	limitStr := c.DefaultQuery("limit", "10")
+	limitInt, err := strconv.Atoi(limitStr)
+	if err == nil && limitInt > 0 && limitInt <= 100 {
+		limit = limitInt
+	}
+
 	auctions, err := h.db.GetAllAuctions()
 	if err != nil {
 		h.logger.Printf("Error getting all auctions: %v", err)
@@ -178,9 +198,46 @@ func (h *AuctionHandlers) GetAllAuctions(c *gin.Context) {
 		return
 	}
 
+	// Convert map of auctions to slice for pagination
+	var auctionSlice []*models.Auction
+	for _, auction := range auctions {
+		auctionSlice = append(auctionSlice, auction)
+	}
+
+	// Sort auctions by creation date (newest first)
+	sort.Slice(auctionSlice, func(i, j int) bool {
+		return auctionSlice[i].CreatedAt.After(auctionSlice[j].CreatedAt)
+	})
+
+	// Calculate pagination values
+	totalItems := len(auctionSlice)
+	totalPages := (totalItems + limit - 1) / limit // Ceiling division
+
+	if totalPages == 0 {
+		totalPages = 1 // At least one page even if empty
+	}
+
+	// Make sure the requested page is valid
+	if page > totalPages {
+		page = totalPages
+	}
+
+	// Calculate starting and ending indices for this page
+	startIndex := (page - 1) * limit
+	endIndex := startIndex + limit
+	if endIndex > totalItems {
+		endIndex = totalItems
+	}
+
+	// Slice the items for the current page
+	var pagedAuctions []*models.Auction
+	if startIndex < totalItems {
+		pagedAuctions = auctionSlice[startIndex:endIndex]
+	}
+
 	// Convert to response format
 	var response []AuctionResponse
-	for _, auction := range auctions {
+	for _, auction := range pagedAuctions {
 		response = append(response, AuctionResponse{
 			ID:            auction.ID,
 			Title:         auction.Title,
@@ -195,8 +252,20 @@ func (h *AuctionHandlers) GetAllAuctions(c *gin.Context) {
 		})
 	}
 
-	h.logger.Printf("Retrieved %d auctions", len(response))
-	c.JSON(http.StatusOK, gin.H{"data": response})
+	h.logger.Printf("Retrieved %d auctions (page %d of %d, showing %d per page)",
+		totalItems, page, totalPages, limit)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": response,
+		"pagination": gin.H{
+			"totalItems": totalItems,
+			"totalPages": totalPages,
+			"currentPage": page,
+			"itemsPerPage": limit,
+			"startIndex": startIndex,
+			"endIndex": endIndex - 1, // Convert to 0-indexed for clarity
+		},
+	})
 }
 
 // GetAuction returns a specific auction by ID
