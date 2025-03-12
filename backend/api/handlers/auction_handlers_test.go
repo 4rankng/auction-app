@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"auction/common"
 	"auction/internal/models"
 )
 
@@ -116,7 +117,7 @@ func (m *MockDatabase) ExportAuctionData(id string) (*models.ExportData, error) 
 		return nil, fmt.Errorf("auction with ID %s not found", id)
 	}
 
-	if auction.AuctionStatus != "completed" {
+	if auction.AuctionStatus != common.Completed {
 		return nil, fmt.Errorf("cannot export data for auction that is not completed")
 	}
 
@@ -253,7 +254,7 @@ func TestGetAllAuctions(t *testing.T) {
 			PriceStep:     10000,
 			BidHistory:    []models.Bid{},
 			CurrentRound:  0,
-			AuctionStatus: "notStarted",
+			AuctionStatus: common.NotStarted,
 		}
 
 		auction2 := &models.Auction{
@@ -264,7 +265,7 @@ func TestGetAllAuctions(t *testing.T) {
 			PriceStep:     20000,
 			BidHistory:    []models.Bid{},
 			CurrentRound:  0,
-			AuctionStatus: "inProgress",
+			AuctionStatus: common.InProgress,
 		}
 
 		mockDB.auctions[auction1.ID] = auction1
@@ -328,7 +329,7 @@ func TestGetAuction(t *testing.T) {
 			PriceStep:     10000,
 			BidHistory:    []models.Bid{},
 			CurrentRound:  0,
-			AuctionStatus: "notStarted",
+			AuctionStatus: common.NotStarted,
 		}
 
 		mockDB.auctions[auction.ID] = auction
@@ -410,7 +411,7 @@ func TestExportAuctionData(t *testing.T) {
 			CurrentRound:  1,
 			HighestBid:    150000,
 			HighestBidder: bidder.ID,
-			AuctionStatus: "completed",
+			AuctionStatus: common.Completed,
 		}
 
 		mockDB.auctions[auction.ID] = auction
@@ -472,7 +473,7 @@ func TestExportAuctionData(t *testing.T) {
 			PriceStep:     10000,
 			BidHistory:    []models.Bid{},
 			CurrentRound:  0,
-			AuctionStatus: "inProgress",
+			AuctionStatus: common.InProgress,
 		}
 
 		mockDB.auctions[auction.ID] = auction
@@ -517,7 +518,7 @@ func TestStartAuction(t *testing.T) {
 			CurrentRound:  0,
 			HighestBid:    0,
 			HighestBidder: "",
-			AuctionStatus: "notStarted",
+			AuctionStatus: common.NotStarted,
 		}
 
 		// Add auction to the mock database
@@ -542,7 +543,7 @@ func TestStartAuction(t *testing.T) {
 		// Check that the auction status was updated
 		updatedAuction, err := mockDB.GetAuction(auctionID)
 		assert.NoError(t, err)
-		assert.Equal(t, "inProgress", updatedAuction.AuctionStatus)
+		assert.Equal(t, common.InProgress, updatedAuction.AuctionStatus)
 		assert.Equal(t, 1, updatedAuction.CurrentRound)
 	})
 
@@ -568,7 +569,7 @@ func TestStartAuction(t *testing.T) {
 			CurrentRound:  1,
 			HighestBid:    0,
 			HighestBidder: "",
-			AuctionStatus: "inProgress", // already started
+			AuctionStatus: common.InProgress, // already started
 		}
 
 		// Add auction to the mock database
@@ -651,7 +652,7 @@ func TestEndAuction(t *testing.T) {
 			CurrentRound:  1,
 			HighestBid:    120,
 			HighestBidder: "bidder1",
-			AuctionStatus: "inProgress",
+			AuctionStatus: common.InProgress,
 		}
 
 		// Add auction to the mock database
@@ -676,7 +677,7 @@ func TestEndAuction(t *testing.T) {
 		// Check that the auction status was updated
 		updatedAuction, err := mockDB.GetAuction(auctionID)
 		assert.NoError(t, err)
-		assert.Equal(t, "completed", updatedAuction.AuctionStatus)
+		assert.Equal(t, common.Completed, updatedAuction.AuctionStatus)
 	})
 
 	t.Run("Auction not in progress", func(t *testing.T) {
@@ -701,7 +702,7 @@ func TestEndAuction(t *testing.T) {
 			CurrentRound:  0,
 			HighestBid:    0,
 			HighestBidder: "",
-			AuctionStatus: "notStarted", // not started
+			AuctionStatus: common.NotStarted, // not started
 		}
 
 		// Add auction to the mock database

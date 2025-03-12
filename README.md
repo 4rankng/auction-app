@@ -1,75 +1,144 @@
 # Auction App Product Specification
 
-## Overview
+## 1. Overview
 
-The Auction App is a robust auction platform designed to create a seamless experience for both auction creators and bidders. This spec outlines a clear, no-compromise architecture that guarantees operational excellence and user satisfaction throughout the auction lifecycle.
+The Auction App is a high-performance auction platform engineered for operational excellence and a flawless user experience. This document defines a strict, production-grade architecture, ensuring that both auction administrators and bidders experience seamless interactions throughout the auction lifecycle.
 
-## Technology Stack
+---
 
-- **Backend Server**
-  - **Language:** Go
-  - **Framework:** Gin
-  - **Database:** tinydb
+## 2. Technology Stack
 
-- **Web Server**
-  - **Technologies:** HTML, CSS, JavaScript
-  - **Libraries:** Bootstrap, Axios
+### Backend Server
+- **Language:** Go
+  *Leverage Go's performance and concurrency for a robust backend.*
+- **Framework:** Gin
+  *Gin's middleware and routing capabilities provide a solid foundation.*
+- **Database:**
+  **Recommendation:** Replace `tinydb` with a production-ready database such as PostgreSQL or MySQL.
+  *A scalable, ACID-compliant database is non-negotiable in a high-stakes auction environment.*
 
-## Core Features
+### Web Server
+- **Technologies:** HTML5, CSS3, JavaScript (ES6+)
+  *Modern standards ensure cross-browser compatibility and performance.*
+- **Libraries & Frameworks:**
+  - **Bootstrap:** For responsive, mobile-first design.
+  - **Axios:** For streamlined RESTful API calls.
 
-### Backend Endpoints
+---
 
-The backend is built with precision and covers all critical auction functionalities:
+## 3. Core Features
 
-- **Auction Management**
-  - **Create an Auction:** Initialize a new auction with initial price, step price, list of bidders, and auction start time.
-  - **Get All Auctions:** Retrieve a list of all auctions.
-  - **Get a Single Auction:** Fetch detailed information on a specific auction.
-  - **Start an Auction:** Activate the auction for bidding.
-  - **End an Auction:** Conclude the bidding process.
-  - **Export Auction Data:** Provide a mechanism to export auction information.
+### 3.1 Backend API Endpoints
 
-- **Bidding Operations**
-  - **Place a Bid:** Allow users to submit bids on an auction.
-  - **Get Current Bids:** Retrieve the latest bids for an active auction.
-  - **Get Auction History:** Display the complete history of an auction.
+Each endpoint must be implemented with robust validation, proper error handling, and secure authentication where needed.
 
-- **Additional Functionality**
-  - **Excel File Parsing:** Process an Excel file to extract and return a list of bidders (without affecting the database).
+#### 3.1.1 Auction Management
+- **Create Auction:**
+  Initializes a new auction with parameters including:
+  - Auction title
+  - Initial price
+  - Price increment (step)
+  - List of bidders (with full details)
+  - Scheduled auction start time
+  *Strict validations and transactional integrity are required.*
+- **Retrieve All Auctions:**
+  Returns a paginated list of auctions.
+- **Retrieve Single Auction:**
+  Provides detailed information on a specific auction, including bid history.
+- **Start Auction:**
+  Transitions the auction state to active. Must ensure that the auction cannot be started more than once.
+- **End Auction:**
+  Concludes the auction and finalizes bidding.
+- **Export Auction Data:**
+  Generates a comprehensive export containing:
+  - Auction Title
+  - Auction Start Time and End Time
+  - Starting Price and Price Increment
+  - Total Bid Count and Complete Bid History
+  - Winner Details (ID, Name, Address) and Final Winning Bid
 
-### Web Server Pages
+#### 3.1.2 Bidding Operations
+- **Place Bid:**
+  Accepts and validates bids against the current highest bid.
+  *Enforce strict rules to prevent race conditions and fraudulent bids.*
+- **Retrieve Current Bids:**
+  Returns real-time bid data for active auctions.
+- **Retrieve Auction History:**
+  Provides a detailed, chronological log of all bidding actions.
 
-The web server delivers an intuitive, user-centric experience through dedicated pages:
+#### 3.1.3 Additional Functionalities
+- **Excel File Parsing:**
+  Parses an uploaded Excel file to extract a list of bidders without impacting the live database.
+  *This must be stateless and idempotent.*
 
-- **index.html**
+---
+
+### 3.2 Frontend Pages
+
+The web interface must be intuitive and responsive, delivering clear and consistent user experiences.
+
+#### 3.2.1 Home Page (index.html)
+- **Functionality:**
   - Displays all completed auctions.
-  - Provides an interface to create new auctions.
+  - Provides a form to create new auctions.
+- **Key Considerations:**
+  *Ensure the interface is optimized for both desktop and mobile experiences.*
 
-- **setup.html**
-  - Configures auction details before the auction starts.
-  - **Features:**
-    - A button labeled “Bat Dau Dau Gia” to start the auction and transition to the bidding phase.
-    - Input fields for "Gia Khoi Diem" and "Buoc Gia" that automatically format numbers using commas (e.g., entering `1000000` displays as `1,000,000`).
-    - Data collection from text fields, including conversion of comma-separated numbers to integers.
-    - Retrieval and management of "Danh Sach Nguoi Tham Gia" (participant list), with options to delete or edit each record.
-    - An optional "Ma Nguoi Tham Gia" field which, if left empty, auto-increments based on the last entry.
+#### 3.2.2 Auction Setup Page (setup.html)
+- **Functionality:**
+  - Configures auction details prior to commencement.
+  - **Primary Action:**
+    - A clearly labeled button “Bắt Đầu Đấu Giá” (Start Auction) which initiates the auction.
+  - **Input Handling:**
+    - Fields for "Giá Khởi Điểm" (Starting Price) and "Bước Giá" (Price Increment) that automatically format large numbers with commas.
+    - Text fields for participant details ("Danh Sách Người Tham Gia") with inline edit and delete capabilities.
+    - Optional field for "Mã Người Tham Gia" that auto-increments if left empty.
+- **User Experience:**
+  *The page should provide real-time validation and a smooth transition into the bidding phase.*
 
-- **bid.html**
-  - Facilitates the bidding process.
-  - **Features:**
-    - A button labeled “Ket Thuc Dau Gia” to end the auction and transition to the result display.
-    - Similar data collection and conversion procedures as in setup.html, ensuring consistency in bid processing.
+#### 3.2.3 Bidding Page (bid.html)
+- **Functionality:**
+  - Active bidding interface.
+  - **Primary Action:**
+    - A prominent “Kết Thúc Đấu Giá” (End Auction) button that terminates the bidding process and transitions to the results.
+  - **Consistency:**
+    - Similar input validation and data formatting as in the setup phase.
+- **Real-Time Updates:**
+  *Ensure live bid updates using WebSockets or similar technology for an engaging user experience.*
 
-- **result.html**
-  - Displays the auction winner prominently.
-  - Shows a complete history of the auction.
-  - Provides a button to return to the index page for a fresh start.
+#### 3.2.4 Results Page (result.html)
+- **Functionality:**
+  - Prominently displays the auction winner and final bid details.
+  - Shows a complete bid history.
+  - Provides an option to return to the home page to start a new auction cycle.
+- **Design:**
+  *Must be designed to celebrate the auction outcome while ensuring data integrity and transparency.*
 
-## Navigation Logic
+---
 
-The app smartly redirects users based on the state of the last inserted auction in the database:
+## 4. Navigation & State Management
 
-- **Auction Not Started:** Any page request redirects to **index.html**.
-- **Auction In Progress:** Requests redirect to **bid.html**.
-- **Auction Ended:** Requests redirect to **result.html**.
+The system must intelligently redirect users based on the auction's state stored in the database. The following logic applies:
+
+- **Auction Not Started:**
+  All requests should be redirected to **index.html**.
+- **Auction In Progress:**
+  Users must be redirected to **bid.html**.
+- **Auction Ended:**
+  All navigation should lead to **result.html**.
+
+*Robust session management and state validation are essential to prevent unauthorized state transitions.*
+
+---
+
+## 5. Non-Functional Requirements
+
+- **Performance:**
+  The backend must handle high concurrency. Utilize caching strategies where applicable.
+- **Security:**
+  Implement strict authentication and authorization measures. All endpoints must be secured against common vulnerabilities (e.g., SQL injection, XSS).
+- **Scalability:**
+  The architecture should support horizontal scaling, especially for the bidding endpoints.
+- **Maintainability:**
+  Code must be modular and adhere to SOLID principles. Comprehensive logging and monitoring are mandatory.
 

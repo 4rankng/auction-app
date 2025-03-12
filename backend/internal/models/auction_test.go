@@ -6,6 +6,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+
+	"auction/common"
 )
 
 func TestAuctionCreation(t *testing.T) {
@@ -21,7 +23,7 @@ func TestAuctionCreation(t *testing.T) {
 		CurrentRound:  0,
 		HighestBid:    0,
 		HighestBidder: "",
-		AuctionStatus: "notStarted",
+		AuctionStatus: common.NotStarted,
 	}
 
 	// Assert that the auction was created with the correct values
@@ -29,7 +31,7 @@ func TestAuctionCreation(t *testing.T) {
 	assert.Equal(t, 100, auction.StartingPrice)
 	assert.Equal(t, 10, auction.PriceStep)
 	assert.NotEmpty(t, auction.ID, "Auction ID should not be empty")
-	assert.Equal(t, "notStarted", auction.AuctionStatus)
+	assert.Equal(t, common.NotStarted, auction.AuctionStatus)
 	assert.NotNil(t, auction.Bidders, "Bidders slice should be initialized")
 	assert.NotNil(t, auction.BidHistory, "BidHistory slice should be initialized")
 	assert.NotZero(t, auction.CreatedAt, "CreatedAt should be set")
@@ -44,16 +46,16 @@ func TestAuctionStatus(t *testing.T) {
 		StartingPrice: 100,
 		PriceStep:     10,
 		BidHistory:    []Bid{},
-		AuctionStatus: "notStarted",
+		AuctionStatus: common.NotStarted,
 	}
 
 	// Test starting the auction
-	auction.AuctionStatus = "inProgress"
-	assert.Equal(t, "inProgress", auction.AuctionStatus)
+	auction.AuctionStatus = common.InProgress
+	assert.Equal(t, common.InProgress, auction.AuctionStatus)
 
 	// Test ending the auction
-	auction.AuctionStatus = "completed"
-	assert.Equal(t, "completed", auction.AuctionStatus)
+	auction.AuctionStatus = common.Completed
+	assert.Equal(t, common.Completed, auction.AuctionStatus)
 }
 
 func TestAddBidder(t *testing.T) {
@@ -65,7 +67,7 @@ func TestAddBidder(t *testing.T) {
 		StartingPrice: 100,
 		PriceStep:     10,
 		BidHistory:    []Bid{},
-		AuctionStatus: "notStarted",
+		AuctionStatus: common.NotStarted,
 	}
 
 	// Add a bidder
@@ -94,7 +96,7 @@ func TestRecordBid(t *testing.T) {
 		StartingPrice: 100,
 		PriceStep:     10,
 		BidHistory:    []Bid{},
-		AuctionStatus: "inProgress",
+		AuctionStatus: common.InProgress,
 	}
 
 	// Add a bidder
@@ -142,7 +144,7 @@ func TestExportData(t *testing.T) {
 		StartingPrice: 100,
 		PriceStep:     10,
 		BidHistory:    []Bid{},
-		AuctionStatus: "completed",
+		AuctionStatus: common.Completed,
 	}
 
 	// Add a bidder

@@ -19,23 +19,3 @@ type ErrorValidation struct {
 func (e *ErrorValidation) Error() string {
 	return e.Message
 }
-
-// ErrorDuplicate represents an error when a duplicate resource is detected
-type ErrorDuplicate struct {
-	Message string
-}
-
-// Error returns the error message
-func (e *ErrorDuplicate) Error() string {
-	return e.Message
-}
-
-// ErrorDatabase represents a general database error
-type ErrorDatabase struct {
-	Message string
-}
-
-// Error returns the error message
-func (e *ErrorDatabase) Error() string {
-	return e.Message
-}

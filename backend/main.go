@@ -76,9 +76,14 @@ func (a *App) Initialize() error {
 		api.POST("/auctions", auctionHandlers.CreateAuction)
 		api.GET("/auctions", auctionHandlers.GetAllAuctions)
 		api.GET("/auctions/:id", auctionHandlers.GetAuction)
-		api.GET("/auction/export/:id", auctionHandlers.ExportAuctionData)
+		api.GET("/auctions/export/:id", auctionHandlers.ExportAuctionData)
 		api.PUT("/auctions/:id/start", auctionHandlers.StartAuction)
 		api.PUT("/auctions/:id/end", auctionHandlers.EndAuction)
+
+		// Bidding operations
+		api.POST("/auctions/:id/bids", auctionHandlers.PlaceBid)
+		api.GET("/auctions/:id/bids/current", auctionHandlers.GetCurrentBids)
+		api.GET("/auctions/:id/bids/history", auctionHandlers.GetAuctionHistory)
 
 		// Bidder routes
 		api.GET("/bidders", bidderHandlers.GetBidders)

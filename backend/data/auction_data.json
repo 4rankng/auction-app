@@ -1,0 +1,58 @@
+{
+  "auctions": {
+    "44ac14fd-b258-4789-b118-14a58673f91a": {
+      "id": "44ac14fd-b258-4789-b118-14a58673f91a",
+      "title": "Xe oto CX5",
+      "createdAt": "2025-03-12T23:13:32.015724+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Frank",
+          "address": "Singapore"
+        },
+        {
+          "id": "2",
+          "name": "Kien",
+          "address": "Hai Phong"
+        }
+      ],
+      "startingPrice": 10000000000,
+      "priceStep": 10000000,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "auctionStatus": "completed"
+    },
+    "f22ef16b-e878-4d8c-94c4-b20af4d9619c": {
+      "id": "f22ef16b-e878-4d8c-94c4-b20af4d9619c",
+      "title": "Iphone 100XT",
+      "createdAt": "2025-03-12T23:14:28.831794+08:00",
+      "bidders": [
+        {
+          "id": "1",
+          "name": "Frank",
+          "address": "Singapore"
+        },
+        {
+          "id": "2",
+          "name": "Kien",
+          "address": "Hai Phong"
+        },
+        {
+          "id": "3",
+          "name": "Cuong",
+          "address": "Kyoto"
+        }
+      ],
+      "startingPrice": 10000000000,
+      "priceStep": 10000000,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "auctionStatus": "notStarted"
+    }
+  },
+  "currentAuction": ""
+}

@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"auction/common"
+)
 
 // Bidder struct defines the structure of a bidder
 type Bidder struct {
@@ -20,17 +24,17 @@ type Bid struct {
 
 // Auction represents a single auction with all its data
 type Auction struct {
-	ID            string    `json:"id"`
-	Title         string    `json:"title"`
-	CreatedAt     time.Time `json:"createdAt"`
-	Bidders       []Bidder  `json:"bidders"`
-	StartingPrice int       `json:"startingPrice"`
-	PriceStep     int       `json:"priceStep"`
-	BidHistory    []Bid     `json:"bidHistory"`
-	CurrentRound  int       `json:"currentRound"`
-	HighestBid    int       `json:"highestBid"`
-	HighestBidder string    `json:"highestBidder"`
-	AuctionStatus string    `json:"auctionStatus"` // "notStarted", "inProgress", "completed"
+	ID            string              `json:"id"`
+	Title         string              `json:"title"`
+	CreatedAt     time.Time           `json:"createdAt"`
+	Bidders       []Bidder            `json:"bidders"`
+	StartingPrice int                 `json:"startingPrice"`
+	PriceStep     int                 `json:"priceStep"`
+	BidHistory    []Bid               `json:"bidHistory"`
+	CurrentRound  int                 `json:"currentRound"`
+	HighestBid    int                 `json:"highestBid"`
+	HighestBidder string              `json:"highestBidder"`
+	AuctionStatus common.AuctionStatus `json:"auctionStatus"`
 }
 
 // AuctionData is the main data structure that will be stored in JSON

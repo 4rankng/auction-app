@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">auction/api/handlers/auction_handlers.go (75.5%)</option>
+				<option value="file0">auction/api/handlers/auction_handlers.go (40.7%)</option>
 				
 				<option value="file1">auction/api/handlers/bidder_handlers.go (47.7%)</option>
 				
@@ -73,7 +73,7 @@
 				
 				<option value="file8">auction/main.go (0.0%)</option>
 				
-				<option value="file9">auction/tests/mock_database.go (56.7%)</option>
+				<option value="file9">auction/tests/mock_database.go (60.0%)</option>
 				
 				</select>
 			</div>
@@ -90,6 +90,7 @@
 		<pre class="file" id="file0" style="display: none">package handlers
 
 import (
+        "fmt"
         "log"
         "net/http"
         "time"
@@ -362,6 +363,183 @@ func (h *AuctionHandlers) EndAuction(c *gin.Context) <span class="cov8" title="1
 
         <span class="cov8" title="1">h.logger.Printf("Auction ended successfully: %s", auctionID)
         c.JSON(http.StatusOK, gin.H{"message": "Auction ended successfully"})</span>
+}
+
+// PlaceBidRequest represents a request to place a bid
+type PlaceBidRequest struct {
+        BidderID string `json:"bidderId" binding:"required"`
+        Amount   int    `json:"amount" binding:"required"`
+}
+
+// PlaceBid adds a new bid to an auction
+func (h *AuctionHandlers) PlaceBid(c *gin.Context) <span class="cov0" title="0">{
+        auctionID := c.Param("id")
+        if auctionID == "" </span><span class="cov0" title="0">{
+                h.logger.Printf("Auction ID is required")
+                c.JSON(http.StatusBadRequest, gin.H{"error": "Auction ID is required"})
+                return
+        }</span>
+
+        // Parse request body
+        <span class="cov0" title="0">var req PlaceBidRequest
+        if err := c.ShouldBindJSON(&amp;req); err != nil </span><span class="cov0" title="0">{
+                h.logger.Printf("Error binding JSON: %v", err)
+                c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
+                return
+        }</span>
+
+        <span class="cov0" title="0">h.logger.Printf("Received bid for auction %s from bidder %s for amount %d",
+                auctionID, req.BidderID, req.Amount)
+
+        // Get the auction
+        auction, err := h.db.GetAuction(auctionID)
+        if err != nil </span><span class="cov0" title="0">{
+                h.logger.Printf("Error getting auction: %v", err)
+                c.JSON(http.StatusNotFound, gin.H{"error": "Auction not found"})
+                return
+        }</span>
+
+        // Check if auction is in progress
+        <span class="cov0" title="0">if auction.AuctionStatus != "inProgress" </span><span class="cov0" title="0">{
+                h.logger.Printf("Cannot place bid: auction is not in progress")
+                c.JSON(http.StatusBadRequest, gin.H{"error": "Auction is not in progress"})
+                return
+        }</span>
+
+        // Check if bidder exists in the auction
+        <span class="cov0" title="0">var bidderName string
+        bidderExists := false
+        for _, bidder := range auction.Bidders </span><span class="cov0" title="0">{
+                if bidder.ID == req.BidderID </span><span class="cov0" title="0">{
+                        bidderExists = true
+                        bidderName = bidder.Name
+                        break</span>
+                }
+        }
+
+        <span class="cov0" title="0">if !bidderExists </span><span class="cov0" title="0">{
+                h.logger.Printf("Bidder %s not found in auction", req.BidderID)
+                c.JSON(http.StatusBadRequest, gin.H{"error": "Bidder not found in this auction"})
+                return
+        }</span>
+
+        // Validate bid amount (must be higher than current highest bid and follow price step)
+        <span class="cov0" title="0">minBidAmount := auction.HighestBid
+        if minBidAmount == 0 </span><span class="cov0" title="0">{
+                minBidAmount = auction.StartingPrice
+        }</span> else<span class="cov0" title="0"> {
+                minBidAmount += auction.PriceStep
+        }</span>
+
+        <span class="cov0" title="0">if req.Amount &lt; minBidAmount </span><span class="cov0" title="0">{
+                h.logger.Printf("Bid amount %d is too low. Minimum bid: %d", req.Amount, minBidAmount)
+                c.JSON(http.StatusBadRequest, gin.H{
+                        "error": fmt.Sprintf("Bid amount must be at least %d", minBidAmount),
+                })
+                return
+        }</span>
+
+        // Create new bid
+        <span class="cov0" title="0">newBid := models.Bid{
+                Round:      auction.CurrentRound,
+                BidderID:   req.BidderID,
+                BidderName: bidderName,
+                Amount:     req.Amount,
+                Timestamp:  time.Now(),
+        }
+
+        // Add bid to history
+        auction.BidHistory = append(auction.BidHistory, newBid)
+
+        // Update highest bid
+        auction.HighestBid = req.Amount
+        auction.HighestBidder = req.BidderID
+
+        // Save updated auction
+        if err := h.db.UpdateAuction(auctionID, auction); err != nil </span><span class="cov0" title="0">{
+                h.logger.Printf("Error updating auction: %v", err)
+                c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to place bid"})
+                return
+        }</span>
+
+        <span class="cov0" title="0">h.logger.Printf("Bid placed successfully for auction %s: %+v", auctionID, newBid)
+        c.JSON(http.StatusOK, gin.H{
+                "message": "Bid placed successfully",
+                "data": newBid,
+        })</span>
+}
+
+// GetCurrentBids returns the current bids for an auction
+func (h *AuctionHandlers) GetCurrentBids(c *gin.Context) <span class="cov0" title="0">{
+        auctionID := c.Param("id")
+        if auctionID == "" </span><span class="cov0" title="0">{
+                h.logger.Printf("Auction ID is required")
+                c.JSON(http.StatusBadRequest, gin.H{"error": "Auction ID is required"})
+                return
+        }</span>
+
+        <span class="cov0" title="0">h.logger.Printf("Getting current bids for auction: %s", auctionID)
+
+        // Get the auction
+        auction, err := h.db.GetAuction(auctionID)
+        if err != nil </span><span class="cov0" title="0">{
+                h.logger.Printf("Error getting auction: %v", err)
+                c.JSON(http.StatusNotFound, gin.H{"error": "Auction not found"})
+                return
+        }</span>
+
+        // Get the latest bid from each bidder
+        <span class="cov0" title="0">latestBids := make(map[string]models.Bid)
+        for _, bid := range auction.BidHistory </span><span class="cov0" title="0">{
+                existingBid, exists := latestBids[bid.BidderID]
+                if !exists || bid.Timestamp.After(existingBid.Timestamp) </span><span class="cov0" title="0">{
+                        latestBids[bid.BidderID] = bid
+                }</span>
+        }
+
+        // Convert map to slice
+        <span class="cov0" title="0">var currentBids []models.Bid
+        for _, bid := range latestBids </span><span class="cov0" title="0">{
+                currentBids = append(currentBids, bid)
+        }</span>
+
+        <span class="cov0" title="0">h.logger.Printf("Retrieved %d current bids for auction %s", len(currentBids), auctionID)
+        c.JSON(http.StatusOK, gin.H{
+                "data": currentBids,
+                "highestBid": auction.HighestBid,
+                "highestBidder": auction.HighestBidder,
+                "currentRound": auction.CurrentRound,
+        })</span>
+}
+
+// GetAuctionHistory returns the complete bid history for an auction
+func (h *AuctionHandlers) GetAuctionHistory(c *gin.Context) <span class="cov0" title="0">{
+        auctionID := c.Param("id")
+        if auctionID == "" </span><span class="cov0" title="0">{
+                h.logger.Printf("Auction ID is required")
+                c.JSON(http.StatusBadRequest, gin.H{"error": "Auction ID is required"})
+                return
+        }</span>
+
+        <span class="cov0" title="0">h.logger.Printf("Getting bid history for auction: %s", auctionID)
+
+        // Get the auction
+        auction, err := h.db.GetAuction(auctionID)
+        if err != nil </span><span class="cov0" title="0">{
+                h.logger.Printf("Error getting auction: %v", err)
+                c.JSON(http.StatusNotFound, gin.H{"error": "Auction not found"})
+                return
+        }</span>
+
+        // Sort bids by timestamp (newest first)
+        <span class="cov0" title="0">bidHistory := auction.BidHistory
+
+        h.logger.Printf("Retrieved %d bids from history for auction %s", len(bidHistory), auctionID)
+        c.JSON(http.StatusOK, gin.H{
+                "data": bidHistory,
+                "auctionStatus": auction.AuctionStatus,
+                "currentRound": auction.CurrentRound,
+        })</span>
 }
 </pre>
 		
@@ -1374,9 +1552,14 @@ func (a *App) Initialize() error <span class="cov0" title="0">{
                 api.POST("/auctions", auctionHandlers.CreateAuction)
                 api.GET("/auctions", auctionHandlers.GetAllAuctions)
                 api.GET("/auctions/:id", auctionHandlers.GetAuction)
-                api.GET("/auction/export/:id", auctionHandlers.ExportAuctionData)
+                api.GET("/auctions/export/:id", auctionHandlers.ExportAuctionData)
                 api.PUT("/auctions/:id/start", auctionHandlers.StartAuction)
                 api.PUT("/auctions/:id/end", auctionHandlers.EndAuction)
+
+                // Bidding operations
+                api.POST("/auctions/:id/bids", auctionHandlers.PlaceBid)
+                api.GET("/auctions/:id/bids/current", auctionHandlers.GetCurrentBids)
+                api.GET("/auctions/:id/bids/history", auctionHandlers.GetAuctionHistory)
 
                 // Bidder routes
                 api.GET("/bidders", bidderHandlers.GetBidders)
@@ -1472,7 +1655,7 @@ func (m *MockDatabase) GetAllAuctions() (map[string]*models.Auction, error) <spa
 // GetAuction retrieves a specific auction by ID
 func (m *MockDatabase) GetAuction(id string) (*models.Auction, error) <span class="cov8" title="1">{
         args := m.Called(id)
-        if args.Get(0) == nil </span><span class="cov0" title="0">{
+        if args.Get(0) == nil </span><span class="cov8" title="1">{
                 return nil, args.Error(1)
         }</span>
         <span class="cov8" title="1">return args.Get(0).(*models.Auction), args.Error(1)</span>

@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"auction/common"
 	"auction/internal/models"
 )
 
@@ -314,7 +315,7 @@ func (t *TinyDB) ExportAuctionData(id string) (*models.ExportData, error) {
 	}
 
 	// Check if auction is completed
-	if auction.AuctionStatus != "completed" {
+	if auction.AuctionStatus != common.Completed {
 		return nil, fmt.Errorf("cannot export data for auction that is not completed")
 	}
 
