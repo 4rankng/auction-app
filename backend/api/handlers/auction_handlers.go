@@ -193,3 +193,84 @@ func (h *AuctionHandlers) ExportAuctionData(c *gin.Context) {
 	h.logger.Printf("Successfully exported data for auction: %s", auctionID)
 	c.JSON(http.StatusOK, gin.H{"data": exportData})
 }
+
+// StartAuction starts an auction by changing its status to inProgress
+func (h *AuctionHandlers) StartAuction(c *gin.Context) {
+	auctionID := c.Param("id")
+	if auctionID == "" {
+		h.logger.Printf("Auction ID is required")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Auction ID is required"})
+		return
+	}
+
+	h.logger.Printf("Starting auction with ID: %s", auctionID)
+
+	// Get the auction
+	auction, err := h.db.GetAuction(auctionID)
+	if err != nil {
+		h.logger.Printf("Error getting auction: %v", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Auction not found"})
+		return
+	}
+
+	// Check if the auction is already started
+	if auction.AuctionStatus != "notStarted" {
+		h.logger.Printf("Cannot start auction: already in progress or completed")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Auction is already in progress or completed"})
+		return
+	}
+
+	// Update auction status to inProgress
+	auction.AuctionStatus = "inProgress"
+	auction.CurrentRound = 1
+
+	// Save the updated auction
+	if err := h.db.UpdateAuction(auctionID, auction); err != nil {
+		h.logger.Printf("Error updating auction: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start auction"})
+		return
+	}
+
+	h.logger.Printf("Auction started successfully: %s", auctionID)
+	c.JSON(http.StatusOK, gin.H{"message": "Auction started successfully"})
+}
+
+// EndAuction ends an auction by changing its status to completed
+func (h *AuctionHandlers) EndAuction(c *gin.Context) {
+	auctionID := c.Param("id")
+	if auctionID == "" {
+		h.logger.Printf("Auction ID is required")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Auction ID is required"})
+		return
+	}
+
+	h.logger.Printf("Ending auction with ID: %s", auctionID)
+
+	// Get the auction
+	auction, err := h.db.GetAuction(auctionID)
+	if err != nil {
+		h.logger.Printf("Error getting auction: %v", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Auction not found"})
+		return
+	}
+
+	// Check if the auction is in progress
+	if auction.AuctionStatus != "inProgress" {
+		h.logger.Printf("Cannot end auction: not in progress")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Auction is not in progress"})
+		return
+	}
+
+	// Update auction status to completed
+	auction.AuctionStatus = "completed"
+
+	// Save the updated auction
+	if err := h.db.UpdateAuction(auctionID, auction); err != nil {
+		h.logger.Printf("Error updating auction: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to end auction"})
+		return
+	}
+
+	h.logger.Printf("Auction ended successfully: %s", auctionID)
+	c.JSON(http.StatusOK, gin.H{"message": "Auction ended successfully"})
+}

@@ -492,3 +492,260 @@ func TestExportAuctionData(t *testing.T) {
 		assert.Contains(t, response["error"], "not completed")
 	})
 }
+
+// TestStartAuction tests the handler for starting an auction
+func TestStartAuction(t *testing.T) {
+	t.Run("Start an auction", func(t *testing.T) {
+		// Setup
+		router, mockDB := setupTestRouter()
+
+		// Add the start auction route to the router
+		logger := log.New(os.Stdout, "[TEST] ", log.LstdFlags)
+		auctionHandlers := NewAuctionHandlers(mockDB, logger)
+		router.PUT("/api/v1/auctions/:id/start", auctionHandlers.StartAuction)
+
+		// Create a test auction with "notStarted" status
+		auctionID := "test-auction-start"
+		auction := &models.Auction{
+			ID:            auctionID,
+			Title:         "Test Auction",
+			CreatedAt:     time.Now(),
+			StartingPrice: 100,
+			PriceStep:     10,
+			Bidders:       []models.Bidder{},
+			BidHistory:    []models.Bid{},
+			CurrentRound:  0,
+			HighestBid:    0,
+			HighestBidder: "",
+			AuctionStatus: "notStarted",
+		}
+
+		// Add auction to the mock database
+		err := mockDB.CreateAuction(auction)
+		require.NoError(t, err)
+
+		// Make the request
+		req, _ := http.NewRequest("PUT", "/api/v1/auctions/"+auctionID+"/start", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Assertions
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var response map[string]interface{}
+		err = json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+
+		assert.Contains(t, response, "message")
+		assert.Contains(t, response["message"], "started")
+
+		// Check that the auction status was updated
+		updatedAuction, err := mockDB.GetAuction(auctionID)
+		assert.NoError(t, err)
+		assert.Equal(t, "inProgress", updatedAuction.AuctionStatus)
+		assert.Equal(t, 1, updatedAuction.CurrentRound)
+	})
+
+	t.Run("Auction already started", func(t *testing.T) {
+		// Setup
+		router, mockDB := setupTestRouter()
+
+		// Add the start auction route to the router
+		logger := log.New(os.Stdout, "[TEST] ", log.LstdFlags)
+		auctionHandlers := NewAuctionHandlers(mockDB, logger)
+		router.PUT("/api/v1/auctions/:id/start", auctionHandlers.StartAuction)
+
+		// Create a test auction with "inProgress" status
+		auctionID := "test-auction-inprogress"
+		auction := &models.Auction{
+			ID:            auctionID,
+			Title:         "Test Auction",
+			CreatedAt:     time.Now(),
+			StartingPrice: 100,
+			PriceStep:     10,
+			Bidders:       []models.Bidder{},
+			BidHistory:    []models.Bid{},
+			CurrentRound:  1,
+			HighestBid:    0,
+			HighestBidder: "",
+			AuctionStatus: "inProgress", // already started
+		}
+
+		// Add auction to the mock database
+		err := mockDB.CreateAuction(auction)
+		require.NoError(t, err)
+
+		// Make the request
+		req, _ := http.NewRequest("PUT", "/api/v1/auctions/"+auctionID+"/start", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Assertions
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		var response map[string]interface{}
+		err = json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+
+		assert.Contains(t, response, "error")
+		assert.Contains(t, response["error"].(string), "already")
+	})
+
+	t.Run("Auction not found", func(t *testing.T) {
+		// Setup
+		router, mockDB := setupTestRouter()
+
+		// Add the start auction route to the router
+		logger := log.New(os.Stdout, "[TEST] ", log.LstdFlags)
+		auctionHandlers := NewAuctionHandlers(mockDB, logger)
+		router.PUT("/api/v1/auctions/:id/start", auctionHandlers.StartAuction)
+
+		// Make the request for a non-existent auction
+		req, _ := http.NewRequest("PUT", "/api/v1/auctions/nonexistent-auction/start", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Assertions
+		assert.Equal(t, http.StatusNotFound, w.Code)
+
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+
+		assert.Contains(t, response, "error")
+		assert.Contains(t, response["error"].(string), "not found")
+	})
+}
+
+// TestEndAuction tests the handler for ending an auction
+func TestEndAuction(t *testing.T) {
+	t.Run("End an auction", func(t *testing.T) {
+		// Setup
+		router, mockDB := setupTestRouter()
+
+		// Add the end auction route to the router
+		logger := log.New(os.Stdout, "[TEST] ", log.LstdFlags)
+		auctionHandlers := NewAuctionHandlers(mockDB, logger)
+		router.PUT("/api/v1/auctions/:id/end", auctionHandlers.EndAuction)
+
+		// Create a test auction with "inProgress" status
+		auctionID := "test-auction-end"
+		auction := &models.Auction{
+			ID:            auctionID,
+			Title:         "Test Auction",
+			CreatedAt:     time.Now(),
+			StartingPrice: 100,
+			PriceStep:     10,
+			Bidders: []models.Bidder{
+				{ID: "bidder1", Name: "Bidder 1", Address: "Address 1"},
+			},
+			BidHistory: []models.Bid{
+				{
+					Round:      1,
+					BidderID:   "bidder1",
+					BidderName: "Bidder 1",
+					Amount:     120,
+					Timestamp:  time.Now(),
+				},
+			},
+			CurrentRound:  1,
+			HighestBid:    120,
+			HighestBidder: "bidder1",
+			AuctionStatus: "inProgress",
+		}
+
+		// Add auction to the mock database
+		err := mockDB.CreateAuction(auction)
+		require.NoError(t, err)
+
+		// Make the request
+		req, _ := http.NewRequest("PUT", "/api/v1/auctions/"+auctionID+"/end", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Assertions
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var response map[string]interface{}
+		err = json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+
+		assert.Contains(t, response, "message")
+		assert.Contains(t, response["message"], "ended")
+
+		// Check that the auction status was updated
+		updatedAuction, err := mockDB.GetAuction(auctionID)
+		assert.NoError(t, err)
+		assert.Equal(t, "completed", updatedAuction.AuctionStatus)
+	})
+
+	t.Run("Auction not in progress", func(t *testing.T) {
+		// Setup
+		router, mockDB := setupTestRouter()
+
+		// Add the end auction route to the router
+		logger := log.New(os.Stdout, "[TEST] ", log.LstdFlags)
+		auctionHandlers := NewAuctionHandlers(mockDB, logger)
+		router.PUT("/api/v1/auctions/:id/end", auctionHandlers.EndAuction)
+
+		// Create a test auction with "notStarted" status
+		auctionID := "test-auction-notstarted"
+		auction := &models.Auction{
+			ID:            auctionID,
+			Title:         "Test Auction",
+			CreatedAt:     time.Now(),
+			StartingPrice: 100,
+			PriceStep:     10,
+			Bidders:       []models.Bidder{},
+			BidHistory:    []models.Bid{},
+			CurrentRound:  0,
+			HighestBid:    0,
+			HighestBidder: "",
+			AuctionStatus: "notStarted", // not started
+		}
+
+		// Add auction to the mock database
+		err := mockDB.CreateAuction(auction)
+		require.NoError(t, err)
+
+		// Make the request
+		req, _ := http.NewRequest("PUT", "/api/v1/auctions/"+auctionID+"/end", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Assertions
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		var response map[string]interface{}
+		err = json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+
+		assert.Contains(t, response, "error")
+		assert.Contains(t, response["error"].(string), "not in progress")
+	})
+
+	t.Run("Auction not found", func(t *testing.T) {
+		// Setup
+		router, mockDB := setupTestRouter()
+
+		// Add the end auction route to the router
+		logger := log.New(os.Stdout, "[TEST] ", log.LstdFlags)
+		auctionHandlers := NewAuctionHandlers(mockDB, logger)
+		router.PUT("/api/v1/auctions/:id/end", auctionHandlers.EndAuction)
+
+		// Make the request for a non-existent auction
+		req, _ := http.NewRequest("PUT", "/api/v1/auctions/nonexistent-auction/end", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Assertions
+		assert.Equal(t, http.StatusNotFound, w.Code)
+
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+
+		assert.Contains(t, response, "error")
+		assert.Contains(t, response["error"].(string), "not found")
+	})
+}

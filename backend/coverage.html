@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">auction/api/handlers/auction_handlers.go (77.4%)</option>
+				<option value="file0">auction/api/handlers/auction_handlers.go (75.5%)</option>
 				
 				<option value="file1">auction/api/handlers/bidder_handlers.go (47.7%)</option>
 				
@@ -67,11 +67,13 @@
 				
 				<option value="file5">auction/internal/database/tiny_db.go (77.2%)</option>
 				
-				<option value="file6">auction/internal/services/excel_service.go (78.8%)</option>
+				<option value="file6">auction/internal/models/errors.go (0.0%)</option>
 				
-				<option value="file7">auction/main.go (0.0%)</option>
+				<option value="file7">auction/internal/services/excel_service.go (78.8%)</option>
 				
-				<option value="file8">auction/tests/mock_database.go (26.7%)</option>
+				<option value="file8">auction/main.go (0.0%)</option>
+				
+				<option value="file9">auction/tests/mock_database.go (56.7%)</option>
 				
 				</select>
 			</div>
@@ -279,6 +281,87 @@ func (h *AuctionHandlers) ExportAuctionData(c *gin.Context) <span class="cov8" t
 
         <span class="cov8" title="1">h.logger.Printf("Successfully exported data for auction: %s", auctionID)
         c.JSON(http.StatusOK, gin.H{"data": exportData})</span>
+}
+
+// StartAuction starts an auction by changing its status to inProgress
+func (h *AuctionHandlers) StartAuction(c *gin.Context) <span class="cov8" title="1">{
+        auctionID := c.Param("id")
+        if auctionID == "" </span><span class="cov0" title="0">{
+                h.logger.Printf("Auction ID is required")
+                c.JSON(http.StatusBadRequest, gin.H{"error": "Auction ID is required"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">h.logger.Printf("Starting auction with ID: %s", auctionID)
+
+        // Get the auction
+        auction, err := h.db.GetAuction(auctionID)
+        if err != nil </span><span class="cov8" title="1">{
+                h.logger.Printf("Error getting auction: %v", err)
+                c.JSON(http.StatusNotFound, gin.H{"error": "Auction not found"})
+                return
+        }</span>
+
+        // Check if the auction is already started
+        <span class="cov8" title="1">if auction.AuctionStatus != "notStarted" </span><span class="cov8" title="1">{
+                h.logger.Printf("Cannot start auction: already in progress or completed")
+                c.JSON(http.StatusBadRequest, gin.H{"error": "Auction is already in progress or completed"})
+                return
+        }</span>
+
+        // Update auction status to inProgress
+        <span class="cov8" title="1">auction.AuctionStatus = "inProgress"
+        auction.CurrentRound = 1
+
+        // Save the updated auction
+        if err := h.db.UpdateAuction(auctionID, auction); err != nil </span><span class="cov0" title="0">{
+                h.logger.Printf("Error updating auction: %v", err)
+                c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start auction"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">h.logger.Printf("Auction started successfully: %s", auctionID)
+        c.JSON(http.StatusOK, gin.H{"message": "Auction started successfully"})</span>
+}
+
+// EndAuction ends an auction by changing its status to completed
+func (h *AuctionHandlers) EndAuction(c *gin.Context) <span class="cov8" title="1">{
+        auctionID := c.Param("id")
+        if auctionID == "" </span><span class="cov0" title="0">{
+                h.logger.Printf("Auction ID is required")
+                c.JSON(http.StatusBadRequest, gin.H{"error": "Auction ID is required"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">h.logger.Printf("Ending auction with ID: %s", auctionID)
+
+        // Get the auction
+        auction, err := h.db.GetAuction(auctionID)
+        if err != nil </span><span class="cov8" title="1">{
+                h.logger.Printf("Error getting auction: %v", err)
+                c.JSON(http.StatusNotFound, gin.H{"error": "Auction not found"})
+                return
+        }</span>
+
+        // Check if the auction is in progress
+        <span class="cov8" title="1">if auction.AuctionStatus != "inProgress" </span><span class="cov8" title="1">{
+                h.logger.Printf("Cannot end auction: not in progress")
+                c.JSON(http.StatusBadRequest, gin.H{"error": "Auction is not in progress"})
+                return
+        }</span>
+
+        // Update auction status to completed
+        <span class="cov8" title="1">auction.AuctionStatus = "completed"
+
+        // Save the updated auction
+        if err := h.db.UpdateAuction(auctionID, auction); err != nil </span><span class="cov0" title="0">{
+                h.logger.Printf("Error updating auction: %v", err)
+                c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to end auction"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">h.logger.Printf("Auction ended successfully: %s", auctionID)
+        c.JSON(http.StatusOK, gin.H{"message": "Auction ended successfully"})</span>
 }
 </pre>
 		
@@ -1045,7 +1128,50 @@ func (t *TinyDB) ExportAuctionData(id string) (*models.ExportData, error) <span 
 var _ Database = (*TinyDB)(nil)
 </pre>
 		
-		<pre class="file" id="file6" style="display: none">package services
+		<pre class="file" id="file6" style="display: none">package models
+
+// ErrorNotFound represents an error when a resource is not found
+type ErrorNotFound struct {
+        Message string
+}
+
+// Error returns the error message
+func (e *ErrorNotFound) Error() string <span class="cov0" title="0">{
+        return e.Message
+}</span>
+
+// ErrorValidation represents an error during validation
+type ErrorValidation struct {
+        Message string
+}
+
+// Error returns the error message
+func (e *ErrorValidation) Error() string <span class="cov0" title="0">{
+        return e.Message
+}</span>
+
+// ErrorDuplicate represents an error when a duplicate resource is detected
+type ErrorDuplicate struct {
+        Message string
+}
+
+// Error returns the error message
+func (e *ErrorDuplicate) Error() string <span class="cov0" title="0">{
+        return e.Message
+}</span>
+
+// ErrorDatabase represents a general database error
+type ErrorDatabase struct {
+        Message string
+}
+
+// Error returns the error message
+func (e *ErrorDatabase) Error() string <span class="cov0" title="0">{
+        return e.Message
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package services
 
 import (
         "fmt"
@@ -1170,7 +1296,7 @@ func (s *excelService) ProcessExcelFile(file io.Reader) ([]models.Bidder, error)
 }
 </pre>
 		
-		<pre class="file" id="file7" style="display: none">package main
+		<pre class="file" id="file8" style="display: none">package main
 
 import (
         "log"
@@ -1249,6 +1375,8 @@ func (a *App) Initialize() error <span class="cov0" title="0">{
                 api.GET("/auctions", auctionHandlers.GetAllAuctions)
                 api.GET("/auctions/:id", auctionHandlers.GetAuction)
                 api.GET("/auction/export/:id", auctionHandlers.ExportAuctionData)
+                api.PUT("/auctions/:id/start", auctionHandlers.StartAuction)
+                api.PUT("/auctions/:id/end", auctionHandlers.EndAuction)
 
                 // Bidder routes
                 api.GET("/bidders", bidderHandlers.GetBidders)
@@ -1286,7 +1414,7 @@ func main() <span class="cov0" title="0">{
 }
 </pre>
 		
-		<pre class="file" id="file8" style="display: none">package tests
+		<pre class="file" id="file9" style="display: none">package tests
 
 import (
         "github.com/stretchr/testify/mock"
@@ -1294,30 +1422,30 @@ import (
         "auction/internal/models"
 )
 
-// MockDatabase is a mock implementation of the database.Database interface
+// MockDatabase is a mock implementation of database.Database
 type MockDatabase struct {
         mock.Mock
 }
 
-// Initialize mocks the Initialize method
+// Initialize implements the Initialize method of the Database interface
 func (m *MockDatabase) Initialize() error <span class="cov0" title="0">{
         args := m.Called()
         return args.Error(0)
 }</span>
 
-// Close mocks the Close method
+// Close implements the Close method of the Database interface
 func (m *MockDatabase) Close() error <span class="cov0" title="0">{
         args := m.Called()
         return args.Error(0)
 }</span>
 
-// SaveData mocks the SaveData method
+// SaveData implements the SaveData method of the Database interface
 func (m *MockDatabase) SaveData() error <span class="cov8" title="1">{
         args := m.Called()
         return args.Error(0)
 }</span>
 
-// GetBidders mocks the GetBidders method
+// GetBidders retrieves bidders from the database
 func (m *MockDatabase) GetBidders() ([]models.Bidder, error) <span class="cov8" title="1">{
         args := m.Called()
         if args.Get(0) == nil </span><span class="cov8" title="1">{
@@ -1326,13 +1454,13 @@ func (m *MockDatabase) GetBidders() ([]models.Bidder, error) <span class="cov8" 
         <span class="cov8" title="1">return args.Get(0).([]models.Bidder), args.Error(1)</span>
 }
 
-// SetBidders mocks the SetBidders method
+// SetBidders updates bidders in the database
 func (m *MockDatabase) SetBidders(bidders []models.Bidder) error <span class="cov8" title="1">{
         args := m.Called(bidders)
         return args.Error(0)
 }</span>
 
-// GetAllAuctions mocks the GetAllAuctions method
+// GetAllAuctions retrieves all auctions from the database
 func (m *MockDatabase) GetAllAuctions() (map[string]*models.Auction, error) <span class="cov0" title="0">{
         args := m.Called()
         if args.Get(0) == nil </span><span class="cov0" title="0">{
@@ -1341,40 +1469,40 @@ func (m *MockDatabase) GetAllAuctions() (map[string]*models.Auction, error) <spa
         <span class="cov0" title="0">return args.Get(0).(map[string]*models.Auction), args.Error(1)</span>
 }
 
-// GetAuction mocks the GetAuction method
-func (m *MockDatabase) GetAuction(auctionID string) (*models.Auction, error) <span class="cov0" title="0">{
-        args := m.Called(auctionID)
+// GetAuction retrieves a specific auction by ID
+func (m *MockDatabase) GetAuction(id string) (*models.Auction, error) <span class="cov8" title="1">{
+        args := m.Called(id)
         if args.Get(0) == nil </span><span class="cov0" title="0">{
                 return nil, args.Error(1)
         }</span>
-        <span class="cov0" title="0">return args.Get(0).(*models.Auction), args.Error(1)</span>
+        <span class="cov8" title="1">return args.Get(0).(*models.Auction), args.Error(1)</span>
 }
 
-// CreateAuction mocks the CreateAuction method
+// CreateAuction creates a new auction
 func (m *MockDatabase) CreateAuction(auction *models.Auction) error <span class="cov0" title="0">{
         args := m.Called(auction)
         return args.Error(0)
 }</span>
 
-// UpdateAuction mocks the UpdateAuction method
-func (m *MockDatabase) UpdateAuction(auctionID string, auction *models.Auction) error <span class="cov0" title="0">{
-        args := m.Called(auctionID, auction)
+// UpdateAuction updates an existing auction
+func (m *MockDatabase) UpdateAuction(id string, auction *models.Auction) error <span class="cov8" title="1">{
+        args := m.Called(id, auction)
         return args.Error(0)
 }</span>
 
-// DeleteAuction mocks the DeleteAuction method
-func (m *MockDatabase) DeleteAuction(auctionID string) error <span class="cov0" title="0">{
-        args := m.Called(auctionID)
+// DeleteAuction deletes an auction
+func (m *MockDatabase) DeleteAuction(id string) error <span class="cov0" title="0">{
+        args := m.Called(id)
         return args.Error(0)
 }</span>
 
-// ExportAuctionData mocks the ExportAuctionData method
-func (m *MockDatabase) ExportAuctionData(auctionID string) (*models.ExportData, error) <span class="cov0" title="0">{
-        args := m.Called(auctionID)
-        if args.Get(0) == nil </span><span class="cov0" title="0">{
+// ExportAuctionData exports auction data
+func (m *MockDatabase) ExportAuctionData(id string) (*models.ExportData, error) <span class="cov8" title="1">{
+        args := m.Called(id)
+        if args.Get(0) == nil </span><span class="cov8" title="1">{
                 return nil, args.Error(1)
         }</span>
-        <span class="cov0" title="0">return args.Get(0).(*models.ExportData), args.Error(1)</span>
+        <span class="cov8" title="1">return args.Get(0).(*models.ExportData), args.Error(1)</span>
 }
 </pre>
 		
