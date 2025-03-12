@@ -1,13 +1,11 @@
 package handlers
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -50,7 +48,7 @@ func (h *BidderHandlers) GetBidders(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": bidders,
+		"data":  bidders,
 		"count": len(bidders),
 	})
 }
@@ -193,7 +191,7 @@ func (h *BidderHandlers) UploadExcelFile(c *gin.Context) {
 
 	h.logger.Printf("File uploaded: %s, size: %d bytes", header.Filename, header.Size)
 
-	// Step 1: Process Excel file to get list of bidders
+	// Process Excel file to get list of bidders
 	bidders, err := h.excelService.ProcessExcelFile(file)
 	if err != nil {
 		h.logger.Printf("Error processing Excel file: %v", err)
@@ -209,45 +207,12 @@ func (h *BidderHandlers) UploadExcelFile(c *gin.Context) {
 
 	h.logger.Printf("Parsed %d bidders from Excel file", len(bidders))
 
-	// Step 2: Initiate goroutine to save the list of bidders in db
-	go func() {
-		// Use a context with timeout for database operations
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		// Set bidders with timeout check
-		select {
-		case <-ctx.Done():
-			h.logger.Printf("Database set operation timed out")
-			return
-		default:
-			if err := h.db.SetBidders(bidders); err != nil {
-				h.logger.Printf("Error setting bidders: %v", err)
-				return
-			}
-		}
-
-		// Save data with timeout check
-		select {
-		case <-ctx.Done():
-			h.logger.Printf("Database save operation timed out")
-			return
-		default:
-			if err := h.db.SaveData(); err != nil {
-				h.logger.Printf("Error saving data: %v", err)
-				return
-			}
-		}
-
-		h.logger.Printf("Successfully saved %d bidders to database", len(bidders))
-	}()
-
-	// Step 3: Include bidders into JSON response and return to client immediately
+	// Return the parsed bidders directly to the client
 	h.logger.Printf("Returning response with %d entries", len(bidders))
 	c.JSON(http.StatusOK, gin.H{
 		"message": "File processed successfully",
-		"data": bidders,
-		"count": len(bidders),
+		"data":    bidders,
+		"count":   len(bidders),
 	})
 }
 
@@ -278,6 +243,6 @@ func (h *BidderHandlers) SetBidders(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Bidders set successfully",
-		"data": request.Bidders,
+		"data":    request.Bidders,
 	})
 }

@@ -651,7 +651,7 @@ async function handleStartAuction() {
                                 showToast("Phiên đấu giá đã đang diễn ra. Đang chuyển hướng...", "info");
 
                                 // Build the full URL properly using the base URL
-                                const targetPage = config.pages.auction;
+                                const targetPage = config.pages.bid;
                                 const fullUrl = new URL(targetPage, window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1));
 
                                 console.log('Target page:', targetPage);
@@ -677,7 +677,7 @@ async function handleStartAuction() {
                                 showToast("Phiên đấu giá đã đang diễn ra. Đang chuyển hướng...", "info");
 
                                 // Build the full URL properly using the base URL
-                                const targetPage = config.pages.auction;
+                                const targetPage = config.pages.bid;
                                 const fullUrl = new URL(targetPage, window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1));
 
                                 console.log('Target page:', targetPage);
@@ -705,7 +705,7 @@ async function handleStartAuction() {
             showToast("Đấu giá đã bắt đầu thành công!", "success");
 
             // Build the full URL properly using the base URL
-            const targetPage = config.pages.auction;
+            const targetPage = config.pages.bid;
             const fullUrl = new URL(targetPage, window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1));
 
             console.log('Target page:', targetPage);

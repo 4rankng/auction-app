@@ -20,10 +20,10 @@ const config = {
 
     // Page URLs
     pages: {
-        setup: 'index.html',
-        auction: 'auction.html',
-        completed: 'completed.html',
-        debug: 'api-debug.html'
+        index: 'index.html',
+        setup: 'setup.html',
+        bid: 'bid.html',
+        result: 'result.html'
     },
 
     // Default settings

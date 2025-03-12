@@ -7,9 +7,9 @@ import (
 
 // Config holds all configuration settings
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-	CORS     CORSConfig
+	Server    ServerConfig
+	Database  DatabaseConfig
+	CORS      CORSConfig
 	RateLimit RateLimitConfig
 }
 
@@ -53,8 +53,8 @@ func LoadConfig() *Config {
 			AllowHeaders: []string{"Origin", "Content-Type"},
 		},
 		RateLimit: RateLimitConfig{
-			MaxRequests: 100,                // 100 requests
-			Period:      60 * time.Second,   // per minute
+			MaxRequests: 100,              // 100 requests
+			Period:      60 * time.Second, // per minute
 		},
 	}
 }

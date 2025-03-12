@@ -29,8 +29,8 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
-	// Initialize BadgerDB
-	db, err := database.NewBadgerDB(dataDir, logger)
+	// Initialize TinyDB (JSON file-based database)
+	db, err := database.NewTinyDB(dataDir, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -72,17 +72,11 @@ func (a *App) Initialize() error {
 	// Group API routes
 	api := a.router.Group("/api/v1")
 	{
-		// Auction routes
-		api.GET("/auction/settings", auctionHandlers.GetAuctionSettings)
-		api.PUT("/auction/settings", auctionHandlers.UpdateAuctionSettings)
-		api.GET("/auction/status", auctionHandlers.GetAuctionStatus)
-		api.POST("/auction/start", auctionHandlers.StartAuction)
-		api.POST("/auction/end", auctionHandlers.EndAuction)
-		api.POST("/auction/reset", auctionHandlers.ResetAuction)
-		api.POST("/auction/bid", auctionHandlers.PlaceBid)
-		api.POST("/auction/bid/cancel", auctionHandlers.CancelLastBid)
-		api.GET("/auction/history", auctionHandlers.GetBidHistory)
-		api.GET("/auction/history/complete", auctionHandlers.GetCompleteAuctionHistory)
+		// Multi-auction routes
+		api.POST("/auctions", auctionHandlers.CreateAuction)
+		api.GET("/auctions", auctionHandlers.GetAllAuctions)
+		api.GET("/auctions/:id", auctionHandlers.GetAuction)
+		api.GET("/auction/export/:id", auctionHandlers.ExportAuctionData)
 
 		// Bidder routes
 		api.GET("/bidders", bidderHandlers.GetBidders)
