@@ -13,7 +13,8 @@ import (
 
 // ExcelService defines the interface for Excel file processing
 type ExcelService interface {
-	ProcessExcelFile(file io.Reader) ([]models.Bidder, error)
+	GetBiddersFromExcelFile(file io.Reader) ([]models.Bidder, error)
+	GenerateAuctionReport(data *models.ExportData) ([]byte, error)
 }
 
 // excelService implements the ExcelService interface
@@ -28,8 +29,8 @@ func NewExcelService(logger *log.Logger) ExcelService {
 	}
 }
 
-// ProcessExcelFile processes an Excel file and extracts bidder information
-func (s *excelService) ProcessExcelFile(file io.Reader) ([]models.Bidder, error) {
+// GetBiddersFromExcelFile processes an Excel file and extracts bidder information
+func (s *excelService) GetBiddersFromExcelFile(file io.Reader) ([]models.Bidder, error) {
 	// Create a temporary file to store the uploaded Excel file
 	tempFile, err := os.CreateTemp("", "upload-*.xlsx")
 	if err != nil {
@@ -120,4 +121,70 @@ func (s *excelService) ProcessExcelFile(file io.Reader) ([]models.Bidder, error)
 
 	s.logger.Printf("Successfully processed %d bidders from Excel file", len(bidders))
 	return bidders, nil
+}
+
+// GenerateAuctionReport creates an Excel report from auction data
+func (s *excelService) GenerateAuctionReport(data *models.ExportData) ([]byte, error) {
+	s.logger.Printf("Generating Excel report for auction %s", data.AuctionID)
+
+	// Create a new Excel file
+	f := excelize.NewFile()
+	defer func() {
+		if err := f.Close(); err != nil {
+			s.logger.Printf("Error closing Excel file: %v", err)
+		}
+	}()
+
+	// Create auction info sheet
+	sheetName := "Auction Info"
+	f.NewSheet(sheetName)
+	f.DeleteSheet("Sheet1") // Delete default sheet
+
+	// Add auction details
+	f.SetCellValue(sheetName, "A1", "Auction ID")
+	f.SetCellValue(sheetName, "B1", data.AuctionID)
+	f.SetCellValue(sheetName, "A2", "Title")
+	f.SetCellValue(sheetName, "B2", data.Title)
+	f.SetCellValue(sheetName, "A3", "Starting Price")
+	f.SetCellValue(sheetName, "B3", data.StartingPrice)
+	f.SetCellValue(sheetName, "A4", "Price Step")
+	f.SetCellValue(sheetName, "B4", data.PriceStep)
+	f.SetCellValue(sheetName, "A5", "Total Bids")
+	f.SetCellValue(sheetName, "B5", data.TotalBids)
+	f.SetCellValue(sheetName, "A6", "Winner ID")
+	f.SetCellValue(sheetName, "B6", data.WinnerID)
+	f.SetCellValue(sheetName, "A7", "Winner Name")
+	f.SetCellValue(sheetName, "B7", data.WinnerName)
+	f.SetCellValue(sheetName, "A8", "Winning Bid")
+	f.SetCellValue(sheetName, "B8", data.WinningBid)
+	f.SetCellValue(sheetName, "A9", "End Time")
+	f.SetCellValue(sheetName, "B9", data.EndTime.Format("2006-01-02 15:04:05"))
+
+	// Add bids sheet
+	bidsSheet := "Bid History"
+	f.NewSheet(bidsSheet)
+	f.SetCellValue(bidsSheet, "A1", "Round")
+	f.SetCellValue(bidsSheet, "B1", "Bidder ID")
+	f.SetCellValue(bidsSheet, "C1", "Bidder Name")
+	f.SetCellValue(bidsSheet, "D1", "Amount")
+	f.SetCellValue(bidsSheet, "E1", "Timestamp")
+
+	for i, bid := range data.BidHistory {
+		row := i + 2 // Start from row 2
+		f.SetCellValue(bidsSheet, fmt.Sprintf("A%d", row), bid.Round)
+		f.SetCellValue(bidsSheet, fmt.Sprintf("B%d", row), bid.BidderID)
+		f.SetCellValue(bidsSheet, fmt.Sprintf("C%d", row), bid.BidderName)
+		f.SetCellValue(bidsSheet, fmt.Sprintf("D%d", row), bid.Amount)
+		f.SetCellValue(bidsSheet, fmt.Sprintf("E%d", row), bid.Timestamp.Format("2006-01-02 15:04:05"))
+	}
+
+	// Save to buffer
+	buffer, err := f.WriteToBuffer()
+	if err != nil {
+		s.logger.Printf("Error writing Excel to buffer: %v", err)
+		return nil, fmt.Errorf("error writing Excel to buffer: %w", err)
+	}
+
+	s.logger.Printf("Successfully generated Excel report for auction %s", data.AuctionID)
+	return buffer.Bytes(), nil
 }

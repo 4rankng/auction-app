@@ -66,31 +66,30 @@ func (a *App) Initialize() error {
 	excelService := services.NewExcelService(a.logger)
 
 	// Create API handlers
-	auctionHandlers := handlers.NewAuctionHandlers(a.db, a.logger)
-	bidderHandlers := handlers.NewBidderHandlers(a.db, a.logger, excelService)
+	apiHandler := handlers.NewHandlers(a.db, a.logger, excelService)
 
 	// Group API routes
 	api := a.router.Group("/api/v1")
 	{
 		// Multi-auction routes
-		api.POST("/auctions", auctionHandlers.CreateAuction)
-		api.GET("/auctions", auctionHandlers.GetAllAuctions)
-		api.GET("/auctions/:id", auctionHandlers.GetAuction)
-		api.GET("/auctions/export/:id", auctionHandlers.ExportAuctionData)
-		api.PUT("/auctions/:id/start", auctionHandlers.StartAuction)
-		api.PUT("/auctions/:id/end", auctionHandlers.EndAuction)
+		api.POST("/auctions", apiHandler.CreateAuction)
+		api.GET("/auctions", apiHandler.GetAllAuctions)
+		api.GET("/auctions/:id", apiHandler.GetAuction)
+		api.GET("/auctions/export/:id", apiHandler.ExportAuctionData)
+		api.PUT("/auctions/:id/start", apiHandler.StartAuction)
+		api.PUT("/auctions/:id/end", apiHandler.EndAuction)
 
 		// Bidding operations
-		api.POST("/auctions/:id/bids", auctionHandlers.PlaceBid)
-		api.GET("/auctions/:id/bids/current", auctionHandlers.GetCurrentBids)
-		api.GET("/auctions/:id/bids/history", auctionHandlers.GetAuctionHistory)
+		api.POST("/auctions/:id/bids", apiHandler.PlaceBid)
+		api.GET("/auctions/:id/bids/current", apiHandler.GetCurrentBids)
+		api.GET("/auctions/:id/bids/history", apiHandler.GetAuctionHistory)
 
 		// Bidder routes
-		api.GET("/bidders", bidderHandlers.GetBidders)
-		api.POST("/bidders", bidderHandlers.AddBidder)
-		api.PUT("/bidders", bidderHandlers.SetBidders)
-		api.DELETE("/bidders/:id", bidderHandlers.DeleteBidder)
-		api.POST("/bidders/import", bidderHandlers.UploadExcelFile)
+		api.GET("/bidders", apiHandler.GetBidders)
+		api.POST("/bidders", apiHandler.AddBidder)
+		api.PUT("/bidders", apiHandler.SetBidders)
+		api.DELETE("/bidders/:id", apiHandler.DeleteBidder)
+		api.POST("/bidders/import", apiHandler.UploadExcelFile)
 	}
 
 	return nil

@@ -64,10 +64,13 @@ Example of response body:
 
 - **Retrieve Single Auction:**
   Provides detailed information on a specific auction, including bid history.
+
 - **Start Auction:**
   Transitions the auction state to active. Must ensure that the auction cannot be started more than once.
+
 - **End Auction:**
   Concludes the auction and finalizes bidding.
+
 - **Export Auction Data:**
   Generates a comprehensive export containing:
   - Auction Title
@@ -78,7 +81,8 @@ Example of response body:
 
 #### 3.1.2 Bidding Operations
 - **Place Bid:**
-  Accepts and validates bids against the current highest bid.
+  In our in-person bidding environment, a single admin is solely responsible for placing bids on behalf of the bidder. This design inherently eliminates race conditions; however, we must implement stringent safeguards to prevent duplicate submissions from the same bidder, particularly due to potential accidental double-clicks by the admin. Each bid is rigorously validated against the current highest bid to ensure adherence to minimum increment requirements and overall bid integrity.
+
   *Enforce strict rules to prevent race conditions and fraudulent bids.*
 - **Retrieve Current Bids:**
   Returns real-time bid data for active auctions.
