@@ -80,19 +80,30 @@ let apiConnectionFailed = false;
 let lastConnectionAttempt = 0;
 const MIN_RETRY_INTERVAL = config.retryInterval || 5000;
 
+// Demo mode state
+let demoState = {
+    currentPrice: 0,
+    priceIncrement: 100000,
+    round: 1,
+    bidders: [],
+    bidHistory: [],
+    timer: null,
+    timeLeft: 300, // 5 minutes in seconds
+    isActive: false
+};
+
 // Add event listeners
-placeBidBtn.addEventListener('click', placeBid);
-cancelBidBtn.addEventListener('click', cancelLastBid);
-endAuctionBtn.addEventListener('click', endAuction);
-backToSetupBtn.addEventListener('click', goToSetup);
-refreshBtn.addEventListener('click', () => {
-    refreshBtn.disabled = true;
-    refreshBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Đang làm mới...';
-    loadAuctionData().finally(() => {
-        refreshBtn.disabled = false;
-        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Làm mới';
-    });
-});
+if (config.demoMode) {
+    placeBidBtn.addEventListener('click', handleDemoBid);
+    cancelBidBtn.addEventListener('click', handleDemoCancelBid);
+    endAuctionBtn.addEventListener('click', handleDemoEndAuction);
+    backToSetupBtn.addEventListener('click', () => window.location.href = config.pages.setup);
+} else {
+    placeBidBtn.addEventListener('click', placeBid);
+    cancelBidBtn.addEventListener('click', cancelLastBid);
+    endAuctionBtn.addEventListener('click', endAuction);
+    backToSetupBtn.addEventListener('click', goToSetup);
+}
 
 // Set current year
 if (currentYearSpan) {
@@ -100,7 +111,14 @@ if (currentYearSpan) {
 }
 
 // Initialize the page
-document.addEventListener('DOMContentLoaded', initialize);
+document.addEventListener('DOMContentLoaded', () => {
+    if (config.demoMode) {
+        initializeDemoMode();
+        startDemoTimer();
+    } else {
+        initialize();
+    }
+});
 
 async function initialize() {
     try {
@@ -515,7 +533,7 @@ function updateButtonStates() {
 function updateBidderGrid() {
     if (!bidderGrid) return;
 
-    // Clear existing grid
+    // Clear the grid
     bidderGrid.innerHTML = '';
 
     if (!bidders || bidders.length === 0) {
@@ -523,43 +541,48 @@ function updateBidderGrid() {
         return;
     }
 
-    // Create card for each bidder
+    // Create a bidder box for each bidder
     bidders.forEach(bidder => {
-        const card = document.createElement('div');
-        card.className = 'bidder-card';
-        card.dataset.bidderId = bidder.id;
+        const bidderBox = document.createElement('div');
+        bidderBox.className = `bidder-box ${selectedBidderId.value === bidder.id ? 'selected' : ''}`;
+        bidderBox.dataset.bidderId = bidder.id;
 
-        // Add selected class if this is the highest bidder
-        if (bidder.id === auctionData.highestBidder) {
-            card.classList.add('highest-bidder');
-        }
-
-        // Add selected class if this bidder is selected
-        if (bidder.id === selectedBidderId.value) {
-            card.classList.add('selected');
-        }
-
-        card.innerHTML = `
+        bidderBox.innerHTML = `
+            <img src="${bidder.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(bidder.name)}&background=random&size=64`}" alt="${bidder.name}">
             <div class="bidder-name">${bidder.name}</div>
             <div class="bidder-id">${bidder.id}</div>
         `;
 
-        // Add click handler to select bidder
-        card.addEventListener('click', () => {
-            selectBidder(bidder.id);
+        bidderBox.addEventListener('click', () => {
+            // Deselect all bidders
+            document.querySelectorAll('.bidder-box').forEach(box => {
+                box.classList.remove('selected');
+            });
+
+            // Select this bidder
+            bidderBox.classList.add('selected');
+
+            // Update hidden input
+            selectedBidderId.value = bidder.id;
+
+            // Update bid amount
+            updateBidAmount();
+
+            // Enable place bid button
+            if (placeBidBtn) placeBidBtn.disabled = false;
         });
 
-        bidderGrid.appendChild(card);
+        bidderGrid.appendChild(bidderBox);
     });
 }
 
 function selectBidder(bidderId) {
     // Deselect all bidders
-    const cards = bidderGrid.querySelectorAll('.bidder-card');
+    const cards = bidderGrid.querySelectorAll('.bidder-box');
     cards.forEach(card => card.classList.remove('selected'));
 
     // Select the clicked bidder
-    const selectedCard = bidderGrid.querySelector(`.bidder-card[data-bidder-id="${bidderId}"]`);
+    const selectedCard = bidderGrid.querySelector(`.bidder-box[data-bidder-id="${bidderId}"]`);
     if (selectedCard) {
         selectedCard.classList.add('selected');
     }
@@ -646,25 +669,16 @@ async function placeBid() {
         showLoadingIndicator(true);
         placeBidBtn.disabled = true;
 
-        if (config.demoMode) {
-            // Use apiService for demo mode
-            await apiService.placeBid({
+        const url = `${API_BASE_URL}${config.endpoints.placeBid(auctionId)}`;
+        const response = await apiRequest(url, {
+            method: 'POST',
+            body: JSON.stringify({
                 bidderId: selectedId,
                 amount: amount
-            });
-        } else {
-            // Use direct API call for non-demo mode
-            const url = `${API_BASE_URL}${config.endpoints.placeBid(auctionId)}`;
-            await apiRequest(url, {
-                method: 'POST',
-                body: JSON.stringify({
-                    bidderId: selectedId,
-                    amount: amount
-                })
-            });
-        }
+            })
+        });
 
-        console.log('Bid placed successfully');
+        console.log('Bid placed successfully:', response);
         showToast('Đặt giá thành công', 'success');
 
         // Reload auction data
@@ -689,21 +703,17 @@ async function cancelLastBid() {
         cancelBidBtn.disabled = true;
         cancelBidBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
 
-        if (config.demoMode) {
-            // Use apiService for demo mode
-            await apiService.cancelLastBid();
-        } else {
-            // Use direct API call for non-demo mode
-            await apiRequest(`${API_BASE_URL}/auction/bid/cancel`, {
-                method: 'POST'
-            });
-        }
+        await apiRequest(`${API_BASE_URL}/auction/bid/cancel`, {
+            method: 'POST'
+        });
 
         // Show success message
         showToast('Đã hủy đấu giá cuối cùng', 'success');
 
         // Update data
-        await loadAuctionData();
+        await Promise.all([
+            loadAuctionData()
+        ]);
 
         // Update UI
         updateStatusUI();
@@ -730,16 +740,10 @@ async function endAuction() {
         showLoadingIndicator(true);
         endAuctionBtn.disabled = true;
 
-        if (config.demoMode) {
-            // Use apiService for demo mode
-            await apiService.endAuction();
-        } else {
-            // Use direct API call for non-demo mode
-            const url = `${API_BASE_URL}${config.endpoints.endAuction(auctionId)}`;
-            await apiRequest(url, {
-                method: 'PUT'
-            });
-        }
+        const url = `${API_BASE_URL}${config.endpoints.endAuction(auctionId)}`;
+        await apiRequest(url, {
+            method: 'PUT'
+        });
 
         showToast('Phiên đấu giá đã kết thúc', 'success');
 
@@ -800,4 +804,187 @@ function formatCurrency(amount) {
 function changeLanguage() {
     // This function is a placeholder for future language support
     console.log('Language change functionality will be implemented in a future update');
+}
+
+// Initialize demo mode
+function initializeDemoMode() {
+    console.log("Initializing demo mode...");
+
+    if (!config.demoMode) return;
+
+    // Generate 20 sample bidders with Vietnamese names
+    const vietnameseNames = [
+        'Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Phạm Thị D',
+        'Hoàng Văn E', 'Đặng Thị F', 'Bùi Văn G', 'Đỗ Thị H',
+        'Ngô Văn I', 'Dương Thị K', 'Lý Văn L', 'Vũ Thị M',
+        'Đặng Văn N', 'Trịnh Thị P', 'Mai Văn Q', 'Hồ Thị R',
+        'Trương Văn S', 'Võ Thị T', 'Đinh Văn U', 'Huỳnh Thị V'
+    ];
+
+    bidders = vietnameseNames.map((name, i) => ({
+        id: `bidder-${i + 1}`,
+        name: name,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&size=64`
+    }));
+
+    console.log("Generated bidders:", bidders);
+
+    // Set initial auction data
+    auctionData = {
+        id: 'demo-auction-1',
+        status: 'inProgress',
+        startingPrice: 1000000, // 1M VND
+        currentPrice: 1000000,
+        priceStep: 100000, // 100K VND
+        round: 1,
+        startTime: new Date().toISOString(),
+        endTime: new Date(Date.now() + 300000).toISOString(), // 5 minutes from now
+        timeLeft: 300, // 5 minutes in seconds
+        highestBid: 1000000,
+        currentRound: 1
+    };
+
+    // Generate some initial bid history
+    const initialBids = 5;
+    bidHistory = [];
+    let currentPrice = auctionData.startingPrice;
+
+    for (let i = 0; i < initialBids; i++) {
+        const randomBidder = bidders[Math.floor(Math.random() * bidders.length)];
+        currentPrice += auctionData.priceStep;
+
+        bidHistory.unshift({
+            round: i + 1,
+            bidderId: randomBidder.id,
+            bidderName: randomBidder.name,
+            amount: currentPrice,
+            timestamp: new Date(Date.now() - (initialBids - i) * 60000).toISOString()
+        });
+    }
+
+    // Update current price to last bid
+    auctionData.currentPrice = currentPrice;
+    auctionData.highestBid = currentPrice;
+    auctionData.round = initialBids + 1;
+    auctionData.currentRound = initialBids + 1;
+
+    // Update UI with demo data
+    updateUI();
+
+    console.log("Demo mode initialized with data:", { auctionData, bidders, bidHistory });
+
+    // Show demo mode indicator
+    const demoIndicator = document.createElement('div');
+    demoIndicator.className = 'demo-indicator';
+    demoIndicator.innerHTML = '<strong>Chế độ Demo</strong> - Đang chạy với dữ liệu mẫu';
+    document.body.appendChild(demoIndicator);
+
+    // Enable all buttons in demo mode
+    if (placeBidBtn) placeBidBtn.disabled = false;
+    if (cancelBidBtn) cancelBidBtn.disabled = false;
+    if (endAuctionBtn) endAuctionBtn.disabled = false;
+    if (backToSetupBtn) backToSetupBtn.disabled = false;
+}
+
+// Update UI with current data
+function updateUI() {
+    updateStatusUI();
+    updateBidderGrid();
+    updateBidAmount();
+    renderBidHistory();
+    updateButtonStates();
+}
+
+// Update status UI elements
+function updateStatusUI() {
+    if (!auctionData) return;
+
+    // Update status badge
+    if (statusBadge) {
+        statusBadge.textContent = auctionData.status === 'inProgress' ? 'Đang diễn ra' : 'Đã kết thúc';
+        statusBadge.className = `badge ${auctionData.status === 'inProgress' ? 'bg-success' : 'bg-danger'} rounded-pill`;
+    }
+
+    // Update round info
+    if (roundInfo) roundInfo.textContent = auctionData.round;
+
+    // Update current price
+    if (currentPrice) currentPrice.textContent = formatCurrency(auctionData.currentPrice);
+    if (floatingInitialPrice) floatingInitialPrice.textContent = formatCurrency(auctionData.startingPrice);
+
+    // Update price increment
+    if (priceIncrement) priceIncrement.textContent = formatCurrency(auctionData.priceStep);
+    if (floatingPriceIncrement) floatingPriceIncrement.textContent = formatCurrency(auctionData.priceStep);
+
+    // Update bidders count
+    if (biddersCount) biddersCount.textContent = bidders.length;
+
+    // Update timer display
+    updateTimerDisplay(auctionData.timeLeft);
+}
+
+// Handle demo bid placement
+async function handleDemoBid() {
+    if (!selectedBidderId.value) {
+        showToast('Vui lòng chọn người đấu giá', 'warning');
+        return;
+    }
+
+    const selectedBidder = bidders.find(b => b.id === selectedBidderId.value);
+    if (!selectedBidder) return;
+
+    // Create new bid
+    const newBid = {
+        round: auctionData.round + 1,
+        bidderId: selectedBidder.id,
+        bidderName: selectedBidder.name,
+        amount: auctionData.currentPrice + auctionData.priceStep,
+        timestamp: new Date().toISOString()
+    };
+
+    // Update auction data
+    auctionData.round = newBid.round;
+    auctionData.currentPrice = newBid.amount;
+
+    // Add to bid history
+    bidHistory.unshift(newBid);
+
+    // Update UI
+    updateUI();
+    showToast('Đấu giá thành công!', 'success');
+}
+
+// Handle demo bid cancellation
+async function handleDemoCancelBid() {
+    if (bidHistory.length === 0) {
+        showToast('Không có lượt đấu giá nào để hủy', 'warning');
+        return;
+    }
+
+    // Remove last bid
+    bidHistory.shift();
+
+    // Update auction data
+    const lastBid = bidHistory[0];
+    if (lastBid) {
+        auctionData.round = lastBid.round;
+        auctionData.currentPrice = lastBid.amount;
+    } else {
+        auctionData.round = 1;
+        auctionData.currentPrice = auctionData.startingPrice;
+    }
+
+    // Update UI
+    updateUI();
+    showToast('Đã hủy lượt đấu giá cuối cùng', 'success');
+}
+
+// Handle demo auction end
+async function handleDemoEndAuction() {
+    auctionData.status = 'ended';
+    updateUI();
+    showToast('Phiên đấu giá đã kết thúc', 'info');
+    setTimeout(() => {
+        window.location.href = config.pages.result;
+    }, 2000);
 }

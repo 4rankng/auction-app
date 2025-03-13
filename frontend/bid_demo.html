@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phiên Đấu Giá (Demo) - Hệ Thống Đấu Giá</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Font: Roboto -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        /* Basic styling */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #0d6efd;
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .demo-indicator {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Bidder grid styling */
+        .bidder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .bidder-box {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .bidder-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #f8f9fa;
+        }
+
+        .bidder-box.selected {
+            background-color: #e9ecef;
+            border-color: #6c757d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .bidder-box img {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            margin-bottom: 0.5rem;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .bidder-box .bidder-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: #212529;
+        }
+
+        .bidder-box .bidder-id {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        /* Info boxes */
+        .info-box {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1rem;
+        }
+
+        .info-box-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-box-value {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #212529;
+        }
+
+        /* Timer display */
+        .timer-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #198754;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        /* Bid history table */
+        .bid-history-table th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .bid-history-table tr:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <!-- Demo mode indicator -->
+    <div class="demo-indicator">
+        <strong>Chế độ Demo</strong> - Đang chạy với dữ liệu mẫu
+    </div>
+
+    <header class="header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">
+                    <a href="index.html" class="text-white text-decoration-none">
+                        <i class="bi bi-house-door me-2"></i>Hệ Thống Đấu Giá
+                    </a>
+                </h1>
+                <div class="d-flex align-items-center">
+                    <a href="setup.html" class="btn btn-outline-light btn-sm me-2">
+                        <i class="bi bi-gear me-1"></i>Thiết Lập
+                    </a>
+                    <select id="language" class="form-select form-select-sm">
+                        <option value="vi">Tiếng Việt</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h4 mb-0">Phiên Đấu Giá</h2>
+                <span class="badge bg-success rounded-pill" id="statusBadge">Đang diễn ra</span>
+            </div>
+
+            <div class="card-body">
+                <!-- Auction info -->
+                <div class="row mb-4">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="info-box">
+                            <div class="info-box-label">Vòng đấu giá</div>
+                            <div class="info-box-value" id="roundInfo">6</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="info-box">
+                            <div class="info-box-label">Giá hiện tại</div>
+                            <div class="info-box-value" id="currentPrice">1.500.000 VND</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="info-box">
+                            <div class="info-box-label">Bước giá</div>
+                            <div class="info-box-value" id="priceIncrement">100.000 VND</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="info-box">
+                            <div class="info-box-label">Người tham gia</div>
+                            <div class="info-box-value" id="biddersCount">20</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mb-4">
+                    <h4>Thời gian còn lại</h4>
+                    <div class="timer-display" id="timer">04:35</div>
+                </div>
+
+                <!-- Bidder selection -->
+                <div class="mb-4">
+                    <h4>Chọn người tham gia</h4>
+                    <div id="bidderGrid" class="bidder-grid">
+                        <!-- Bidders will be added here dynamically -->
+                    </div>
+                    <input type="hidden" id="selectedBidderId" value="">
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="bidAmount" class="form-label">Số tiền đấu giá</label>
+                            <div class="input-group">
+                                <input type="text" id="bidAmount" class="form-control" value="1.600.000" readonly>
+                                <span class="input-group-text">VND</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mb-4 justify-content-center">
+                    <button id="placeBidBtn" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Đấu Giá
+                    </button>
+                    <button id="cancelBidBtn" class="btn btn-outline-danger">
+                        <i class="bi bi-x-circle"></i> Hủy Đấu Giá Cuối
+                    </button>
+                    <button id="endAuctionBtn" class="btn btn-danger">
+                        <i class="bi bi-stop-circle"></i> Kết Thúc Đấu Giá
+                    </button>
+                </div>
+
+                <!-- Bid history -->
+                <h4>Lịch Sử Đấu Giá</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover bid-history-table">
+                        <thead>
+                            <tr>
+                                <th>Vòng</th>
+                                <th>Người tham gia</th>
+                                <th>Số tiền</th>
+                                <th>Thời gian</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bidHistoryList">
+                            <tr>
+                                <td>5</td>
+                                <td>Nguyễn Văn A (bidder-1)</td>
+                                <td>1.500.000 VND</td>
+                                <td>13/03/2023 10:25:30</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Trần Thị B (bidder-2)</td>
+                                <td>1.400.000 VND</td>
+                                <td>13/03/2023 10:24:15</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Lê Văn C (bidder-3)</td>
+                                <td>1.300.000 VND</td>
+                                <td>13/03/2023 10:23:05</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Phạm Thị D (bidder-4)</td>
+                                <td>1.200.000 VND</td>
+                                <td>13/03/2023 10:22:10</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Hoàng Văn E (bidder-5)</td>
+                                <td>1.100.000 VND</td>
+                                <td>13/03/2023 10:21:00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card-footer text-end">
+                <button id="backToSetupBtn" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Quay Lại Thiết Lập
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast container for notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Generate 20 bidders with Vietnamese names
+        document.addEventListener('DOMContentLoaded', function() {
+            // Try to load bidders from localStorage first
+            let bidders = [];
+            const storedBidders = localStorage.getItem('demo_bidders');
+
+            if (storedBidders) {
+                try {
+                    const parsedBidders = JSON.parse(storedBidders);
+                    if (Array.isArray(parsedBidders) && parsedBidders.length >= 2) {
+                        bidders = parsedBidders;
+                        console.log('Loaded bidders from localStorage:', bidders);
+                    }
+                } catch (e) {
+                    console.error('Error parsing stored bidders:', e);
+                }
+            }
+
+            // If no bidders in localStorage or less than 2, use default Vietnamese names
+            if (bidders.length < 2) {
+                const vietnameseNames = [
+                    'Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Phạm Thị D',
+                    'Hoàng Văn E', 'Đặng Thị F', 'Bùi Văn G', 'Đỗ Thị H',
+                    'Ngô Văn I', 'Dương Thị K', 'Lý Văn L', 'Vũ Thị M',
+                    'Đặng Văn N', 'Trịnh Thị P', 'Mai Văn Q', 'Hồ Thị R',
+                    'Trương Văn S', 'Võ Thị T', 'Đinh Văn U', 'Huỳnh Thị V'
+                ];
+
+                bidders = vietnameseNames.map((name, index) => ({
+                    id: `bidder-${index + 1}`,
+                    name: name,
+                    address: `Địa chỉ ${index + 1}, Việt Nam`
+                }));
+            }
+
+            // Load auction settings from localStorage
+            let settings = {
+                initialPrice: 1000000,
+                priceIncrement: 100000,
+                auctionDuration: 5
+            };
+
+            const storedSettings = localStorage.getItem('demo_settings');
+            if (storedSettings) {
+                try {
+                    const parsedSettings = JSON.parse(storedSettings);
+                    settings = { ...settings, ...parsedSettings };
+                    console.log('Loaded settings from localStorage:', settings);
+
+                    // Update UI with settings
+                    document.getElementById('currentPrice').textContent = formatCurrency(settings.initialPrice);
+                    document.getElementById('priceIncrement').textContent = formatCurrency(settings.priceIncrement);
+                    document.getElementById('bidAmount').value = formatCurrency(settings.initialPrice + settings.priceIncrement);
+                } catch (e) {
+                    console.error('Error parsing stored settings:', e);
+                }
+            }
+
+            // Update bidders count
+            document.getElementById('biddersCount').textContent = bidders.length;
+
+            const bidderGrid = document.getElementById('bidderGrid');
+            const selectedBidderId = document.getElementById('selectedBidderId');
+
+            // Clear existing bidders
+            bidderGrid.innerHTML = '';
+
+            // Generate bidder boxes
+            bidders.forEach((bidder, index) => {
+                const bidderId = bidder.id || `bidder-${index + 1}`;
+                const bidderName = bidder.name;
+                const bidderBox = document.createElement('div');
+                bidderBox.className = 'bidder-box';
+                bidderBox.dataset.bidderId = bidderId;
+
+                // Generate avatar using UI Avatars service
+                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(bidderName)}&background=random&size=64`;
+
+                bidderBox.innerHTML = `
+                    <img src="${avatarUrl}" alt="${bidderName}">
+                    <div class="bidder-name">${bidderName}</div>
+                    <div class="bidder-id">${bidderId}</div>
+                `;
+
+                // Add click event to select bidder
+                bidderBox.addEventListener('click', function() {
+                    // Deselect all bidders
+                    document.querySelectorAll('.bidder-box').forEach(box => {
+                        box.classList.remove('selected');
+                    });
+
+                    // Select this bidder
+                    bidderBox.classList.add('selected');
+                    selectedBidderId.value = bidderId;
+
+                    // Show toast notification
+                    showToast(`Đã chọn người tham gia: ${bidderName}`, 'info');
+                });
+
+                bidderGrid.appendChild(bidderBox);
+            });
+
+            // Add event listeners to buttons
+            document.getElementById('placeBidBtn').addEventListener('click', function() {
+                if (!selectedBidderId.value) {
+                    showToast('Vui lòng chọn người tham gia', 'warning');
+                    return;
+                }
+                showToast('Đấu giá thành công!', 'success');
+            });
+
+            document.getElementById('cancelBidBtn').addEventListener('click', function() {
+                showToast('Đã hủy lượt đấu giá cuối cùng', 'success');
+            });
+
+            document.getElementById('endAuctionBtn').addEventListener('click', function() {
+                showToast('Phiên đấu giá đã kết thúc', 'info');
+            });
+
+            document.getElementById('backToSetupBtn').addEventListener('click', function() {
+                window.location.href = 'setup.html';
+            });
+        });
+
+        // Format currency function
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toastContainer = document.querySelector('.toast-container');
+            const toastId = `toast-${Date.now()}`;
+            const toastHtml = `
+                <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header ${type === 'error' ? 'bg-danger text-white' :
+                                            type === 'success' ? 'bg-success text-white' :
+                                            type === 'warning' ? 'bg-warning' : ''}">
+                        <strong class="me-auto">${
+                            type === 'error' ? 'Lỗi' :
+                            type === 'success' ? 'Thành công' :
+                            type === 'warning' ? 'Cảnh báo' : 'Thông báo'
+                        }</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, {
+                delay: 3000
+            });
+
+            toast.show();
+
+            // Remove toast from DOM after it's hidden
+            toastElement.addEventListener('hidden.bs.toast', function () {
+                toastElement.remove();
+            });
+        }
+    </script>
+</body>
+</html>

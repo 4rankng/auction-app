@@ -1,28 +1,21 @@
 // Environment Configuration
 const config = {
-    // API Configuration
-    apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1',
+    demoMode: true, // Enable demo mode
+    apiBaseUrl: 'http://localhost:8080/api/v1',
     endpoints: {
         // Auction endpoints
-        auctions: '/auctions',
-        auctionById: (id) => `/auctions/${id}`,
-        startAuction: (id) => `/auctions/${id}/start`,
-        endAuction: (id) => `/auctions/${id}/end`,
-        exportAuction: (id) => `/auctions/${id}/export`,
-
-        // Bidding endpoints
-        placeBid: (id) => `/auctions/${id}/bids`,
-        currentBids: (id) => `/auctions/${id}/bids/current`,
-        bidHistory: (id) => `/auctions/${id}/bids/history`,
+        auctionSettings: '/auction/settings',
+        auctionStatus: '/auction/status',
+        auctionHistory: '/auction/history',
+        auctionHistoryComplete: '/auction/history/complete',
+        auctionReset: '/auction/reset',
+        auctionStart: '/auction/start',
+        auctionBid: '/auction/bid',
 
         // Bidder endpoints
         bidders: '/bidders',
         bidderById: (id) => `/bidders/${id}`,
-        biddersImport: '/bidders/import',
-        auctionBidders: (id) => `/auctions/${id}/bidders`,
-
-        // System endpoints
-        health: '/health'
+        biddersImport: '/bidders/import'
     },
 
     // Page URLs
@@ -30,7 +23,8 @@ const config = {
         index: 'index.html',
         setup: 'setup.html',
         bid: 'bid.html',
-        result: 'result.html'
+        result: 'result.html',
+        debug: 'api-debug.html'
     },
 
     // Default settings

@@ -79,6 +79,19 @@
 
     <main class="main">
         <div class="container py-5">
+            <!-- Demo mode indicator -->
+            <div class="alert alert-warning mb-4">
+                <strong>Demo Mode</strong> - Running with mock data
+                <div class="mt-2">
+                    <a href="setup.html" class="btn btn-sm btn-primary me-2">
+                        <i class="bi bi-gear"></i> Thiết Lập Đấu Giá
+                    </a>
+                    <a href="bid_demo.html" class="btn btn-sm btn-success me-2">
+                        <i class="bi bi-play-fill"></i> Xem Demo Đấu Giá
+                    </a>
+                </div>
+            </div>
+
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="mb-0">Hệ Thống Đấu Giá</h1>
                 <button id="createAuctionBtn" class="btn btn-primary" onclick="location.href='setup.html'; localStorage.setItem('currentAuctionId', 'demo-auction-1');">
@@ -144,56 +157,200 @@
     <!-- Load environment config first -->
     <script src=".env.js"></script>
 
-    <!-- DEBUG: Force a sample auction if needed -->
+    <!-- Generate sample auction data (40 entries) -->
     <script>
-        // This will run immediately, before any modules are loaded
-        console.log('Checking if we need to force sample data...');
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded in inline script');
+        // Pagination state
+        let currentPage = 1;
+        let pageSize = 10;
+        let allAuctions = [];
 
-            // Force a sample auction row if the table is empty after a short delay
-            setTimeout(function() {
-                const auctionsTableBody = document.getElementById('auctionsTableBody');
-                const noAuctionsMessage = document.getElementById('noAuctionsMessage');
+        function generateSampleAuctions() {
+            console.log('Generating 40 sample auction entries');
+            const auctionsTableBody = document.getElementById('auctionsTableBody');
+            if (!auctionsTableBody) return;
 
-                if (auctionsTableBody && auctionsTableBody.children.length === 0) {
-                    console.log('No auctions found after delay, adding sample data');
+            // Clear existing content
+            auctionsTableBody.innerHTML = '';
 
-                    // Hide no auctions message
-                    if (noAuctionsMessage) {
-                        noAuctionsMessage.style.display = 'none';
-                    }
+            // Hide no auctions message
+            const noAuctionsMessage = document.getElementById('noAuctionsMessage');
+            if (noAuctionsMessage) {
+                noAuctionsMessage.style.display = 'none';
+            }
 
-                    // Add a hardcoded sample row
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>Demo Auction (Forced)</td>
-                        <td>${new Date().toLocaleDateString()}</td>
-                        <td><span class="badge bg-secondary">Chưa Bắt Đầu</span></td>
-                        <td>1,000,000 VND</td>
-                        <td>0 VND</td>
-                        <td>3</td>
-                        <td>
-                            <button class="btn btn-primary btn-sm view-auction" data-auction-id="demo-auction-1">
-                                Xem Chi Tiết
-                            </button>
-                        </td>
-                    `;
+            // Status types for variety
+            const statuses = [
+                { status: 'setup', badge: 'bg-secondary', text: 'Chưa Bắt Đầu' },
+                { status: 'active', badge: 'bg-success', text: 'Đang Diễn Ra' },
+                { status: 'ended', badge: 'bg-danger', text: 'Đã Kết Thúc' }
+            ];
 
-                    // Add click handler for the button
-                    const viewBtn = row.querySelector('.view-auction');
-                    if (viewBtn) {
-                        viewBtn.addEventListener('click', function() {
-                            // Save auction ID to localStorage
-                            localStorage.setItem('currentAuctionId', 'demo-auction-1');
-                            // Navigate to setup page
-                            window.location.href = 'setup.html';
-                        });
-                    }
+            // Generate all auctions
+            allAuctions = [];
+            for (let i = 1; i <= 40; i++) {
+                // Create dates from 40 days ago to today
+                const daysAgo = 40 - i;
+                const date = new Date();
+                date.setDate(date.getDate() - daysAgo);
 
-                    auctionsTableBody.appendChild(row);
+                // Select random status with weighted probabilities
+                const statusIndex = Math.random();
+                let status;
+                if (statusIndex < 0.3) {
+                    status = statuses[0]; // 30% chance for setup
+                } else if (statusIndex < 0.7) {
+                    status = statuses[1]; // 40% chance for active
+                } else {
+                    status = statuses[2]; // 30% chance for ended
                 }
-            }, 1000); // Check after 1 second
+
+                // Random prices with more realistic ranges
+                const startingPrice = Math.floor(Math.random() * 20 + 1) * 1000000; // 1M to 20M
+                const highestBid = status.status !== 'setup' ?
+                    startingPrice + Math.floor(Math.random() * 50 + 1) * 100000 : 0;
+
+                // Random number of bidders with more realistic distribution
+                const bidderCount = Math.floor(Math.random() * 15 + 2); // 2 to 17
+
+                // Create row with more varied auction names
+                const auctionTypes = ['Phiên Đấu Giá', 'Đấu Giá Bất Động Sản', 'Đấu Giá Xe', 'Đấu Giá Tài Sản'];
+                const auctionType = auctionTypes[Math.floor(Math.random() * auctionTypes.length)];
+
+                allAuctions.push({
+                    id: i,
+                    name: `${auctionType} ${i}`,
+                    date: date,
+                    status: status,
+                    startingPrice: startingPrice,
+                    highestBid: highestBid,
+                    bidderCount: bidderCount
+                });
+            }
+
+            // Sort auctions by date (newest first)
+            allAuctions.sort((a, b) => b.date - a.date);
+
+            // Update pagination controls
+            updatePaginationControls();
+
+            // Display current page
+            displayCurrentPage();
+        }
+
+        function displayCurrentPage() {
+            const auctionsTableBody = document.getElementById('auctionsTableBody');
+            if (!auctionsTableBody) return;
+
+            // Clear existing content
+            auctionsTableBody.innerHTML = '';
+
+            // Calculate start and end indices for current page
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, allAuctions.length);
+
+            // Display auctions for current page
+            for (let i = startIndex; i < endIndex; i++) {
+                const auction = allAuctions[i];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${auction.name}</td>
+                    <td>${auction.date.toLocaleDateString('vi-VN')}</td>
+                    <td><span class="badge ${auction.status.badge}">${auction.status.text}</span></td>
+                    <td>${auction.startingPrice.toLocaleString('vi-VN')} VND</td>
+                    <td>${auction.status.status !== 'setup' ? auction.highestBid.toLocaleString('vi-VN') + ' VND' : '0 VND'}</td>
+                    <td>${auction.bidderCount}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm view-auction" data-auction-id="demo-auction-${auction.id}">
+                            Xem Chi Tiết
+                        </button>
+                    </td>
+                `;
+
+                // Add click handler for the button
+                const viewBtn = row.querySelector('.view-auction');
+                if (viewBtn) {
+                    viewBtn.addEventListener('click', function() {
+                        localStorage.setItem('currentAuctionId', `demo-auction-${auction.id}`);
+                        window.location.href = 'setup.html';
+                    });
+                }
+
+                auctionsTableBody.appendChild(row);
+            }
+        }
+
+        function updatePaginationControls() {
+            const pagination = document.getElementById('pagination');
+            if (!pagination) return;
+
+            // Clear existing pagination
+            pagination.innerHTML = '';
+
+            // Calculate total pages
+            const totalPages = Math.ceil(allAuctions.length / pageSize);
+
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `
+                <a class="page-link" href="#" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            `;
+            if (currentPage > 1) {
+                prevLi.querySelector('.page-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage--;
+                    displayCurrentPage();
+                    updatePaginationControls();
+                });
+            }
+            pagination.appendChild(prevLi);
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${currentPage === i ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.querySelector('.page-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage = i;
+                    displayCurrentPage();
+                    updatePaginationControls();
+                });
+                pagination.appendChild(li);
+            }
+
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `
+                <a class="page-link" href="#" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            `;
+            if (currentPage < totalPages) {
+                nextLi.querySelector('.page-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage++;
+                    displayCurrentPage();
+                    updatePaginationControls();
+                });
+            }
+            pagination.appendChild(nextLi);
+        }
+
+        // Handle page size change
+        document.getElementById('pageSizeSelect')?.addEventListener('change', function(e) {
+            pageSize = parseInt(e.target.value);
+            currentPage = 1; // Reset to first page
+            displayCurrentPage();
+            updatePaginationControls();
+        });
+
+        // Initialize the table
+        document.addEventListener('DOMContentLoaded', function() {
+            generateSampleAuctions();
         });
     </script>
 
@@ -243,31 +400,6 @@
                 });
             }
         }, 2000);
-    </script>
-
-    <!-- Final backup script for navigation -->
-    <script>
-        // This script ensures all navigation buttons work, even if other scripts fail
-        window.addEventListener('load', function() {
-            console.log('Window fully loaded - final navigation check');
-
-            // Add navigation handler to Create New Auction button
-            document.getElementById('createAuctionBtn')?.addEventListener('click', function() {
-                console.log('Create auction button clicked (backup handler)');
-                localStorage.setItem('currentAuctionId', 'demo-auction-1');
-                window.location.href = 'setup.html';
-            });
-
-            // Add navigation handlers to all View Detail buttons
-            document.querySelectorAll('.view-auction').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    const auctionId = this.getAttribute('data-auction-id') || 'demo-auction-1';
-                    console.log('View auction button clicked (backup handler):', auctionId);
-                    localStorage.setItem('currentAuctionId', auctionId);
-                    window.location.href = 'setup.html';
-                });
-            });
-        });
     </script>
 </body>
 </html>

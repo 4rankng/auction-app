@@ -195,3 +195,83 @@ export async function checkHealth() {
 
     return apiRequest(config.endpoints.health);
 }
+
+// API Service for Demo Mode
+import config from './config.js';
+
+// Mock data for demo mode
+const mockData = {
+    auction: {
+        id: 'demo-auction-1',
+        status: 'inProgress',
+        startingPrice: 1000000,
+        currentPrice: 1000000,
+        priceStep: 100000,
+        round: 1,
+        timeLeft: 300
+    },
+    bidders: [],
+    bidHistory: []
+};
+
+// Get auction status
+export async function getAuctionStatus() {
+    return {
+        status: 'inProgress',
+        highestBid: mockData.auction.currentPrice,
+        highestBidder: null,
+        timeRemaining: mockData.auction.timeLeft,
+        round: mockData.auction.round
+    };
+}
+
+// Get auction settings
+export async function getAuctionSettings() {
+    return {
+        initialPrice: mockData.auction.startingPrice,
+        priceIncrement: mockData.auction.priceStep,
+        auctionDuration: 300
+    };
+}
+
+// Get bidders
+export async function getBidders() {
+    return mockData.bidders;
+}
+
+// Get bid history
+export async function getBidHistory() {
+    return mockData.bidHistory;
+}
+
+// Reset demo
+export async function resetDemo() {
+    mockData.auction = {
+        id: 'demo-auction-1',
+        status: 'inProgress',
+        startingPrice: 1000000,
+        currentPrice: 1000000,
+        priceStep: 100000,
+        round: 1,
+        timeLeft: 300
+    };
+    mockData.bidders = [];
+    mockData.bidHistory = [];
+    return { success: true };
+}
+
+// Place bid
+export async function placeBid(bidderId, amount) {
+    return { success: true };
+}
+
+// Cancel last bid
+export async function cancelLastBid() {
+    return { success: true };
+}
+
+// End auction
+export async function endAuction() {
+    mockData.auction.status = 'ended';
+    return { success: true };
+}
