@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import Card from '../components/ui/Card';
-import Loading from '../components/ui/Loading';
-import Button from '../components/ui/Button';
+import { Container, Row, Col, Card, Button, Spinner, Badge } from 'react-bootstrap';
 import BidHistory from '../components/bids/BidHistory';
 import { useToast } from '../contexts/ToastContext';
 import databaseService from '../services/databaseService';
-import { AuctionResult } from '../models/types';
-import { ROUTES } from '../models/constants';
+import { AuctionResult, Auction, Bid, Bidder } from '../models/types';
+import { ROUTES, AUCTION_STATUS } from '../models/constants';
+import * as XLSX from 'xlsx';
+import './ResultPage.css';
 
 const ResultPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showToast } = useToast();
 
+  const [auction, setAuction] = useState<Auction | null>(null);
   const [result, setResult] = useState<AuctionResult | null>(null);
+  const [bids, setBids] = useState<Bid[]>([]);
+  const [bidders, setBidders] = useState<Record<string, Bidder>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadResult = async () => {
+    const loadData = async () => {
       if (!id) {
         navigate(ROUTES.HOME);
         return;
@@ -27,173 +30,304 @@ const ResultPage: React.FC = () => {
       setIsLoading(true);
 
       try {
-        const auctionResult = await databaseService.auction.getResult(id);
+        // First, try to get the auction
+        const auctionData = await databaseService.auction.getById(id);
 
-        if (!auctionResult) {
-          showToast('Auction result not found', 'error');
+        if (!auctionData) {
+          showToast('Auction not found', 'error');
           navigate(ROUTES.HOME);
           return;
         }
 
-        setResult(auctionResult);
+        setAuction(auctionData);
+
+        // Get all bids for this auction
+        const auctionBids = await databaseService.bid.getAllForAuction(id);
+        setBids(auctionBids);
+
+        // Get all bidders
+        const allBidders = await databaseService.bidder.getAll();
+        const biddersMap: Record<string, Bidder> = {};
+        allBidders.forEach(bidder => {
+          biddersMap[bidder.id] = bidder;
+        });
+        setBidders(biddersMap);
+
+        // If the auction has ended, get the result
+        if (auctionData.status === AUCTION_STATUS.ENDED) {
+          const auctionResult = await databaseService.auction.getResult(id);
+          if (auctionResult) {
+            setResult(auctionResult);
+          }
+        }
       } catch (error) {
-        console.error('Error loading auction result:', error);
-        showToast('Failed to load auction result', 'error');
+        console.error('Error loading auction data:', error);
+        showToast('Failed to load auction data', 'error');
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadResult();
+    loadData();
   }, [id, navigate, showToast]);
 
-  if (isLoading) {
-    return <Loading fullScreen text="Loading result..." />;
-  }
+  const exportToExcel = () => {
+    if (!auction) return;
 
-  if (!result) {
+    // Create workbook and worksheet
+    const workbook = XLSX.utils.book_new();
+
+    // Auction summary data
+    const summaryData = [
+      ['Auction Report', ''],
+      ['', ''],
+      ['Auction ID', auction.id || 'Unknown'],
+      ['Title', auction.title || 'Unknown'],
+      ['Description', auction.description || ''],
+      ['Status', auction.status],
+      ['', ''],
+      ['Starting Price', databaseService.formatCurrency(auction.startingPrice)],
+      ['Current Price', databaseService.formatCurrency(auction.currentPrice)],
+      ['Price Step', databaseService.formatCurrency(auction.priceStep)],
+      ['Created At', new Date(auction.createdAt).toLocaleString()],
+      ['Updated At', auction.updatedAt ? new Date(auction.updatedAt).toLocaleString() : ''],
+      ['', ''],
+    ];
+
+    // Add result information if auction has ended
+    if (result) {
+      summaryData.push(
+        ['Final Price', databaseService.formatCurrency(result.finalPrice)],
+        ['Start Time', new Date(result.startTime).toLocaleString()],
+        ['End Time', new Date(result.endTime).toLocaleString()],
+        ['Total Bids', result.totalBids.toString()],
+        ['Total Bidders', result.totalBidders.toString()],
+        ['', ''],
+        ['Winner Information', '']
+      );
+
+      // Add winner information if exists
+      if (result.winner) {
+        summaryData.push(
+          ['Name', result.winner.name],
+          ['Phone', result.winner.phone || ''],
+          ['Email', result.winner.email || ''],
+          ['Address', result.winner.address || ''],
+          ['Winning Bid', databaseService.formatCurrency(result.finalPrice)]
+        );
+      } else {
+        summaryData.push(['No winner (no bids were placed)', '']);
+      }
+    }
+
+    // Add summary worksheet
+    const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'Auction Summary');
+
+    // Bid history data
+    const bidHistoryHeaders = ['Time', 'Bidder', 'Amount'];
+    const bidHistoryData = [bidHistoryHeaders];
+
+    if (bids && bids.length > 0) {
+      bids.forEach(bid => {
+        const bidder = bidders[bid.bidderId];
+        bidHistoryData.push([
+          new Date(bid.timestamp).toLocaleString(),
+          bidder ? bidder.name : 'Unknown Bidder',
+          databaseService.formatCurrency(bid.amount)
+        ]);
+      });
+    }
+
+    // Add bid history worksheet
+    const bidHistoryWorksheet = XLSX.utils.aoa_to_sheet(bidHistoryData);
+    XLSX.utils.book_append_sheet(workbook, bidHistoryWorksheet, 'Bid History');
+
+    // Generate Excel file and trigger download
+    const timestamp = new Date().getTime();
+    XLSX.writeFile(workbook, `auction-report-${timestamp}.xlsx`);
+
+    showToast('Report exported successfully', 'success');
+  };
+
+  if (isLoading) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-xl font-medium text-gray-900 mb-2">Result Not Found</h2>
-        <p className="text-gray-600 mb-6">The auction result you're looking for doesn't exist</p>
-        <Button variant="primary" onClick={() => navigate(ROUTES.HOME)}>
-          Go to Home
-        </Button>
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '80vh' }}>
+        <Spinner animation="border" role="status" variant="primary">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+        <span className="ms-2">Loading auction details...</span>
       </div>
     );
   }
 
+  if (!auction) {
+    return (
+      <Container className="py-5 text-center">
+        <h2 className="mb-3">Auction Not Found</h2>
+        <p className="text-muted mb-4">The auction you're looking for doesn't exist</p>
+        <Button variant="primary" onClick={() => navigate(ROUTES.HOME)}>
+          Go to Home
+        </Button>
+      </Container>
+    );
+  }
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Auction Result</h1>
+    <Container className="py-4">
+      <div className="d-flex justify-content-between align-items-center page-header">
+        <div>
+          <h1 className="mb-1">{auction.title}</h1>
+          <Badge bg={
+            auction.status === AUCTION_STATUS.SETUP ? 'primary' :
+            auction.status === AUCTION_STATUS.IN_PROGRESS ? 'success' : 'secondary'
+          }>
+            {auction.status === AUCTION_STATUS.SETUP ? 'Setup' :
+             auction.status === AUCTION_STATUS.IN_PROGRESS ? 'In Progress' : 'Ended'}
+          </Badge>
+        </div>
         <Link to={ROUTES.HOME}>
-          <Button variant="primary">Back to Home</Button>
+          <Button variant="primary">
+            <i className="bi bi-house me-1"></i> Back to Home
+          </Button>
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Card title="Auction Summary">
-            <div className="p-4">
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                  <p className="text-sm text-gray-500">Starting Price</p>
-                  <p className="font-medium">{databaseService.formatCurrency(result.startingPrice)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Final Price</p>
-                  <p className="font-medium text-green-600">{databaseService.formatCurrency(result.finalPrice)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Start Time</p>
-                  <p className="font-medium">{new Date(result.startTime).toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">End Time</p>
-                  <p className="font-medium">{new Date(result.endTime).toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Total Bids</p>
-                  <p className="font-medium">{result.totalBids}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Total Bidders</p>
-                  <p className="font-medium">{result.totalBidders}</p>
-                </div>
+      <Row>
+        <Col xs={12}>
+          <Card className="shadow-sm mb-4">
+            <Card.Header className="bg-white d-flex justify-content-between align-items-center py-3">
+              <h5 className="mb-0 fw-bold">Auction Details</h5>
+              <div className="action-icons">
+                <Button
+                  variant="link"
+                  className="action-icon print-icon"
+                  onClick={() => window.print()}
+                  title="Print Details"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <i className="bi bi-printer-fill"></i>
+                  <span className="action-label">Print</span>
+                </Button>
+                <Button
+                  variant="link"
+                  className="action-icon export-icon"
+                  onClick={exportToExcel}
+                  title="Export to Excel"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <i className="bi bi-file-earmark-excel-fill"></i>
+                  <span className="action-label">Export</span>
+                </Button>
               </div>
+            </Card.Header>
+            <Card.Body>
+              {auction.description && (
+                <div className="mb-4">
+                  <h6>Description</h6>
+                  <p>{auction.description}</p>
+                </div>
+              )}
 
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Winner</h3>
-                {result.winner ? (
-                  <div className="flex items-center bg-green-50 p-4 rounded-md">
-                    <div className="flex-shrink-0 h-16 w-16">
+              <Row className="mb-4">
+                <Col sm={6} md={4} className="mb-3">
+                  <small className="text-muted d-block">
+                    <i className="bi bi-tag me-1"></i>Starting Price
+                  </small>
+                  <span>{databaseService.formatCurrency(auction.startingPrice)}</span>
+                </Col>
+                <Col sm={6} md={4} className="mb-3">
+                  <small className="text-muted d-block">
+                    <i className="bi bi-cash-stack me-1"></i>Current Price
+                  </small>
+                  <span className="text-success fw-bold">{databaseService.formatCurrency(auction.currentPrice)}</span>
+                </Col>
+                <Col sm={6} md={4} className="mb-3">
+                  <small className="text-muted d-block">
+                    <i className="bi bi-arrow-up-circle me-1"></i>Price Step
+                  </small>
+                  <span>{databaseService.formatCurrency(auction.priceStep)}</span>
+                </Col>
+                <Col sm={6} md={4} className="mb-3">
+                  <small className="text-muted d-block">
+                    <i className="bi bi-calendar-event me-1"></i>Created
+                  </small>
+                  <span>{new Date(auction.createdAt).toLocaleDateString()}</span>
+                </Col>
+                {auction.updatedAt && (
+                  <Col sm={6} md={4} className="mb-3">
+                    <small className="text-muted d-block">
+                      <i className="bi bi-clock-history me-1"></i>Last Updated
+                    </small>
+                    <span>{new Date(auction.updatedAt).toLocaleDateString()}</span>
+                  </Col>
+                )}
+                {auction.timeLeft && auction.status === AUCTION_STATUS.IN_PROGRESS && (
+                  <Col sm={6} md={4} className="mb-3">
+                    <small className="text-muted d-block">
+                      <i className="bi bi-hourglass-split me-1"></i>Time Left
+                    </small>
+                    <span>{Math.floor(auction.timeLeft / 60)} minutes</span>
+                  </Col>
+                )}
+              </Row>
+
+              {result && result.winner && (
+                <div className="border-top pt-4 mt-2">
+                  <h5 className="mb-3">Winner</h5>
+                  <div className="d-flex bg-light p-3 rounded">
+                    <div style={{ width: '64px', height: '64px' }}>
                       <img
-                        className="h-16 w-16 rounded-full"
+                        className="rounded-circle w-100 h-100"
                         src={result.winner.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(result.winner.name)}&background=random&size=64`}
                         alt={result.winner.name}
                       />
                     </div>
-                    <div className="ml-4">
-                      <h4 className="text-lg font-medium text-gray-900">{result.winner.name}</h4>
+                    <div className="ms-3">
+                      <h5 className="mb-1">{result.winner.name}</h5>
                       {result.winner.phone && (
-                        <p className="text-sm text-gray-600">
-                          <span className="inline-block mr-1">
-                            <svg className="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                            </svg>
-                          </span>
+                        <p className="mb-1 small">
+                          <i className="bi bi-telephone me-1"></i>
                           {result.winner.phone}
                         </p>
                       )}
                       {result.winner.email && (
-                        <p className="text-sm text-gray-600">
-                          <span className="inline-block mr-1">
-                            <svg className="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                          </span>
+                        <p className="mb-1 small">
+                          <i className="bi bi-envelope me-1"></i>
                           {result.winner.email}
                         </p>
                       )}
                       {result.winner.address && (
-                        <p className="text-sm text-gray-600">
-                          <span className="inline-block mr-1">
-                            <svg className="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                          </span>
+                        <p className="mb-1 small">
+                          <i className="bi bi-geo-alt me-1"></i>
                           {result.winner.address}
                         </p>
                       )}
-                      <p className="mt-2 text-lg font-medium text-green-600">
+                      <p className="mt-2 text-success fw-bold">
                         Winning Bid: {databaseService.formatCurrency(result.finalPrice)}
                       </p>
                     </div>
                   </div>
-                ) : (
-                  <p className="text-yellow-600">No winner (no bids were placed)</p>
-                )}
-              </div>
-            </div>
+                </div>
+              )}
+            </Card.Body>
           </Card>
 
-          <Card title="Bid History">
-            <BidHistory bids={result.bidHistory} />
+          <Card className="shadow-sm">
+            <Card.Header className="bg-white">
+              <h5 className="mb-0">Bid History</h5>
+            </Card.Header>
+            <Card.Body>
+              {bids.length > 0 ? (
+                <BidHistory bids={bids} />
+              ) : (
+                <p className="text-center text-muted my-4">No bids have been placed yet.</p>
+              )}
+            </Card.Body>
           </Card>
-        </div>
-
-        <div>
-          <Card title="Actions">
-            <div className="space-y-4 p-4">
-              <Link to={ROUTES.HOME} className="block">
-                <Button variant="primary" fullWidth>
-                  Back to Home
-                </Button>
-              </Link>
-
-              <Link to={ROUTES.SETUP} className="block">
-                <Button variant="secondary" fullWidth>
-                  Create New Auction
-                </Button>
-              </Link>
-
-              <Button
-                variant="success"
-                fullWidth
-                onClick={() => {
-                  // Print the result
-                  window.print();
-                }}
-              >
-                Print Result
-              </Button>
-            </div>
-          </Card>
-        </div>
-      </div>
-    </div>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

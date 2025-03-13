@@ -58,13 +58,7 @@ const HomePage: React.FC = () => {
           </Link>
         );
       case AUCTION_STATUS.ENDED:
-        return (
-          <Link to={`${ROUTES.RESULT}/${auction.id}`}>
-            <Button variant="secondary" size="sm">
-              <i className="bi bi-eye me-1"></i> View Results
-            </Button>
-          </Link>
-        );
+        return null;
       default:
         return null;
     }
@@ -162,7 +156,25 @@ const HomePage: React.FC = () => {
                       <><i className="bi bi-hourglass-split me-1"></i>{Math.floor(auction.timeLeft / 60)} minutes left</>
                     )}
                   </small>
-                  {getActionButton(auction)}
+                  <div className="d-flex gap-2">
+                    <Link to={`${ROUTES.RESULT}/${auction.id}`}>
+                      <Button
+                        variant={
+                          auction.status === AUCTION_STATUS.SETUP ? "outline-primary" :
+                          auction.status === AUCTION_STATUS.IN_PROGRESS ? "outline-success" :
+                          "primary"
+                        }
+                        size="sm"
+                        className="view-detail-btn"
+                      >
+                        <i className={`bi ${
+                          auction.status === AUCTION_STATUS.ENDED ? "bi-eye" : "bi-info-circle"
+                        } me-1`}></i>
+                        {auction.status === AUCTION_STATUS.ENDED ? "View Results" : "View Detail"}
+                      </Button>
+                    </Link>
+                    {getActionButton(auction)}
+                  </div>
                 </Card.Footer>
               </Card>
             </Col>
