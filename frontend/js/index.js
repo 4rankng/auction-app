@@ -1,4 +1,42 @@
 import config from './config.js';
+import * as apiService from './api-service.js';
+
+// Debug info for demo mode
+console.log('Config loaded:', config);
+console.log('Demo mode status:', config.demoMode ? 'ENABLED' : 'DISABLED');
+
+// Add demo mode indicator if in demo mode
+if (config.demoMode) {
+    console.log('Demo mode is enabled, setting up indicator');
+    document.addEventListener('DOMContentLoaded', () => {
+        const demoIndicator = document.createElement('div');
+        demoIndicator.className = 'alert alert-warning';
+        demoIndicator.style.marginBottom = '20px';
+        demoIndicator.innerHTML = '<strong>Demo Mode</strong> - Running with mock data';
+
+        // Insert the indicator at the top of the container
+        const container = document.querySelector('.container');
+        if (container) {
+            // Insert at the beginning of the container, before any other content
+            container.insertBefore(demoIndicator, container.firstChild);
+            console.log('Demo indicator added to page');
+        } else {
+            console.error('Could not find container element for demo indicator');
+        }
+
+        // Add quick setup button for demo
+        const setupBtn = document.createElement('button');
+        setupBtn.className = 'btn btn-primary ms-2';
+        setupBtn.innerHTML = 'Quick Setup';
+        setupBtn.addEventListener('click', () => {
+            // For demo mode, we'll just use a fixed ID
+            localStorage.setItem('currentAuctionId', 'demo-auction-1');
+            console.log('Quick Setup: Navigating directly to setup.html');
+            window.location.href = 'setup.html';
+        });
+        demoIndicator.appendChild(setupBtn);
+    });
+}
 
 // DOM Elements
 const createAuctionBtn = document.getElementById('createAuctionBtn');
@@ -100,22 +138,33 @@ async function apiRequest(url, options = {}) {
 
 // Create auction row
 function createAuctionRow(auction) {
-    const status = auction.status || auction.auctionStatus || 'notStarted';
-    const statusClass = status === 'notStarted' ? 'bg-secondary' :
-                         status === 'inProgress' ? 'bg-success' : 'bg-danger';
-    const statusText = status === 'notStarted' ? 'Chưa Bắt Đầu' :
-                      status === 'inProgress' ? 'Đang Diễn Ra' : 'Đã Kết Thúc';
+    console.log('Creating row for auction:', auction);
+
+    // Ensure status is properly normalized
+    const status = auction.status || auction.auctionStatus || 'setup';
+    console.log(`Auction ${auction.id} status: ${status}`);
+
+    const statusClass = status === 'setup' ? 'bg-secondary' :
+                         status === 'active' ? 'bg-success' : 'bg-danger';
+    const statusText = status === 'setup' ? 'Chưa Bắt Đầu' :
+                      status === 'active' ? 'Đang Diễn Ra' : 'Đã Kết Thúc';
 
     // Make sure bidders is an array
     const bidders = auction.bidders || [];
 
+    // Ensure we have values for all properties
+    const displayTitle = auction.title || 'Phiên Đấu Giá';
+    const created = auction.created || new Date().toISOString();
+    const startingPrice = auction.startingPrice || 0;
+    const highestBid = auction.highestBid || 0;
+
     const row = document.createElement('tr');
     row.innerHTML = `
-        <td>${auction.title || 'Phiên Đấu Giá'}</td>
-        <td>${formatDate(auction.created)}</td>
+        <td>${displayTitle}</td>
+        <td>${formatDate(created)}</td>
         <td><span class="badge ${statusClass}">${statusText}</span></td>
-        <td class="starting-price">${formatCurrency(auction.startingPrice)}</td>
-        <td class="current-price">${status !== 'notStarted' && auction.highestBid ? formatCurrency(auction.highestBid) : '0 VND'}</td>
+        <td class="starting-price">${formatCurrency(startingPrice)}</td>
+        <td class="current-price">${status !== 'setup' && highestBid ? formatCurrency(highestBid) : '0 VND'}</td>
         <td>${bidders.length}</td>
         <td>
             <button class="btn btn-primary btn-sm view-auction" data-auction-id="${auction.id}">
@@ -171,12 +220,41 @@ function createPagination(currentPage, totalPages) {
 async function loadAuctions(page = 1, pageSize = 10) {
     showLoading();
     try {
-        const result = await apiRequest(`${config.apiBaseUrl}${config.endpoints.auctions}?page=${page}&pageSize=${pageSize}`);
+        let auctions = [];
 
-        currentPage = result.page;
-        totalPages = result.totalPages;
-        currentPageSize = result.pageSize;
-        const auctions = result.data || [];
+        // In demo mode, we'll just have a single auction
+        if (config.demoMode) {
+            console.log('Loading demo auction data');
+
+            // Create a demo auction directly without relying on API calls that might fail
+            auctions = [{
+                id: "demo-auction-1",
+                title: "Demo Auction",
+                created: new Date().toISOString(),
+                status: "setup", // Start with setup status
+                startingPrice: 1000000,
+                highestBid: 0,
+                bidders: [
+                    { id: "B001", name: "Nguyễn Văn A", address: "123 Đường Lê Lợi, Hà Nội" },
+                    { id: "B002", name: "Trần Thị B", address: "456 Đường Nguyễn Huệ, TP.HCM" },
+                    { id: "B003", name: "Lê Văn C", address: "789 Đường Trần Phú, Đà Nẵng" }
+                ]
+            }];
+
+            // Update pagination for demo
+            currentPage = 1;
+            totalPages = 1;
+
+            // In demo mode, also set the localStorage for current auction
+            localStorage.setItem('currentAuctionId', 'demo-auction-1');
+        } else {
+            // Real API call for production
+            const result = await apiRequest(`${config.apiBaseUrl}${config.endpoints.auctions}?page=${page}&pageSize=${pageSize}`);
+            auctions = result.data || [];
+            currentPage = result.page;
+            totalPages = result.totalPages;
+            currentPageSize = result.pageSize;
+        }
 
         console.log('Loaded auctions:', auctions);
 
@@ -197,6 +275,35 @@ async function loadAuctions(page = 1, pageSize = 10) {
         }
     } catch (error) {
         console.error('Failed to load auctions:', error);
+
+        // If we're in demo mode and something went wrong, still show a demo auction
+        if (config.demoMode) {
+            console.log('Error occurred, but creating fallback demo auction');
+            const fallbackAuction = {
+                id: "demo-auction-1",
+                title: "Demo Auction (Fallback)",
+                created: new Date().toISOString(),
+                status: "setup",
+                startingPrice: 1000000,
+                highestBid: 0,
+                bidders: [
+                    { id: "B001", name: "Nguyễn Văn A", address: "123 Đường Lê Lợi, Hà Nội" },
+                    { id: "B002", name: "Trần Thị B", address: "456 Đường Nguyễn Huệ, TP.HCM" }
+                ]
+            };
+
+            noAuctionsMessage.style.display = 'none';
+            auctionsTableBody.innerHTML = '';
+            const row = createAuctionRow(fallbackAuction);
+            auctionsTableBody.appendChild(row);
+
+            // Set localStorage for the demo auction
+            localStorage.setItem('currentAuctionId', 'demo-auction-1');
+
+            // No need to show an error toast in demo mode fallback
+            return;
+        }
+
         noAuctionsMessage.style.display = 'block';
         showToast('Không thể tải danh sách phiên đấu giá. Vui lòng thử lại.', 'error');
     } finally {
@@ -208,22 +315,39 @@ async function loadAuctions(page = 1, pageSize = 10) {
 async function viewAuction(auctionId) {
     showLoading();
     try {
+        // Save auction ID to localStorage
         localStorage.setItem('currentAuctionId', auctionId);
+        console.log(`Viewing auction: ${auctionId}`);
+
+        if (config.demoMode) {
+            console.log('Demo mode: navigating directly to setup page');
+            // In demo mode, just go directly to the setup page without checking status
+            console.log('Navigating to setup.html directly');
+            window.location.href = 'setup.html';
+            return;
+        }
+
+        // For non-demo mode, check the status and navigate accordingly
         const result = await apiRequest(`${config.apiBaseUrl}${config.endpoints.auctionById(auctionId)}`);
         const auction = result.data;
         const status = auction.status || auction.auctionStatus;
 
-        if (status === 'notStarted') {
+        console.log('Auction status:', status);
+
+        // Navigate based on auction status
+        if (status === 'setup') {
             window.location.href = config.pages.setup;
-        } else if (status === 'inProgress') {
+        } else if (status === 'active') {
             window.location.href = config.pages.bid;
-        } else if (status === 'completed') {
+        } else if (status === 'ended') {
             window.location.href = config.pages.result;
+        } else {
+            // Default to setup page
+            window.location.href = config.pages.setup;
         }
     } catch (error) {
         console.error('Failed to get auction status:', error);
         showToast('Không thể mở phiên đấu giá. Vui lòng thử lại.', 'error');
-    } finally {
         hideLoading();
     }
 }
@@ -232,6 +356,20 @@ async function viewAuction(auctionId) {
 async function createNewAuction() {
     showLoading();
     try {
+        console.log('Creating new auction');
+
+        if (config.demoMode) {
+            // In demo mode, just reset the demo data and go directly to setup
+            console.log('Demo mode: going directly to setup page');
+            localStorage.setItem('currentAuctionId', 'demo-auction-1');
+
+            // Use direct navigation to setup.html instead of config.pages.setup
+            console.log('Navigating to setup.html directly');
+            window.location.href = 'setup.html';
+            return;
+        }
+
+        // Real API call for production
         const auctionData = {
             title: "Phiên Đấu Giá Mới",
             startingPrice: config.defaultSettings.startingPrice,
@@ -249,31 +387,81 @@ async function createNewAuction() {
     } catch (error) {
         console.error('Failed to create auction:', error);
         showToast('Không thể tạo phiên đấu giá mới. Vui lòng thử lại.', 'error');
-    } finally {
         hideLoading();
     }
 }
 
 // Event Listeners
-createAuctionBtn.addEventListener('click', createNewAuction);
-refreshBtn.addEventListener('click', () => {
-    refreshBtn.disabled = true;
-    refreshBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Đang làm mới...';
-    loadAuctions(currentPage, currentPageSize).finally(() => {
-        refreshBtn.disabled = false;
-        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Làm mới';
-    });
-});
-
-// Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
-    // Show no auctions message initially
-    noAuctionsMessage.style.display = 'block';
+    console.log('DOM fully loaded and parsed');
+
+    // Force-add a demo auction row if in demo mode
+    if (config.demoMode) {
+        console.log('Demo mode detected, forcing sample data display');
+        // Hide the no auctions message immediately
+        if (noAuctionsMessage) {
+            noAuctionsMessage.style.display = 'none';
+        }
+
+        // Create a sample auction directly
+        const sampleAuction = {
+            id: "demo-auction-1",
+            title: "Demo Auction",
+            created: new Date().toISOString(),
+            status: "setup",
+            startingPrice: 1000000,
+            highestBid: 0,
+            bidders: [
+                { id: "B001", name: "Nguyễn Văn A", address: "123 Đường Lê Lợi, Hà Nội" },
+                { id: "B002", name: "Trần Thị B", address: "456 Đường Nguyễn Huệ, TP.HCM" },
+                { id: "B003", name: "Lê Văn C", address: "789 Đường Trần Phú, Đà Nẵng" }
+            ]
+        };
+
+        // Clear table and add the sample row directly to the DOM
+        if (auctionsTableBody) {
+            auctionsTableBody.innerHTML = '';
+            const row = createAuctionRow(sampleAuction);
+            auctionsTableBody.appendChild(row);
+            console.log('Sample auction row added directly to DOM');
+        } else {
+            console.error('auctionsTableBody element not found');
+        }
+    }
+
+    // Add click handler for create auction button
+    if (createAuctionBtn) {
+        createAuctionBtn.addEventListener('click', createNewAuction);
+    }
+
+    // Add click handler for refresh button
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            refreshBtn.disabled = true;
+            refreshBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Đang làm mới...';
+            loadAuctions(currentPage, currentPageSize).finally(() => {
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Làm mới';
+            });
+        });
+    }
+
+    // Show no auctions message initially only if not in demo mode
+    if (noAuctionsMessage && !config.demoMode) {
+        noAuctionsMessage.style.display = 'block';
+    }
 
     // Add event listener for page size changes
-    pageSizeSelect.addEventListener('change', (e) => {
-        currentPageSize = parseInt(e.target.value);
-        currentPage = 1; // Reset to first page when changing page size
-        loadAuctions(currentPage, currentPageSize);
-    });
+    if (pageSizeSelect) {
+        pageSizeSelect.addEventListener('change', (e) => {
+            currentPageSize = parseInt(e.target.value);
+            currentPage = 1; // Reset to first page when changing page size
+            loadAuctions(currentPage, currentPageSize);
+        });
+    }
+
+    // Load auctions on page load (but we've already added sample data in demo mode)
+    if (!config.demoMode) {
+        loadAuctions();
+    }
 });

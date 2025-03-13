@@ -1,11 +1,40 @@
-// Import configuration
+// Import configuration and API service
 import config from './config.js';
+import * as apiService from './api-service.js';
+
+// Add demo mode indicator if in demo mode
+if (config.demoMode) {
+    document.addEventListener('DOMContentLoaded', () => {
+        const demoIndicator = document.createElement('div');
+        demoIndicator.className = 'alert alert-warning position-fixed top-0 start-50 translate-middle-x';
+        demoIndicator.style.zIndex = '1050';
+        demoIndicator.style.marginTop = '10px';
+        demoIndicator.innerHTML = '<strong>Demo Mode</strong> - Running with mock data';
+        document.body.appendChild(demoIndicator);
+
+        // Add reset button if in demo mode
+        const resetBtn = document.createElement('button');
+        resetBtn.id = 'resetDemoBtn';
+        resetBtn.className = 'btn btn-danger btn-sm ms-2';
+        resetBtn.innerHTML = '<i class="fas fa-redo"></i> Reset';
+        resetBtn.addEventListener('click', async () => {
+            try {
+                await apiService.resetDemo();
+                showToast('Demo reset successfully', 'success');
+                window.location.reload();
+            } catch (error) {
+                showToast(`Error resetting demo: ${error.message}`, 'danger');
+            }
+        });
+        demoIndicator.appendChild(resetBtn);
+    });
+}
 
 // Constants from configuration
 const API_BASE_URL = config.apiBaseUrl;
 const WS_BASE_URL = API_BASE_URL.replace('http', 'ws');
 const TIMER_INTERVAL = 1000; // Update to 1 second for more accurate timers
-const DEFAULT_AUCTION_DURATION = config.defaultAuctionDuration;
+const DEFAULT_AUCTION_DURATION = config.defaultSettings.auctionDuration || 300;
 
 // DOM Elements
 const statusBadge = document.getElementById('statusBadge');
@@ -83,6 +112,14 @@ async function initialize() {
             return;
         }
 
+        console.log('Initializing with auction ID:', auctionId);
+
+        // For demo mode, ensure we're using the demo-auction-1 ID
+        if (config.demoMode && auctionId !== 'demo-auction-1') {
+            auctionId = 'demo-auction-1';
+            localStorage.setItem('currentAuctionId', auctionId);
+        }
+
         // Load initial auction data
         await loadAuctionData();
 
@@ -96,22 +133,42 @@ async function initialize() {
         const status = auctionData.status;
         console.log('Current auction status:', status);
 
-        if (status === 'notStarted') {
+        if (status === 'setup') {
             console.log('Auction not started, redirecting to setup page');
             window.location.href = config.pages.setup;
             return;
-        } else if (status === 'completed') {
+        } else if (status === 'ended') {
             console.log('Auction already completed, redirecting to result page');
             window.location.href = config.pages.result;
             return;
         }
 
-        // Initialize WebSocket connection
-        initializeWebSocket();
+        // Initialize WebSocket connection (in real mode)
+        if (!config.demoMode) {
+            initializeWebSocket();
+        } else {
+            // For demo mode, use a timer to simulate real-time updates
+            startDemoTimer();
+        }
     } catch (error) {
         console.error('Failed to initialize auction page:', error);
         showToast('Không thể tải dữ liệu. Vui lòng thử lại sau.', 'error');
     }
+}
+
+// Start a demo timer to simulate real-time updates in demo mode
+function startDemoTimer() {
+    // Check for updates every 2 seconds
+    const timerInterval = setInterval(async () => {
+        try {
+            await loadAuctionData();
+        } catch (error) {
+            console.error('Error in demo timer update:', error);
+        }
+    }, 2000);
+
+    // Store the interval ID in a variable so we can clear it later if needed
+    window.demoBidTimer = timerInterval;
 }
 
 function initializeWebSocket() {
@@ -202,10 +259,27 @@ async function loadAuctionData() {
 // Load auction details
 async function loadAuction() {
     try {
-        const url = `${API_BASE_URL}${config.endpoints.auctionById(auctionId)}`;
-        const response = await apiRequest(url);
+        if (config.demoMode) {
+            // Use apiService for demo mode
+            const status = await apiService.getAuctionStatus();
 
-        auctionData = response.data;
+            auctionData = {
+                id: auctionId,
+                status: status.status,
+                startingPrice: await getAuctionSettings().then(data => data.initialPrice),
+                priceStep: await getAuctionSettings().then(data => data.priceIncrement),
+                highestBid: status.highestBid,
+                highestBidder: status.highestBidder,
+                timeRemaining: status.timeRemaining,
+                currentRound: status.round
+            };
+        } else {
+            // Use direct API call for non-demo mode
+            const url = `${API_BASE_URL}${config.endpoints.auctionById(auctionId)}`;
+            const response = await apiRequest(url);
+            auctionData = response.data;
+        }
+
         console.log('Auction data:', auctionData);
 
         // Update UI with auction data
@@ -219,16 +293,30 @@ async function loadAuction() {
     }
 }
 
+// Helper function to get auction settings in demo mode
+async function getAuctionSettings() {
+    try {
+        return await apiService.getAuctionSettings();
+    } catch (error) {
+        console.error('Error getting auction settings:', error);
+        return { initialPrice: 1000000, priceIncrement: 50000 };
+    }
+}
+
 // Load bidders for the auction
 async function loadBidders() {
     try {
-        if (!auctionData || !auctionData.bidders) {
-            return [];
+        if (config.demoMode) {
+            // Use apiService for demo mode
+            bidders = await apiService.getBidders();
+        } else {
+            if (!auctionData || !auctionData.bidders) {
+                return [];
+            }
+            bidders = auctionData.bidders;
         }
 
-        bidders = auctionData.bidders;
         updateBidderGrid();
-
         return bidders;
     } catch (error) {
         console.error('Error loading bidders:', error);
@@ -239,12 +327,16 @@ async function loadBidders() {
 // Load bid history
 async function loadBidHistory() {
     try {
-        const url = `${API_BASE_URL}${config.endpoints.bidHistory(auctionId)}`;
-        const response = await apiRequest(url);
+        if (config.demoMode) {
+            // Use apiService for demo mode
+            bidHistory = await apiService.getBidHistory();
+        } else {
+            const url = `${API_BASE_URL}${config.endpoints.bidHistory(auctionId)}`;
+            const response = await apiRequest(url);
+            bidHistory = response.data || [];
+        }
 
-        bidHistory = response.data || [];
         renderBidHistory();
-
         return bidHistory;
     } catch (error) {
         console.error('Error loading bid history:', error);
@@ -554,16 +646,25 @@ async function placeBid() {
         showLoadingIndicator(true);
         placeBidBtn.disabled = true;
 
-        const url = `${API_BASE_URL}${config.endpoints.placeBid(auctionId)}`;
-        const response = await apiRequest(url, {
-            method: 'POST',
-            body: JSON.stringify({
+        if (config.demoMode) {
+            // Use apiService for demo mode
+            await apiService.placeBid({
                 bidderId: selectedId,
                 amount: amount
-            })
-        });
+            });
+        } else {
+            // Use direct API call for non-demo mode
+            const url = `${API_BASE_URL}${config.endpoints.placeBid(auctionId)}`;
+            await apiRequest(url, {
+                method: 'POST',
+                body: JSON.stringify({
+                    bidderId: selectedId,
+                    amount: amount
+                })
+            });
+        }
 
-        console.log('Bid placed successfully:', response);
+        console.log('Bid placed successfully');
         showToast('Đặt giá thành công', 'success');
 
         // Reload auction data
@@ -588,17 +689,21 @@ async function cancelLastBid() {
         cancelBidBtn.disabled = true;
         cancelBidBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
 
-        await apiRequest(`${API_BASE_URL}/auction/bid/cancel`, {
-            method: 'POST'
-        });
+        if (config.demoMode) {
+            // Use apiService for demo mode
+            await apiService.cancelLastBid();
+        } else {
+            // Use direct API call for non-demo mode
+            await apiRequest(`${API_BASE_URL}/auction/bid/cancel`, {
+                method: 'POST'
+            });
+        }
 
         // Show success message
         showToast('Đã hủy đấu giá cuối cùng', 'success');
 
         // Update data
-        await Promise.all([
-            loadAuctionData()
-        ]);
+        await loadAuctionData();
 
         // Update UI
         updateStatusUI();
@@ -625,10 +730,16 @@ async function endAuction() {
         showLoadingIndicator(true);
         endAuctionBtn.disabled = true;
 
-        const url = `${API_BASE_URL}${config.endpoints.endAuction(auctionId)}`;
-        await apiRequest(url, {
-            method: 'PUT'
-        });
+        if (config.demoMode) {
+            // Use apiService for demo mode
+            await apiService.endAuction();
+        } else {
+            // Use direct API call for non-demo mode
+            const url = `${API_BASE_URL}${config.endpoints.endAuction(auctionId)}`;
+            await apiRequest(url, {
+                method: 'PUT'
+            });
+        }
 
         showToast('Phiên đấu giá đã kết thúc', 'success');
 

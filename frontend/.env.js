@@ -7,11 +7,16 @@ const envConfig = {
     apiBaseUrl: 'http://localhost:8080/api/v1',
 
     // Debug mode - Should be false in production
-    debug: true
+    debug: true,
+
+    // Demo mode - Set to false to use actual backend API
+    // When true, the app will use in-memory data and mock functionality
+    demoMode: true,
 
     // Add any other environment-specific settings here
 };
 
 // In production, you might want:
 // apiBaseUrl: 'https://your-production-api.com/api/v1',
-// debug: false
+// debug: false,
+// demoMode: false

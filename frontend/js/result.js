@@ -1,5 +1,32 @@
 // Import configuration
 import config from './config.js';
+import * as apiService from './api-service.js';
+
+// Add demo mode indicator if in demo mode
+if (config.demoMode) {
+    document.addEventListener('DOMContentLoaded', () => {
+        const demoIndicator = document.createElement('div');
+        demoIndicator.className = 'alert alert-warning';
+        demoIndicator.innerHTML = '<strong>Demo Mode</strong> - Running with mock data';
+        document.querySelector('.container').prepend(demoIndicator);
+
+        // Add reset button if in demo mode
+        const resetBtn = document.createElement('button');
+        resetBtn.id = 'resetDemoBtn';
+        resetBtn.className = 'btn btn-danger btn-sm ms-2';
+        resetBtn.innerHTML = '<i class="fas fa-redo"></i> Reset';
+        resetBtn.addEventListener('click', async () => {
+            try {
+                await apiService.resetDemo();
+                showToast('Demo reset successfully', 'success');
+                window.location.href = config.pages.index;
+            } catch (error) {
+                showToast(`Error resetting demo: ${error.message}`, 'danger');
+            }
+        });
+        demoIndicator.appendChild(resetBtn);
+    });
+}
 
 // Constants
 const API_BASE_URL = config.apiBaseUrl;
@@ -61,18 +88,44 @@ async function loadAuctionData() {
     try {
         showLoadingIndicator(true);
 
-        // Get auction details
-        const url = `${API_BASE_URL}${config.endpoints.auctionById(auctionId)}`;
-        const response = await apiRequest(url);
+        if (config.demoMode) {
+            // For demo mode, use apiService
+            const status = await apiService.getAuctionStatus();
+            const bidders = await apiService.getBidders();
 
-        auctionData = response.data;
+            // For demo mode, ensure we're using the fixed ID
+            if (auctionId !== 'demo-auction-1') {
+                auctionId = 'demo-auction-1';
+                localStorage.setItem('currentAuctionId', auctionId);
+            }
+
+            // Create auction data object from status and bidders
+            auctionData = {
+                id: auctionId,
+                title: "Demo Auction Results",
+                status: status.status,
+                bidders: bidders,
+                highestBid: status.highestBid,
+                highestBidder: status.highestBidder,
+                startTime: status.startTime,
+                endTime: status.endTime
+            };
+
+            // Get bid history from apiService
+            bidHistory = await apiService.getBidHistory();
+        } else {
+            // Get auction details
+            const url = `${API_BASE_URL}${config.endpoints.auctionById(auctionId)}`;
+            const response = await apiRequest(url);
+            auctionData = response.data;
+
+            // Load bid history
+            const historyUrl = `${API_BASE_URL}${config.endpoints.bidHistory(auctionId)}`;
+            const historyResponse = await apiRequest(historyUrl);
+            bidHistory = historyResponse.data || [];
+        }
+
         console.log('Auction data:', auctionData);
-
-        // Load bid history
-        const historyUrl = `${API_BASE_URL}${config.endpoints.bidHistory(auctionId)}`;
-        const historyResponse = await apiRequest(historyUrl);
-
-        bidHistory = historyResponse.data || [];
         console.log('Bid history:', bidHistory);
 
         // Update UI
@@ -95,7 +148,7 @@ function updateUI() {
     }
 
     // Set winner info if auction is completed
-    if (auctionData.status === 'completed') {
+    if (auctionData.status === 'ended') {
         // Find the winning bidder
         const winningBidder = auctionData.bidders.find(bidder => bidder.id === auctionData.highestBidder);
 
@@ -119,12 +172,12 @@ function updateUI() {
     // Set auction status badge
     if (auctionStatusBadge) {
         const status = auctionData.status;
-        auctionStatusBadge.textContent = status === 'notStarted' ? 'Chưa bắt đầu' :
-                                        status === 'inProgress' ? 'Đang diễn ra' : 'Đã kết thúc';
+        auctionStatusBadge.textContent = status === 'setup' ? 'Chưa bắt đầu' :
+                                        status === 'active' ? 'Đang diễn ra' : 'Đã kết thúc';
 
         auctionStatusBadge.className = 'badge ' +
-                                      (status === 'notStarted' ? 'bg-secondary' :
-                                       status === 'inProgress' ? 'bg-success' : 'bg-danger');
+                                      (status === 'setup' ? 'bg-secondary' :
+                                       status === 'active' ? 'bg-success' : 'bg-danger');
     }
 
     // Update bid history table
@@ -155,7 +208,7 @@ function renderBidHistory() {
         const row = document.createElement('tr');
 
         // Add highlight for winning bid
-        if (bid.bidderId === auctionData.highestBidder && auctionData.status === 'completed') {
+        if (bid.bidderId === auctionData.highestBidder && auctionData.status === 'ended') {
             row.classList.add('table-success');
         }
 
@@ -175,36 +228,113 @@ async function exportAuctionData() {
     try {
         showLoadingIndicator(true);
 
-        const url = `${API_BASE_URL}${config.endpoints.exportAuction(auctionId)}`;
+        if (config.demoMode) {
+            // In demo mode, create a local Excel file using SheetJS
+            const workbook = XLSX.utils.book_new();
 
-        // Fetch as blob
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            // Create auction info sheet
+            const auctionInfoRows = [
+                ['Auction Summary'],
+                ['ID', auctionData.id || 'demo-auction-1'],
+                ['Status', auctionData.status || 'Unknown'],
+                ['Start Time', auctionData.startTime ? new Date(auctionData.startTime).toLocaleString() : 'N/A'],
+                ['End Time', auctionData.endTime ? new Date(auctionData.endTime).toLocaleString() : 'N/A'],
+                ['Starting Price', formatCurrency(auctionData.startingPrice || 0)],
+                ['Final Price', formatCurrency(auctionData.highestBid || 0)],
+                ['Winning Bidder', auctionData.highestBidder || 'None']
+            ];
+
+            const infoSheet = XLSX.utils.aoa_to_sheet(auctionInfoRows);
+            XLSX.utils.book_append_sheet(workbook, infoSheet, 'Auction Info');
+
+            // Create bidders sheet
+            const bidderHeaders = ['ID', 'Name', 'Address'];
+            const bidderRows = [bidderHeaders];
+
+            if (auctionData.bidders && auctionData.bidders.length > 0) {
+                auctionData.bidders.forEach(bidder => {
+                    bidderRows.push([
+                        bidder.id,
+                        bidder.name,
+                        bidder.address || ''
+                    ]);
+                });
             }
-        });
 
-        if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
+            const bidderSheet = XLSX.utils.aoa_to_sheet(bidderRows);
+            XLSX.utils.book_append_sheet(workbook, bidderSheet, 'Bidders');
+
+            // Create bid history sheet
+            const historyHeaders = ['Round', 'Bidder ID', 'Bidder Name', 'Amount', 'Timestamp'];
+            const historyRows = [historyHeaders];
+
+            if (bidHistory && bidHistory.length > 0) {
+                bidHistory.forEach(bid => {
+                    historyRows.push([
+                        bid.round,
+                        bid.bidderId,
+                        bid.bidderName,
+                        bid.amount,
+                        new Date(bid.timestamp).toLocaleString()
+                    ]);
+                });
+            }
+
+            const historySheet = XLSX.utils.aoa_to_sheet(historyRows);
+            XLSX.utils.book_append_sheet(workbook, historySheet, 'Bid History');
+
+            // Generate Excel file
+            const excelData = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            const blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+            // Create download link
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `auction_results_demo.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+
+            // Clean up
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }, 100);
+
+            showToast('Xuất dữ liệu thành công', 'success');
+        } else {
+            // Real API call for production
+            const url = `${API_BASE_URL}${config.endpoints.exportAuction(auctionId)}`;
+
+            // Fetch as blob
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+
+            // Get the blob
+            const blob = await response.blob();
+
+            // Create download link and trigger download
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = `auction_results_${auctionId}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+
+            // Clean up
+            window.URL.revokeObjectURL(downloadUrl);
+            document.body.removeChild(a);
+
+            showToast('Xuất dữ liệu thành công', 'success');
         }
-
-        // Get the blob
-        const blob = await response.blob();
-
-        // Create download link and trigger download
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = `auction_results_${auctionId}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-
-        // Clean up
-        window.URL.revokeObjectURL(downloadUrl);
-        document.body.removeChild(a);
-
-        showToast('Xuất dữ liệu thành công', 'success');
     } catch (error) {
         console.error('Error exporting auction data:', error);
         showToast('Không thể xuất dữ liệu', 'error');
