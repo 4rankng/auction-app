@@ -73,7 +73,7 @@ func (h *Handlers) CreateAuction(c *gin.Context) {
 		CurrentRound:  0,
 		HighestBid:    0,
 		HighestBidder: "",
-		AuctionStatus: common.NotStarted,
+		Status:        common.NotStarted,
 	}
 
 	// Save to database
@@ -98,7 +98,7 @@ func (h *Handlers) CreateAuction(c *gin.Context) {
 			"id":      auction.ID,
 			"title":   auction.Title,
 			"created": auction.CreatedAt,
-			"status":  auction.AuctionStatus,
+			"status":  auction.Status,
 		},
 	})
 }

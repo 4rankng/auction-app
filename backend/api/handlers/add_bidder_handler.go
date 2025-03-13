@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
+	"auction/common"
 	"auction/internal/models"
 )
 
@@ -54,12 +56,16 @@ func (h *Handlers) AddBidder(c *gin.Context) {
 		return
 	}
 
-	// Check if auction is in a valid state to add bidders
-	if auction.AuctionStatus != "pending" {
-		h.logger.Printf("Error: Cannot add bidders to auction with status: %s", auction.AuctionStatus)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Cannot add bidders to an auction that has already started or completed",
-		})
+	if auction == nil {
+		h.logger.Printf("Auction not found: %s", auctionID)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Auction not found: %s", auctionID)})
+		return
+	}
+
+	// Verify that the auction is in a state where bidders can be added
+	if auction.Status != common.NotStarted {
+		h.logger.Printf("Error: Cannot add bidders to auction with status: %s", auction.Status)
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Cannot add bidders to auction with status: %s", auction.Status)})
 		return
 	}
 

@@ -314,9 +314,22 @@ func (t *TinyDB) ExportAuctionData(id string) (*models.ExportData, error) {
 		return nil, fmt.Errorf("auction with ID %s not found", id)
 	}
 
-	// Check if auction is completed
-	if auction.AuctionStatus != common.Completed {
-		return nil, fmt.Errorf("cannot export data for auction that is not completed")
+	// Initialize an empty export data structure with auction metadata
+	exportData := models.ExportData{
+		AuctionID:     auction.ID,
+		Title:         auction.Title,
+		StartingPrice: auction.StartingPrice,
+		PriceStep:     auction.PriceStep,
+		TotalBids:     len(auction.BidHistory),
+		BidHistory:    []models.Bid{},
+		WinnerID:      auction.HighestBidder,
+		WinningBid:    auction.HighestBid,
+		EndTime:       time.Now(),
+	}
+
+	// Ensure the auction is completed
+	if auction.Status != common.Completed {
+		return nil, fmt.Errorf("cannot export data for an auction that is not completed")
 	}
 
 	// Find winner information
@@ -329,20 +342,9 @@ func (t *TinyDB) ExportAuctionData(id string) (*models.ExportData, error) {
 	}
 
 	// Create export data
-	exportData := &models.ExportData{
-		AuctionID:     auction.ID,
-		Title:         auction.Title,
-		StartingPrice: auction.StartingPrice,
-		PriceStep:     auction.PriceStep,
-		TotalBids:     len(auction.BidHistory),
-		BidHistory:    auction.BidHistory,
-		WinnerID:      auction.HighestBidder,
-		WinnerName:    winnerName,
-		WinningBid:    auction.HighestBid,
-		EndTime:       time.Now(), // Ideally this would be stored in the auction data
-	}
+	exportData.WinnerName = winnerName
 
-	return exportData, nil
+	return &exportData, nil
 }
 
 // Ensure TinyDB implements Database interface

@@ -24,7 +24,7 @@ func (suite *GetBiddersTestSuite) SetupTest() {
 func (suite *GetBiddersTestSuite) TestGetBiddersSuccess() {
 	// Create an auction with bidders
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 
 	// Add more bidders
 	auction.Bidders = append(auction.Bidders, models.Bidder{

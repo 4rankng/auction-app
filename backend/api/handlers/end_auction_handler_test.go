@@ -44,7 +44,7 @@ func (suite *EndAuctionTestSuite) TestEndAuctionNotFound() {
 func (suite *EndAuctionTestSuite) TestEndAuctionNotInProgress() {
 	// Create an auction that is not in progress
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.NotStarted
+	auction.Status = common.NotStarted
 	suite.mockDB.UpdateAuction(auction.ID, auction)
 
 	// Make the request
@@ -58,7 +58,7 @@ func (suite *EndAuctionTestSuite) TestEndAuctionNotInProgress() {
 func (suite *EndAuctionTestSuite) TestEndAuctionSuccess() {
 	// Create an auction in progress
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 	auction.HighestBid = 150
 	auction.HighestBidder = "bidder1"
 	auction.BidHistory = []models.Bid{
@@ -94,7 +94,7 @@ func (suite *EndAuctionTestSuite) TestEndAuctionSuccess() {
 	// Verify the auction was updated in the database
 	updatedAuction, err := suite.mockDB.GetAuction("test-auction")
 	suite.NoError(err)
-	assert.Equal(suite.T(), common.Completed, updatedAuction.AuctionStatus)
+	assert.Equal(suite.T(), common.Completed, updatedAuction.Status)
 }
 
 // TestEndAuctionSuite runs the test suite

@@ -21,8 +21,8 @@ type ErrorMockDB struct {
 	*mocks.MockDB
 }
 
-// SetBidders overrides the MockDB's SetBidders method to return an error
-func (m *ErrorMockDB) SetBidders(bidders []models.Bidder) error {
+// UpdateAuction overrides the MockDB's UpdateAuction method to return an error
+func (m *ErrorMockDB) UpdateAuction(id string, auction *models.Auction) error {
 	return fmt.Errorf("database error")
 }
 
@@ -36,6 +36,10 @@ func (suite *SetBiddersTestSuite) SetupTest() {
 }
 
 func (suite *SetBiddersTestSuite) TestSetBiddersSuccess() {
+	// Create a test auction first
+	auction := suite.CreateTestAuction("test-auction")
+	suite.mockDB.UpdateAuction(auction.ID, auction)
+
 	// Setup bidders
 	bidders := []models.Bidder{
 		{ID: "1", Name: "John Doe", Address: "123 Main St"},
@@ -43,7 +47,10 @@ func (suite *SetBiddersTestSuite) TestSetBiddersSuccess() {
 	}
 
 	// Create request body
-	reqBody, _ := json.Marshal(SetBiddersRequest{Bidders: bidders})
+	reqBody, _ := json.Marshal(SetBiddersRequest{
+		Bidders:   bidders,
+		AuctionId: "test-auction",
+	})
 
 	// Make the request
 	w := httptest.NewRecorder()
@@ -64,7 +71,10 @@ func (suite *SetBiddersTestSuite) TestSetBiddersSuccess() {
 
 func (suite *SetBiddersTestSuite) TestSetBiddersEmptyList() {
 	// Create request with empty bidders list
-	reqBody, _ := json.Marshal(SetBiddersRequest{Bidders: []models.Bidder{}})
+	reqBody, _ := json.Marshal(SetBiddersRequest{
+		Bidders: []models.Bidder{},
+		AuctionId: "test-auction",
+	})
 
 	// Make the request
 	w := httptest.NewRecorder()
@@ -91,7 +101,11 @@ func (suite *SetBiddersTestSuite) TestSetBiddersInvalidFormat() {
 }
 
 func (suite *SetBiddersTestSuite) TestSetBiddersDBError() {
-	// Create a custom mock DB that returns an error for SetBidders
+	// Create a test auction first
+	auction := suite.CreateTestAuction("test-auction")
+	suite.mockDB.UpdateAuction(auction.ID, auction)
+
+	// Create a custom mock DB that returns an error for UpdateAuction
 	originalDB := suite.handlers.db
 
 	// Create and set the error mock DB
@@ -104,7 +118,10 @@ func (suite *SetBiddersTestSuite) TestSetBiddersDBError() {
 	}
 
 	// Create request body
-	reqBody, _ := json.Marshal(SetBiddersRequest{Bidders: bidders})
+	reqBody, _ := json.Marshal(SetBiddersRequest{
+		Bidders: bidders,
+		AuctionId: "test-auction",
+	})
 
 	// Make the request
 	w := httptest.NewRecorder()
@@ -113,7 +130,7 @@ func (suite *SetBiddersTestSuite) TestSetBiddersDBError() {
 	suite.router.ServeHTTP(w, req)
 
 	// Assert response
-	suite.AssertErrorResponse(w, http.StatusInternalServerError, "Failed to set bidders")
+	suite.AssertErrorResponse(w, http.StatusInternalServerError, "Failed to update auction")
 
 	// Restore the original DB
 	suite.handlers.db = originalDB

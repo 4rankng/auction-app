@@ -33,7 +33,7 @@ func (h *Handlers) GetAuction(c *gin.Context) {
 		return
 	}
 
-	h.logger.Printf("Retrieved auction: %s, status: %s", auction.Title, auction.AuctionStatus)
+	h.logger.Printf("Retrieved auction: %s, status: %s", auction.Title, auction.Status)
 
 	// Return auction data
 	c.JSON(http.StatusOK, gin.H{

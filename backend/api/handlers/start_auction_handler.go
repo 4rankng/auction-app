@@ -34,9 +34,9 @@ func (h *Handlers) StartAuction(c *gin.Context) {
 		return
 	}
 
-	// Check if auction is already started
-	if auction.AuctionStatus != common.NotStarted {
-		h.logger.Printf("Error: Cannot start auction, current status: %s", auction.AuctionStatus)
+	// Check if the auction can be started
+	if auction.Status != common.NotStarted {
+		h.logger.Printf("Error: Cannot start auction, current status: %s", auction.Status)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Auction is already started or completed"})
 		return
 	}
@@ -48,8 +48,8 @@ func (h *Handlers) StartAuction(c *gin.Context) {
 		return
 	}
 
-	// Update auction status to in-progress
-	auction.AuctionStatus = common.InProgress
+	// Update auction status
+	auction.Status = common.InProgress
 	auction.CurrentRound = 1
 
 	// Save the updated auction
@@ -67,13 +67,13 @@ func (h *Handlers) StartAuction(c *gin.Context) {
 
 	h.logger.Printf("Auction started successfully: %s (ID: %s)", auction.Title, auction.ID)
 
-	// Return success response
+	// Return response
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Auction started successfully",
 		"data": gin.H{
 			"id":           auction.ID,
 			"title":        auction.Title,
-			"status":       auction.AuctionStatus,
+			"status":       auction.Status,
 			"currentRound": auction.CurrentRound,
 			"bidderCount":  len(auction.Bidders),
 		},

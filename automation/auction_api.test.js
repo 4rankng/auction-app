@@ -306,7 +306,7 @@ describe('Auction API Tests', () => {
       // Find our completed auction in the response
       const completedAuction = response.data.data.find(a => a.id === auctionId);
       expect(completedAuction).toBeDefined();
-      expect(completedAuction.auctionStatus).toBe('completed');
+      expect(completedAuction.status).toBe('completed');
 
       // Verify bid history is included
       expect(completedAuction.bidHistory).toBeDefined();
@@ -316,7 +316,7 @@ describe('Auction API Tests', () => {
       expect(completedAuction.bidHistory[0]).toHaveProperty('amount');
     });
 
-    test('should not include bid history for in-progress auctions', async () => {
+    test('should include bid history for in-progress auctions', async () => {
       // Create and setup an in-progress auction with bids
       const auctionId = await createAndSetupAuction();
       await api.put(`/api/v1/auctions/${auctionId}/start`);
@@ -336,10 +336,114 @@ describe('Auction API Tests', () => {
       // Find our in-progress auction in the response
       const inProgressAuction = response.data.data.find(a => a.id === auctionId);
       expect(inProgressAuction).toBeDefined();
-      expect(inProgressAuction.auctionStatus).toBe('inProgress');
+      expect(inProgressAuction.status).toBe('inProgress');
 
       // Verify bid history is empty or undefined
       expect(inProgressAuction.bidHistory || []).toHaveLength(0);
+    });
+
+    test('should filter auctions by status', async () => {
+      // First, create auctions with different statuses
+
+      // Create a "notStarted" auction
+      const notStartedResponse = await api.post('/api/v1/auctions', {
+        ...testAuction,
+        title: "Not Started Auction"
+      });
+      const notStartedId = notStartedResponse.data.data.id;
+      await wait(100);
+
+      // Create an "inProgress" auction
+      const inProgressResponse = await api.post('/api/v1/auctions', {
+        ...testAuction,
+        title: "In Progress Auction"
+      });
+      const inProgressId = inProgressResponse.data.data.id;
+
+      // Set bidders and start the auction
+      await api.put(`/api/v1/auctions/${inProgressId}/bidders`, { bidders: testBidders });
+      await wait(100);
+      await api.put(`/api/v1/auctions/${inProgressId}/start`);
+      await wait(100);
+
+      // Create a "completed" auction
+      const completedResponse = await api.post('/api/v1/auctions', {
+        ...testAuction,
+        title: "Completed Auction"
+      });
+      const completedId = completedResponse.data.data.id;
+
+      // Set bidders, start, and end the auction
+      await api.put(`/api/v1/auctions/${completedId}/bidders`, { bidders: testBidders });
+      await wait(100);
+      await api.put(`/api/v1/auctions/${completedId}/start`);
+      await wait(100);
+      await api.put(`/api/v1/auctions/${completedId}/end`);
+      await wait(100);
+
+      // Test filtering by "notStarted" status
+      const notStartedFiltered = await api.get('/api/v1/auctions?status=notStarted');
+      expect(notStartedFiltered.status).toBe(200);
+      expect(notStartedFiltered.data.data.length).toBeGreaterThan(0);
+
+      // Verify all returned auctions have notStarted status
+      for (const auction of notStartedFiltered.data.data) {
+        expect(auction.status).toBe('notStarted');
+      }
+
+      // Find our specifically created notStarted auction
+      const foundNotStarted = notStartedFiltered.data.data.find(a => a.id === notStartedId);
+      expect(foundNotStarted).toBeDefined();
+      expect(foundNotStarted.title).toBe("Not Started Auction");
+
+      // Test filtering by "inProgress" status
+      const inProgressFiltered = await api.get('/api/v1/auctions?status=inProgress');
+      expect(inProgressFiltered.status).toBe(200);
+      expect(inProgressFiltered.data.data.length).toBeGreaterThan(0);
+
+      // Verify all returned auctions have inProgress status
+      for (const auction of inProgressFiltered.data.data) {
+        expect(auction.status).toBe('inProgress');
+      }
+
+      // Find our specifically created inProgress auction
+      const foundInProgress = inProgressFiltered.data.data.find(a => a.id === inProgressId);
+      expect(foundInProgress).toBeDefined();
+      expect(foundInProgress.title).toBe("In Progress Auction");
+
+      // Test filtering by "completed" status
+      const completedFiltered = await api.get('/api/v1/auctions?status=completed');
+      expect(completedFiltered.status).toBe(200);
+      expect(completedFiltered.data.data.length).toBeGreaterThan(0);
+
+      // Verify all returned auctions have completed status
+      for (const auction of completedFiltered.data.data) {
+        expect(auction.status).toBe('completed');
+      }
+
+      // Find our specifically created completed auction
+      const foundCompleted = completedFiltered.data.data.find(a => a.id === completedId);
+      expect(foundCompleted).toBeDefined();
+      expect(foundCompleted.title).toBe("Completed Auction");
+
+      // Test combining status filter with pagination
+      const paginatedStatusResponse = await api.get('/api/v1/auctions?status=notStarted&pageSize=2');
+      expect(paginatedStatusResponse.status).toBe(200);
+      expect(paginatedStatusResponse.data).toHaveProperty('pageSize', 2);
+      expect(paginatedStatusResponse.data).toHaveProperty('page', 1);
+      expect(paginatedStatusResponse.data).toHaveProperty('totalPages');
+
+      // Verify all returned auctions have notStarted status
+      for (const auction of paginatedStatusResponse.data.data) {
+        expect(auction.status).toBe('notStarted');
+      }
+    });
+
+    test('should reject requests with invalid status parameter', async () => {
+      await expect(api.get('/api/v1/auctions?status=invalid'))
+        .rejects.toMatchObject({
+          response: { status: 400 }
+        });
     });
   });
 

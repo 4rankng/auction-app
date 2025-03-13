@@ -26,7 +26,7 @@ type AuctionResponse struct {
 	CurrentRound  int                 `json:"currentRound"`
 	HighestBid    int                 `json:"highestBid"`
 	HighestBidder string              `json:"highestBidder"`
-	AuctionStatus common.AuctionStatus `json:"auctionStatus"`
+	Status        common.AuctionStatus `json:"status"`
 }
 
 // PaginatedResponse represents a paginated response
@@ -42,6 +42,7 @@ type PaginatedResponse struct {
 // Supports pagination via query parameters:
 // - page: page number (default: 1)
 // - pageSize: number of items per page (default: 10)
+// - status: filter auctions by status (optional, can be one of: notStarted, inProgress, completed)
 func (h *Handlers) GetAllAuctions(c *gin.Context) {
 	h.logger.Printf("Getting all auctions")
 
@@ -56,6 +57,25 @@ func (h *Handlers) GetAllAuctions(c *gin.Context) {
 		pageSize = 10
 	}
 
+	// Get status filter parameter
+	statusFilter := c.Query("status")
+	var filterByStatus bool
+	var statusValue common.AuctionStatus
+
+	// Validate the status parameter if provided
+	if statusFilter != "" {
+		switch common.AuctionStatus(statusFilter) {
+		case common.NotStarted, common.InProgress, common.Completed:
+			filterByStatus = true
+			statusValue = common.AuctionStatus(statusFilter)
+			h.logger.Printf("Filtering auctions by status: %s", statusValue)
+		default:
+			h.logger.Printf("Invalid status filter value: %s", statusFilter)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid status value. Must be one of: notStarted, inProgress, completed"})
+			return
+		}
+	}
+
 	// Get all auctions from database
 	auctionsMap, err := h.db.GetAllAuctions()
 	if err != nil {
@@ -64,9 +84,13 @@ func (h *Handlers) GetAllAuctions(c *gin.Context) {
 		return
 	}
 
-	// Convert map to slice for sorting
+	// Convert map to slice for sorting and filtering
 	var auctions []*models.Auction
 	for _, auction := range auctionsMap {
+		// Apply status filter if requested
+		if filterByStatus && auction.Status != statusValue {
+			continue
+		}
 		auctions = append(auctions, auction)
 	}
 
@@ -78,6 +102,9 @@ func (h *Handlers) GetAllAuctions(c *gin.Context) {
 	// Calculate pagination values
 	total := len(auctions)
 	totalPages := (total + pageSize - 1) / pageSize
+	if totalPages == 0 {
+		totalPages = 1
+	}
 
 	// Validate page number
 	if page > totalPages && totalPages > 0 {
@@ -113,21 +140,25 @@ func (h *Handlers) GetAllAuctions(c *gin.Context) {
 			CurrentRound:  auction.CurrentRound,
 			HighestBid:    auction.HighestBid,
 			HighestBidder: auction.HighestBidder,
-			AuctionStatus: auction.AuctionStatus,
+			Status:        auction.Status,
 		}
 
 		// Always include bidders (addresses issue #2)
 		response.Bidders = auction.Bidders
 
 		// Include bid history only for completed auctions (addresses issue #3)
-		if auction.AuctionStatus == common.Completed {
+		if auction.Status == common.Completed {
 			response.BidHistory = auction.BidHistory
 		}
 
 		auctionResponses = append(auctionResponses, response)
 	}
 
-	h.logger.Printf("Retrieved %d auctions (page %d of %d)", len(auctionResponses), page, totalPages)
+	if filterByStatus {
+		h.logger.Printf("Retrieved %d auctions with status '%s' (page %d of %d)", len(auctionResponses), statusValue, page, totalPages)
+	} else {
+		h.logger.Printf("Retrieved %d auctions (page %d of %d)", len(auctionResponses), page, totalPages)
+	}
 
 	// Return paginated response
 	c.JSON(http.StatusOK, PaginatedResponse{

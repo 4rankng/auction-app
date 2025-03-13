@@ -24,7 +24,7 @@ func (suite *GetAuctionTestSuite) SetupTest() {
 func (suite *GetAuctionTestSuite) TestGetAuctionSuccess() {
 	// Create an auction
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 	suite.mockDB.UpdateAuction(auction.ID, auction)
 
 	// Make the request

@@ -25,7 +25,7 @@ func (suite *PlaceBidTestSuite) SetupTest() {
 func (suite *PlaceBidTestSuite) TestPlaceBidValidBid() {
 	// Create an auction
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 	suite.mockDB.UpdateAuction(auction.ID, auction)
 
 	// Make the request
@@ -69,7 +69,7 @@ func (suite *PlaceBidTestSuite) TestPlaceBidMissingAuctionID() {
 func (suite *PlaceBidTestSuite) TestPlaceBidInvalidBidAmount() {
 	// Create an auction
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 	suite.mockDB.UpdateAuction(auction.ID, auction)
 
 	// Make the request with a negative amount
@@ -87,7 +87,7 @@ func (suite *PlaceBidTestSuite) TestPlaceBidInvalidBidAmount() {
 func (suite *PlaceBidTestSuite) TestPlaceBidUnregisteredBidder() {
 	// Create an auction
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 	suite.mockDB.UpdateAuction(auction.ID, auction)
 
 	// Make the request with an unregistered bidder
@@ -105,7 +105,7 @@ func (suite *PlaceBidTestSuite) TestPlaceBidUnregisteredBidder() {
 func (suite *PlaceBidTestSuite) TestPlaceBidBelowMinimum() {
 	// Create an auction
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 	suite.mockDB.UpdateAuction(auction.ID, auction)
 
 	// Make the request with an amount below the minimum
@@ -127,7 +127,7 @@ func (suite *PlaceBidTestSuite) TestPlaceBidBelowMinimum() {
 func (suite *PlaceBidTestSuite) TestPlaceBidDuplicateBid() {
 	// Create an auction with an existing bid
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 
 	// Add an initial bid
 	auction.BidHistory = []models.Bid{
@@ -159,7 +159,7 @@ func (suite *PlaceBidTestSuite) TestPlaceBidDuplicateBid() {
 func (suite *PlaceBidTestSuite) TestPlaceBidRapidSuccessiveBids() {
 	// Create an auction with a recent bid
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 
 	// Add a very recent bid
 	auction.BidHistory = []models.Bid{
@@ -195,7 +195,7 @@ func (suite *PlaceBidTestSuite) TestPlaceBidRapidSuccessiveBids() {
 func (suite *PlaceBidTestSuite) TestPlaceBidAuctionNotInProgress() {
 	// Create an auction that is not in progress
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.Completed
+	auction.Status = common.Completed
 	suite.mockDB.UpdateAuction(auction.ID, auction)
 
 	// Make the request

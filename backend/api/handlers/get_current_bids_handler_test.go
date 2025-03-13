@@ -25,7 +25,7 @@ func (suite *GetCurrentBidsTestSuite) SetupTest() {
 func (suite *GetCurrentBidsTestSuite) TestGetCurrentBidsWithNoBids() {
 	// Create an auction with no bids
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 	suite.mockDB.UpdateAuction(auction.ID, auction)
 
 	// Make the request
@@ -47,7 +47,7 @@ func (suite *GetCurrentBidsTestSuite) TestGetCurrentBidsWithNoBids() {
 func (suite *GetCurrentBidsTestSuite) TestGetCurrentBidsWithBids() {
 	// Create an auction with bids
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 	auction.CurrentRound = 3
 
 	// Add some bids

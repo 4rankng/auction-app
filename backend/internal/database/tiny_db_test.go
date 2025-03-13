@@ -62,7 +62,7 @@ func TestTinyDBSaveData(t *testing.T) {
 		CreatedAt:     time.Now(),
 		StartingPrice: 100000,
 		PriceStep:     10000,
-		AuctionStatus: common.NotStarted,
+		Status: common.NotStarted,
 	}
 
 	// Add the auction
@@ -108,7 +108,7 @@ func TestTinyDBCreateAuction(t *testing.T) {
 		CreatedAt:     time.Now(),
 		StartingPrice: 100000,
 		PriceStep:     10000,
-		AuctionStatus: common.NotStarted,
+		Status: common.NotStarted,
 	}
 
 	// Add the auction
@@ -135,7 +135,7 @@ func TestTinyDBGetAuction(t *testing.T) {
 		CreatedAt:     time.Now(),
 		StartingPrice: 100000,
 		PriceStep:     10000,
-		AuctionStatus: common.NotStarted,
+		Status: common.NotStarted,
 	}
 
 	// Add the auction
@@ -169,7 +169,7 @@ func TestTinyDBGetAllAuctions(t *testing.T) {
 		CreatedAt:     time.Now(),
 		StartingPrice: 100000,
 		PriceStep:     10000,
-		AuctionStatus: common.NotStarted,
+		Status: common.NotStarted,
 	}
 
 	auction2 := &models.Auction{
@@ -178,7 +178,7 @@ func TestTinyDBGetAllAuctions(t *testing.T) {
 		CreatedAt:     time.Now(),
 		StartingPrice: 200000,
 		PriceStep:     20000,
-		AuctionStatus: common.NotStarted,
+		Status: common.NotStarted,
 	}
 
 	// Add the auctions
@@ -207,7 +207,7 @@ func TestTinyDBUpdateAuction(t *testing.T) {
 		CreatedAt:     time.Now(),
 		StartingPrice: 100000,
 		PriceStep:     10000,
-		AuctionStatus: common.NotStarted,
+		Status: common.NotStarted,
 	}
 
 	// Add the auction
@@ -221,7 +221,7 @@ func TestTinyDBUpdateAuction(t *testing.T) {
 		CreatedAt:     auction.CreatedAt,
 		StartingPrice: 150000,
 		PriceStep:     15000,
-		AuctionStatus: common.InProgress,
+		Status: common.InProgress,
 	}
 
 	err = db.UpdateAuction("test-auction", updatedAuction)
@@ -232,7 +232,7 @@ func TestTinyDBUpdateAuction(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "Updated Test Auction", fetchedAuction.Title)
 	assert.Equal(t, 150000, fetchedAuction.StartingPrice)
-	assert.Equal(t, common.InProgress, fetchedAuction.AuctionStatus)
+	assert.Equal(t, common.InProgress, fetchedAuction.Status)
 
 	// Try to update a non-existent auction
 	err = db.UpdateAuction("non-existent", updatedAuction)
@@ -254,7 +254,7 @@ func TestTinyDBDeleteAuction(t *testing.T) {
 		CreatedAt:     time.Now(),
 		StartingPrice: 100000,
 		PriceStep:     10000,
-		AuctionStatus: "notStarted",
+		Status: "notStarted",
 	}
 
 	// Add the auction
@@ -315,7 +315,7 @@ func TestTinyDBExportAuctionData(t *testing.T) {
 		CurrentRound:  3,
 		HighestBid:    150000,
 		HighestBidder: bidder1.ID,
-		AuctionStatus: common.Completed,
+		Status: common.Completed,
 	}
 
 	// Add the auction
@@ -343,7 +343,7 @@ func TestTinyDBExportAuctionData(t *testing.T) {
 		ID:            "non-completed",
 		Title:         "Non-Completed Auction",
 		CreatedAt:     time.Now(),
-		AuctionStatus: common.InProgress,
+		Status: common.InProgress,
 	}
 
 	err = db.CreateAuction(nonCompletedAuction)
@@ -365,7 +365,7 @@ func TestTinyDBBidderOperations(t *testing.T) {
 		StartingPrice: 100000,
 		PriceStep:     10000,
 		Bidders:       []models.Bidder{},
-		AuctionStatus: "notStarted",
+		Status: "notStarted",
 	}
 
 	// Add the auction
@@ -419,7 +419,7 @@ func TestTinyDBCurrentAuction(t *testing.T) {
 		CreatedAt:     time.Now(),
 		StartingPrice: 100000,
 		PriceStep:     10000,
-		AuctionStatus: "notStarted",
+		Status: "notStarted",
 	}
 
 	auction2 := &models.Auction{
@@ -428,7 +428,7 @@ func TestTinyDBCurrentAuction(t *testing.T) {
 		CreatedAt:     time.Now(),
 		StartingPrice: 200000,
 		PriceStep:     20000,
-		AuctionStatus: "notStarted",
+		Status: "notStarted",
 	}
 
 	// Add the auctions

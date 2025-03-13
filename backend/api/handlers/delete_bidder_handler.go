@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"auction/common"
 	"auction/internal/models"
 
 	"github.com/gin-gonic/gin"
@@ -42,8 +43,8 @@ func (h *Handlers) DeleteBidder(c *gin.Context) {
 	}
 
 	// Check if auction is in a valid state to remove bidders
-	if auction.AuctionStatus != "pending" {
-		h.logger.Printf("Error: Cannot remove bidders from auction with status: %s", auction.AuctionStatus)
+	if auction.Status != common.NotStarted {
+		h.logger.Printf("Error: Cannot remove bidders from auction with status: %s", auction.Status)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Cannot remove bidders from an auction that has already started or completed",
 		})

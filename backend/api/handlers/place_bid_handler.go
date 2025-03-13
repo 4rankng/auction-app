@@ -58,8 +58,8 @@ func (h *Handlers) PlaceBid(c *gin.Context) {
 	}
 
 	// Step 5: Validate auction status
-	if auction.AuctionStatus != common.InProgress {
-		h.logger.Printf("Cannot accept bid: auction status is %s", auction.AuctionStatus)
+	if auction.Status != common.InProgress {
+		h.logger.Printf("Cannot accept bid: auction status is %s", auction.Status)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bids can only be placed on auctions in progress"})
 		return
 	}

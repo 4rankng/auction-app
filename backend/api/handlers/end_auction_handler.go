@@ -35,14 +35,14 @@ func (h *Handlers) EndAuction(c *gin.Context) {
 	}
 
 	// Check if the auction is in progress
-	if auction.AuctionStatus != common.InProgress {
-		h.logger.Printf("Error: Cannot end auction, current status: %s", auction.AuctionStatus)
+	if auction.Status != common.InProgress {
+		h.logger.Printf("Error: Cannot end auction, current status: %s", auction.Status)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Auction is not in progress"})
 		return
 	}
 
 	// Update auction status to completed
-	auction.AuctionStatus = common.Completed
+	auction.Status = common.Completed
 
 	// Save the updated auction
 	if err := h.db.UpdateAuction(auctionID, auction); err != nil {
@@ -65,7 +65,7 @@ func (h *Handlers) EndAuction(c *gin.Context) {
 		"data": gin.H{
 			"id":            auction.ID,
 			"title":         auction.Title,
-			"status":        auction.AuctionStatus,
+			"status":        auction.Status,
 			"highestBid":    auction.HighestBid,
 			"highestBidder": auction.HighestBidder,
 			"bidCount":      len(auction.BidHistory),

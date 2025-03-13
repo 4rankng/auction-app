@@ -39,7 +39,7 @@ func (suite *GetAllAuctionsTestSuite) TestGetAllAuctionsEmpty() {
 	suite.Equal(0, response.Total)
 	suite.Equal(1, response.Page)
 	suite.Equal(10, response.PageSize)
-	suite.Equal(0, response.TotalPages)
+	suite.Equal(1, response.TotalPages)
 	suite.Empty(response.Data, "Data array should be empty")
 }
 
@@ -47,12 +47,12 @@ func (suite *GetAllAuctionsTestSuite) TestGetAllAuctionsEmpty() {
 func (suite *GetAllAuctionsTestSuite) TestGetAllAuctionsWithData() {
 	// Create a few auctions with different creation times
 	auction1 := suite.CreateTestAuction("auction-1")
-	auction1.AuctionStatus = common.InProgress
+	auction1.Status = common.InProgress
 	auction1.CreatedAt = time.Now().Add(-24 * time.Hour) // 1 day ago
 	suite.mockDB.UpdateAuction(auction1.ID, auction1)
 
 	auction2 := suite.CreateTestAuction("auction-2")
-	auction2.AuctionStatus = common.Completed
+	auction2.Status = common.Completed
 	auction2.CreatedAt = time.Now() // Now (newest)
 	// Add some bid history for completed auction
 	auction2.BidHistory = []models.Bid{
@@ -64,7 +64,7 @@ func (suite *GetAllAuctionsTestSuite) TestGetAllAuctionsWithData() {
 	suite.mockDB.UpdateAuction(auction2.ID, auction2)
 
 	auction3 := suite.CreateTestAuction("auction-3")
-	auction3.AuctionStatus = common.InProgress
+	auction3.Status = common.InProgress
 	auction3.CreatedAt = time.Now().Add(-12 * time.Hour) // 12 hours ago
 	suite.mockDB.UpdateAuction(auction3.ID, auction3)
 
@@ -98,7 +98,7 @@ func (suite *GetAllAuctionsTestSuite) TestGetAllAuctionsWithData() {
 
 	// Verify that bid history is included only for completed auctions
 	completedAuction := response.Data[0] // auction-2 is completed
-	suite.Equal(common.Completed, completedAuction.AuctionStatus)
+	suite.Equal(common.Completed, completedAuction.Status)
 	suite.NotEmpty(completedAuction.BidHistory, "Completed auction should have bid history")
 	suite.Len(completedAuction.BidHistory, 2, "Completed auction should have 2 bids")
 	suite.Equal(200, completedAuction.HighestBid)
@@ -106,11 +106,11 @@ func (suite *GetAllAuctionsTestSuite) TestGetAllAuctionsWithData() {
 
 	// Verify that bid history is not included for in-progress auctions
 	inProgressAuction1 := response.Data[1] // auction-3 is in progress
-	suite.Equal(common.InProgress, inProgressAuction1.AuctionStatus)
+	suite.Equal(common.InProgress, inProgressAuction1.Status)
 	suite.Empty(inProgressAuction1.BidHistory, "In-progress auction should not have bid history")
 
 	inProgressAuction2 := response.Data[2] // auction-1 is in progress
-	suite.Equal(common.InProgress, inProgressAuction2.AuctionStatus)
+	suite.Equal(common.InProgress, inProgressAuction2.Status)
 	suite.Empty(inProgressAuction2.BidHistory, "In-progress auction should not have bid history")
 }
 
@@ -195,6 +195,84 @@ func (suite *GetAllAuctionsTestSuite) TestGetAllAuctionsPagination() {
 	suite.Equal(10, response5.PageSize)
 	suite.Equal(3, response5.TotalPages)
 	suite.Len(response5.Data, 5)
+}
+
+// TestGetAllAuctionsWithStatusFilter tests filtering auctions by status
+func (suite *GetAllAuctionsTestSuite) TestGetAllAuctionsWithStatusFilter() {
+	// Create auctions with different statuses
+	auction1 := suite.CreateTestAuction("auction-1")
+	auction1.Status = common.NotStarted
+	suite.mockDB.UpdateAuction(auction1.ID, auction1)
+
+	auction2 := suite.CreateTestAuction("auction-2")
+	auction2.Status = common.InProgress
+	suite.mockDB.UpdateAuction(auction2.ID, auction2)
+
+	auction3 := suite.CreateTestAuction("auction-3")
+	auction3.Status = common.Completed
+	suite.mockDB.UpdateAuction(auction3.ID, auction3)
+
+	auction4 := suite.CreateTestAuction("auction-4")
+	auction4.Status = common.InProgress
+	suite.mockDB.UpdateAuction(auction4.ID, auction4)
+
+	// Test filtering by NotStarted status
+	w1 := suite.MakeRequest(http.MethodGet, "/auctions?status=notStarted", nil)
+	suite.Equal(http.StatusOK, w1.Code)
+
+	var response1 PaginatedResponse
+	err := json.Unmarshal(w1.Body.Bytes(), &response1)
+	suite.NoError(err)
+
+	suite.Equal(1, response1.Total)
+	suite.Len(response1.Data, 1)
+	suite.Equal("auction-1", response1.Data[0].ID)
+	suite.Equal(common.NotStarted, response1.Data[0].Status)
+
+	// Test filtering by InProgress status
+	w2 := suite.MakeRequest(http.MethodGet, "/auctions?status=inProgress", nil)
+	suite.Equal(http.StatusOK, w2.Code)
+
+	var response2 PaginatedResponse
+	err = json.Unmarshal(w2.Body.Bytes(), &response2)
+	suite.NoError(err)
+
+	suite.Equal(2, response2.Total)
+	suite.Len(response2.Data, 2)
+	for _, auction := range response2.Data {
+		suite.Equal(common.InProgress, auction.Status)
+	}
+
+	// Test filtering by Completed status
+	w3 := suite.MakeRequest(http.MethodGet, "/auctions?status=completed", nil)
+	suite.Equal(http.StatusOK, w3.Code)
+
+	var response3 PaginatedResponse
+	err = json.Unmarshal(w3.Body.Bytes(), &response3)
+	suite.NoError(err)
+
+	suite.Equal(1, response3.Total)
+	suite.Len(response3.Data, 1)
+	suite.Equal("auction-3", response3.Data[0].ID)
+	suite.Equal(common.Completed, response3.Data[0].Status)
+
+	// Test with invalid status value
+	w4 := suite.MakeRequest(http.MethodGet, "/auctions?status=invalid", nil)
+	suite.Equal(http.StatusBadRequest, w4.Code)
+
+	// Test with combined pagination and status filter
+	w5 := suite.MakeRequest(http.MethodGet, "/auctions?status=inProgress&pageSize=1", nil)
+	suite.Equal(http.StatusOK, w5.Code)
+
+	var response5 PaginatedResponse
+	err = json.Unmarshal(w5.Body.Bytes(), &response5)
+	suite.NoError(err)
+
+	suite.Equal(2, response5.Total) // Total should be 2 (all inProgress auctions)
+	suite.Equal(1, response5.PageSize)
+	suite.Equal(2, response5.TotalPages)
+	suite.Len(response5.Data, 1) // Only 1 per page
+	suite.Equal(common.InProgress, response5.Data[0].Status)
 }
 
 // TestGetAllAuctionsSuite runs the test suite

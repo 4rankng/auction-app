@@ -44,7 +44,7 @@ func (suite *StartAuctionTestSuite) TestStartAuctionNotFound() {
 func (suite *StartAuctionTestSuite) TestStartAuctionAlreadyStarted() {
 	// Create an auction that is already in progress
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 	suite.mockDB.UpdateAuction(auction.ID, auction)
 
 	// Make the request
@@ -58,7 +58,7 @@ func (suite *StartAuctionTestSuite) TestStartAuctionAlreadyStarted() {
 func (suite *StartAuctionTestSuite) TestStartAuctionInsufficientBidders() {
 	// Create an auction with only one bidder
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.NotStarted
+	auction.Status = common.NotStarted
 	auction.Bidders = []models.Bidder{
 		{ID: "bidder1", Name: "Bidder One"},
 	}
@@ -75,7 +75,7 @@ func (suite *StartAuctionTestSuite) TestStartAuctionInsufficientBidders() {
 func (suite *StartAuctionTestSuite) TestStartAuctionSuccess() {
 	// Create an auction that is not started
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.NotStarted
+	auction.Status = common.NotStarted
 	auction.Bidders = []models.Bidder{
 		{ID: "bidder1", Name: "Bidder One"},
 		{ID: "bidder2", Name: "Bidder Two"},
@@ -105,7 +105,7 @@ func (suite *StartAuctionTestSuite) TestStartAuctionSuccess() {
 	// Verify the auction was updated in the database
 	updatedAuction, err := suite.mockDB.GetAuction("test-auction")
 	suite.NoError(err)
-	assert.Equal(suite.T(), common.InProgress, updatedAuction.AuctionStatus)
+	assert.Equal(suite.T(), common.InProgress, updatedAuction.Status)
 	assert.Equal(suite.T(), 1, updatedAuction.CurrentRound)
 }
 

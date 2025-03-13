@@ -25,7 +25,7 @@ func (suite *GetAuctionHistoryTestSuite) SetupTest() {
 func (suite *GetAuctionHistoryTestSuite) TestGetAuctionHistoryWithNoBids() {
 	// Create an auction with no bids
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 	suite.mockDB.UpdateAuction(auction.ID, auction)
 
 	// Make the request
@@ -47,7 +47,7 @@ func (suite *GetAuctionHistoryTestSuite) TestGetAuctionHistoryWithNoBids() {
 func (suite *GetAuctionHistoryTestSuite) TestGetAuctionHistoryWithBids() {
 	// Create an auction with bids
 	auction := suite.CreateTestAuction("test-auction")
-	auction.AuctionStatus = common.InProgress
+	auction.Status = common.InProgress
 
 	// Add some bids
 	auction.BidHistory = []models.Bid{
