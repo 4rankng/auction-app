@@ -2,11 +2,13 @@ const { spawn } = require('child_process');
 const axios = require('axios');
 const path = require('path');
 const chalk = require('chalk');
+const config = require('./config');
 require('dotenv').config();
 
 // Configuration
 const backendPath = path.join(__dirname, '../backend');
-const serverUrl = process.env.SERVER_URL || 'http://localhost:8080';
+const serverUrl = process.env.SERVER_URL || config.urls.backend.base;
+const healthUrl = process.env.SERVER_URL ? `${process.env.SERVER_URL}/health` : config.urls.backend.health;
 const maxRetries = 30; // Maximum number of retries to check if server is up
 const retryInterval = 1000; // Interval between retries in milliseconds
 
@@ -47,13 +49,51 @@ function startServer() {
 // Check if the server is running
 async function isServerRunning() {
   try {
-    const response = await axios.get(`${serverUrl}/health`);
+    const response = await axios.get(healthUrl);
     const healthData = response.data;
     console.log(chalk.green(`Server is healthy: ${JSON.stringify(healthData)}`));
     return response.status === 200;
   } catch (error) {
     return false;
   }
+}
+
+// Properly stop the server
+function stopServerProcess(server) {
+  return new Promise((resolve) => {
+    if (!server) {
+      resolve();
+      return;
+    }
+
+    // Remove all listeners to prevent logging after tests
+    server.stdout.removeAllListeners();
+    server.stderr.removeAllListeners();
+
+    try {
+      // Try to kill the process or its group
+      try {
+        // For detached processes
+        process.kill(-server.pid, 'SIGTERM');
+      } catch (err) {
+        // Plain process kill
+        server.kill('SIGTERM');
+      }
+
+      // Add a listener for process exit
+      server.on('exit', () => {
+        resolve();
+      });
+
+      // Safety timeout in case the exit event doesn't fire
+      setTimeout(() => {
+        resolve();
+      }, 500);
+    } catch (error) {
+      console.error(chalk.red(`Error stopping server: ${error.message}`));
+      resolve();
+    }
+  });
 }
 
 // Wait for the server to be ready
@@ -87,7 +127,7 @@ async function main() {
   // Setup clean shutdown
   process.on('SIGINT', () => {
     console.log(chalk.yellow('Shutting down server...'));
-    serverProcess.kill();
+    stopServerProcess(serverProcess);
     process.exit(0);
   });
 
@@ -105,5 +145,6 @@ if (require.main === module) {
   module.exports = {
     startServer,
     waitForServer,
+    stopServerProcess,
   };
 }

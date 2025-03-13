@@ -1,10 +1,13 @@
 const axios = require('axios');
-const { startServer, waitForServer } = require('./server');
+const { startServer, waitForServer, stopServerProcess } = require('./server');
+const config = require('./config');
+const { stopServer } = require('./utils/server-utils');
 
-const serverUrl = process.env.SERVER_URL || 'http://localhost:8080';
+// Use the backend base URL from config
+const serverUrl = process.env.SERVER_URL || config.urls.backend.base;
 const api = axios.create({
   baseURL: serverUrl,
-  timeout: 10000,
+  timeout: config.timeouts.defaultApiResponse,
 });
 
 // Test data
@@ -25,11 +28,12 @@ const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Helper function to create and setup an auction
 async function createAndSetupAuction() {
-  const createResponse = await api.post('/api/v1/auctions', testAuction);
+  const createResponse = await api.post(config.urls.backend.api.auctions.base.replace(serverUrl, ''), testAuction);
   const auctionId = createResponse.data.data.id;
   await wait(100);
 
-  await api.put(`/api/v1/auctions/${auctionId}/bidders`, { bidders: testBidders });
+  const biddersEndpoint = config.urls.backend.api.auctions.bidders(auctionId).replace(serverUrl, '');
+  await api.put(biddersEndpoint, { bidders: testBidders });
   await wait(100);
 
   return auctionId;
@@ -37,16 +41,18 @@ async function createAndSetupAuction() {
 
 // Helper function to setup auction with bids
 async function setupAuctionWithBids(auctionId) {
-  await api.put(`/api/v1/auctions/${auctionId}/start`);
+  const startEndpoint = config.urls.backend.api.auctions.start(auctionId).replace(serverUrl, '');
+  await api.put(startEndpoint);
   await wait(100);
 
-  await api.post(`/api/v1/auctions/${auctionId}/bids`, {
+  const bidEndpoint = config.urls.backend.api.auctions.bids.place(auctionId).replace(serverUrl, '');
+  await api.post(bidEndpoint, {
     bidderId: "1",
     amount: testAuction.startingPrice + testAuction.priceStep
   });
   await wait(100);
 
-  await api.post(`/api/v1/auctions/${auctionId}/bids`, {
+  await api.post(bidEndpoint, {
     bidderId: "2",
     amount: testAuction.startingPrice + (2 * testAuction.priceStep)
   });
@@ -60,7 +66,7 @@ describe('Auction API Tests', () => {
   beforeAll(async () => {
     // Start server if not running
     try {
-      await api.get('/health');
+      await api.get(config.urls.backend.health.replace(serverUrl, ''));
     } catch {
       serverProcess = startServer();
       await waitForServer();
@@ -71,9 +77,29 @@ describe('Auction API Tests', () => {
 
   afterAll(async () => {
     if (serverProcess) {
-      serverProcess.kill();
-      await wait(1000); // Wait for server to properly shutdown
+      // Use the improved server shutdown with proper cleanup
+      await stopServerProcess(serverProcess);
+
+      // Additional cleanup to help with garbage collection
+      if (serverProcess.stdout) {
+        serverProcess.stdout.removeAllListeners();
+      }
+      if (serverProcess.stderr) {
+        serverProcess.stderr.removeAllListeners();
+      }
+
+      // Clear any remaining event listeners
+      serverProcess.removeAllListeners();
+
+      // Nullify the reference to help garbage collection
+      serverProcess = null;
+
+      // Give some time for cleanup to complete
+      await wait(500);
     }
+
+    // Cancel any pending axios requests
+    api.cancelToken && api.cancelToken.cancel && api.cancelToken.cancel('Tests completed');
   });
 
   describe('Happy Path - Full Auction Flow', () => {
