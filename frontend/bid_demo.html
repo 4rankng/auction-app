@@ -137,10 +137,7 @@
     </style>
 </head>
 <body>
-    <!-- Demo mode indicator -->
-    <div class="demo-indicator">
-        <strong>Chế độ Demo</strong> - Đang chạy với dữ liệu mẫu
-    </div>
+    <!-- Demo mode indicator has been removed -->
 
     <header class="header">
         <div class="container">
@@ -153,6 +150,9 @@
                 <div class="d-flex align-items-center">
                     <a href="setup.html" class="btn btn-outline-light btn-sm me-2">
                         <i class="bi bi-gear me-1"></i>Thiết Lập
+                    </a>
+                    <a href="result.html" class="btn btn-outline-light btn-sm me-2">
+                        <i class="bi bi-trophy me-1"></i>Kết Quả
                     </a>
                     <select id="language" class="form-select form-select-sm">
                         <option value="vi">Tiếng Việt</option>
@@ -232,7 +232,7 @@
                     <button id="cancelBidBtn" class="btn btn-outline-danger">
                         <i class="bi bi-x-circle"></i> Hủy Đấu Giá Cuối
                     </button>
-                    <button id="endAuctionBtn" class="btn btn-danger">
+                    <button id="endAuctionBtn" class="btn btn-danger" onclick="window.location.href='result.html';">
                         <i class="bi bi-stop-circle"></i> Kết Thúc Đấu Giá
                     </button>
                 </div>
@@ -416,7 +416,53 @@
             });
 
             document.getElementById('endAuctionBtn').addEventListener('click', function() {
+                // Create auction result data
+                const selectedBidder = selectedBidderId.value ?
+                    bidders.find(b => b.id === selectedBidderId.value) :
+                    bidders[Math.floor(Math.random() * bidders.length)];
+
+                // Get current price from UI or settings
+                const currentPriceText = document.getElementById('currentPrice').textContent;
+                const currentPrice = parseInt(currentPriceText.replace(/[^\d]/g, '')) || settings.initialPrice;
+
+                // Create result data
+                const auctionResult = {
+                    auctionId: 'demo-auction-1',
+                    status: 'ended',
+                    startTime: new Date(Date.now() - 300000).toISOString(), // 5 minutes ago
+                    endTime: new Date().toISOString(),
+                    startingPrice: settings.initialPrice,
+                    finalPrice: currentPrice,
+                    winner: selectedBidder,
+                    bidHistory: Array.from(document.querySelectorAll('#bidHistoryList tr')).map((row, index) => {
+                        const cells = row.querySelectorAll('td');
+                        const bidderInfo = cells[1].textContent.split('(');
+                        const bidderName = bidderInfo[0].trim();
+                        const bidderId = bidderInfo[1] ? bidderInfo[1].replace(')', '').trim() : `bidder-${index + 1}`;
+
+                        return {
+                            round: parseInt(cells[0].textContent),
+                            bidderId: bidderId,
+                            bidderName: bidderName,
+                            amount: parseInt(cells[2].textContent.replace(/[^\d]/g, '')),
+                            timestamp: cells[3].textContent
+                        };
+                    }),
+                    totalBids: document.querySelectorAll('#bidHistoryList tr').length,
+                    totalBidders: new Set(Array.from(document.querySelectorAll('#bidHistoryList tr')).map(row => {
+                        const bidderInfo = row.querySelectorAll('td')[1].textContent.split('(');
+                        return bidderInfo[1] ? bidderInfo[1].replace(')', '').trim() : '';
+                    })).size
+                };
+
+                // Save result to localStorage
+                localStorage.setItem('auction_result', JSON.stringify(auctionResult));
+
                 showToast('Phiên đấu giá đã kết thúc', 'info');
+
+                // Direct navigation to result.html without delay
+                console.log('Redirecting to result.html...');
+                window.location.href = 'result.html';
             });
 
             document.getElementById('backToSetupBtn').addEventListener('click', function() {
