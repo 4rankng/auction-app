@@ -46,27 +46,36 @@ function showToast(message, type = 'info') {
     });
 }
 
+// Format currency
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';
+}
+
 // Create auction card
 function createAuctionCard(auction) {
-    const statusClass = auction.auctionStatus === 'notStarted' ? 'bg-secondary' :
-                        auction.auctionStatus === 'inProgress' ? 'bg-success' : 'bg-danger';
-    const statusText = auction.auctionStatus === 'notStarted' ? 'Not Started' :
-                      auction.auctionStatus === 'inProgress' ? 'In Progress' : 'Completed';
+    const status = auction.status || auction.auctionStatus || 'notStarted';
+    const statusClass = status === 'notStarted' ? 'bg-secondary' :
+                         status === 'inProgress' ? 'bg-success' : 'bg-danger';
+    const statusText = status === 'notStarted' ? 'Not Started' :
+                      status === 'inProgress' ? 'In Progress' : 'Completed';
+
+    // Make sure bidders is an array
+    const bidders = auction.bidders || [];
 
     const card = document.createElement('div');
-    card.className = 'col-md-4';
+    card.className = 'col-md-4 mb-4';
     card.innerHTML = `
         <div class="card auction-card">
             <div class="card-header d-flex justify-content-between">
-                <h5 class="card-title mb-0">Auction #${auction.id}</h5>
+                <h5 class="card-title mb-0">${auction.title || 'Auction'}</h5>
                 <span class="badge ${statusClass}">${statusText}</span>
             </div>
             <div class="card-body">
-                <p><strong>Starting Price:</strong> ${auction.startingPrice.toLocaleString()} VND</p>
-                <p><strong>Price Step:</strong> ${auction.priceStep.toLocaleString()} VND</p>
-                <p><strong>Bidders:</strong> ${auction.bidders.length}</p>
-                ${auction.auctionStatus !== 'notStarted' ?
-                    `<p><strong>Current Highest Bid:</strong> ${auction.highestBid.toLocaleString()} VND</p>` : ''}
+                <p><strong>Starting Price:</strong> ${formatCurrency(auction.startingPrice)}</p>
+                <p><strong>Price Step:</strong> ${formatCurrency(auction.priceStep)}</p>
+                <p><strong>Bidders:</strong> ${bidders.length}</p>
+                ${status !== 'notStarted' && auction.highestBid ?
+                    `<p><strong>Current Highest Bid:</strong> ${formatCurrency(auction.highestBid)}</p>` : ''}
             </div>
             <div class="card-footer">
                 <button class="btn btn-primary btn-sm view-auction" data-auction-id="${auction.id}">
@@ -88,10 +97,20 @@ async function loadAuctions() {
     showLoading();
 
     try {
-        const response = await axios.get(`${config.apiBaseUrl}/auctions`);
-        const auctions = response.data;
+        const response = await fetch(`${config.apiBaseUrl}${config.endpoints.auctions}`);
 
-        if (auctions.length > 0) {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        // Extract the auctions from the response
+        const auctions = result.data || [];
+
+        console.log('Loaded auctions:', auctions);
+
+        if (auctions && auctions.length > 0) {
             noAuctionsMessage.style.display = 'none';
             auctionsContainer.innerHTML = '';
 
@@ -112,14 +131,22 @@ async function loadAuctions() {
 
 // View an auction
 function viewAuction(auctionId) {
+    // Store the auction ID in localStorage
     localStorage.setItem('currentAuctionId', auctionId);
 
     // Redirect to the appropriate page based on auction status
     showLoading();
 
-    axios.get(`${config.apiBaseUrl}/auction/${auctionId}/status`)
+    fetch(`${config.apiBaseUrl}${config.endpoints.auctionById(auctionId)}`)
         .then(response => {
-            const status = response.data.auctionStatus;
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(result => {
+            const auction = result.data;
+            const status = auction.status || auction.auctionStatus;
 
             if (status === 'notStarted') {
                 window.location.href = config.pages.setup;
@@ -140,10 +167,29 @@ function viewAuction(auctionId) {
 function createNewAuction() {
     showLoading();
 
-    axios.post(`${config.apiBaseUrl}/auctions`)
+    // Default auction data
+    const auctionData = {
+        title: "New Auction",
+        startingPrice: config.defaultSettings.startingPrice,
+        priceStep: config.defaultSettings.priceStep
+    };
+
+    fetch(`${config.apiBaseUrl}${config.endpoints.auctions}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(auctionData)
+    })
         .then(response => {
-            const newAuctionId = response.data.id;
-            localStorage.setItem('currentAuctionId', newAuctionId);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(result => {
+            const newAuction = result.data;
+            localStorage.setItem('currentAuctionId', newAuction.id);
             window.location.href = config.pages.setup;
         })
         .catch(error => {

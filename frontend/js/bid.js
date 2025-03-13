@@ -33,18 +33,8 @@ const floatingAuctionDuration = document.getElementById('floatingAuctionDuration
 const floatingTimer = document.getElementById('floatingTimer');
 
 // State
-let auctionStatus = {
-    status: 'notStarted',
-    round: 0,
-    highestBid: 0,
-    timeRemaining: 0,
-    startTime: null // Add start time tracking
-};
-let auctionSettings = {
-    initialPrice: 0,
-    priceIncrement: 0,
-    auctionDuration: DEFAULT_AUCTION_DURATION // Default duration
-};
+let auctionId = '';
+let auctionData = null;
 let bidHistory = [];
 let bidders = [];
 let timerInterval;
@@ -67,17 +57,26 @@ if (currentYearSpan) {
 document.addEventListener('DOMContentLoaded', initialize);
 
 async function initialize() {
-    // Log API URL if in debug mode
-    if (config.debug) {
-        console.log('API URL:', API_BASE_URL);
-    }
-
     try {
+        // Get auction ID from localStorage
+        auctionId = localStorage.getItem('currentAuctionId');
+        if (!auctionId) {
+            console.log('No auction ID found, redirecting to setup page');
+            window.location.href = config.pages.setup;
+            return;
+        }
+
         // Load auction data
         await loadAuctionData();
 
         // Check auction status to determine if we should be on this page
-        const status = auctionStatus.status;
+        if (!auctionData) {
+            console.log('No auction data found, redirecting to setup page');
+            window.location.href = config.pages.setup;
+            return;
+        }
+
+        const status = auctionData.status;
         console.log('Current auction status:', status);
 
         if (status === 'notStarted') {
@@ -92,7 +91,6 @@ async function initialize() {
 
         // Start timer update
         startTimers();
-
     } catch (error) {
         console.error('Failed to initialize auction page:', error);
         showToast('Không thể tải dữ liệu. Vui lòng thử lại sau.', 'error');
@@ -108,7 +106,7 @@ function startTimers() {
     // Start timer that updates every second
     timerInterval = setInterval(() => {
         // Update auction status
-        loadAuctionStatus().catch(error => {
+        loadAuctionData().catch(error => {
             console.error('Error updating auction status:', error);
         });
 
@@ -119,30 +117,97 @@ function startTimers() {
     }, TIMER_INTERVAL);
 }
 
+// Load all needed auction data
 async function loadAuctionData() {
-    showLoadingIndicator(true);
+    if (!auctionId) return;
+
+    const now = Date.now();
+    if (apiConnectionFailed && now - lastConnectionAttempt < MIN_RETRY_INTERVAL) {
+        console.log('Skipping API call due to recent failure');
+        return;
+    }
+    lastConnectionAttempt = now;
 
     try {
-        await Promise.all([
-            loadAuctionSettings(),
-            loadAuctionStatus(),
-            loadBidders(),
-            loadBidHistory()
-        ]);
+        showLoadingIndicator(true);
 
-        // Update UI elements
-        updateStatusUI();
-        updateBidderGrid();
-        updateBidAmount();
-        renderBidHistory();
-        updateButtonStates();
-        updateFloatingCard();
+        // Get auction data
+        await loadAuction();
 
+        // Load bidders
+        await loadBidders();
+
+        // Load bid history
+        await loadBidHistory();
+
+        // If we previously showed a connection error, show connection restored message
+        if (apiConnectionFailed) {
+            showToast('Kết nối đã được khôi phục.', 'success');
+            apiConnectionFailed = false;
+        }
     } catch (error) {
-        console.error('Failed to load auction data:', error);
-        throw error;
+        console.error('Error loading auction data:', error);
+
+        // Only show error toast once when API connection fails
+        if (!apiConnectionFailed) {
+            showToast('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối và thử lại.', 'error');
+            apiConnectionFailed = true;
+        }
     } finally {
         showLoadingIndicator(false);
+    }
+}
+
+// Load auction details
+async function loadAuction() {
+    try {
+        const url = `${API_BASE_URL}${config.endpoints.auctionById(auctionId)}`;
+        const response = await apiRequest(url);
+
+        auctionData = response.data;
+        console.log('Auction data:', auctionData);
+
+        // Update UI with auction data
+        updateStatusUI();
+        updateButtonStates();
+
+        return auctionData;
+    } catch (error) {
+        console.error('Error loading auction:', error);
+        throw error;
+    }
+}
+
+// Load bidders for the auction
+async function loadBidders() {
+    try {
+        if (!auctionData || !auctionData.bidders) {
+            return [];
+        }
+
+        bidders = auctionData.bidders;
+        updateBidderGrid();
+
+        return bidders;
+    } catch (error) {
+        console.error('Error loading bidders:', error);
+        throw error;
+    }
+}
+
+// Load bid history
+async function loadBidHistory() {
+    try {
+        const url = `${API_BASE_URL}${config.endpoints.bidHistory(auctionId)}`;
+        const response = await apiRequest(url);
+
+        bidHistory = response.data || [];
+        renderBidHistory();
+
+        return bidHistory;
+    } catch (error) {
+        console.error('Error loading bid history:', error);
+        throw error;
     }
 }
 
@@ -220,129 +285,28 @@ async function apiRequest(url, options = {}) {
     }
 }
 
-async function loadAuctionSettings() {
-    try {
-        const data = await apiRequest(`${API_BASE_URL}/auction/settings`);
-
-        if (data) {
-            auctionSettings = {
-                initialPrice: data.startingPrice || 0,
-                priceIncrement: data.priceStep || 0,
-                auctionDuration: config.defaultAuctionDuration
-            };
-
-            // Update UI
-            if (floatingInitialPrice) {
-                floatingInitialPrice.textContent = formatCurrency(auctionSettings.initialPrice);
-            }
-            if (floatingPriceIncrement) {
-                floatingPriceIncrement.textContent = formatCurrency(auctionSettings.priceIncrement);
-            }
-            if (floatingAuctionDuration && auctionSettings.auctionDuration) {
-                const minutes = Math.floor(auctionSettings.auctionDuration / 60);
-                floatingAuctionDuration.textContent = `${minutes} phút`;
-            }
-
-            return auctionSettings;
-        }
-    } catch (error) {
-        console.error('Failed to load auction settings:', error);
-        throw error;
-    }
-}
-
-function updateFloatingCard() {
-    if (floatingInitialPrice) {
-        floatingInitialPrice.textContent = formatCurrency(auctionSettings.initialPrice);
-    }
-    if (floatingPriceIncrement) {
-        floatingPriceIncrement.textContent = formatCurrency(auctionSettings.priceIncrement);
-    }
-}
-
-async function loadAuctionStatus() {
-    try {
-        const data = await apiRequest(`${API_BASE_URL}/auction/status`);
-
-        if (data) {
-            const prevStatus = auctionStatus.status;
-
-            // Update auction status
-            auctionStatus = {
-                status: data.auctionStatus || 'notStarted',
-                round: data.currentRound || 0,
-                highestBid: data.highestBid || 0,
-                highestBidder: data.highestBidder || '',
-                startTime: data.startTime ? new Date(data.startTime) : null, // Parse start time
-                timeRemaining: data.timeRemaining || 0
-            };
-
-            // Handle status changes
-            if (prevStatus !== auctionStatus.status) {
-                console.log('Auction status changed from', prevStatus, 'to', auctionStatus.status);
-
-                // If auction was completed, redirect to result page
-                if (auctionStatus.status === 'completed') {
-                    showToast('Phiên đấu giá đã kết thúc!', 'success');
-                    window.location.href = config.pages.result;
-                    return;
-                }
-
-                // If auction was reset, redirect to setup page
-                if (prevStatus !== 'notStarted' && auctionStatus.status === 'notStarted') {
-                    showToast('Phiên đấu giá đã được thiết lập lại!', 'info');
-                    window.location.href = config.pages.setup;
-                    return;
-                }
-            }
-
-            // Update UI
-            updateStatusUI();
-            updateButtonStates();
-            updateElapsedTimeDisplay();
-
-            return auctionStatus;
-        }
-    } catch (error) {
-        console.error('Failed to load auction status:', error);
-        // Don't throw the error here to prevent breaking the UI update interval
-    }
-}
-
 function updateStatusUI() {
+    if (!auctionData) return;
+
     // Update status badge
-    if (statusBadge) {
-        statusBadge.textContent = auctionStatus.status === 'notStarted' ? 'Chưa bắt đầu' :
-                                  auctionStatus.status === 'inProgress' ? 'Đang diễn ra' : 'Đã kết thúc';
+    const status = auctionData.status;
+    statusBadge.textContent = status === 'inProgress' ? 'Đang diễn ra' : 'Đã hoàn thành';
+    statusBadge.className = `badge ${status === 'inProgress' ? 'bg-success' : 'bg-danger'}`;
 
-        statusBadge.className = 'badge ' +
-                               (auctionStatus.status === 'notStarted' ? 'bg-secondary' :
-                                auctionStatus.status === 'inProgress' ? 'bg-success' : 'bg-danger');
+    // Update round information
+    roundInfo.textContent = `Vòng ${auctionData.currentRound || 1}`;
+
+    // Update price information
+    currentPrice.textContent = formatCurrency(auctionData.highestBid || auctionData.startingPrice);
+    priceIncrement.textContent = formatCurrency(auctionData.priceStep);
+
+    // Update bidder count if available
+    if (auctionData.bidders) {
+        biddersCount.textContent = auctionData.bidders.length;
     }
 
-    // Update round info
-    if (roundInfo) {
-        roundInfo.textContent = auctionStatus.round;
-    }
-
-    // Update current price
-    if (currentPrice) {
-        if (auctionStatus.round === 0) {
-            currentPrice.textContent = formatCurrency(auctionSettings.initialPrice);
-        } else {
-            currentPrice.textContent = formatCurrency(auctionStatus.highestBid);
-        }
-    }
-
-    // Update price increment
-    if (priceIncrement) {
-        priceIncrement.textContent = formatCurrency(auctionSettings.priceIncrement);
-    }
-
-    // Update bidders count
-    if (biddersCount) {
-        biddersCount.textContent = bidders.length;
-    }
+    // Update floating card
+    updateFloatingCard();
 }
 
 function updateTimerDisplay(seconds) {
@@ -380,11 +344,11 @@ function updateTimerDisplay(seconds) {
 }
 
 function updateElapsedTimeDisplay() {
-    if (!auctionStatus.startTime || !timer) return;
+    if (!auctionData || !auctionData.startTime || !timer) return;
 
     // Calculate elapsed time
     const now = new Date();
-    const elapsedMilliseconds = now - new Date(auctionStatus.startTime);
+    const elapsedMilliseconds = now - new Date(auctionData.startTime);
     const elapsedSeconds = Math.floor(elapsedMilliseconds / 1000);
 
     // Format and display as MM:SS
@@ -399,7 +363,7 @@ function updateButtonStates() {
     const buttons = [placeBidBtn, cancelBidBtn, endAuctionBtn, backToSetupBtn];
 
     // Disable all buttons if auction is not in progress
-    if (auctionStatus.status !== 'inProgress') {
+    if (auctionData.status !== 'inProgress') {
         buttons.forEach(btn => {
             if (btn) btn.disabled = true;
         });
@@ -433,7 +397,7 @@ function updateBidderGrid() {
         card.dataset.bidderId = bidder.id;
 
         // Add selected class if this is the highest bidder
-        if (bidder.id === auctionStatus.highestBidder) {
+        if (bidder.id === auctionData.highestBidder) {
             card.classList.add('highest-bidder');
         }
 
@@ -477,50 +441,21 @@ function selectBidder(bidderId) {
     updateBidAmount();
 }
 
-async function loadBidders() {
-    try {
-        const data = await apiRequest(`${API_BASE_URL}/bidders`);
-
-        if (data) {
-            bidders = data || [];
-            return bidders;
-        }
-    } catch (error) {
-        console.error('Failed to load bidders:', error);
-        throw error;
-    }
-}
-
 function updateBidAmount() {
     if (!bidAmount) return;
 
     // Calculate next bid amount
     let nextBid;
 
-    if (auctionStatus.round === 0) {
+    if (auctionData.round === 0) {
         // First bid is the starting price
-        nextBid = auctionSettings.initialPrice;
+        nextBid = auctionData.startingPrice;
     } else {
         // Subsequent bids are highest bid + increment
-        nextBid = auctionStatus.highestBid + auctionSettings.priceIncrement;
+        nextBid = auctionData.highestBid + auctionData.priceStep;
     }
 
     bidAmount.value = nextBid;
-}
-
-async function loadBidHistory() {
-    try {
-        const data = await apiRequest(`${API_BASE_URL}/auction/history`);
-
-        if (data) {
-            bidHistory = data || [];
-            renderBidHistory();
-            return bidHistory;
-        }
-    } catch (error) {
-        console.error('Failed to load bid history:', error);
-        // Don't throw to prevent breaking UI updates
-    }
 }
 
 function renderBidHistory() {
@@ -561,51 +496,43 @@ function renderBidHistory() {
 }
 
 async function placeBid() {
-    const bidderId = selectedBidderId.value;
+    const selectedId = selectedBidderId.value;
+    const amount = parseInt(bidAmount.value.replace(/\D/g, ''), 10);
 
-    if (!bidderId) {
-        showToast('Vui lòng chọn người tham gia đấu giá', 'warning');
+    if (!selectedId) {
+        showToast('Vui lòng chọn người tham gia', 'warning');
+        return;
+    }
+
+    if (isNaN(amount) || amount <= 0) {
+        showToast('Vui lòng nhập số tiền hợp lệ', 'warning');
         return;
     }
 
     try {
-        // Disable button and show loading state
+        showLoadingIndicator(true);
         placeBidBtn.disabled = true;
-        placeBidBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
 
-        // Calculate bid amount
-        const amount = parseInt(bidAmount.value);
-
-        await apiRequest(`${API_BASE_URL}/auction/bid`, {
+        const url = `${API_BASE_URL}${config.endpoints.placeBid(auctionId)}`;
+        const response = await apiRequest(url, {
             method: 'POST',
             body: JSON.stringify({
-                bidderId: bidderId,
+                bidderId: selectedId,
                 amount: amount
             })
         });
 
-        // Show success message
-        showToast('Đấu giá thành công!', 'success');
+        console.log('Bid placed successfully:', response);
+        showToast('Đặt giá thành công', 'success');
 
-        // Update data
-        await Promise.all([
-            loadAuctionStatus(),
-            loadBidHistory()
-        ]);
-
-        // Update UI
-        updateStatusUI();
-        updateBidderGrid();
-        updateBidAmount();
-        updateButtonStates();
-
+        // Reload auction data
+        await loadAuctionData();
     } catch (error) {
-        showToast(error.message || 'Không thể đấu giá. Vui lòng thử lại.', 'error');
         console.error('Error placing bid:', error);
+        showToast(error.message || 'Không thể đặt giá', 'error');
     } finally {
-        // Reset button state
+        showLoadingIndicator(false);
         placeBidBtn.disabled = false;
-        placeBidBtn.innerHTML = '<i class="bi bi-check-circle"></i> Đấu Giá';
     }
 }
 
@@ -629,8 +556,7 @@ async function cancelLastBid() {
 
         // Update data
         await Promise.all([
-            loadAuctionStatus(),
-            loadBidHistory()
+            loadAuctionData()
         ]);
 
         // Update UI
@@ -650,30 +576,28 @@ async function cancelLastBid() {
 }
 
 async function endAuction() {
-    // Confirm with user
-    if (!confirm('Bạn có chắc chắn muốn kết thúc phiên đấu giá?')) {
+    if (!confirm('Bạn có chắc chắn muốn kết thúc phiên đấu giá này?')) {
         return;
     }
 
     try {
-        // Show loading state
+        showLoadingIndicator(true);
         endAuctionBtn.disabled = true;
-        endAuctionBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
 
-        await apiRequest(`${API_BASE_URL}/auction/end`, {
-            method: 'POST'
+        const url = `${API_BASE_URL}${config.endpoints.endAuction(auctionId)}`;
+        await apiRequest(url, {
+            method: 'PUT'
         });
 
-        // Redirect to completed page
+        showToast('Phiên đấu giá đã kết thúc', 'success');
+
+        // Redirect to result page
         window.location.href = config.pages.result;
-
     } catch (error) {
-        showToast(error.message || 'Không thể kết thúc đấu giá', 'error');
         console.error('Error ending auction:', error);
-
-        // Reset button state
+        showToast(error.message || 'Không thể kết thúc phiên đấu giá', 'error');
+        showLoadingIndicator(false);
         endAuctionBtn.disabled = false;
-        endAuctionBtn.innerHTML = '<i class="bi bi-stop-circle"></i> Kết Thúc Đấu Giá';
     }
 }
 

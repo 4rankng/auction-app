@@ -223,61 +223,59 @@ async function loadAuctionSettings() {
     }
 }
 
-// Update auction settings
+// Update auction settings and create auction if needed
 async function updateAuctionSettings(settings) {
     try {
-        // Map the frontend property names to backend property names if needed
-        const backendSettings = {
-            startingPrice: settings.initialPrice !== undefined ? settings.initialPrice : settings.startingPrice,
-            priceStep: settings.priceIncrement !== undefined ? settings.priceIncrement : settings.priceStep
-        };
+        showLoadingIndicator(true);
 
-        const url = `${API_BASE_URL}${config.endpoints.auctionSettings}`;
-        await apiRequest(url, {
-            method: 'PUT',
-            body: JSON.stringify(backendSettings)
-        });
+        // Get all auctions first
+        const auctionsUrl = `${API_BASE_URL}${config.endpoints.auctions}`;
+        const auctionsResponse = await apiRequest(auctionsUrl);
+
+        let auctionData;
+
+        // If no auctions exist or all are completed, create a new one
+        if (!auctionsResponse.data || auctionsResponse.data.length === 0 ||
+            auctionsResponse.data.every(auction => auction.status === 'completed')) {
+            // Create a new auction
+            const createUrl = `${API_BASE_URL}${config.endpoints.auctions}`;
+            const response = await apiRequest(createUrl, {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: 'New Auction',
+                    startingPrice: settings.initialPrice,
+                    priceStep: settings.priceIncrement
+                })
+            });
+
+            auctionData = response.data;
+            console.log('Created new auction:', auctionData);
+        } else {
+            // Use the first auction that isn't completed
+            auctionData = auctionsResponse.data.find(auction => auction.status !== 'completed');
+        }
+
+        // Store the auction ID in localStorage for other pages
+        localStorage.setItem('currentAuctionId', auctionData.id);
+
+        return auctionData;
     } catch (error) {
         console.error('Error updating auction settings:', error);
         throw error;
+    } finally {
+        showLoadingIndicator(false);
     }
 }
 
-// Load bidders from the API
+// Load bidders from API
 async function loadBidders() {
     try {
         const url = `${API_BASE_URL}${config.endpoints.bidders}`;
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log('Loaded bidders:', result);
-
-        // If the backend returns an array directly
-        if (Array.isArray(result)) {
-            return result;
-        }
-
-        // If the backend returns an object with a data property that is an array
-        if (result.data && Array.isArray(result.data)) {
-            return result.data;
-        }
-
-        // If no valid bidders were found
-        console.warn('Invalid bidder data format received:', result);
-        return [];
+        const response = await apiRequest(url);
+        return response.data || [];
     } catch (error) {
         console.error('Error loading bidders:', error);
-        showToast('Không thể tải danh sách người đấu giá', 'error');
+        showToast('Không thể tải danh sách người tham gia', 'error');
         return [];
     }
 }
@@ -323,7 +321,7 @@ function renderBiddersList() {
     updateStartButtonState();
 }
 
-// Handle add bidder
+// Add a new bidder
 async function handleAddBidder() {
     // Get input values
     const id = bidderIdInput.value.trim();
@@ -348,55 +346,45 @@ async function handleAddBidder() {
     }
 
     try {
-        // Show loading state
         showLoadingIndicator(true);
-        addBidderBtn.disabled = true;
 
-        // Create bidder object
-        const bidder = { id, name, address };
+        const url = `${API_BASE_URL}${config.endpoints.bidders}`;
+        const response = await apiRequest(url, {
+            method: 'POST',
+            body: JSON.stringify({
+                name: name,
+                address: address
+            })
+        });
 
-        // Send to API
-        await addBidder(bidder);
+        // Reload bidders after adding
+        const updatedBidders = await loadBidders();
+        bidders = updatedBidders;
+        renderBiddersList();
 
-        // Clear inputs
+        // Reset form
         bidderIdInput.value = '';
         bidderNameInput.value = '';
         bidderAddressInput.value = '';
-
-        // Reload bidders
-        await loadBidders();
 
         showToast('Thêm người tham gia thành công', 'success');
     } catch (error) {
         showToast(error.message || 'Không thể thêm người tham gia', 'error');
         console.error('Error adding bidder:', error);
     } finally {
-        // Reset button state
-        addBidderBtn.disabled = false;
         showLoadingIndicator(false);
     }
 }
 
-// Handle bidder deletion
+// Delete a bidder
 async function handleDeleteBidder(id) {
-    // Confirm with user
-    if (!confirm('Bạn có chắc chắn muốn xóa người tham gia này?')) {
-        return;
-    }
-
     try {
-        // Show loading state
         showLoadingIndicator(true);
 
-        // Send delete request
-        const url = `${API_BASE_URL}${config.endpoints.bidders}/${id}`;
-        const response = await apiRequest(url, {
+        const url = `${API_BASE_URL}${config.endpoints.bidderById(id)}`;
+        await apiRequest(url, {
             method: 'DELETE'
         });
-
-        if (!response.ok) {
-            throw new Error('Failed to delete bidder');
-        }
 
         // Reload bidders
         const updatedBidders = await loadBidders();
@@ -466,70 +454,52 @@ async function handleFileUpload(event) {
         const formData = new FormData();
         formData.append('file', file);
 
-        console.log('Uploading Excel file:', file.name);
-
         // Set up fetch with AbortController for timeout
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds timeout
 
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                body: formData,
-                signal: controller.signal
-            });
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData,
+            signal: controller.signal
+        });
 
-            clearTimeout(timeoutId);
+        clearTimeout(timeoutId);
 
-            if (!response.ok) {
-                let errorMsg = `HTTP error! status: ${response.status}`;
-                try {
-                    const errorData = await response.text();
-                    console.error('Error response:', errorData);
-                    if (errorData) {
-                        try {
-                            const errorJson = JSON.parse(errorData);
-                            if (errorJson.error) {
-                                errorMsg = errorJson.error;
-                            }
-                        } catch (e) {
-                            // If JSON parsing fails, just use the text
-                            if (errorData.length < 100) { // Only use short error messages
-                                errorMsg = errorData;
-                            }
+        if (!response.ok) {
+            let errorMsg = `HTTP error! status: ${response.status}`;
+            try {
+                const errorData = await response.text();
+                console.error('Error response:', errorData);
+                if (errorData) {
+                    try {
+                        const errorJson = JSON.parse(errorData);
+                        if (errorJson.error) {
+                            errorMsg = errorJson.error;
+                        }
+                    } catch (e) {
+                        // If JSON parsing fails, just use the text
+                        if (errorData.length < 100) { // Only use short error messages
+                            errorMsg = errorData;
                         }
                     }
-                } catch (e) {
-                    console.error('Error parsing error response:', e);
                 }
-                throw new Error(errorMsg);
+            } catch (e) {
+                console.error('Error parsing error response:', e);
             }
-
-            // Parse response before proceeding
-            const result = await response.json();
-            console.log('Import response:', result);
-
-            if (!result.data || result.data.length === 0) {
-                throw new Error('Không tìm thấy người đấu giá trong file Excel');
-            }
-
-            // Reset file input
-            fileInput.value = '';
-
-            // Reload bidders
-            console.log('Reloading bidders after successful import');
-            bidders = await loadBidders();
-            console.log(`Loaded ${bidders.length} bidders after import`);
-            renderBiddersList();
-
-            showToast(`Nhập Excel thành công: ${result.count || 0} người đấu giá`, 'success');
-        } catch (fetchError) {
-            if (fetchError.name === 'AbortError') {
-                throw new Error('Yêu cầu bị hủy do quá thời gian chờ. Vui lòng thử lại.');
-            } else {
-                throw fetchError;
-            }
+            throw new Error(errorMsg);
         }
+
+        // Process successful response
+        const result = await response.json();
+        console.log('Import result:', result);
+
+        // Reload bidders
+        const updatedBidders = await loadBidders();
+        bidders = updatedBidders;
+        renderBiddersList();
+
+        showToast(`Nhập dữ liệu thành công: ${result.count || 'nhiều'} người tham gia`, 'success');
     } catch (error) {
         console.error('Error uploading Excel file:', error);
         showToast(error.message || 'Không thể nhập file Excel', 'error');
@@ -540,7 +510,7 @@ async function handleFileUpload(event) {
     }
 }
 
-// Function with validation and API calls - correct format
+// Start auction
 async function handleStartAuction() {
     console.log("Starting auction with validation and API calls");
 
@@ -577,156 +547,32 @@ async function handleStartAuction() {
     startAuctionBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
 
     try {
-        // 1. First API call: Update auction settings (not using this since settings are included in start request)
-        // const settingsData = {
-        //     startingPrice: initialPrice,
-        //     priceStep: priceIncrement
-        // };
+        // Get the current auction ID
+        const auctionId = localStorage.getItem('currentAuctionId');
+        if (!auctionId) {
+            throw new Error('No auction ID found');
+        }
 
-        // const settingsUrl = `${API_BASE_URL}${config.endpoints.auctionSettings}`;
-        // const settingsResponse = await fetch(settingsUrl, {
-        //     method: 'PUT',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         'Accept': 'application/json'
-        //     },
-        //     body: JSON.stringify(settingsData)
-        // });
-
-        // if (!settingsResponse.ok) {
-        //     const errorText = await settingsResponse.text();
-        //     console.error("Settings API error:", errorText);
-        //     throw new Error(`Không thể cập nhật cài đặt: ${settingsResponse.status} ${settingsResponse.statusText}`);
-        // }
-
-        // console.log("Settings API call successful");
-
-        // 2. API call to start auction - using the exact format from backend
-        console.log("Making API call to start auction");
-
-        // Prepare simplified bidders data
-        const simplifiedBidders = bidders.map(bidder => ({
-            id: bidder.id,
-            name: bidder.name,
-            address: bidder.address || ''
-        }));
-
-        // Prepare request in exact format expected by backend
-        const requestData = {
-            settings: {
-                startingPrice: initialPrice,
-                priceStep: priceIncrement
-            },
-            bidders: simplifiedBidders
-        };
-
-        console.log("Request data:", requestData);
-
-        const auctionUrl = `${API_BASE_URL}${config.endpoints.auctionStart}`;
-        const auctionResponse = await fetch(auctionUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(requestData)
+        // First set the bidders for the auction
+        const setBiddersUrl = `${API_BASE_URL}${config.endpoints.auctionBidders(auctionId)}`;
+        await apiRequest(setBiddersUrl, {
+            method: 'PUT',
+            body: JSON.stringify({
+                bidders: bidders
+            })
         });
 
-        if (!auctionResponse.ok) {
-            let errorMessage = `Server error: ${auctionResponse.status} ${auctionResponse.statusText}`;
-            try {
-                const errorBody = await auctionResponse.text();
-                console.error("API error response:", errorBody);
+        // Then start the auction
+        const startUrl = `${API_BASE_URL}${config.endpoints.startAuction(auctionId)}`;
+        await apiRequest(startUrl, {
+            method: 'PUT'
+        });
 
-                // Try to parse JSON error if possible
-                if (errorBody) {
-                    try {
-                        const errorJson = JSON.parse(errorBody);
-                        if (errorJson && errorJson.error) {
-                            errorMessage = errorJson.error;
-
-                            // Special case: if auction is already in progress, redirect to auction page
-                            if (errorMessage === "Auction already in progress") {
-                                console.log("Auction already in progress, redirecting to auction page");
-                                showToast("Phiên đấu giá đã đang diễn ra. Đang chuyển hướng...", "info");
-
-                                // Build the full URL properly using the base URL
-                                const targetPage = config.pages.bid;
-                                const fullUrl = new URL(targetPage, window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1));
-
-                                console.log('Target page:', targetPage);
-                                console.log('Full redirect URL:', fullUrl.toString());
-
-                                // Immediately disable button
-                                startAuctionBtn.disabled = true;
-                                startAuctionBtn.innerHTML = '<i class="bi bi-check"></i> Đang chuyển hướng...';
-
-                                // Use location.assign() with the full URL
-                                window.location.assign(fullUrl.toString());
-                                return; // Exit early to prevent showing error
-                            }
-                        }
-                    } catch (parseError) {
-                        // If it's not JSON, use text as is if it's short
-                        if (errorBody.length < 100) {
-                            errorMessage = errorBody;
-
-                            // Check for already in progress text response
-                            if (errorBody.includes("already in progress")) {
-                                console.log("Auction already in progress, redirecting to auction page");
-                                showToast("Phiên đấu giá đã đang diễn ra. Đang chuyển hướng...", "info");
-
-                                // Build the full URL properly using the base URL
-                                const targetPage = config.pages.bid;
-                                const fullUrl = new URL(targetPage, window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1));
-
-                                console.log('Target page:', targetPage);
-                                console.log('Full redirect URL:', fullUrl.toString());
-
-                                // Immediately disable button
-                                startAuctionBtn.disabled = true;
-                                startAuctionBtn.innerHTML = '<i class="bi bi-check"></i> Đang chuyển hướng...';
-
-                                // Use location.assign() with the full URL
-                                window.location.assign(fullUrl.toString());
-                                return; // Exit early to prevent showing error
-                            }
-                        }
-                    }
-                }
-            } catch (readError) {
-                console.error("Error reading error response:", readError);
-            }
-
-            throw new Error(`Không thể bắt đầu đấu giá: ${errorMessage}`);
-        } else {
-            // All API calls successful
-            console.log("All API calls successful, navigating to auction page");
-            showToast("Đấu giá đã bắt đầu thành công!", "success");
-
-            // Build the full URL properly using the base URL
-            const targetPage = config.pages.bid;
-            const fullUrl = new URL(targetPage, window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1));
-
-            console.log('Target page:', targetPage);
-            console.log('Full redirect URL:', fullUrl.toString());
-
-            // Immediately disable UI elements
-            startAuctionBtn.disabled = true;
-            startAuctionBtn.innerHTML = '<i class="bi bi-check"></i> Đang chuyển hướng...';
-
-            // Use location.assign() with the full URL
-            window.location.assign(fullUrl.toString());
-        }
+        // Redirect to bid page
+        window.location.href = config.pages.bid;
     } catch (error) {
-        console.error("API call error:", error);
-        showToast(error.message || "Có lỗi xảy ra khi bắt đầu đấu giá", "error");
-
-        // Reset button to original state on error
-        startAuctionBtn.disabled = false;
-        startAuctionBtn.innerHTML = '<i class="bi bi-play-fill"></i> Bắt Đầu Đấu Giá';
-    } finally {
-        // Hide loading indicator
+        showToast(error.message || 'Không thể bắt đầu phiên đấu giá', 'error');
+        console.error('Error starting auction:', error);
         showLoadingIndicator(false);
     }
 }

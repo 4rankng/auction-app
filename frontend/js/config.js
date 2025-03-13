@@ -4,18 +4,25 @@ const config = {
     apiBaseUrl: 'http://localhost:8080/api/v1',
     endpoints: {
         // Auction endpoints
-        auctionSettings: '/auction/settings',
-        auctionStatus: '/auction/status',
-        auctionHistory: '/auction/history',
-        auctionHistoryComplete: '/auction/history/complete',
-        auctionReset: '/auction/reset',
-        auctionStart: '/auction/start',
-        auctionBid: '/auction/bid',
+        auctions: '/auctions',
+        auctionById: (id) => `/auctions/${id}`,
+        startAuction: (id) => `/auctions/${id}/start`,
+        endAuction: (id) => `/auctions/${id}/end`,
+        exportAuction: (id) => `/auctions/${id}/export`,
+
+        // Bidding endpoints
+        placeBid: (id) => `/auctions/${id}/bids`,
+        currentBids: (id) => `/auctions/${id}/bids/current`,
+        bidHistory: (id) => `/auctions/${id}/bids/history`,
 
         // Bidder endpoints
         bidders: '/bidders',
         bidderById: (id) => `/bidders/${id}`,
-        biddersImport: '/bidders/import'
+        biddersImport: '/bidders/import',
+        auctionBidders: (id) => `/auctions/${id}/bidders`,
+
+        // System endpoints
+        health: '/health'
     },
 
     // Page URLs
