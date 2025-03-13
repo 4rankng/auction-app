@@ -65,66 +65,146 @@ class ThongTinDauGia:
         self.dau_gia_vien = dau_gia_vien
         
         # Thiết lập font chữ lớn cho màn hình thông tin
-        self.title_font = ('Helvetica', 24, 'bold')
-        self.header_font = ('Helvetica', 20, 'bold')
-        self.info_font = ('Helvetica', 18)
+        self.title_font = ('Helvetica', 28, 'bold')
+        self.header_font = ('Helvetica', 24, 'bold')
+        self.info_font = ('Helvetica', 22)
+        self.timer_font = ('Helvetica', 72, 'bold')
         
         # Main frame
-        main_frame = ttk.Frame(self.window, padding="20")
+        main_frame = ttk.Frame(self.window, padding="30")
         main_frame.grid(row=0, column=0, sticky="nsew")
         self.window.columnconfigure(0, weight=1)
         self.window.rowconfigure(0, weight=1)
         main_frame.columnconfigure(0, weight=1)
         
-        # Tiêu đề và thông tin chung (căn giữa)
-        ttk.Label(main_frame, text="CÔNG TY ĐẤU GIÁ HỢP DANH HP.AUSERCO", 
-                 font=self.title_font, anchor="center").grid(row=0, column=0, pady=(0, 10))
+        # Tạo frame cho tiêu đề công ty
+        title_frame = ttk.Frame(main_frame)
+        title_frame.grid(row=0, column=0, columnspan=2, pady=(0, 20))
+        title_frame.columnconfigure(0, weight=1)
         
-        ttk.Label(main_frame, text=tai_san,
-                 font=self.header_font, anchor="center").grid(row=1, column=0, pady=(0, 0))
+        title_text = tk.Text(title_frame, font=self.title_font, height=1, wrap=tk.WORD,
+                           background=self.window.cget('background'), relief='flat',
+                           highlightthickness=0, width=60)
+        title_text.grid(row=0, column=0, sticky="nsew")
+        title_text.insert('1.0', "CÔNG TY ĐẤU GIÁ HỢP DANH HP.AUSERCO")
+        title_text.configure(state='disabled')
+        title_text.tag_configure('center', justify='center')
+        title_text.tag_add('center', '1.0', 'end')
         
-        ttk.Label(main_frame, text=f"Đấu giá viên: {dau_gia_vien}",
-                 font=self.header_font, anchor="center").grid(row=2, column=0, pady=(0, 20))
+        # Tạo frame cho phần tài sản
+        tai_san_frame = ttk.Frame(main_frame)
+        tai_san_frame.grid(row=1, column=0, columnspan=2, pady=(0, 10))
+        tai_san_frame.columnconfigure(0, weight=1)
         
-        # Thông tin giá
+        # Label "Phiên đấu giá tài sản"
+        phien_text = tk.Text(tai_san_frame, font=self.header_font, height=1, wrap=tk.WORD,
+                           background=self.window.cget('background'), relief='flat',
+                           highlightthickness=0, width=60)
+        phien_text.grid(row=0, column=0, pady=(0, 10))
+        phien_text.insert('1.0', "Phiên đấu giá tài sản:")
+        phien_text.configure(state='disabled')
+        phien_text.tag_configure('center', justify='center')
+        phien_text.tag_add('center', '1.0', 'end')
+        
+        # Text widget cho tài sản
+        tai_san_text = tk.Text(tai_san_frame, font=('Helvetica', 24), height=2, wrap=tk.WORD,
+                             background=self.window.cget('background'), relief='flat',
+                             highlightthickness=0, width=120)
+        tai_san_text.grid(row=1, column=0, sticky="nsew")
+        tai_san_text.insert('1.0', tai_san)
+        tai_san_text.configure(state='disabled')
+        tai_san_text.tag_configure('center', justify='center')
+        tai_san_text.tag_add('center', '1.0', 'end')
+        
+        # Frame cho đấu giá viên
+        dau_gia_vien_frame = ttk.Frame(main_frame)
+        dau_gia_vien_frame.grid(row=2, column=0, columnspan=2, pady=(0, 20))
+        dau_gia_vien_frame.columnconfigure(0, weight=1)
+        
+        dau_gia_vien_text = tk.Text(dau_gia_vien_frame, font=('Helvetica', 24, 'bold'), height=1, wrap=tk.WORD,
+                                   background=self.window.cget('background'), relief='flat',
+                                   highlightthickness=0, width=80)
+        dau_gia_vien_text.grid(row=0, column=0, sticky="nsew")
+        dau_gia_vien_text.insert('1.0', f"Đấu giá viên: {dau_gia_vien}")
+        dau_gia_vien_text.configure(state='disabled')
+        dau_gia_vien_text.tag_configure('center', justify='center')
+        dau_gia_vien_text.tag_add('center', '1.0', 'end')
+        
+        # Frame cho thông tin giá - Bên trái
         info_frame = ttk.Frame(main_frame)
-        info_frame.grid(row=3, column=0, sticky="ew", padx=10, pady=10)
+        info_frame.grid(row=3, column=0, sticky="nsew", padx=20, pady=10)
         info_frame.columnconfigure(0, weight=1)
         
-        self.lbl_gia_khoi_diem = ttk.Label(info_frame, 
-                                          text=f"Giá khởi điểm: {format_currency(gia_khoi_diem)}",
-                                          font=self.info_font)
-        self.lbl_gia_khoi_diem.grid(row=0, column=0, sticky="w", pady=5)
+        # Text widget cho giá khởi điểm
+        gia_khoi_diem_text = tk.Text(info_frame, font=self.info_font, height=1, wrap=tk.WORD,
+                                    background=self.window.cget('background'), relief='flat',
+                                    highlightthickness=0, width=40)
+        gia_khoi_diem_text.grid(row=0, column=0, sticky="w", pady=10)
+        gia_khoi_diem_text.insert('1.0', f"Giá khởi điểm: {format_currency(gia_khoi_diem)}")
+        gia_khoi_diem_text.configure(state='disabled')
+        self.lbl_gia_khoi_diem = gia_khoi_diem_text
         
-        self.lbl_buoc_gia = ttk.Label(info_frame, 
-                                     text=f"Bước giá: {format_currency(buoc_gia)}",
-                                     font=self.info_font)
-        self.lbl_buoc_gia.grid(row=1, column=0, sticky="w", pady=5)
+        # Text widget cho bước giá
+        buoc_gia_text = tk.Text(info_frame, font=self.info_font, height=1, wrap=tk.WORD,
+                               background=self.window.cget('background'), relief='flat',
+                               highlightthickness=0, width=40)
+        buoc_gia_text.grid(row=1, column=0, sticky="w", pady=10)
+        buoc_gia_text.insert('1.0', f"Bước giá: {format_currency(buoc_gia)}")
+        buoc_gia_text.configure(state='disabled')
+        self.lbl_buoc_gia = buoc_gia_text
         
-        # Thông tin trả giá hiện tại
-        tra_gia_frame = ttk.LabelFrame(main_frame, text="Thông Tin Trả Giá", padding=15)
-        tra_gia_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=10)
+        # Frame cho lịch sử trả giá - Bên phải
+        self.lich_su_frame = ttk.LabelFrame(main_frame, text="Lịch sử trả giá gần nhất", padding=15)
+        self.lich_su_frame.grid(row=3, column=1, sticky="nsew", padx=20, pady=10)
+        self.lich_su_frame.grid_remove()
+        self.lich_su_frame.columnconfigure(0, weight=1)
+        
+        # Text widgets cho lịch sử
+        self.lbl_lich_su_1 = tk.Text(self.lich_su_frame, font=self.info_font, height=1, wrap=tk.WORD,
+                                    background=self.window.cget('background'), relief='flat',
+                                    highlightthickness=0, width=40)
+        self.lbl_lich_su_1.grid(row=0, column=0, sticky="w", pady=10)
+        self.lbl_lich_su_1.configure(state='disabled')
+        
+        self.lbl_lich_su_2 = tk.Text(self.lich_su_frame, font=self.info_font, height=1, wrap=tk.WORD,
+                                    background=self.window.cget('background'), relief='flat',
+                                    highlightthickness=0, width=40)
+        self.lbl_lich_su_2.grid(row=1, column=0, sticky="w", pady=10)
+        self.lbl_lich_su_2.configure(state='disabled')
+        
+        # Frame cho thông tin trả giá hiện tại
+        tra_gia_frame = ttk.LabelFrame(main_frame, text="Thông Tin Trả Giá", padding=10)
+        tra_gia_frame.grid(row=4, column=0, columnspan=2, sticky="ew", padx=20, pady=5)
         tra_gia_frame.columnconfigure(0, weight=1)
         
-        self.lbl_lan_tra = ttk.Label(tra_gia_frame, text="Lần trả giá: 1",
-                                    font=self.header_font)
-        self.lbl_lan_tra.grid(row=0, column=0, sticky="w", pady=10)
+        # Text widgets cho thông tin trả giá
+        self.lbl_lan_tra = tk.Text(tra_gia_frame, font=self.header_font, height=1, wrap=tk.WORD,
+                                  background=self.window.cget('background'), relief='flat',
+                                  highlightthickness=0, width=60)
+        self.lbl_lan_tra.grid(row=0, column=0, sticky="w", pady=5)
+        self.lbl_lan_tra.insert('1.0', "Lần trả giá: 1")
+        self.lbl_lan_tra.configure(state='disabled')
         
-        self.lbl_nguoi_tra = ttk.Label(tra_gia_frame, text="Người trả giá cao nhất: Chưa có",
-                                      font=self.header_font)
-        self.lbl_nguoi_tra.grid(row=1, column=0, sticky="w", pady=10)
+        self.lbl_nguoi_tra = tk.Text(tra_gia_frame, font=self.header_font, height=1, wrap=tk.WORD,
+                                    background=self.window.cget('background'), relief='flat',
+                                    highlightthickness=0, width=60)
+        self.lbl_nguoi_tra.grid(row=1, column=0, sticky="w", pady=5)
+        self.lbl_nguoi_tra.insert('1.0', "Người trả giá cao nhất: Chưa có")
+        self.lbl_nguoi_tra.configure(state='disabled')
         
-        self.lbl_gia_cao_nhat = ttk.Label(tra_gia_frame, text=f"Giá trả cao nhất: {format_currency(0)}",
-                                         font=self.header_font)
-        self.lbl_gia_cao_nhat.grid(row=2, column=0, sticky="w", pady=10)
+        self.lbl_gia_cao_nhat = tk.Text(tra_gia_frame, font=self.header_font, height=1, wrap=tk.WORD,
+                                       background=self.window.cget('background'), relief='flat',
+                                       highlightthickness=0, width=60)
+        self.lbl_gia_cao_nhat.grid(row=2, column=0, sticky="w", pady=5)
+        self.lbl_gia_cao_nhat.insert('1.0', f"Giá trả cao nhất: {format_currency(0)}")
+        self.lbl_gia_cao_nhat.configure(state='disabled')
         
-        # Đồng hồ đếm ngược
-        time_frame = ttk.LabelFrame(main_frame, text="Thời gian trả giá còn lại", padding=15)
-        time_frame.grid(row=5, column=0, sticky="ew", padx=10, pady=10)
+        # Frame cho đồng hồ đếm ngược
+        time_frame = ttk.LabelFrame(main_frame, text="Thời gian trả giá còn lại", padding=10)
+        time_frame.grid(row=5, column=0, columnspan=2, sticky="ew", padx=20, pady=10)
         time_frame.columnconfigure(0, weight=1)
         
-        self.lbl_thoi_gian = ttk.Label(time_frame, text="60",
-                                      font=('Helvetica', 48, 'bold'))
+        self.lbl_thoi_gian = ttk.Label(time_frame, text="60", font=('Helvetica', 48, 'bold'))
         self.lbl_thoi_gian.grid(row=0, column=0, pady=10)
         
         # Thiết lập style
@@ -139,13 +219,49 @@ class ThongTinDauGia:
         # Căn giữa label thời gian
         time_frame.grid_columnconfigure(0, weight=1)
         self.lbl_thoi_gian.grid(sticky="n")
+        
+        # Khởi tạo danh sách lịch sử trả giá
+        self.lich_su_tra_gia = []
 
     def cap_nhat_thong_tin(self, lan_tra, nguoi_tra, gia_tra):
         """Cập nhật thông tin trả giá"""
-        self.lbl_lan_tra.config(text=f"Lần trả giá: {lan_tra}")
-        self.lbl_nguoi_tra.config(text=f"Người trả giá cao nhất: {nguoi_tra}")
-        self.lbl_gia_cao_nhat.config(text=f"Giá trả cao nhất: {format_currency(gia_tra)}")
-    
+        # Cập nhật lần trả giá
+        self.lbl_lan_tra.configure(state='normal')
+        self.lbl_lan_tra.delete('1.0', tk.END)
+        self.lbl_lan_tra.insert('1.0', f"Lần trả giá: {lan_tra}")
+        self.lbl_lan_tra.configure(state='disabled')
+        
+        # Cập nhật người trả giá cao nhất
+        self.lbl_nguoi_tra.configure(state='normal')
+        self.lbl_nguoi_tra.delete('1.0', tk.END)
+        self.lbl_nguoi_tra.insert('1.0', f"Người trả giá cao nhất: {nguoi_tra}")
+        self.lbl_nguoi_tra.configure(state='disabled')
+        
+        # Cập nhật giá trả cao nhất
+        self.lbl_gia_cao_nhat.configure(state='normal')
+        self.lbl_gia_cao_nhat.delete('1.0', tk.END)
+        self.lbl_gia_cao_nhat.insert('1.0', f"Giá trả cao nhất: {format_currency(gia_tra)}")
+        self.lbl_gia_cao_nhat.configure(state='disabled')
+        
+        # Cập nhật lịch sử trả giá
+        self.lich_su_tra_gia.append((lan_tra, gia_tra))
+        if lan_tra >= 4:  # Chỉ hiển thị từ lần trả giá thứ 4
+            self.lich_su_frame.grid()  # Hiển thị frame lịch sử
+            # Hiển thị 2 lần trả giá gần nhất
+            if len(self.lich_su_tra_gia) >= 2:
+                lan_2, gia_2 = self.lich_su_tra_gia[-2]
+                self.lbl_lich_su_1.configure(state='normal')
+                self.lbl_lich_su_1.delete('1.0', tk.END)
+                self.lbl_lich_su_1.insert('1.0', f"Lần {lan_2}: {format_currency(gia_2)}")
+                self.lbl_lich_su_1.configure(state='disabled')
+                
+            if len(self.lich_su_tra_gia) >= 3:
+                lan_3, gia_3 = self.lich_su_tra_gia[-3]
+                self.lbl_lich_su_2.configure(state='normal')
+                self.lbl_lich_su_2.delete('1.0', tk.END)
+                self.lbl_lich_su_2.insert('1.0', f"Lần {lan_3}: {format_currency(gia_3)}")
+                self.lbl_lich_su_2.configure(state='disabled')
+
     def cap_nhat_thoi_gian(self, thoi_gian):
         """Cập nhật đồng hồ đếm ngược"""
         self.lbl_thoi_gian.config(text=str(thoi_gian))
@@ -157,34 +273,71 @@ class ThongTinDauGia:
             widget.destroy()
             
         # Main frame
-        main_frame = ttk.Frame(self.window, padding="20")
+        main_frame = ttk.Frame(self.window, padding="30")
         main_frame.grid(row=0, column=0, sticky="nsew")
         self.window.columnconfigure(0, weight=1)
         self.window.rowconfigure(0, weight=1)
         main_frame.columnconfigure(0, weight=1)
         
-        # Tiêu đề và thông tin chung (căn giữa)
-        ttk.Label(main_frame, text="CÔNG TY ĐẤU GIÁ HỢP DANH HP.AUSERCO", 
-                 font=self.title_font, anchor="center").grid(row=0, column=0, pady=(0, 10))
+        # Tiêu đề công ty
+        title_text = tk.Text(main_frame, font=self.title_font, height=1, wrap=tk.WORD,
+                           background=self.window.cget('background'), relief='flat',
+                           highlightthickness=0, width=120)
+        title_text.grid(row=0, column=0, pady=(0, 20))
+        title_text.insert('1.0', "CÔNG TY ĐẤU GIÁ HỢP DANH HP.AUSERCO")
+        title_text.configure(state='disabled')
+        title_text.tag_configure('center', justify='center')
+        title_text.tag_add('center', '1.0', 'end')
         
-        ttk.Label(main_frame, text=self.tai_san,
-                 font=self.header_font, anchor="center").grid(row=1, column=0, pady=(0, 0))
+        # Thông tin tài sản
+        tai_san_text = tk.Text(main_frame, font=self.header_font, height=2, wrap=tk.WORD,
+                             background=self.window.cget('background'), relief='flat',
+                             highlightthickness=0, width=120)
+        tai_san_text.grid(row=1, column=0, pady=(0, 10))
+        tai_san_text.insert('1.0', self.tai_san)
+        tai_san_text.configure(state='disabled')
+        tai_san_text.tag_configure('center', justify='center')
+        tai_san_text.tag_add('center', '1.0', 'end')
         
-        ttk.Label(main_frame, text=f"Đấu giá viên: {self.dau_gia_vien}",
-                 font=self.header_font, anchor="center").grid(row=2, column=0, pady=(0, 20))
+        # Thông tin đấu giá viên
+        dau_gia_vien_text = tk.Text(main_frame, font=('Helvetica', 24, 'bold'), height=1, wrap=tk.WORD,
+                                   background=self.window.cget('background'), relief='flat',
+                                   highlightthickness=0, width=80)
+        dau_gia_vien_text.grid(row=2, column=0, pady=(0, 30))
+        dau_gia_vien_text.insert('1.0', f"Đấu giá viên: {self.dau_gia_vien}")
+        dau_gia_vien_text.configure(state='disabled')
+        dau_gia_vien_text.tag_configure('center', justify='center')
+        dau_gia_vien_text.tag_add('center', '1.0', 'end')
         
-        # Kết quả đấu giá
-        ttk.Label(main_frame, text="KẾT QUẢ ĐẤU GIÁ", 
-                 font=('Helvetica', 36, 'bold'),
-                 style='Title.TLabel').grid(row=3, column=0, pady=(20, 40))
+        # Tiêu đề kết quả
+        ket_qua_text = tk.Text(main_frame, font=('Helvetica', 36, 'bold'), height=1, wrap=tk.WORD,
+                              background=self.window.cget('background'), relief='flat',
+                              highlightthickness=0, width=40, foreground='navy')
+        ket_qua_text.grid(row=3, column=0, pady=(0, 40))
+        ket_qua_text.insert('1.0', "KẾT QUẢ ĐẤU GIÁ")
+        ket_qua_text.configure(state='disabled')
+        ket_qua_text.tag_configure('center', justify='center')
+        ket_qua_text.tag_add('center', '1.0', 'end')
         
-        # Thông tin người thắng
-        ttk.Label(main_frame, text=f"Người trả giá cao nhất: {nguoi_thang}",
-                 font=('Helvetica', 24, 'bold')).grid(row=4, column=0, pady=10)
+        # Người trả giá cao nhất
+        nguoi_thang_text = tk.Text(main_frame, font=('Helvetica', 24, 'bold'), height=1, wrap=tk.WORD,
+                                  background=self.window.cget('background'), relief='flat',
+                                  highlightthickness=0, width=80)
+        nguoi_thang_text.grid(row=4, column=0, pady=(0, 20))
+        nguoi_thang_text.insert('1.0', f"Người trả giá cao nhất: {nguoi_thang}")
+        nguoi_thang_text.configure(state='disabled')
+        nguoi_thang_text.tag_configure('center', justify='center')
+        nguoi_thang_text.tag_add('center', '1.0', 'end')
         
-        # Giá thắng
-        ttk.Label(main_frame, text=f"Giá trả cao nhất: {format_currency(gia_thang)}",
-                 font=('Helvetica', 24, 'bold')).grid(row=5, column=0, pady=10)
+        # Giá trả cao nhất
+        gia_thang_text = tk.Text(main_frame, font=('Helvetica', 24, 'bold'), height=1, wrap=tk.WORD,
+                                background=self.window.cget('background'), relief='flat',
+                                highlightthickness=0, width=80)
+        gia_thang_text.grid(row=5, column=0, pady=(0, 20))
+        gia_thang_text.insert('1.0', f"Giá trả cao nhất: {format_currency(gia_thang)}")
+        gia_thang_text.configure(state='disabled')
+        gia_thang_text.tag_configure('center', justify='center')
+        gia_thang_text.tag_add('center', '1.0', 'end')
         
         # Căn giữa các widget trong main_frame
         for i in range(6):
@@ -617,12 +770,13 @@ class Form2:
             self.cach_tra_gia.set("buoc_gia")
             self.frame_buoc_gia.grid()
 
-        # Reset thời gian sau khi trả giá
+        # Reset thời gian sau khi trả giá và cập nhật cả hai màn hình
         self.thoi_gian_con_lai = 60
         self.txt_thoi_gian.configure(state="normal")
         self.txt_thoi_gian.delete(0, tk.END)
         self.txt_thoi_gian.insert(0, "60")
         self.txt_thoi_gian.configure(state="readonly")
+        self.man_hinh_thong_tin.cap_nhat_thoi_gian(60)  # Cập nhật màn hình thông tin
         self.btn_bat_dau_thoi_gian.config(text="Bắt đầu")
         self.dem_nguoc_dang_chay = False
 
@@ -849,7 +1003,7 @@ class Form1:
         self.btn_them = ttk.Button(btn_frame, text="Thêm", command=self.them_nguoi_tham_gia, style='Bold.TButton')
         self.btn_them.pack(side=tk.LEFT, padx=5)
 
-        self.btn_xoa = ttk.Button(btn_frame, text="Xóa", command=self.xoa_nguoi_tham_gia)
+        self.btn_xoa = ttk.Button(btn_frame, text="Xóa", command=self.xoa_nguoi_tham_gia, style='Bold.TButton')
         self.btn_xoa.pack(side=tk.LEFT, padx=5)
 
         self.btn_import = ttk.Button(btn_frame, text="Import từ Excel", command=self.import_from_excel, style='Bold.TButton')
