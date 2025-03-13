@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { SetupPage } from './pages/SetupPage';
+import SetupPage from './pages/SetupPage';
 import { BidPage } from './pages/BidPage';
 import { ResultPage } from './pages/ResultPage';
 import './App.css';

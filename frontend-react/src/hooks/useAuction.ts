@@ -1,94 +1,117 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Auction, Bidder, Bid } from '../types';
+import { useState, useEffect } from 'react';
 import { databaseService } from '../services/databaseService';
+import { Auction, Bidder, Bid, Settings } from '../types';
 
-export const useAuction = () => {
+export function useAuction() {
   const [auction, setAuction] = useState<Auction | null>(null);
   const [bidders, setBidders] = useState<Bidder[]>([]);
   const [bids, setBids] = useState<Bid[]>([]);
+  const [settings, setSettings] = useState<Settings>({
+    initialPrice: 1000,
+    priceIncrement: 100,
+    auctionDuration: 300,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadAuctionData = useCallback(() => {
+  const refreshData = async () => {
     try {
-      const currentAuction = databaseService.getCurrentAuction();
-      if (!currentAuction) {
-        setError('No active auction found');
-        return;
-      }
-
-      const auctionBidders = databaseService.getBidders();
-      const auctionBids = databaseService.getBids(currentAuction.id);
-
+      setLoading(true);
+      const db = databaseService.getDatabase();
+      const currentAuction = Object.values(db.auctions).find(a => a.status === 'IN_PROGRESS') || null;
       setAuction(currentAuction);
-      setBidders(auctionBidders);
-      setBids(auctionBids);
+      setBidders(Object.values(db.bidders));
+      setBids(Object.values(db.bids));
+      setSettings(db.settings);
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load auction data');
+      setError(err instanceof Error ? err.message : 'Failed to refresh data');
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
-    loadAuctionData();
-  }, [loadAuctionData]);
+    refreshData();
+  }, []);
 
-  const createAuction = useCallback((auctionData: Omit<Auction, 'id'>) => {
+  const createAuction = async (auctionData: Omit<Auction, 'id'>) => {
     try {
-      const newAuction = databaseService.createAuction(auctionData);
-      setAuction(newAuction);
+      const newAuction = await databaseService.createAuction(auctionData);
+      await refreshData();
       return newAuction;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create auction');
       throw err;
     }
-  }, []);
+  };
 
-  const updateAuction = useCallback((updatedAuction: Auction) => {
+  const updateAuction = async (auction: Auction) => {
     try {
-      databaseService.updateAuction(updatedAuction);
-      setAuction(updatedAuction);
+      await databaseService.updateAuction(auction);
+      await refreshData();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update auction');
       throw err;
     }
-  }, []);
+  };
 
-  const placeBid = useCallback((bidderId: string, amount: number) => {
-    if (!auction) throw new Error('No active auction');
-
-    const bidder = bidders.find(b => b.id === bidderId);
-    if (!bidder) throw new Error('Bidder not found');
-
-    const newBid: Omit<Bid, 'id'> = {
-      auctionId: auction.id,
-      bidderId,
-      bidderName: bidder.name,
-      amount,
-      timestamp: Date.now(),
-      round: bids.length + 1,
-    };
-
+  const createBidder = async (bidderData: Omit<Bidder, 'id'>) => {
     try {
-      const createdBid = databaseService.createBid(newBid);
-      setBids(prev => [...prev, createdBid]);
-      return createdBid;
+      const newBidder = await databaseService.createBidder(bidderData);
+      await refreshData();
+      return newBidder;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create bidder');
+      throw err;
+    }
+  };
+
+  const createBid = async (auctionId: string, bidderId: string, amount: number) => {
+    try {
+      const newBid = await databaseService.createBid(auctionId, bidderId, amount);
+      await refreshData();
+      return newBid;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create bid');
+      throw err;
+    }
+  };
+
+  const placeBid = async (bidderId: string, amount: number) => {
+    try {
+      if (!auction) throw new Error('No active auction');
+      const newBid = await createBid(auction.id, bidderId, amount);
+      return newBid;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to place bid');
       throw err;
     }
-  }, [auction, bidders, bids]);
+  };
+
+  const clearBidders = async () => {
+    try {
+      await databaseService.clearBidders();
+      setBidders([]);
+    } catch (error) {
+      console.error('Error clearing bidders:', error);
+      throw error;
+    }
+  };
 
   return {
     auction,
     bidders,
     bids,
+    settings,
     loading,
     error,
     createAuction,
     updateAuction,
+    createBidder,
+    createBid,
     placeBid,
-    refreshData: loadAuctionData,
+    refreshData,
+    clearBidders,
   };
-};
+}

@@ -1,271 +1,302 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuction } from '../hooks/useAuction';
 import { Bidder, Auction } from '../types';
 import * as XLSX from 'xlsx';
+import './SetupPage.css';
+import AuctionDetails from '../components/AuctionDetails';
+import PricingAndDuration from '../components/PricingAndDuration';
+import BidderManagement from '../components/BidderManagement';
 
-export const SetupPage: React.FC = () => {
+interface ExcelRow {
+  name?: string;
+  nric?: string;
+  issuingAuthority?: string;
+  address?: string;
+}
+
+export default function SetupPage() {
   const navigate = useNavigate();
-  const { createAuction } = useAuction();
-  const [bidders, setBidders] = useState<Bidder[]>([]);
-  const [settings, setSettings] = useState({
+  const { createAuction, createBidder, bidders, refreshData, clearBidders } = useAuction();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [newBidder, setNewBidder] = useState<Omit<Bidder, 'id'>>({
+    name: '',
+    nric: '',
+    issuingAuthority: '',
+    address: '',
+  });
+  const [bidderId, setBidderId] = useState<string>('');
+  const [importing, setImporting] = useState(false);
+  const [auctionDetails, setAuctionDetails] = useState({
     title: '',
     description: '',
     startingPrice: 1000,
-    bidStep: 100,
-    duration: 300, // 5 minutes in seconds
+    priceIncrement: 100,
+    duration: 300,
+  });
+  const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({
+    show: false,
+    message: '',
+    type: 'success'
   });
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast((prev: { show: boolean; message: string; type: 'success' | 'error' }) => ({ ...prev, show: false })), 3000);
+  };
+
+  // Centralized error handling hook
+  const useErrorHandling = () => {
+    const [error, setError] = useState<string | null>(null);
+    const handleError = (message: string) => {
+      setError(message);
+      showToast(message, 'error');
+    };
+    return { error, handleError };
+  };
+
+  const { handleError } = useErrorHandling();
+
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
+
+  // Helper to get cell value safely
+  const getCellValue = (worksheet: any, row: number, col: number): string =>
+    worksheet[XLSX.utils.encode_cell({ r: row, c: col })]?.v?.toString().trim() || '';
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    try {
+      setImporting(true);
 
-        const newBidders: Bidder[] = jsonData.map((row: any) => ({
-          id: getNextBidderId(),
-          name: row.name,
-          nric: row.nric,
-          issuingAuthority: row.issuingAuthority,
-          address: row.address,
-        }));
-
-        setBidders(prev => [...prev, ...newBidders]);
-      } catch (error) {
-        console.error('Error reading Excel file:', error);
+      // Read file and parse workbook
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const worksheet = workbook.Sheets['Đủ ĐK'];
+      if (!worksheet) {
+        handleError('Sheet "Đủ ĐK" not found in the Excel file');
+        return;
       }
-    };
-    reader.readAsArrayBuffer(file);
+
+      // Manually iterate through cells to find "STT"
+      let headerRow = -1;
+      let headerCol = -1;
+      const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+
+      for (let R = range.s.r; R <= range.e.r; ++R) {
+        const cellValue = getCellValue(worksheet, R, 0);
+        if (cellValue.match(/^STT\.?$/i)) {
+          headerRow = R;
+          headerCol = 0;
+          break;
+        }
+      }
+
+      if (headerRow === -1) {
+        handleError('Could not find table header with "STT" in the Excel file');
+        return;
+      }
+
+      // Validate column headers
+      const expectedHeaders = ['STT', 'Họ tên', 'Địa chỉ', 'Giấy CMND/CCCD/ĐKDN', 'Số điện thoại'];
+      for (let i = 0; i < expectedHeaders.length; i++) {
+        const cellValue = getCellValue(worksheet, headerRow, headerCol + i);
+        if (!cellValue.includes(expectedHeaders[i])) {
+          handleError('Invalid column structure in Excel file');
+          return;
+        }
+      }
+
+      // Process rows
+      const bidders: Bidder[] = [];
+      for (let R = headerRow + 1; R <= range.e.r; ++R) {
+        const id = getCellValue(worksheet, R, headerCol);
+        const name = getCellValue(worksheet, R, headerCol + 1);
+        const address = getCellValue(worksheet, R, headerCol + 2);
+        const nric = getCellValue(worksheet, R, headerCol + 3);
+        const phone = getCellValue(worksheet, R, headerCol + 4);
+
+        if (!id || !name || !address || !nric || !phone) break;
+
+        bidders.push({
+          id,
+          name,
+          address,
+          nric,
+          phone,
+          issuingAuthority: 'NA',
+        });
+      }
+
+      if (bidders.length === 0) {
+        handleError('No valid bidders found');
+        return;
+      }
+
+      // Replace existing data
+      await clearBidders();
+      await Promise.all(bidders.map(createBidder));
+
+      showToast(`Imported ${bidders.length} valid bidders`, 'success');
+    } catch (error: any) {
+      console.error('Import failed:', error);
+      handleError(`Error: ${error.message}`);
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
-  const getNextBidderId = () => {
-    if (bidders.length === 0) return '1';
-    const maxId = Math.max(...bidders.map(bidder => parseInt(bidder.id) || 0));
-    return (maxId + 1).toString();
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
   };
 
-  const handleAddBidder = () => {
-    const newBidder: Bidder = {
-      id: getNextBidderId(),
-      name: '',
-      nric: '',
-      issuingAuthority: '',
-      address: '',
-    };
-    setBidders(prev => [...prev, newBidder]);
+  const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setBidderId(value);
   };
 
-  const handleBidderChange = (index: number, field: keyof Bidder, value: string) => {
-    setBidders(prev => prev.map((bidder, i) =>
-      i === index ? { ...bidder, [field]: value } : bidder
-    ));
+  const handleAddBidder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const bidderData = {
+        ...newBidder,
+        id: bidderId || undefined, // If empty, let the service auto-assign
+      };
+      await createBidder(bidderData);
+      setNewBidder({
+        name: '',
+        nric: '',
+        issuingAuthority: '',
+        address: '',
+      });
+      setBidderId('');
+    } catch (error) {
+      console.error('Error adding bidder:', error);
+    }
   };
 
   const handleStartAuction = async () => {
     try {
+      // Validate auction configuration
+      if (!auctionDetails.title.trim()) {
+        handleError('Please provide an auction title');
+        return;
+      }
+
+      // Validate starting price is a positive number
+      if (!auctionDetails.startingPrice || auctionDetails.startingPrice <= 0) {
+        handleError('Starting price must be a positive number');
+        return;
+      }
+
+      // Validate price increment is a positive number
+      if (!auctionDetails.priceIncrement || auctionDetails.priceIncrement <= 0) {
+        handleError('Minimum bid increment must be a positive number');
+        return;
+      }
+
+      // Validate duration is a positive number
+      if (!auctionDetails.duration || auctionDetails.duration <= 0) {
+        handleError('Auction duration must be a positive number');
+        return;
+      }
+
+      // Validate bidder list
+      if (bidders.length < 2) {
+        handleError('At least 2 bidders are required to start an auction');
+        return;
+      }
+
       const auctionData: Omit<Auction, 'id'> = {
-        title: settings.title,
-        description: settings.description,
-        status: 'SETUP',
-        startingPrice: settings.startingPrice,
-        currentPrice: settings.startingPrice,
-        bidStep: settings.bidStep,
-        timeLeft: settings.duration,
+        title: auctionDetails.title.trim(),
+        description: auctionDetails.description.trim(),
+        status: 'IN_PROGRESS',
+        startingPrice: auctionDetails.startingPrice,
+        currentPrice: auctionDetails.startingPrice,
+        bidStep: auctionDetails.priceIncrement,
+        timeLeft: auctionDetails.duration,
+        startTime: Date.now(),
+        endTime: Date.now() + (auctionDetails.duration * 1000),
         auctionItem: 'Default Item',
         auctioneer: 'Default Auctioneer',
-        startTime: Date.now(),
       };
 
       await createAuction(auctionData);
+      showToast('Auction started successfully!', 'success');
       navigate('/bid');
     } catch (error) {
       console.error('Error starting auction:', error);
+      handleError('Failed to start the auction. Please try again.');
     }
+  };
+
+  const formatNumber = (value: number) => {
+    return value.toLocaleString('en-US');
+  };
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'startingPrice' | 'priceIncrement') => {
+    const value = parseInt(e.target.value.replace(/,/g, '')) || 0;
+    setAuctionDetails(prev => ({ ...prev, [field]: value }));
   };
 
   return (
     <div className="container py-4">
-      <h1 className="text-center mb-4">Auction Setup</h1>
+      {/* Toast Container */}
+      <div className="toast-container position-fixed top-0 end-0 p-3">
+        <div className={`toast ${toast.show ? 'show' : ''} ${toast.type === 'success' ? 'bg-success' : 'bg-danger'} text-white`} role="alert">
+          <div className="toast-body">
+            {toast.message}
+          </div>
+        </div>
+      </div>
 
       <div className="row mb-4">
-        <div className="col-md-6 mb-4">
-          <div className="card h-100">
-            <div className="card-header">
-              <h2 className="h4 mb-0">Auction Details</h2>
-            </div>
-            <div className="card-body">
-              <div className="mb-3">
-                <label htmlFor="title" className="form-label">Auction Title</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="title"
-                  value={settings.title}
-                  onChange={(e) => setSettings(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Enter auction title"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="description" className="form-label">Description</label>
-                <textarea
-                  className="form-control"
-                  id="description"
-                  value={settings.description}
-                  onChange={(e) => setSettings(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Enter auction description"
-                  rows={4}
-                />
-              </div>
-            </div>
-          </div>
+        <div className="col-md-6">
+          <AuctionDetails
+            title={auctionDetails.title}
+            description={auctionDetails.description}
+            onTitleChange={(e) => setAuctionDetails(prev => ({ ...prev, title: e.target.value }))}
+            onDescriptionChange={(e) => setAuctionDetails(prev => ({ ...prev, description: e.target.value }))}
+          />
         </div>
-
-        <div className="col-md-6 mb-4">
-          <div className="card h-100">
-            <div className="card-header">
-              <h2 className="h4 mb-0">Auction Settings</h2>
-            </div>
-            <div className="card-body">
-              <div className="mb-3">
-                <label htmlFor="startingPrice" className="form-label">Starting Price ($)</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  id="startingPrice"
-                  value={settings.startingPrice}
-                  onChange={(e) => setSettings(prev => ({ ...prev, startingPrice: Number(e.target.value) }))}
-                  min="0"
-                  step="100"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="bidStep" className="form-label">Minimum Bid Increment ($)</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  id="bidStep"
-                  value={settings.bidStep}
-                  onChange={(e) => setSettings(prev => ({ ...prev, bidStep: Number(e.target.value) }))}
-                  min="10"
-                  step="10"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="duration" className="form-label">Auction Duration (minutes)</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  id="duration"
-                  value={settings.duration / 60}
-                  onChange={(e) => setSettings(prev => ({ ...prev, duration: Number(e.target.value) * 60 }))}
-                  min="1"
-                  max="60"
-                />
-              </div>
-            </div>
-          </div>
+        <div className="col-md-6">
+          <PricingAndDuration
+            startingPrice={auctionDetails.startingPrice}
+            priceIncrement={auctionDetails.priceIncrement}
+            duration={auctionDetails.duration}
+            onPriceChange={handlePriceChange}
+            onDurationChange={(e) => setAuctionDetails(prev => ({ ...prev, duration: parseInt(e.target.value) || 0 }))}
+          />
         </div>
       </div>
 
-      <div className="card mb-4">
-        <div className="card-header">
-          <h2 className="h4 mb-0">Bidder Management</h2>
-        </div>
-        <div className="card-body">
-          <div className="row mb-4">
-            <div className="col-md-8">
-              <input
-                type="file"
-                className="form-control"
-                accept=".xlsx,.xls"
-                onChange={handleFileUpload}
-              />
-            </div>
-            <div className="col-md-4">
-              <button onClick={handleAddBidder} className="btn btn-primary w-100">
-                Add Bidder
-              </button>
-            </div>
-          </div>
+      <BidderManagement
+        bidders={bidders}
+        newBidder={newBidder}
+        bidderId={bidderId}
+        importing={importing}
+        onIdChange={handleIdChange}
+        onNewBidderChange={(field, value) => setNewBidder(prev => ({ ...prev, [field]: value }))}
+        onAddBidder={handleAddBidder}
+        onImportClick={handleImportClick}
+        fileInputRef={fileInputRef}
+      />
 
-          <div className="row">
-            {bidders.map((bidder, index) => (
-              <div key={bidder.id} className="col-md-6 mb-3">
-                <div className="card">
-                  <div className="card-body">
-                    <div className="mb-3">
-                      <label className="form-label">ID</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={bidder.id}
-                        disabled
-                        readOnly
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Name</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={bidder.name}
-                        onChange={(e) => handleBidderChange(index, 'name', e.target.value)}
-                        placeholder="Enter bidder name"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">NRIC</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={bidder.nric}
-                        onChange={(e) => handleBidderChange(index, 'nric', e.target.value)}
-                        placeholder="Enter NRIC"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Issuing Authority</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={bidder.issuingAuthority}
-                        onChange={(e) => handleBidderChange(index, 'issuingAuthority', e.target.value)}
-                        placeholder="Enter issuing authority"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Address</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={bidder.address}
-                        onChange={(e) => handleBidderChange(index, 'address', e.target.value)}
-                        placeholder="Enter address"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="text-center">
+      <div className="d-grid">
         <button
+          className="btn btn-success btn-lg"
           onClick={handleStartAuction}
-          className="btn btn-success btn-lg px-5"
-          disabled={!settings.title || !settings.description || bidders.length === 0}
+          disabled={bidders.length === 0}
         >
           Start Auction
         </button>
       </div>
     </div>
   );
-};
+}

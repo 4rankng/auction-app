@@ -1,0 +1,11 @@
+.excel-import-btn:hover:not(:disabled) {
+  background-color: #217346 !important;
+  color: white !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(33, 115, 70, 0.2);
+}
+
+.excel-import-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}

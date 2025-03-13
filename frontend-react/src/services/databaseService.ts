@@ -1,111 +1,121 @@
-import { Database, Auction, Bidder, Bid, Settings } from '../types';
+import { Database, Auction, Bidder, Bid } from '../types';
 
 const STORAGE_KEY = 'auction_app_db';
 
-const defaultSettings: Settings = {
-  initialPrice: 1000,
-  priceIncrement: 100,
-  auctionDuration: 300, // 5 minutes in seconds
-};
-
-const defaultDatabase: Database = {
-  auctions: {},
-  bidders: {},
-  bids: {},
-  settings: defaultSettings,
-};
-
-class DatabaseService {
-  private static instance: DatabaseService;
+export class DatabaseService {
   private database: Database;
 
-  private constructor() {
+  constructor() {
     this.database = this.loadDatabase();
-  }
-
-  public static getInstance(): DatabaseService {
-    if (!DatabaseService.instance) {
-      DatabaseService.instance = new DatabaseService();
-    }
-    return DatabaseService.instance;
   }
 
   private loadDatabase(): Database {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : defaultDatabase;
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    return {
+      auctions: {},
+      bidders: {},
+      bids: {},
+      settings: {
+        initialPrice: 1000,
+        priceIncrement: 100,
+        auctionDuration: 300,
+      },
+    };
   }
 
-  private saveDatabase(): void {
+  private saveDatabase() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(this.database));
   }
 
-  // Auction operations
-  public createAuction(auction: Omit<Auction, 'id'>): Auction {
+  public getDatabase(): Database {
+    return this.database;
+  }
+
+  public async createAuction(auctionData: Omit<Auction, 'id'>): Promise<Auction> {
     const id = Date.now().toString();
-    const newAuction: Auction = { ...auction, id };
+    const newAuction: Auction = { ...auctionData, id };
     this.database.auctions[id] = newAuction;
-    this.database.currentAuctionId = id;
     this.saveDatabase();
     return newAuction;
   }
 
-  public getCurrentAuction(): Auction | null {
-    const id = this.database.currentAuctionId;
-    return id ? this.database.auctions[id] : null;
-  }
-
-  public updateAuction(auction: Auction): void {
+  public async updateAuction(auction: Auction): Promise<void> {
     this.database.auctions[auction.id] = auction;
     this.saveDatabase();
   }
 
-  // Bidder operations
-  public createBidder(bidder: Omit<Bidder, 'id'>): Bidder {
-    const id = Date.now().toString();
-    const newBidder: Bidder = { ...bidder, id };
+  public async createBidder(bidderData: Omit<Bidder, 'id'> & { id?: string }): Promise<Bidder> {
+    const id = bidderData.id || this.getNextBidderId();
+
+    // Check if ID already exists
+    if (this.database.bidders[id]) {
+      throw new Error(`Bidder with ID ${id} already exists`);
+    }
+
+    const newBidder: Bidder = { ...bidderData, id };
     this.database.bidders[id] = newBidder;
     this.saveDatabase();
     return newBidder;
   }
 
-  public getBidders(): Bidder[] {
-    return Object.values(this.database.bidders);
-  }
+  public async createBid(auctionId: string, bidderId: string, amount: number): Promise<Bid> {
+    const auction = this.database.auctions[auctionId];
+    if (!auction) throw new Error('Auction not found');
 
-  public importBidders(bidders: Omit<Bidder, 'id'>[]): Bidder[] {
-    const newBidders = bidders.map(bidder => this.createBidder(bidder));
-    return newBidders;
-  }
+    const bidder = this.database.bidders[bidderId];
+    if (!bidder) throw new Error('Bidder not found');
 
-  // Bid operations
-  public createBid(bid: Omit<Bid, 'id'>): Bid {
     const id = Date.now().toString();
-    const newBid: Bid = { ...bid, id };
+    const newBid: Bid = {
+      id,
+      auctionId,
+      bidderId,
+      bidderName: bidder.name,
+      amount,
+      timestamp: Date.now(),
+      round: Object.values(this.database.bids).filter(b => b.auctionId === auctionId).length + 1,
+    };
+
     this.database.bids[id] = newBid;
+    auction.currentPrice = amount;
     this.saveDatabase();
     return newBid;
   }
 
-  public getBids(auctionId: string): Bid[] {
-    return Object.values(this.database.bids).filter(bid => bid.auctionId === auctionId);
+  private getNextBidderId(): string {
+    const bidders = Object.values(this.database.bidders);
+    if (bidders.length === 0) return '1';
+    const maxId = Math.max(...bidders.map(bidder => parseInt(bidder.id) || 0));
+    return (maxId + 1).toString();
   }
 
-  // Settings operations
-  public getSettings(): Settings {
-    return this.database.settings;
-  }
-
-  public updateSettings(settings: Partial<Settings>): Settings {
-    this.database.settings = { ...this.database.settings, ...settings };
-    this.saveDatabase();
-    return this.database.settings;
-  }
-
-  // Utility methods
   public resetDatabase(): void {
-    this.database = defaultDatabase;
+    this.database = {
+      auctions: {},
+      bidders: {},
+      bids: {},
+      settings: {
+        initialPrice: 1000,
+        priceIncrement: 100,
+        auctionDuration: 300,
+      },
+    };
     this.saveDatabase();
+  }
+
+  async clearBidders(): Promise<void> {
+    try {
+      this.database.bidders = {};
+      this.saveDatabase();
+    } catch (error) {
+      console.error('Error clearing bidders:', error);
+      throw error;
+    }
   }
 }
 
-export const databaseService = DatabaseService.getInstance();
+export const databaseService = new DatabaseService();
+
