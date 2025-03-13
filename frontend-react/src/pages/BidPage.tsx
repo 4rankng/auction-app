@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card as BsCard, Button as BsButton, Spinner } from 'react-bootstrap';
-import Timer from '../components/auctions/Timer';
-import BidderList from '../components/bidders/BidderList';
-import BidForm from '../components/bids/BidForm';
-import BidHistory from '../components/bids/BidHistory';
+import { Container, Spinner, Button } from 'react-bootstrap';
 import Modal from '../components/ui/Modal';
 import { useToast } from '../contexts/ToastContext';
 import databaseService from '../services/databaseService';
 import { Auction, Bidder, Bid } from '../models/types';
 import { AUCTION_STATUS, ROUTES } from '../models/constants';
+import './BidPage.css';
 
 const BidPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,7 +21,9 @@ const BidPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isEnding, setIsEnding] = useState(false);
   const [showConfirmEndModal, setShowConfirmEndModal] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(60); // Default 60 seconds
+  const [bidAmount, setBidAmount] = useState<number | ''>('');
+  const [bidIncrements, setBidIncrements] = useState(1);
 
   // Load auction data
   const loadAuctionData = useCallback(async () => {
@@ -98,51 +97,185 @@ const BidPage: React.FC = () => {
     }
   }, [auction?.status, loadAuctionData]);
 
-  // Handle timer expiration
-  const handleTimeUp = useCallback(async () => {
-    if (!auction) return;
-
-    try {
-      // End the auction
-      const highestBid = await databaseService.bid.getHighestBid(auction.id);
-      const winnerId = highestBid?.bidderId;
-
-      await databaseService.auction.end(auction.id, winnerId);
-
-      showToast('Auction has ended', 'info');
-      navigate(`${ROUTES.RESULT}/${auction.id}`);
-    } catch (error) {
-      console.error('Error ending auction:', error);
-      showToast('Failed to end auction', 'error');
-    }
-  }, [auction, navigate, showToast]);
-
   // Handle manual end auction
   const handleEndAuction = async () => {
-    if (!auction) return;
+    console.log('Starting auction end process...');
+    if (!auction) {
+      showToast('No auction found to end', 'error');
+      return;
+    }
 
     setIsEnding(true);
+    setShowConfirmEndModal(false);
+    showToast('Ending auction...', 'info');
 
     try {
-      // End the auction
+      // Get the highest bid
       const highestBid = await databaseService.bid.getHighestBid(auction.id);
       const winnerId = highestBid?.bidderId;
+      console.log('Highest bid found:', highestBid?.amount);
 
-      await databaseService.auction.end(auction.id, winnerId);
+      // Update auction state locally to prevent further bids
+      setAuction(prev => prev ? {
+        ...prev,
+        status: AUCTION_STATUS.ENDED,
+        timeLeft: 0
+      } : null);
 
+      // Store auction ID safely
+      const currentAuctionId = auction.id;
+      console.log('Ending auction ID:', currentAuctionId);
+
+      // End the auction in the database
+      await databaseService.auction.end(currentAuctionId, winnerId);
+      console.log('Database updated successfully');
+
+      // Show success message
       showToast('Auction ended successfully', 'success');
-      navigate(`${ROUTES.RESULT}/${auction.id}`);
+
+      console.log('Preparing to navigate to results...');
+
+      // Force a delay to ensure database is fully updated and UI has time to reflect changes
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // First try to use the navigate function with replace option
+      try {
+        console.log(`Navigating to result page: ${ROUTES.RESULT}/${currentAuctionId}`);
+        navigate(`${ROUTES.RESULT}/${currentAuctionId}`, { replace: true });
+
+        // Add a fallback in case navigate doesn't trigger immediately
+        setTimeout(() => {
+          const resultUrl = `${window.location.origin}${ROUTES.RESULT}/${currentAuctionId}`;
+          console.log('Fallback navigation to:', resultUrl);
+          window.location.href = resultUrl;
+        }, 1000);
+      } catch (navigationError) {
+        console.error('Navigation error:', navigationError);
+        // Fallback to direct URL if navigate fails
+        const resultUrl = `${window.location.origin}${ROUTES.RESULT}/${currentAuctionId}`;
+        console.log('Fallback navigation to:', resultUrl);
+        window.location.href = resultUrl;
+      }
     } catch (error) {
       console.error('Error ending auction:', error);
-      showToast('Failed to end auction', 'error');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      showToast(`Failed to end auction: ${errorMessage}`, 'error');
       setIsEnding(false);
+
+      // Revert auction state if ending failed
+      await loadAuctionData();
     }
   };
 
-  // Handle bid placed
-  const handleBidPlaced = async () => {
-    await loadAuctionData();
-    showToast('Bid placed successfully', 'success');
+  // Handle timer expiration
+  const handleTimeUp = useCallback(async () => {
+    console.log('Timer expired, ending auction...');
+    if (!auction) return;
+
+    try {
+      // Get the highest bid
+      const highestBid = await databaseService.bid.getHighestBid(auction.id);
+      const winnerId = highestBid?.bidderId;
+      console.log('Highest bid found:', highestBid?.amount);
+
+      // Update auction state locally to prevent further bids
+      setAuction(prev => prev ? {
+        ...prev,
+        status: AUCTION_STATUS.ENDED,
+        timeLeft: 0
+      } : null);
+
+      // Store auction ID safely
+      const currentAuctionId = auction.id;
+      console.log('Ending auction ID:', currentAuctionId);
+
+      // End the auction in the database
+      await databaseService.auction.end(currentAuctionId, winnerId);
+      console.log('Database updated successfully');
+
+      // Show success message
+      showToast('Auction has ended', 'info');
+
+      console.log('Preparing to navigate to results...');
+
+      // Force a delay to ensure database is fully updated and UI has time to reflect changes
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // First try to use the navigate function with replace option
+      try {
+        console.log(`Navigating to result page: ${ROUTES.RESULT}/${currentAuctionId}`);
+        navigate(`${ROUTES.RESULT}/${currentAuctionId}`, { replace: true });
+
+        // Add a fallback in case navigate doesn't trigger immediately
+        setTimeout(() => {
+          const resultUrl = `${window.location.origin}${ROUTES.RESULT}/${currentAuctionId}`;
+          console.log('Fallback navigation to:', resultUrl);
+          window.location.href = resultUrl;
+        }, 1000);
+      } catch (navigationError) {
+        console.error('Navigation error:', navigationError);
+        // Fallback to direct URL if navigate fails
+        const resultUrl = `${window.location.origin}${ROUTES.RESULT}/${currentAuctionId}`;
+        console.log('Fallback navigation to:', resultUrl);
+        window.location.href = resultUrl;
+      }
+    } catch (error) {
+      console.error('Error ending auction:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      showToast(`Failed to end auction: ${errorMessage}`, 'error');
+
+      // Revert auction state if ending failed
+      await loadAuctionData();
+    }
+  }, [auction, navigate, showToast, loadAuctionData]);
+
+  // Calculate time status for badge
+  const getTimeStatus = (): 'active' | 'ending-soon' | 'ended' => {
+    if (!auction) return 'ended';
+    if (timeLeft <= 15) return 'ending-soon';
+    return 'active';
+  };
+
+  // Calculate next bid amount based on increments
+  const calculateNextBidAmount = useCallback(() => {
+    if (!auction) return 0;
+    return auction.currentPrice + (auction.bidStep * bidIncrements);
+  }, [auction, bidIncrements]);
+
+  // Handle bid increments change
+  const handleIncrementChange = (increment: number) => {
+    setBidIncrements(increment);
+    setBidAmount(auction ? auction.currentPrice + (auction.bidStep * increment) : '');
+  };
+
+  // Handle bid submission
+  const handleSubmitBid = async () => {
+    if (!selectedBidder || !auction) return;
+
+    const amount = typeof bidAmount === 'number' ? bidAmount : calculateNextBidAmount();
+
+    try {
+      if (!selectedBidder.id) {
+        throw new Error('Selected bidder has no ID');
+      }
+
+      await databaseService.bid.create({
+        auctionId: auction.id,
+        bidderId: selectedBidder.id,
+        amount
+      });
+
+      // Refresh auction data
+      await loadAuctionData();
+      showToast('Bid placed successfully!', 'success');
+
+      // Reset form
+      setBidAmount('');
+      setBidIncrements(1);
+    } catch (error) {
+      console.error('Error placing bid:', error);
+      showToast('Failed to place bid', 'error');
+    }
   };
 
   // Handle bidder selection
@@ -152,163 +285,202 @@ const BidPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: '80vh' }}>
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
         <Spinner animation="border" role="status" variant="primary">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
-        <span className="ms-2">Loading auction...</span>
+        <span className="ms-3">Loading auction...</span>
       </div>
     );
   }
 
   if (!auction) {
     return (
-      <Container className="py-5 text-center">
-        <h2 className="mb-3">Auction Not Found</h2>
-        <p className="text-muted mb-4">The auction you're looking for doesn't exist</p>
-        <BsButton variant="primary" onClick={() => navigate(ROUTES.HOME)}>
-          Go to Home
-        </BsButton>
-      </Container>
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <div className="text-center">
+          <h2 className="mb-3">Auction Not Found</h2>
+          <p className="text-muted mb-4">The auction you're looking for doesn't exist</p>
+          <Button variant="primary" onClick={() => navigate(ROUTES.HOME)}>
+            Go to Home
+          </Button>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container>
-      <Row className="mb-4 align-items-center">
-        <Col md={8}>
-          <h1 className="mb-1">{auction.title}</h1>
-          <p className="text-muted">{auction.description}</p>
-        </Col>
-        <Col md={4} className="d-flex justify-content-md-end mt-3 mt-md-0">
-          <div className="text-center me-3">
-            <p className="mb-1 small text-muted">Time Remaining</p>
-            <Timer
-              initialSeconds={timeLeft}
-              onTimeUp={handleTimeUp}
-              size="lg"
-            />
-          </div>
-          <BsButton
-            variant="danger"
-            onClick={() => setShowConfirmEndModal(true)}
-          >
-            End Auction
-          </BsButton>
-        </Col>
-      </Row>
-
-      <Row>
-        <Col lg={8} className="mb-4">
-          <BsCard className="shadow-sm mb-4">
-            <BsCard.Header className="bg-white">
-              <h5 className="mb-0">Current Price</h5>
-            </BsCard.Header>
-            <BsCard.Body className="text-center py-4">
-              <p className="small text-muted mb-1">Current Price</p>
-              <h2 className="text-success mb-0">
-                {databaseService.formatCurrency(auction.currentPrice)}
-              </h2>
-              <p className="small text-muted mt-2">
-                Starting Price: {databaseService.formatCurrency(auction.startingPrice)}
-              </p>
-            </BsCard.Body>
-          </BsCard>
-
-          <BsCard className="shadow-sm">
-            <BsCard.Header className="bg-white">
-              <h5 className="mb-0">Bid History</h5>
-            </BsCard.Header>
-            <BsCard.Body>
-              <BidHistory bids={bids} />
-            </BsCard.Body>
-          </BsCard>
-        </Col>
-
-        <Col lg={4}>
-          <BsCard className="shadow-sm mb-4">
-            <BsCard.Header className="bg-white">
-              <h5 className="mb-0">Place Bid</h5>
-            </BsCard.Header>
-            <BsCard.Body>
-              <BidForm
-                auction={auction}
-                selectedBidder={selectedBidder}
-                onBidPlaced={handleBidPlaced}
-              />
-            </BsCard.Body>
-          </BsCard>
-
-          <BsCard className="shadow-sm">
-            <BsCard.Header className="bg-white">
-              <h5 className="mb-0">Bidders</h5>
-            </BsCard.Header>
-            <BsCard.Body>
-              <BidderList
-                bidders={bidders}
-                selectedBidderId={selectedBidder?.id}
-                highestBidderId={highestBidder?.id}
-                onSelectBidder={handleSelectBidder}
-              />
-            </BsCard.Body>
-          </BsCard>
-        </Col>
-      </Row>
-
-      {/* Confirm End Auction Modal */}
-      <Modal
-        isOpen={showConfirmEndModal}
-        onClose={() => setShowConfirmEndModal(false)}
-        title="End Auction"
-        footer={
-          <>
-            <BsButton
-              variant="secondary"
-              onClick={() => setShowConfirmEndModal(false)}
-              disabled={isEnding}
-            >
-              Cancel
-            </BsButton>
-            <BsButton
-              variant="danger"
-              onClick={handleEndAuction}
-              disabled={isEnding}
-            >
-              {isEnding ? 'Ending...' : 'End Auction'}
-            </BsButton>
-          </>
-        }
-      >
-        <div className="py-3">
-          <p className="mb-4">Are you sure you want to end this auction?</p>
-
-          {highestBidder ? (
-            <div className="bg-light p-3 rounded">
-              <p className="fw-medium mb-2">Current highest bidder:</p>
+    <div className="bid-page">
+      <Container>
+        {/* Main card with all content */}
+        <div className="ds-card mb-4">
+          {/* Header - Title, Status, End Button */}
+          <div className="ds-card__header position-relative">
+            <div className="d-flex justify-content-between align-items-start">
               <div className="d-flex align-items-center">
-                <div style={{ width: '40px', height: '40px' }}>
-                  <img
-                    className="rounded-circle w-100 h-100"
-                    src={highestBidder.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(highestBidder.name)}&background=random&size=40`}
-                    alt={highestBidder.name}
-                  />
-                </div>
-                <div className="ms-3">
-                  <div className="fw-medium">
-                    {highestBidder.name}
-                  </div>
-                  <div className="small text-muted">
-                    Bid: {databaseService.formatCurrency(auction.currentPrice)}
-                  </div>
+                <h1 className="ds-card__title me-3 mb-0">{auction.title}</h1>
+                <div className={`ds-status-pill-inline ${getTimeStatus()}`}>
+                  <i className={`bi ${getTimeStatus() === 'active' ? 'bi-broadcast' : 'bi-hourglass-split'}`}></i>
+                  {getTimeStatus() === 'active' ? 'Active' : 'Ending Soon'}
                 </div>
               </div>
+              <Button
+                variant="outline-danger"
+                className="end-auction-btn"
+                onClick={() => {
+                  console.log('End auction button clicked');
+                  setShowConfirmEndModal(true);
+                }}
+                disabled={isEnding}
+              >
+                {isEnding ? 'Ending...' : 'End Auction'}
+              </Button>
             </div>
-          ) : (
-            <p className="text-warning">There are no bids yet.</p>
-          )}
+
+            {/* Auctioneer Info */}
+            <p className="ds-card__subtitle mt-2">
+              <i className="bi bi-person me-2"></i>
+              Auctioneer: {auction.auctioneer}
+            </p>
+          </div>
+
+          {/* Timer Display */}
+          <div className="auction-timer text-center my-3">
+            <div className="timer-display" onClick={handleTimeUp}>
+              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+            </div>
+          </div>
+
+          {/* Price Information */}
+          <div className="price-info-container py-3">
+            <div className="d-flex justify-content-between align-items-center">
+              <div className="price-item">
+                <div className="price-value">{databaseService.formatCurrency(auction.currentPrice)}</div>
+                <div className="price-label">Current Price</div>
+              </div>
+              <div className="price-item">
+                <div className="price-value">{databaseService.formatCurrency(auction.startingPrice)}</div>
+                <div className="price-label">Starting Price</div>
+              </div>
+              <div className="price-item">
+                <div className="price-value">{databaseService.formatCurrency(auction.bidStep)}</div>
+                <div className="price-label">Bid Step</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bidder Selection */}
+          <div className="bidder-selection-section py-3">
+            <h3 className="section-title">Select Bidder</h3>
+            <div className="bidder-grid">
+              {bidders.map(bidder => (
+                <div
+                  key={bidder.id}
+                  className={`bidder-square ${selectedBidder?.id === bidder.id ? 'selected' : ''} ${highestBidder?.id === bidder.id ? 'highest' : ''}`}
+                  onClick={() => handleSelectBidder(bidder)}
+                  title={bidder.name}
+                >
+                  {bidder.id}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bid Amount Selection */}
+          <div className="bid-amount-section py-3">
+            <h3 className="section-title">Select Bid Amount</h3>
+            {/* Bid increment buttons */}
+            <div className="bid-increments-container d-flex gap-2 mb-3">
+              {[1, 2, 5, 10].map(increment => (
+                <button
+                  key={increment}
+                  className={`btn ${bidIncrements === increment ? 'btn-primary' : 'btn-outline-primary'}`}
+                  onClick={() => handleIncrementChange(increment)}
+                >
+                  {increment}x
+                </button>
+              ))}
+            </div>
+
+            <div className="input-group mb-3">
+              <input
+                type="number"
+                className="form-control"
+                value={bidAmount}
+                onChange={(e) => setBidAmount(Number(e.target.value))}
+                placeholder={`Minimum bid: ${databaseService.formatCurrency(calculateNextBidAmount())}`}
+                min={calculateNextBidAmount()}
+                step={auction.bidStep}
+              />
+              <button
+                className="btn btn-success"
+                onClick={handleSubmitBid}
+                disabled={!selectedBidder || isEnding}
+              >
+                Place Bid
+              </button>
+            </div>
+          </div>
+
+          {/* Bid History */}
+          <div className="bid-history-section py-3">
+            <h3 className="section-title">Bid History</h3>
+            <div className="bid-history-container">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>ID</th>
+                    <th>Bidder</th>
+                    <th>ID Number</th>
+                    <th>Contact</th>
+                    <th className="text-end">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bids.map((bid) => {
+                    const bidderDetails = bidders.find(b => b.id === bid.bidderId);
+                    return (
+                      <tr key={bid.id}>
+                        <td>{new Date(bid.timestamp).toLocaleTimeString()}</td>
+                        <td>{bid.bidderId}</td>
+                        <td>{bid.bidderName}</td>
+                        <td>{bidderDetails?.idNumber || '-'}</td>
+                        <td>
+                          {bidderDetails?.phone ? (
+                            <span><i className="bi bi-telephone-fill me-1"></i>{bidderDetails.phone}</span>
+                          ) : bidderDetails?.email ? (
+                            <span><i className="bi bi-envelope-fill me-1"></i>{bidderDetails.email}</span>
+                          ) : '-'}
+                        </td>
+                        <td className="text-end fw-bold text-primary">{databaseService.formatCurrency(bid.amount)}</td>
+                      </tr>
+                    );
+                  })}
+                  {bids.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="text-center text-muted py-4">
+                        No bids placed yet
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </Modal>
-    </Container>
+      </Container>
+
+      {/* Confirm End Modal */}
+      <Modal
+        show={showConfirmEndModal}
+        onHide={() => setShowConfirmEndModal(false)}
+        title="End Auction"
+        body="Are you sure you want to end this auction? This action cannot be undone."
+        confirmText="End Auction"
+        confirmVariant="danger"
+        onConfirm={handleEndAuction}
+      />
+    </div>
   );
 };
 

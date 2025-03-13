@@ -199,23 +199,59 @@ export const auctionService = {
   end: async (id: string, winnerId?: string): Promise<Auction> => {
     const db = getDatabase();
     const auction = db.auctions[id];
+
     if (!auction) {
-      throw new Error('Auction not found');
+      throw new Error(`Auction with ID ${id} not found`);
+    }
+
+    if (auction.status === AUCTION_STATUS.ENDED) {
+      throw new Error('Auction has already ended');
+    }
+
+    if (auction.status !== AUCTION_STATUS.IN_PROGRESS) {
+      throw new Error('Cannot end an auction that is not in progress');
     }
 
     const now = new Date();
+    const highestBid = await bidService.getHighestBid(id);
+    const finalPrice = highestBid?.amount || auction.currentPrice;
 
     const updatedAuction: Auction = {
       ...auction,
       status: AUCTION_STATUS.ENDED,
       timeLeft: 0,
       winner: winnerId,
+      endTime: now.toISOString(),
       updatedAt: now
     };
 
-    db.auctions[id] = updatedAuction;
-    await saveDatabase(db);
-    return updatedAuction;
+    try {
+      db.auctions[id] = updatedAuction;
+      saveDatabase(db);
+
+      // Calculate total unique bidders
+      const uniqueBidders = new Set((db.bids[id] || []).map(bid => bid.bidderId));
+
+      // Store the auction result
+      const result: AuctionResult = {
+        auctionId: id,
+        status: AUCTION_STATUS.ENDED,
+        endTime: now.toISOString(),
+        startTime: auction.startTime,
+        startingPrice: auction.startingPrice,
+        finalPrice,
+        winner: winnerId,
+        totalBids: (db.bids[id] || []).length,
+        totalBidders: uniqueBidders.size
+      };
+
+      localStorage.setItem(`auction_result_${id}`, JSON.stringify(result));
+
+      return updatedAuction;
+    } catch (error) {
+      console.error('Error saving auction end state:', error);
+      throw new Error('Failed to save auction end state');
+    }
   },
 
   // Get auction result
@@ -250,15 +286,13 @@ export const bidderService = {
   },
 
   // Create a new bidder
-  create: async (bidder: Omit<Bidder, 'id'>): Promise<Bidder> => {
+  create: async (bidder: Bidder): Promise<Bidder> => {
     const db = getDatabase();
-    const id = uuidv4();
     const now = new Date();
 
     const newBidder: Bidder = {
       ...bidder,
-      id,
-      createdAt: now,
+      createdAt: bidder.createdAt || now,
       updatedAt: now
     };
 
@@ -267,23 +301,24 @@ export const bidderService = {
       newBidder.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(newBidder.name)}&background=random&size=64`;
     }
 
-    db.bidders[id] = newBidder;
+    db.bidders[bidder.id] = newBidder;
     saveDatabase(db);
 
     return newBidder;
   },
 
   // Create multiple bidders
-  createMany: (bidders: Omit<Bidder, 'id'>[]): Bidder[] => {
+  createMany: (bidders: Bidder[]): Bidder[] => {
     const db = getDatabase();
     const newBidders: Bidder[] = [];
 
     bidders.forEach(bidder => {
-      const id = uuidv4();
+      const now = new Date();
 
       const newBidder: Bidder = {
         ...bidder,
-        id
+        createdAt: bidder.createdAt || now,
+        updatedAt: now
       };
 
       // Generate avatar if not provided
@@ -291,7 +326,7 @@ export const bidderService = {
         newBidder.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(newBidder.name)}&background=random&size=64`;
       }
 
-      db.bidders[id] = newBidder;
+      db.bidders[bidder.id] = newBidder;
       newBidders.push(newBidder);
     });
 
@@ -338,15 +373,16 @@ export const bidderService = {
     const headers = rows[0];
     const data = rows.slice(1).filter(row => row.length === headers.length);
 
-    const bidders: Omit<Bidder, 'id'>[] = data.map(row => {
-      const bidder: Omit<Bidder, 'id'> = {
-        name: row[0] || '',
-        idNumber: row[1] || '',
-        issuingAuthority: row[2] || '',
-        address: row[3] || '',
-        phone: row[4] || undefined,
-        email: row[5] || undefined,
-        avatar: row[6] || undefined,
+    const bidders: Bidder[] = data.map((row, index) => {
+      const bidder: Bidder = {
+        id: row[0] || `bidder${index + 1}`, // Use first column as ID or generate a simple numeric ID
+        name: row[1] || '',
+        idNumber: row[2] || '',
+        issuingAuthority: row[3] || '',
+        address: row[4] || '',
+        phone: row[5] || undefined,
+        email: row[6] || undefined,
+        avatar: row[7] || undefined,
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -529,13 +565,15 @@ export const utilityService = {
       ];
 
       vietnameseNames.forEach((name, index) => {
+        const bidderNumber = index + 1;
         bidderService.create({
+          id: bidderNumber.toString(), // Simple numeric ID
           name,
-          idNumber: `ID${index + 1}`,
+          idNumber: `ID${bidderNumber}`,
           issuingAuthority: 'Sample Authority',
-          address: `Địa chỉ ${index + 1}, Việt Nam`,
+          address: `Địa chỉ ${bidderNumber}, Việt Nam`,
           phone: `098${index.toString().padStart(7, '0')}`,
-          email: `bidder${index + 1}@example.com`,
+          email: `bidder${bidderNumber}@example.com`,
           createdAt: new Date(),
           updatedAt: new Date()
         });
@@ -593,14 +631,15 @@ export const utilityService = {
 
     // Create sample bidders
     const sampleBidders = Array.from({ length: 5 }, (_, index) => {
-      const name = `Bidder ${index + 1}`;
+      const bidderNumber = index + 1;
       return {
-        name,
-        idNumber: `ID${index + 1}`,
+        id: bidderNumber.toString(), // Simple numeric ID
+        name: `Bidder ${bidderNumber}`,
+        idNumber: `ID${bidderNumber}`,
         issuingAuthority: 'Sample Authority',
-        address: `Sample Address ${index + 1}`,
+        address: `Sample Address ${bidderNumber}`,
         phone: `098${index.toString().padStart(7, '0')}`,
-        email: `bidder${index + 1}@example.com`,
+        email: `bidder${bidderNumber}@example.com`,
         createdAt: now,
         updatedAt: now
       };

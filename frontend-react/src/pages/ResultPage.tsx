@@ -18,6 +18,7 @@ const ResultPage: React.FC = () => {
   const [result, setResult] = useState<AuctionResult | null>(null);
   const [bids, setBids] = useState<Bid[]>([]);
   const [bidders, setBidders] = useState<Record<string, Bidder>>({});
+  const [winnerBidder, setWinnerBidder] = useState<Bidder | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -58,6 +59,13 @@ const ResultPage: React.FC = () => {
           const auctionResult = await databaseService.auction.getResult(id);
           if (auctionResult) {
             setResult(auctionResult);
+            // If there's a winner, get their details
+            if (auctionResult.winner) {
+              const winnerData = await databaseService.bidder.getById(auctionResult.winner);
+              if (winnerData) {
+                setWinnerBidder(winnerData);
+              }
+            }
           }
         }
       } catch (error) {
@@ -72,7 +80,7 @@ const ResultPage: React.FC = () => {
   }, [id, navigate, showToast]);
 
   const exportToExcel = () => {
-    if (!auction) return;
+    if (!auction || !result) return;
 
     // Create workbook and worksheet
     const workbook = XLSX.utils.book_new();
@@ -88,7 +96,7 @@ const ResultPage: React.FC = () => {
       ['', ''],
       ['Starting Price', databaseService.formatCurrency(auction.startingPrice)],
       ['Current Price', databaseService.formatCurrency(auction.currentPrice)],
-      ['Price Step', databaseService.formatCurrency(auction.bidStep)],
+      ['Bid Step', databaseService.formatCurrency(auction.bidStep)],
       ['Created At', new Date(auction.createdAt).toLocaleString()],
       ['Updated At', auction.updatedAt ? new Date(auction.updatedAt).toLocaleString() : ''],
       ['', ''],
@@ -98,21 +106,21 @@ const ResultPage: React.FC = () => {
     if (result) {
       summaryData.push(
         ['Final Price', databaseService.formatCurrency(result.finalPrice)],
-        ['Start Time', new Date(result.startTime).toLocaleString()],
+        ['Start Time', result.startTime ? new Date(result.startTime).toLocaleString() : 'N/A'],
         ['End Time', new Date(result.endTime).toLocaleString()],
         ['Total Bids', result.totalBids.toString()],
-        ['Total Bidders', result.totalBidders.toString()],
+        ['Total Bidders', result.totalBidders?.toString() || 'N/A'],
         ['', ''],
         ['Winner Information', '']
       );
 
       // Add winner information if exists
-      if (result.winner) {
+      if (winnerBidder) {
         summaryData.push(
-          ['Name', result.winner.name],
-          ['Phone', result.winner.phone || ''],
-          ['Email', result.winner.email || ''],
-          ['Address', result.winner.address || ''],
+          ['Name', winnerBidder.name],
+          ['Phone', winnerBidder.phone || ''],
+          ['Email', winnerBidder.email || ''],
+          ['Address', winnerBidder.address || ''],
           ['Winning Bid', databaseService.formatCurrency(result.finalPrice)]
         );
       } else {
@@ -200,24 +208,21 @@ const ResultPage: React.FC = () => {
               <h5 className="mb-0 fw-bold">Auction Details</h5>
               <div className="action-icons">
                 <Button
-                  variant="link"
-                  className="action-icon print-icon"
+                  variant="outline-primary"
+                  className="me-2"
                   onClick={() => window.print()}
                   title="Print Details"
-                  style={{ textDecoration: 'none' }}
                 >
-                  <i className="bi bi-printer-fill"></i>
-                  <span className="action-label">Print</span>
+                  <i className="bi bi-printer-fill me-2"></i>
+                  Print Report
                 </Button>
                 <Button
-                  variant="link"
-                  className="action-icon export-icon"
+                  variant="success"
                   onClick={exportToExcel}
                   title="Export to Excel"
-                  style={{ textDecoration: 'none' }}
                 >
-                  <i className="bi bi-file-earmark-excel-fill"></i>
-                  <span className="action-label">Export</span>
+                  <i className="bi bi-file-earmark-excel-fill me-2"></i>
+                  Export to Excel
                 </Button>
               </div>
             </Card.Header>
@@ -244,7 +249,7 @@ const ResultPage: React.FC = () => {
                 </Col>
                 <Col sm={6} md={4} className="mb-3">
                   <small className="text-muted d-block">
-                    <i className="bi bi-arrow-up-circle me-1"></i>Price Step
+                    <i className="bi bi-arrow-up-circle me-1"></i>Bid Step
                   </small>
                   <span>{databaseService.formatCurrency(auction.bidStep)}</span>
                 </Col>
@@ -272,35 +277,35 @@ const ResultPage: React.FC = () => {
                 )}
               </Row>
 
-              {result && result.winner && (
+              {result && winnerBidder && (
                 <div className="border-top pt-4 mt-2">
                   <h5 className="mb-3">Winner</h5>
                   <div className="d-flex bg-light p-3 rounded">
                     <div style={{ width: '64px', height: '64px' }}>
                       <img
                         className="rounded-circle w-100 h-100"
-                        src={result.winner.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(result.winner.name)}&background=random&size=64`}
-                        alt={result.winner.name}
+                        src={winnerBidder.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(winnerBidder.name)}&background=random&size=64`}
+                        alt={winnerBidder.name}
                       />
                     </div>
                     <div className="ms-3">
-                      <h5 className="mb-1">{result.winner.name}</h5>
-                      {result.winner.phone && (
+                      <h5 className="mb-1">{winnerBidder.name}</h5>
+                      {winnerBidder.phone && (
                         <p className="mb-1 small">
                           <i className="bi bi-telephone me-1"></i>
-                          {result.winner.phone}
+                          {winnerBidder.phone}
                         </p>
                       )}
-                      {result.winner.email && (
+                      {winnerBidder.email && (
                         <p className="mb-1 small">
                           <i className="bi bi-envelope me-1"></i>
-                          {result.winner.email}
+                          {winnerBidder.email}
                         </p>
                       )}
-                      {result.winner.address && (
+                      {winnerBidder.address && (
                         <p className="mb-1 small">
                           <i className="bi bi-geo-alt me-1"></i>
-                          {result.winner.address}
+                          {winnerBidder.address}
                         </p>
                       )}
                       <p className="mt-2 text-success fw-bold">

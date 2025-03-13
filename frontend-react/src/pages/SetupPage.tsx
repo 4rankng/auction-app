@@ -7,7 +7,7 @@ import Modal from 'react-bootstrap/Modal';
 import { useToast } from '../contexts/ToastContext';
 import databaseService from '../services/databaseService';
 import { Auction, Bidder } from '../models/types';
-import { ROUTES } from '../models/constants';
+import { ROUTES, AUCTION_STATUS } from '../models/constants';
 import './SetupPage.css';
 
 const SetupPage: React.FC = () => {
@@ -78,13 +78,90 @@ const SetupPage: React.FC = () => {
     }
   };
 
+  const handleAddBidder = async () => {
+    // Validate required fields
+    if (!newBidder.id || !newBidder.name) {
+      showToast('Participant ID and Name are required', 'error');
+      return;
+    }
+
+    // Check for duplicate ID
+    if (bidders.some(bidder => bidder.id === newBidder.id)) {
+      showToast('Participant ID already exists', 'error');
+      return;
+    }
+
+    try {
+      const bidderData = {
+        ...newBidder,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      await databaseService.bidder.create(bidderData);
+      const allBidders = await databaseService.bidder.getAll();
+      setBidders(allBidders);
+
+      // Reset form
+      setNewBidder({
+        id: '',
+        name: '',
+        idNumber: '',
+        issuingAuthority: '',
+        address: ''
+      });
+
+      showToast('Participant added successfully', 'success');
+    } catch (error) {
+      console.error('Error adding participant:', error);
+      showToast('Failed to add participant', 'error');
+    }
+  };
+
+  const handleDeleteBidder = async (id: string) => {
+    try {
+      await databaseService.bidder.delete(id);
+      const allBidders = await databaseService.bidder.getAll();
+      setBidders(allBidders);
+      showToast('Participant deleted successfully', 'success');
+    } catch (error) {
+      console.error('Error deleting participant:', error);
+      showToast('Failed to delete participant', 'error');
+    }
+  };
+
   const handleStartAuction = async () => {
-    if (!auction) return;
+    let auctionId: string;
+
+    if (!auction) {
+      // Create new auction if none exists
+      try {
+        const newAuction = await databaseService.auction.create({
+          title: auctionItem,
+          startingPrice,
+          currentPrice: startingPrice,
+          bidStep,
+          auctionItem,
+          auctioneer,
+          status: AUCTION_STATUS.SETUP,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+        setAuction(newAuction);
+        auctionId = newAuction.id;
+      } catch (error) {
+        console.error('Error creating auction:', error);
+        showToast('Failed to create auction', 'error');
+        return;
+      }
+    } else {
+      auctionId = auction.id;
+    }
 
     setIsStarting(true);
 
     try {
-      const updatedAuction = await databaseService.auction.start(auction.id);
+      const updatedAuction = await databaseService.auction.start(auctionId);
       showToast('Auction started successfully', 'success');
       navigate(`${ROUTES.BID}/${updatedAuction.id}`);
     } catch (error) {
@@ -92,14 +169,6 @@ const SetupPage: React.FC = () => {
       showToast('Failed to start auction', 'error');
       setIsStarting(false);
     }
-  };
-
-  const handleAddBidder = () => {
-    // Implementation of handleAddBidder function
-  };
-
-  const handleDeleteBidder = (id: string) => {
-    // Implementation of handleDeleteBidder function
   };
 
   if (isLoading) {

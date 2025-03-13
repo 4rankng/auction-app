@@ -7,6 +7,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { Bidder } from '../../models/types';
 
 interface BidderFormData {
+  id: string;
   name: string;
   idNumber: string;
   issuingAuthority: string;
@@ -30,7 +31,7 @@ const BidderForm: React.FC<BidderFormProps> = ({ onBidderAdded, className = '' }
     setIsSubmitting(true);
 
     try {
-      const bidderData: Omit<Bidder, "id"> = {
+      const bidderData: Bidder = {
         ...data,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -55,11 +56,35 @@ const BidderForm: React.FC<BidderFormProps> = ({ onBidderAdded, className = '' }
     <form onSubmit={handleSubmit(onSubmit)} className={className}>
       <div className="space-y-4">
         <Input
+          label="Bidder ID"
+          placeholder="Enter numeric bidder ID"
+          error={errors.id?.message}
+          fullWidth
+          {...register('id', { required: 'Bidder ID is required' })}
+        />
+
+        <Input
           label="Name"
           placeholder="Enter bidder name"
           error={errors.name?.message}
           fullWidth
           {...register('name', { required: 'Name is required' })}
+        />
+
+        <Input
+          label="ID Number"
+          placeholder="Enter ID number"
+          error={errors.idNumber?.message}
+          fullWidth
+          {...register('idNumber', { required: 'ID Number is required' })}
+        />
+
+        <Input
+          label="Issuing Authority"
+          placeholder="Enter issuing authority"
+          error={errors.issuingAuthority?.message}
+          fullWidth
+          {...register('issuingAuthority', { required: 'Issuing Authority is required' })}
         />
 
         <Input
@@ -94,7 +119,7 @@ const BidderForm: React.FC<BidderFormProps> = ({ onBidderAdded, className = '' }
           placeholder="Enter address"
           error={errors.address?.message}
           fullWidth
-          {...register('address')}
+          {...register('address', { required: 'Address is required' })}
         />
 
         <div className="pt-2">

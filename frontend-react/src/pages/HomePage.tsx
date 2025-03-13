@@ -1,28 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Row, Col, Button, Spinner, Card } from 'react-bootstrap';
+import { Container, Row, Col, Button, Spinner, Card, Modal } from 'react-bootstrap';
 import databaseService from '../services/databaseService';
 import { Auction } from '../models/types';
 import { ROUTES, AUCTION_STATUS } from '../models/constants';
+import { useToast } from '../contexts/ToastContext';
 import './HomePage.css';
 
 const HomePage: React.FC = () => {
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const { showToast } = useToast();
+
+  const loadAuctions = async () => {
+    setIsLoading(true);
+    try {
+      const allAuctions = await databaseService.auction.getAll();
+      setAuctions(allAuctions);
+    } catch (error) {
+      console.error('Error loading auctions:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadAuctions = async () => {
-      setIsLoading(true);
-      try {
-        const allAuctions = await databaseService.auction.getAll();
-        setAuctions(allAuctions);
-      } catch (error) {
-        console.error('Error loading auctions:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadAuctions();
   }, []);
 
@@ -64,6 +67,18 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const handleRemoveAllAuctions = () => {
+    try {
+      databaseService.utility.clearAllData();
+      setAuctions([]);
+      showToast('All auctions and related data have been removed', 'success');
+      setShowConfirmModal(false);
+    } catch (error) {
+      console.error('Error removing auctions:', error);
+      showToast('Failed to remove auctions', 'error');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -79,11 +94,21 @@ const HomePage: React.FC = () => {
     <Container className="py-4">
       <div className="d-flex justify-content-between align-items-center page-header">
         <h1 className="mb-0">Auction System</h1>
-        <Link to={ROUTES.SETUP}>
-          <Button variant="primary">
-            <i className="bi bi-plus-lg me-1"></i> Create New Auction
-          </Button>
-        </Link>
+        <div className="d-flex gap-2">
+          {auctions.length > 0 && (
+            <Button
+              variant="outline-danger"
+              onClick={() => setShowConfirmModal(true)}
+            >
+              <i className="bi bi-trash me-1"></i> Remove All Auctions
+            </Button>
+          )}
+          <Link to={ROUTES.SETUP}>
+            <Button variant="primary">
+              <i className="bi bi-plus-lg me-1"></i> Create New Auction
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {auctions.length === 0 ? (
@@ -93,13 +118,8 @@ const HomePage: React.FC = () => {
           </div>
           <h2>No Auctions Yet</h2>
           <p>Get started by creating your first auction</p>
-          <Link to={ROUTES.SETUP}>
-            <Button variant="primary">
-              <i className="bi bi-plus-lg me-1"></i> Create New Auction
-            </Button>
-          </Link>
         </div>
-      ) : (
+      ) :
         <Row xs={1} md={2} lg={3} className="g-4">
           {auctions.map(auction => (
             <Col key={auction.id}>
@@ -180,7 +200,26 @@ const HomePage: React.FC = () => {
             </Col>
           ))}
         </Row>
-      )}
+      }
+
+      {/* Confirmation Modal */}
+      <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Removal</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Are you sure you want to remove all auctions and related data? This action cannot be undone.</p>
+          <p className="text-danger fw-bold">Warning: This will delete all auctions, bids, and bidder information.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleRemoveAllAuctions}>
+            Remove All Data
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

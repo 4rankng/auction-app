@@ -25,60 +25,37 @@
 
 .action-icons {
   display: flex;
-  gap: var(--spacing-md);
+  gap: 10px;
 }
 
-.action-icon {
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: 2rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  text-decoration: none !important;
-  color: #fff;
-  border: none;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+/* Print styles for when the user clicks the Print button */
+@media print {
+  .action-icons,
+  .btn-primary {
+    display: none !important;
+  }
 
-.action-icon:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  color: #fff;
-}
+  .card {
+    border: none !important;
+    box-shadow: none !important;
+  }
 
-.action-icon:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+  .card-header {
+    background-color: white !important;
+    border-bottom: 1px solid #ddd !important;
+  }
 
-.action-icon i {
-  font-size: 1.1rem;
-}
+  body {
+    font-size: 12pt;
+  }
 
-.action-label {
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+  h1 {
+    font-size: 18pt;
+  }
 
-/* Print icon specific styling */
-.action-icon.print-icon {
-  background: linear-gradient(135deg, var(--gray-700), var(--gray-800));
-}
-
-.action-icon.print-icon:hover {
-  background: linear-gradient(135deg, var(--gray-800), var(--gray-900));
-}
-
-/* Export icon specific styling */
-.action-icon.export-icon {
-  background: linear-gradient(135deg, var(--success), var(--success-dark));
-}
-
-.action-icon.export-icon:hover {
-  background: linear-gradient(135deg, var(--success-dark), var(--success));
+  h5 {
+    font-size: 14pt;
+  }
 }
 
 /* Winner card styling */
@@ -119,49 +96,6 @@
   color: var(--success);
   font-weight: 600;
   font-size: 1.1rem;
-}
-
-/* Print styles */
-@media print {
-  .page-header button,
-  .action-icons,
-  .card-header .action-icons {
-    display: none !important;
-  }
-
-  .container {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .card {
-    border: none !important;
-    box-shadow: none !important;
-  }
-
-  .card-body {
-    padding: 0 !important;
-  }
-
-  h1 {
-    font-size: 24px !important;
-    text-align: center;
-    margin-bottom: var(--spacing-lg);
-  }
-
-  body {
-    font-size: 12px !important;
-  }
-
-  .col-lg-8 {
-    width: 100% !important;
-    flex: 0 0 100% !important;
-    max-width: 100% !important;
-  }
-
-  .col-lg-4 {
-    display: none !important;
-  }
 }
 
 /* Responsive adjustments */

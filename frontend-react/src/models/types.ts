@@ -40,6 +40,7 @@ export interface Auction {
   timeLeft?: number;
   startTime?: string;
   endTime?: string;
+  finalPrice?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,15 +48,14 @@ export interface Auction {
 // Auction result model
 export interface AuctionResult {
   auctionId: string;
-  status: typeof AUCTION_STATUS.ENDED;
-  startTime: string;
   endTime: string;
-  startingPrice: number;
+  startTime?: string;
+  startingPrice?: number;
   finalPrice: number;
-  winner?: Bidder;
-  bidHistory: Bid[];
+  winner?: string;
   totalBids: number;
-  totalBidders: number;
+  totalBidders?: number;
+  status?: typeof AUCTION_STATUS.ENDED;
 }
 
 // Settings model

@@ -1,22 +1,26 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import Button from './Button';
+import { Button } from 'react-bootstrap';
 
 interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  show: boolean;
+  onHide: () => void;
   title: string;
-  children: React.ReactNode;
-  footer?: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  body: string | React.ReactNode;
+  confirmText?: string;
+  confirmVariant?: string;
+  onConfirm?: () => void;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 const Modal: React.FC<ModalProps> = ({
-  isOpen,
-  onClose,
+  show,
+  onHide,
   title,
-  children,
-  footer,
+  body,
+  confirmText = 'Confirm',
+  confirmVariant = 'primary',
+  onConfirm,
   size = 'md'
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -25,13 +29,12 @@ const Modal: React.FC<ModalProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        onClose();
+        onHide();
       }
     };
 
-    if (isOpen) {
+    if (show) {
       document.addEventListener('mousedown', handleClickOutside);
-      // Prevent scrolling when modal is open
       document.body.style.overflow = 'hidden';
     }
 
@@ -39,70 +42,95 @@ const Modal: React.FC<ModalProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
       document.body.style.overflow = 'auto';
     };
-  }, [isOpen, onClose]);
+  }, [show, onHide]);
 
   // Close modal when pressing Escape key
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose();
+        onHide();
       }
     };
 
-    if (isOpen) {
+    if (show) {
       document.addEventListener('keydown', handleEscapeKey);
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [isOpen, onClose]);
+  }, [show, onHide]);
 
-  const sizeClasses = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl'
+  // Handle confirm action
+  const handleConfirm = () => {
+    console.log('Modal confirm button clicked');
+    if (onConfirm) {
+      onConfirm();
+    }
   };
 
-  if (!isOpen) return null;
+  if (!show) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+    <div
+      className="modal-backdrop"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1050
+      }}
+    >
       <div
         ref={modalRef}
-        className={`bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col`}
+        className="ds-card"
+        style={{
+          width: '100%',
+          maxWidth: size === 'sm' ? '400px' : size === 'lg' ? '800px' : '600px',
+          maxHeight: '90vh',
+          margin: '0 auto'
+        }}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+        <div className="d-flex align-items-center justify-content-between p-4 border-bottom">
+          <h4 className="mb-0">{title}</h4>
           <button
             type="button"
-            className="text-gray-400 hover:text-gray-500 focus:outline-none"
-            onClick={onClose}
-          >
-            <span className="sr-only">Close</span>
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            className="btn-close"
+            onClick={onHide}
+            aria-label="Close"
+          />
         </div>
 
         {/* Body */}
-        <div className="px-6 py-4 overflow-y-auto flex-grow">{children}</div>
+        <div className="p-4" style={{ overflowY: 'auto' }}>
+          {body}
+        </div>
 
         {/* Footer */}
-        {footer ? (
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
-            {footer}
-          </div>
-        ) : (
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
-            <Button variant="secondary" onClick={onClose}>
-              Close
+        <div className="d-flex justify-content-end gap-2 p-4 border-top bg-light">
+          <Button
+            variant="outline-secondary"
+            onClick={onHide}
+          >
+            Cancel
+          </Button>
+          {onConfirm && (
+            <Button
+              variant={confirmVariant}
+              onClick={handleConfirm}
+            >
+              {confirmText}
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>,
     document.body
