@@ -1,4 +1,7 @@
 backend/data/*
 backend/data
-.env
 *node_modules*
+*.env
+*.env.production
+*.env.local
+frontend/.env.production

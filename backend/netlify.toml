@@ -1,0 +1,21 @@
+[build]
+  command = "go build -o auction-server"
+  publish = "public"
+  functions = "functions"
+
+[build.environment]
+  GO_VERSION = "1.22"
+
+[functions]
+  external_node_modules = []
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/auction-server/:splat"
+  status = 200
+
+[dev]
+  command = "go run main.go"
+  port = 8080
+  publish = "public"
