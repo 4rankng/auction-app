@@ -1,0 +1,102 @@
+.auction-card {
+  margin-bottom: 20px;
+  transition: transform 0.2s;
+  border: 1px solid rgba(0,0,0,0.125);
+}
+
+.auction-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.auction-card .card-title {
+  font-weight: 500;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.auction-card .card-header {
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid rgba(0,0,0,0.125);
+}
+
+.auction-card .card-footer {
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid rgba(0,0,0,0.125);
+}
+
+.auction-card .badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+}
+
+.auction-card .text-success {
+  color: #28a745 !important;
+}
+
+.auction-card small.text-muted {
+  font-size: 0.875rem;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 1rem;
+}
+
+/* Custom button styles */
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-primary:hover {
+  background-color: #0069d9;
+  border-color: #0062cc;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+/* Loading spinner */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+
+.loading-spinner {
+  margin-right: 0.5rem;
+}
+
+/* Empty state */
+.empty-state-card {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 0.25rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.empty-state-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #343a40;
+}
+
+.empty-state-card p {
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state-card .btn {
+  padding: 0.5rem 1.5rem;
+}
