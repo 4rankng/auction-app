@@ -28,11 +28,45 @@ The Auction App is a high-performance auction platform engineered for operationa
 
 ## 3. Core Features
 
-### 3.1 Backend API Endpoints
+### 3.1 Language and Formatting Requirements
+
+#### 3.1.1 Language
+- **Primary Language:** Vietnamese
+  - All UI elements, labels, buttons, and messages must be in Vietnamese
+  - Key UI elements must use the following translations:
+    - Page Title: "Hệ Thống Đấu Giá"
+    - Create Button: "Tạo Phiên Đấu Giá Mới"
+    - View Button: "Xem Chi Tiết"
+    - Status Labels:
+      - Not Started: "Chưa Bắt Đầu"
+      - In Progress: "Đang Diễn Ra"
+      - Completed: "Đã Kết Thúc"
+    - Table Headers:
+      - Title: "Tên Phiên"
+      - Status: "Trạng Thái"
+      - Starting Price: "Giá Khởi Điểm"
+      - Current Price: "Giá Hiện Tại"
+      - Bidders: "Người Tham Gia"
+
+#### 3.1.2 Number Formatting
+- **Currency Display:**
+  - All monetary values must be displayed in VND
+  - Numbers must use comma separators for thousands (e.g., 1,000,000 VND)
+  - The VND suffix must be separated from the number by a space
+  - Examples:
+    - 1,000 VND
+    - 1,000,000 VND
+    - 10,000,000,000 VND
+- **Input Handling:**
+  - Numeric inputs must automatically format with comma separators as the user types
+  - The system must properly parse comma-separated numbers for calculations
+  - All monetary calculations must maintain precision without rounding errors
+
+### 3.2 Backend API Endpoints
 
 Each endpoint must be implemented with robust validation, proper error handling, and secure authentication where needed.
 
-#### 3.1.1 Auction Management
+#### 3.2.1 Auction Management
 - **Create Auction:**
   Initializes a new auction with at least containing parameters below:
   - Auction title
@@ -79,7 +113,7 @@ Example of response body:
   - Total Bid Count and Complete Bid History
   - Winner Details (ID, Name, Address) and Final Winning Bid
 
-#### 3.1.2 Bidding Operations
+#### 3.2.2 Bidding Operations
 - **Place Bid:**
   In our in-person bidding environment, a single admin is solely responsible for placing bids on behalf of the bidder. This design inherently eliminates race conditions; however, we must implement stringent safeguards to prevent duplicate submissions from the same bidder, particularly due to potential accidental double-clicks by the admin. Each bid is rigorously validated against the current highest bid to ensure adherence to minimum increment requirements and overall bid integrity.
 
@@ -89,7 +123,7 @@ Example of response body:
 - **Retrieve Auction History:**
   Provides a detailed, chronological log of all bidding actions.
 
-#### 3.1.3 Additional Functionalities
+#### 3.2.3 Additional Functionalities
 - **Excel File Parsing:**
   Parses an uploaded Excel file to extract a list of bidders without impacting the live database.
   *This must be stateless and idempotent.*
@@ -111,7 +145,7 @@ The web interface must be intuitive and responsive, delivering clear and consist
 - **Functionality:**
   - Configures auction details prior to commencement.
   - **Primary Action:**
-    - A clearly labeled button “Bắt Đầu Đấu Giá” (Start Auction) which initiates the auction.
+    - A clearly labeled button "Bắt Đầu Đấu Giá" (Start Auction) which initiates the auction.
   - **Input Handling:**
     - Fields for "Giá Khởi Điểm" (Starting Price) and "Bước Giá" (Price Increment) that automatically format large numbers with commas.
     - Text fields for participant details ("Danh Sách Người Tham Gia") with inline edit and delete capabilities.
@@ -123,7 +157,7 @@ The web interface must be intuitive and responsive, delivering clear and consist
 - **Functionality:**
   - Active bidding interface.
   - **Primary Action:**
-    - A prominent “Kết Thúc Đấu Giá” (End Auction) button that terminates the bidding process and transitions to the results.
+    - A prominent "Kết Thúc Đấu Giá" (End Auction) button that terminates the bidding process and transitions to the results.
   - **Consistency:**
     - Similar input validation and data formatting as in the setup phase.
 - **Real-Time Updates:**

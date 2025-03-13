@@ -43,13 +43,13 @@ func NewApp() (*App, error) {
 	// Create router
 	router := gin.Default()
 
-	// Configure CORS - Allow specific origins with credentials
+	// Configure CORS - Allow all origins (for development only)
 	config := cors.Config{
-		AllowOrigins:     []string{"http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:8080"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
+		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
+		AllowCredentials: false,
 		MaxAge:           12 * time.Hour,
 	}
 	router.Use(cors.New(config))

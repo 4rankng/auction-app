@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -48,32 +48,79 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
+
+        .pagination .page-link {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+        .pagination .active .page-link {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .pagination .page-link:focus {
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
     <!-- Loading overlay -->
     <div class="loading-overlay">
         <div class="spinner-border loading-spinner" role="status">
-            <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden">Đang tải...</span>
         </div>
     </div>
 
     <main class="main">
         <div class="container py-5">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="mb-0">Auctions</h1>
+                <h1 class="mb-0">Hệ Thống Đấu Giá</h1>
                 <button id="createAuctionBtn" class="btn btn-primary">
-                    <i class="bi bi-plus-lg"></i> Create New Auction
+                    <i class="bi bi-plus-lg"></i> Tạo Phiên Đấu Giá Mới
                 </button>
             </div>
 
-            <!-- Auctions Container -->
-            <div id="auctionsContainer" class="row">
-                <!-- Placeholder for auctions -->
-                <div class="col-12 text-center py-5" id="noAuctionsMessage">
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>No auctions available. Click "Create New Auction" to get started.
-                    </div>
+            <!-- Auctions Table -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tên Phiên</th>
+                            <th>Ngày Tạo</th>
+                            <th>Trạng Thái</th>
+                            <th>Giá Khởi Điểm</th>
+                            <th>Giá Hiện Tại</th>
+                            <th>Người Tham Gia</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auctionsTableBody">
+                        <!-- Auctions will be added here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div class="d-flex align-items-center">
+                    <label class="me-2">Số mục mỗi trang:</label>
+                    <select id="pageSizeSelect" class="form-select form-select-sm" style="width: auto;">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <nav aria-label="Điều hướng trang" class="ms-3">
+                    <ul class="pagination pagination-md mb-0" id="pagination">
+                        <!-- Pagination will be added here -->
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- No Auctions Message -->
+            <div class="col-12 text-center py-5" id="noAuctionsMessage">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>Chưa có phiên đấu giá nào. Nhấn "Tạo Phiên Đấu Giá Mới" để bắt đầu.
                 </div>
             </div>
         </div>

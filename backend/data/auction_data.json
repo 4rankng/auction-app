@@ -3545,6 +3545,19 @@
       "highestBidder": "",
       "status": "notStarted"
     },
+    "62830a2d-eba4-483e-9d3e-c4442bfc0ab2": {
+      "id": "62830a2d-eba4-483e-9d3e-c4442bfc0ab2",
+      "title": "Phiên Đấu Giá Mới",
+      "createdAt": "2025-03-13T11:31:28.975309+08:00",
+      "bidders": [],
+      "startingPrice": 1000000,
+      "priceStep": 50000,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": "notStarted"
+    },
     "62e4decf-9854-421f-a90f-d48a3748dc81": {
       "id": "62e4decf-9854-421f-a90f-d48a3748dc81",
       "title": "Test Auction",
@@ -6872,6 +6885,19 @@
       "highestBidder": "",
       "status": "notStarted"
     },
+    "b2280f6d-6ca7-4b8d-bfc9-ced4140dee30": {
+      "id": "b2280f6d-6ca7-4b8d-bfc9-ced4140dee30",
+      "title": "Phiên Đấu Giá Mới",
+      "createdAt": "2025-03-13T11:36:02.762968+08:00",
+      "bidders": [],
+      "startingPrice": 1000000,
+      "priceStep": 50000,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": "notStarted"
+    },
     "b23514a4-380a-4fa4-9d08-4c48c9b1de45": {
       "id": "b23514a4-380a-4fa4-9d08-4c48c9b1de45",
       "title": "Test Auction",
@@ -8783,6 +8809,19 @@
       ],
       "startingPrice": 1000,
       "priceStep": 100,
+      "bidHistory": [],
+      "currentRound": 0,
+      "highestBid": 0,
+      "highestBidder": "",
+      "status": "notStarted"
+    },
+    "e4d41f5d-dcac-45e7-9546-52667607a397": {
+      "id": "e4d41f5d-dcac-45e7-9546-52667607a397",
+      "title": "New Auction",
+      "createdAt": "2025-03-13T11:29:45.603434+08:00",
+      "bidders": [],
+      "startingPrice": 1000000,
+      "priceStep": 50000,
       "bidHistory": [],
       "currentRound": 0,
       "highestBid": 0,

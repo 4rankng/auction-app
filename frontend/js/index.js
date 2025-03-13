@@ -2,9 +2,26 @@ import config from './config.js';
 
 // DOM Elements
 const createAuctionBtn = document.getElementById('createAuctionBtn');
-const auctionsContainer = document.getElementById('auctionsContainer');
+const auctionsTableBody = document.getElementById('auctionsTableBody');
 const noAuctionsMessage = document.getElementById('noAuctionsMessage');
 const loadingOverlay = document.querySelector('.loading-overlay');
+const pageSizeSelect = document.getElementById('pageSizeSelect');
+const paginationElement = document.getElementById('pagination');
+
+// Current pagination state
+let currentPage = 1;
+let currentPageSize = 10;
+let totalPages = 1;
+
+// Format date in Vietnamese locale
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
 
 // Show loading overlay
 function showLoading() {
@@ -16,193 +33,227 @@ function hideLoading() {
     document.body.classList.remove('loading');
 }
 
+// Format currency in VND
+function formatCurrency(amount) {
+    return amount.toLocaleString('vi-VN') + ' VND';
+}
+
 // Show toast notification
 function showToast(message, type = 'info') {
     const toastContainer = document.querySelector('.toast-container');
-    const toastId = `toast-${Date.now()}`;
-    const toastHtml = `
-        <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header ${type === 'error' ? 'bg-danger text-white' : type === 'success' ? 'bg-success text-white' : ''}">
-                <strong class="me-auto">${type === 'error' ? 'Error' : 'Notification'}</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                ${message}
-            </div>
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type} show`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+
+    toast.innerHTML = `
+        <div class="toast-header">
+            <strong class="me-auto">${type === 'error' ? 'Lỗi' : 'Thông báo'}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Đóng"></button>
+        </div>
+        <div class="toast-body">
+            ${message}
         </div>
     `;
 
-    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-    const toastElement = document.getElementById(toastId);
-    const toast = new bootstrap.Toast(toastElement, {
-        delay: type === 'error' ? config.toastDelayError : config.toastDelay
-    });
+    toastContainer.appendChild(toast);
 
-    toast.show();
-
-    // Remove toast from DOM after it's hidden
-    toastElement.addEventListener('hidden.bs.toast', function () {
-        toastElement.remove();
-    });
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
 }
 
-// Format currency
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';
-}
-
-// Create auction card
-function createAuctionCard(auction) {
-    const status = auction.status || auction.auctionStatus || 'notStarted';
-    const statusClass = status === 'notStarted' ? 'bg-secondary' :
-                         status === 'inProgress' ? 'bg-success' : 'bg-danger';
-    const statusText = status === 'notStarted' ? 'Not Started' :
-                      status === 'inProgress' ? 'In Progress' : 'Completed';
-
-    // Make sure bidders is an array
-    const bidders = auction.bidders || [];
-
-    const card = document.createElement('div');
-    card.className = 'col-md-4 mb-4';
-    card.innerHTML = `
-        <div class="card auction-card">
-            <div class="card-header d-flex justify-content-between">
-                <h5 class="card-title mb-0">${auction.title || 'Auction'}</h5>
-                <span class="badge ${statusClass}">${statusText}</span>
-            </div>
-            <div class="card-body">
-                <p><strong>Starting Price:</strong> ${formatCurrency(auction.startingPrice)}</p>
-                <p><strong>Price Step:</strong> ${formatCurrency(auction.priceStep)}</p>
-                <p><strong>Bidders:</strong> ${bidders.length}</p>
-                ${status !== 'notStarted' && auction.highestBid ?
-                    `<p><strong>Current Highest Bid:</strong> ${formatCurrency(auction.highestBid)}</p>` : ''}
-            </div>
-            <div class="card-footer">
-                <button class="btn btn-primary btn-sm view-auction" data-auction-id="${auction.id}">
-                    View Auction
-                </button>
-            </div>
-        </div>
-    `;
-
-    // Add event listener to view button
-    const viewBtn = card.querySelector('.view-auction');
-    viewBtn.addEventListener('click', () => viewAuction(auction.id));
-
-    return card;
-}
-
-// Load auctions from the server
-async function loadAuctions() {
-    showLoading();
-
+// API request helper with error handling
+async function apiRequest(url, options = {}) {
     try {
-        const response = await fetch(`${config.apiBaseUrl}${config.endpoints.auctions}`);
+        // Set default headers if not provided
+        if (!options.headers) {
+            options.headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            };
+        }
+
+        const response = await fetch(url, options);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const result = await response.json();
+        return await response.json();
+    } catch (error) {
+        console.error('API Request Error:', error);
+        showToast('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.', 'error');
+        throw error;
+    }
+}
 
-        // Extract the auctions from the response
+// Create auction row
+function createAuctionRow(auction) {
+    const status = auction.status || auction.auctionStatus || 'notStarted';
+    const statusClass = status === 'notStarted' ? 'bg-secondary' :
+                         status === 'inProgress' ? 'bg-success' : 'bg-danger';
+    const statusText = status === 'notStarted' ? 'Chưa Bắt Đầu' :
+                      status === 'inProgress' ? 'Đang Diễn Ra' : 'Đã Kết Thúc';
+
+    // Make sure bidders is an array
+    const bidders = auction.bidders || [];
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>${auction.title || 'Phiên Đấu Giá'}</td>
+        <td>${formatDate(auction.created)}</td>
+        <td><span class="badge ${statusClass}">${statusText}</span></td>
+        <td class="starting-price">${formatCurrency(auction.startingPrice)}</td>
+        <td class="current-price">${status !== 'notStarted' && auction.highestBid ? formatCurrency(auction.highestBid) : '0 VND'}</td>
+        <td>${bidders.length}</td>
+        <td>
+            <button class="btn btn-primary btn-sm view-auction" data-auction-id="${auction.id}">
+                Xem Chi Tiết
+            </button>
+        </td>
+    `;
+
+    // Add event listener to view button
+    const viewBtn = row.querySelector('.view-auction');
+    viewBtn.addEventListener('click', () => viewAuction(auction.id));
+
+    return row;
+}
+
+// Create pagination controls
+function createPagination(currentPage, totalPages) {
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
+
+    // Previous button
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+    prevLi.innerHTML = `<a class="page-link" href="#" data-page="${currentPage - 1}">← Trang trước</a>`;
+    pagination.appendChild(prevLi);
+
+    // Current page indicator
+    const currentLi = document.createElement('li');
+    currentLi.className = 'page-item active';
+    currentLi.innerHTML = `<span class="page-link">Trang ${currentPage}/${totalPages}</span>`;
+    pagination.appendChild(currentLi);
+
+    // Next button
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+    nextLi.innerHTML = `<a class="page-link" href="#" data-page="${currentPage + 1}">Trang sau →</a>`;
+    pagination.appendChild(nextLi);
+
+    // Add event listeners to pagination links
+    pagination.querySelectorAll('.page-link').forEach(link => {
+        if (!link.hasAttribute('data-page')) return; // Skip the current page indicator
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = parseInt(e.target.dataset.page);
+            if (page && page !== currentPage && page >= 1 && page <= totalPages) {
+                loadAuctions(page, currentPageSize);
+            }
+        });
+    });
+}
+
+// Load auctions from the server
+async function loadAuctions(page = 1, pageSize = 10) {
+    showLoading();
+    try {
+        const result = await apiRequest(`${config.apiBaseUrl}${config.endpoints.auctions}?page=${page}&pageSize=${pageSize}`);
+
+        currentPage = result.page;
+        totalPages = result.totalPages;
+        currentPageSize = result.pageSize;
         const auctions = result.data || [];
 
         console.log('Loaded auctions:', auctions);
 
         if (auctions && auctions.length > 0) {
             noAuctionsMessage.style.display = 'none';
-            auctionsContainer.innerHTML = '';
+            auctionsTableBody.innerHTML = '';
 
             auctions.forEach(auction => {
-                const card = createAuctionCard(auction);
-                auctionsContainer.appendChild(card);
+                const row = createAuctionRow(auction);
+                auctionsTableBody.appendChild(row);
             });
+
+            // Update pagination
+            createPagination(currentPage, totalPages);
         } else {
             noAuctionsMessage.style.display = 'block';
+            paginationElement.innerHTML = '';
         }
     } catch (error) {
         console.error('Failed to load auctions:', error);
-        showToast('Failed to load auctions. Please try again later.', 'error');
+        noAuctionsMessage.style.display = 'block';
+        showToast('Không thể tải danh sách phiên đấu giá. Vui lòng thử lại.', 'error');
     } finally {
         hideLoading();
     }
 }
 
 // View an auction
-function viewAuction(auctionId) {
-    // Store the auction ID in localStorage
-    localStorage.setItem('currentAuctionId', auctionId);
-
-    // Redirect to the appropriate page based on auction status
+async function viewAuction(auctionId) {
     showLoading();
+    try {
+        localStorage.setItem('currentAuctionId', auctionId);
+        const result = await apiRequest(`${config.apiBaseUrl}${config.endpoints.auctionById(auctionId)}`);
+        const auction = result.data;
+        const status = auction.status || auction.auctionStatus;
 
-    fetch(`${config.apiBaseUrl}${config.endpoints.auctionById(auctionId)}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(result => {
-            const auction = result.data;
-            const status = auction.status || auction.auctionStatus;
-
-            if (status === 'notStarted') {
-                window.location.href = config.pages.setup;
-            } else if (status === 'inProgress') {
-                window.location.href = config.pages.bid;
-            } else if (status === 'completed') {
-                window.location.href = config.pages.result;
-            }
-        })
-        .catch(error => {
-            console.error('Failed to get auction status:', error);
-            hideLoading();
-            showToast('Failed to open auction. Please try again.', 'error');
-        });
+        if (status === 'notStarted') {
+            window.location.href = config.pages.setup;
+        } else if (status === 'inProgress') {
+            window.location.href = config.pages.bid;
+        } else if (status === 'completed') {
+            window.location.href = config.pages.result;
+        }
+    } catch (error) {
+        console.error('Failed to get auction status:', error);
+        showToast('Không thể mở phiên đấu giá. Vui lòng thử lại.', 'error');
+    } finally {
+        hideLoading();
+    }
 }
 
 // Create a new auction
-function createNewAuction() {
+async function createNewAuction() {
     showLoading();
+    try {
+        const auctionData = {
+            title: "Phiên Đấu Giá Mới",
+            startingPrice: config.defaultSettings.startingPrice,
+            priceStep: config.defaultSettings.priceStep
+        };
 
-    // Default auction data
-    const auctionData = {
-        title: "New Auction",
-        startingPrice: config.defaultSettings.startingPrice,
-        priceStep: config.defaultSettings.priceStep
-    };
-
-    fetch(`${config.apiBaseUrl}${config.endpoints.auctions}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(auctionData)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(result => {
-            const newAuction = result.data;
-            localStorage.setItem('currentAuctionId', newAuction.id);
-            window.location.href = config.pages.setup;
-        })
-        .catch(error => {
-            console.error('Failed to create auction:', error);
-            hideLoading();
-            showToast('Failed to create auction. Please try again.', 'error');
+        const result = await apiRequest(`${config.apiBaseUrl}${config.endpoints.auctions}`, {
+            method: 'POST',
+            body: JSON.stringify(auctionData)
         });
+
+        const newAuction = result.data;
+        localStorage.setItem('currentAuctionId', newAuction.id);
+        window.location.href = config.pages.setup;
+    } catch (error) {
+        console.error('Failed to create auction:', error);
+        showToast('Không thể tạo phiên đấu giá mới. Vui lòng thử lại.', 'error');
+    } finally {
+        hideLoading();
+    }
 }
 
 // Event Listeners
 createAuctionBtn.addEventListener('click', createNewAuction);
+pageSizeSelect.addEventListener('change', (e) => {
+    currentPageSize = parseInt(e.target.value);
+    loadAuctions(1, currentPageSize);
+});
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    loadAuctions();
+    loadAuctions(1, currentPageSize);
 });

@@ -6,15 +6,34 @@ const { checkServersRunning } = require('./utils/server-utils');
  * UI tests for the Auction App index page
  *
  * These tests verify that:
- * 1. The "Create New Auction" button navigates to the setup page
- * 2. The "View Auction" button navigates to the specific auction page
- * 3. The language and formatting on the index page meet requirements
- * 4. Prices are displayed in VND with comma separators
+ * 1. The page uses Vietnamese language for all UI elements
+ * 2. All numeric values are properly formatted with VND currency and comma separators
+ * 3. The "Create New Auction" button navigates to the setup page
+ * 4. The "View Auction" button navigates to the specific auction page
  */
 
 // Base URL for the frontend - use the URL from the command line
 const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL + '/frontend/index.html' : config.urls.frontend.index;
 const backendUrl = process.env.BACKEND_URL ? process.env.BACKEND_URL + '/health' : config.urls.backend.health;
+
+// Vietnamese text constants for verification
+const VI_TEXTS = {
+  pageTitle: 'Hệ Thống Đấu Giá',
+  createButton: 'Tạo Phiên Đấu Giá Mới',
+  viewButton: 'Xem Chi Tiết',
+  statusLabels: {
+    notStarted: 'Chưa Bắt Đầu',
+    inProgress: 'Đang Diễn Ra',
+    completed: 'Đã Kết Thúc'
+  },
+  headers: {
+    title: 'Tên Phiên',
+    status: 'Trạng Thái',
+    startingPrice: 'Giá Khởi Điểm',
+    currentPrice: 'Giá Hiện Tại',
+    bidders: 'Người Tham Gia'
+  }
+};
 
 test.describe('Auction Index Page Tests', () => {
   // Before all tests, check if servers are running
@@ -26,7 +45,6 @@ test.describe('Auction Index Page Tests', () => {
       console.error('Please start the required servers before running the tests:');
       console.error(`1. Frontend: cd frontend && npx http-server . -p ${config.ports.frontend}`);
       console.error('2. Backend: cd backend && go run .');
-      // We don't throw an error here because we want the tests to run and show the proper error messages
     }
   });
 
@@ -37,68 +55,93 @@ test.describe('Auction Index Page Tests', () => {
       // Wait for the page to fully load
       await page.waitForSelector('.container', { timeout: config.timeouts.defaultPageLoad });
     } catch (error) {
-      // This error will be caught by Playwright and the test will fail
-      // with a meaningful error message
       throw new Error(`Failed to load frontend page at ${frontendUrl}. Make sure the frontend server is running.`);
     }
   });
 
-  test('should display the auction list page with correct structure', async ({ page }) => {
-    // Check that the page has the correct title
-    await expect(page).toHaveTitle(/Hệ Thống Đấu Giá/); // Should contain this text
+  test('should display the auction list page with correct Vietnamese text', async ({ page }) => {
+    // Check page title
+    await expect(page).toHaveTitle(VI_TEXTS.pageTitle);
 
-    // Check for the main elements
-    await expect(page.locator('h1')).toBeVisible();
-    await expect(page.locator('#createAuctionBtn')).toBeVisible();
+    // Check main heading
+    const heading = await page.locator('h1').textContent();
+    expect(heading).toContain(VI_TEXTS.pageTitle);
 
-    // Check that the create button has the correct text
+    // Check create button text
     const createBtnText = await page.locator('#createAuctionBtn').textContent();
-    expect(createBtnText).toContain('Create New Auction');
+    expect(createBtnText).toContain(VI_TEXTS.createButton);
+
+    // Check table headers
+    for (const [key, value] of Object.entries(VI_TEXTS.headers)) {
+      const headerText = await page.locator(`th:has-text("${value}")`).textContent();
+      expect(headerText).toContain(value);
+    }
+
+    // Check status labels if any auctions exist
+    const statusCells = await page.locator('td.status').all();
+    for (const cell of statusCells) {
+      const status = await cell.textContent();
+      expect(Object.values(VI_TEXTS.statusLabels)).toContain(status.trim());
+    }
   });
 
-  test('clicking "Create New Auction" should navigate to setup/create page', async ({ page }) => {
-    // Click the Create New Auction button
-    await page.click('#createAuctionBtn');
-
-    // Give the page time to process the click and start navigation
+  test('should format all numeric values as VND with comma separators', async ({ page }) => {
+    // Wait for auction data to load
     await page.waitForTimeout(1000);
 
-    // Check that we've navigated away from the index page
-    await expect(page.url()).not.toEqual(frontendUrl);
+    // Check starting prices
+    const startingPrices = await page.locator('td.starting-price').all();
+    for (const price of startingPrices) {
+      const priceText = await price.textContent();
+      expect(priceText).toMatch(/^\d{1,3}(\.\d{3})*(\s)?VND$/);
 
-    // The actual navigation might depend on the app's current state
-    // We can only verify we're not on the index page anymore
-  });
+      // Verify dot formatting for numbers > 999
+      const numericValue = parseInt(priceText.replace(/[^\d]/g, ''));
+      if (numericValue > 999) {
+        expect(priceText).toMatch(/\d{1,3}(\.\d{3})+(\s)?VND$/);
+      }
+    }
 
-  test('should display prices in VND with comma separators', async ({ page }) => {
-    // Wait for content to load
-    await page.waitForTimeout(1000);
+    // Check current prices
+    const currentPrices = await page.locator('td.current-price').all();
+    for (const price of currentPrices) {
+      const priceText = await price.textContent();
+      if (priceText !== '0 VND') { // Skip if no bids
+        expect(priceText).toMatch(/^\d{1,3}(\.\d{3})*(\s)?VND$/);
 
-    // Get the entire page content
-    const pageContent = await page.textContent('body');
-
-    // Check if any VND prices are present in the page
-    if (pageContent.includes('VND')) {
-      // Find all price text with regex
-      const pricePattern = /[\d,.]+ VND/g;
-      const priceMatches = pageContent.match(pricePattern);
-
-      if (priceMatches && priceMatches.length > 0) {
-        // For each price found, check the format
-        for (const price of priceMatches) {
-          // Extract the numeric part
-          const numericPart = price.replace(' VND', '').trim();
-
-          // If the number is > 999, it should have commas
-          if (parseFloat(numericPart.replace(/,/g, '')) > 999) {
-            expect(numericPart).toMatch(/\d{1,3}(,\d{3})+/);
-          }
+        // Verify dot formatting for numbers > 999
+        const numericValue = parseInt(priceText.replace(/[^\d]/g, ''));
+        if (numericValue > 999) {
+          expect(priceText).toMatch(/\d{1,3}(\.\d{3})+(\s)?VND$/);
         }
       }
     }
   });
 
-  test('clicking "View Auction" should navigate to the auction page', async ({ page }) => {
+  test('clicking "Create New Auction" should navigate to setup page', async ({ page }) => {
+    // Wait for response from creating auction
+    const responsePromise = page.waitForResponse(response =>
+      response.url().includes('/auctions') && response.request().method() === 'POST'
+    );
+
+    // Click the Create New Auction button
+    await page.click('#createAuctionBtn');
+
+    // Wait for the response
+    await responsePromise;
+
+    // Wait for navigation to complete
+    await page.waitForTimeout(1000);
+
+    // Verify navigation
+    expect(page.url()).toContain('setup.html');
+
+    // Verify the setup page is in Vietnamese
+    const pageTitle = await page.title();
+    expect(pageTitle).toContain('Tạo Phiên Đấu Giá');
+  });
+
+  test('clicking "View Auction" should navigate to auction details', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
 
@@ -106,16 +149,24 @@ test.describe('Auction Index Page Tests', () => {
     const viewBtnCount = await page.locator('.view-auction').count();
 
     if (viewBtnCount > 0) {
-      // Click the first view auction button
-      await page.click('.view-auction:first-child');
+      // Get the first view button
+      const viewBtn = await page.locator('.view-auction').first();
 
-      // Give the page time to navigate
+      // Verify view button text
+      const viewBtnText = await viewBtn.textContent();
+      expect(viewBtnText.trim()).toBe(VI_TEXTS.viewButton);
+
+      // Click the first view auction button
+      await viewBtn.click();
       await page.waitForTimeout(1000);
 
-      // Check that we've navigated away from the index page
-      await expect(page.url()).not.toEqual(frontendUrl);
+      // Verify navigation
+      expect(page.url()).toContain('bid.html');
+
+      // Verify the auction page is in Vietnamese
+      const pageTitle = await page.title();
+      expect(pageTitle).toContain('Chi Tiết Phiên Đấu Giá');
     } else {
-      // Skip test if no auction cards are found
       test.skip('No auctions available to test View button');
     }
   });
