@@ -7,6 +7,14 @@ const noAuctionsMessage = document.getElementById('noAuctionsMessage');
 const loadingOverlay = document.querySelector('.loading-overlay');
 const pageSizeSelect = document.getElementById('pageSizeSelect');
 const paginationElement = document.getElementById('pagination');
+const refreshBtn = document.getElementById('refreshBtn') || (() => {
+    const btn = document.createElement('button');
+    btn.id = 'refreshBtn';
+    btn.className = 'btn btn-outline-primary me-2';
+    btn.innerHTML = '<i class="fas fa-sync-alt"></i> Làm mới';
+    document.querySelector('.auction-controls').prepend(btn);
+    return btn;
+})();
 
 // Current pagination state
 let currentPage = 1;
@@ -248,12 +256,24 @@ async function createNewAuction() {
 
 // Event Listeners
 createAuctionBtn.addEventListener('click', createNewAuction);
-pageSizeSelect.addEventListener('change', (e) => {
-    currentPageSize = parseInt(e.target.value);
-    loadAuctions(1, currentPageSize);
+refreshBtn.addEventListener('click', () => {
+    refreshBtn.disabled = true;
+    refreshBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Đang làm mới...';
+    loadAuctions(currentPage, currentPageSize).finally(() => {
+        refreshBtn.disabled = false;
+        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Làm mới';
+    });
 });
 
-// Initialize
+// Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
-    loadAuctions(1, currentPageSize);
+    // Show no auctions message initially
+    noAuctionsMessage.style.display = 'block';
+
+    // Add event listener for page size changes
+    pageSizeSelect.addEventListener('change', (e) => {
+        currentPageSize = parseInt(e.target.value);
+        currentPage = 1; // Reset to first page when changing page size
+        loadAuctions(currentPage, currentPageSize);
+    });
 });

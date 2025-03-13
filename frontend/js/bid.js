@@ -3,6 +3,7 @@ import config from './config.js';
 
 // Constants from configuration
 const API_BASE_URL = config.apiBaseUrl;
+const WS_BASE_URL = API_BASE_URL.replace('http', 'ws');
 const TIMER_INTERVAL = 1000; // Update to 1 second for more accurate timers
 const DEFAULT_AUCTION_DURATION = config.defaultAuctionDuration;
 
@@ -25,6 +26,14 @@ const backToSetupBtn = document.getElementById('backToSetupBtn');
 const currentYearSpan = document.getElementById('currentYear');
 const toastContainer = document.querySelector('.toast-container');
 const languageSelect = document.getElementById('language');
+const refreshBtn = document.getElementById('refreshBtn') || (() => {
+    const btn = document.createElement('button');
+    btn.id = 'refreshBtn';
+    btn.className = 'btn btn-outline-primary';
+    btn.innerHTML = '<i class="fas fa-sync-alt"></i> Làm mới';
+    document.querySelector('.auction-controls').prepend(btn);
+    return btn;
+})();
 
 // Floating card elements
 const floatingInitialPrice = document.getElementById('floatingInitialPrice');
@@ -37,16 +46,24 @@ let auctionId = '';
 let auctionData = null;
 let bidHistory = [];
 let bidders = [];
-let timerInterval;
+let ws = null;
 let apiConnectionFailed = false;
 let lastConnectionAttempt = 0;
-const MIN_RETRY_INTERVAL = config.retryInterval || 5000; // Minimum time between connection retry attempts
+const MIN_RETRY_INTERVAL = config.retryInterval || 5000;
 
 // Add event listeners
 placeBidBtn.addEventListener('click', placeBid);
 cancelBidBtn.addEventListener('click', cancelLastBid);
 endAuctionBtn.addEventListener('click', endAuction);
 backToSetupBtn.addEventListener('click', goToSetup);
+refreshBtn.addEventListener('click', () => {
+    refreshBtn.disabled = true;
+    refreshBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Đang làm mới...';
+    loadAuctionData().finally(() => {
+        refreshBtn.disabled = false;
+        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Làm mới';
+    });
+});
 
 // Set current year
 if (currentYearSpan) {
@@ -66,7 +83,7 @@ async function initialize() {
             return;
         }
 
-        // Load auction data
+        // Load initial auction data
         await loadAuctionData();
 
         // Check auction status to determine if we should be on this page
@@ -89,32 +106,56 @@ async function initialize() {
             return;
         }
 
-        // Start timer update
-        startTimers();
+        // Initialize WebSocket connection
+        initializeWebSocket();
     } catch (error) {
         console.error('Failed to initialize auction page:', error);
         showToast('Không thể tải dữ liệu. Vui lòng thử lại sau.', 'error');
     }
 }
 
-function startTimers() {
-    // Clear any existing intervals
-    if (timerInterval) {
-        clearInterval(timerInterval);
+function initializeWebSocket() {
+    if (ws) {
+        ws.close();
     }
 
-    // Start timer that updates every second
-    timerInterval = setInterval(() => {
-        // Update auction status
-        loadAuctionData().catch(error => {
-            console.error('Error updating auction status:', error);
-        });
+    ws = new WebSocket(`${WS_BASE_URL}/ws/auction/${auctionId}`);
 
-        // Update bid history
-        loadBidHistory().catch(error => {
-            console.error('Error updating bid history:', error);
-        });
-    }, TIMER_INTERVAL);
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        handleWebSocketMessage(data);
+    };
+
+    ws.onclose = () => {
+        console.log('WebSocket connection closed');
+        setTimeout(initializeWebSocket, 5000); // Attempt to reconnect after 5 seconds
+    };
+
+    ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        showToast('Kết nối thời gian thực bị gián đoạn. Sử dụng nút làm mới để cập nhật thông tin.', 'warning');
+    };
+}
+
+function handleWebSocketMessage(data) {
+    switch (data.type) {
+        case 'auction_update':
+            auctionData = data.auction;
+            updateStatusUI();
+            updateButtonStates();
+            break;
+        case 'bid_update':
+            bidHistory = data.bidHistory;
+            renderBidHistory();
+            break;
+        case 'bidder_update':
+            bidders = data.bidders;
+            updateBidderGrid();
+            break;
+        case 'auction_end':
+            window.location.href = config.pages.result;
+            break;
+    }
 }
 
 // Load all needed auction data

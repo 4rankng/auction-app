@@ -20,6 +20,14 @@ const startAuctionBtn = document.getElementById('startAuction');
 const currentYearSpan = document.getElementById('currentYear');
 const toastContainer = document.querySelector('.toast-container');
 const languageSelect = document.getElementById('language');
+const refreshBtn = document.getElementById('refreshBtn') || (() => {
+    const btn = document.createElement('button');
+    btn.id = 'refreshBtn';
+    btn.className = 'btn btn-outline-primary me-2';
+    btn.innerHTML = '<i class="fas fa-sync-alt"></i> Làm mới';
+    document.querySelector('.auction-controls').prepend(btn);
+    return btn;
+})();
 
 // State
 let bidders = [];
@@ -35,7 +43,7 @@ const MIN_RETRY_INTERVAL = config.minRetryInterval || 5000; // Minimum time betw
 console.log('Initializing page...');
 
 // Initialize the page
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     // Log API URL if in debug mode
     if (config.debug) {
         console.log('API URL:', API_BASE_URL);
@@ -50,16 +58,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     addBidderBtn.addEventListener('click', handleAddBidder);
     importExcelBtn.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', handleFileUpload);
+    refreshBtn.addEventListener('click', () => {
+        refreshBtn.disabled = true;
+        refreshBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Đang làm mới...';
+        loadData().finally(() => {
+            refreshBtn.disabled = false;
+            refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Làm mới';
+        });
+    });
 
     // Debug event for start auction button
     console.log('Adding click handler to start auction button');
     startAuctionBtn.addEventListener('click', (e) => {
         console.log('START AUCTION BUTTON CLICKED');
-        // Prevent default to ensure we handle navigation ourselves
         e.preventDefault();
-
-        // Don't disable the button or show loading state
-        // Just navigate directly
         handleStartAuction();
     });
 
@@ -68,12 +80,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Button error:', e);
     });
 
-    // Initial data load
-    await loadData();
-
     if (languageSelect) {
         languageSelect.addEventListener('change', changeLanguage);
     }
+
+    // Show initial empty state
+    noBiddersMessage.style.display = 'block';
 });
 
 // Load data (auction settings and bidders)
