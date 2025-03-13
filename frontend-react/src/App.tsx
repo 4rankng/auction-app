@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-bootstrap';
 import { ToastProvider } from './contexts/ToastContext';
 import MainLayout from './components/layout/MainLayout';
 import HomePage from './pages/HomePage';
@@ -9,6 +10,7 @@ import ResultPage from './pages/ResultPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { ROUTES } from './models/constants';
 import databaseService from './services/databaseService';
+import './styles/shared.css';
 
 const App: React.FC = () => {
   // Initialize the database with sample data
@@ -28,19 +30,22 @@ const App: React.FC = () => {
   return (
     <Router>
       <ToastProvider>
-        <Routes>
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<HomePage />} />
-            <Route path={ROUTES.SETUP} element={<SetupPage />} />
-            <Route path={`${ROUTES.SETUP}/:id`} element={<SetupPage />} />
-            <Route path={ROUTES.BID} element={<BidPage />} />
-            <Route path={`${ROUTES.BID}/:id`} element={<BidPage />} />
-            <Route path={ROUTES.RESULT} element={<ResultPage />} />
-            <Route path={`${ROUTES.RESULT}/:id`} element={<ResultPage />} />
-            <Route path="404" element={<NotFoundPage />} />
-            <Route path="*" element={<Navigate to="/404" replace />} />
-          </Route>
-        </Routes>
+        <div className="app">
+          <Routes>
+            <Route path="/" element={<MainLayout />}>
+              <Route index element={<HomePage />} />
+              <Route path={ROUTES.SETUP} element={<SetupPage />} />
+              <Route path={`${ROUTES.SETUP}/:id`} element={<SetupPage />} />
+              <Route path={ROUTES.BID} element={<BidPage />} />
+              <Route path={`${ROUTES.BID}/:id`} element={<BidPage />} />
+              <Route path={ROUTES.RESULT} element={<ResultPage />} />
+              <Route path={`${ROUTES.RESULT}/:id`} element={<ResultPage />} />
+              <Route path="404" element={<NotFoundPage />} />
+              <Route path="*" element={<Navigate to="/404" replace />} />
+            </Route>
+          </Routes>
+          <ToastContainer />
+        </div>
       </ToastProvider>
     </Router>
   );

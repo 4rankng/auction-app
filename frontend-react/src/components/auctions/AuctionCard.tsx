@@ -85,7 +85,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, className = '' }) =>
           </div>
           <div>
             <p className="text-sm text-gray-500">Price Step</p>
-            <p className="font-medium">{databaseService.formatCurrency(auction.priceStep)}</p>
+            <p className="font-medium">{databaseService.formatCurrency(auction.bidStep)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Created</p>

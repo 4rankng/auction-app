@@ -12,7 +12,7 @@ interface AuctionFormData {
   title: string;
   description: string;
   startingPrice: number;
-  priceStep: number;
+  bidStep: number;
 }
 
 interface AuctionFormProps {
@@ -31,10 +31,10 @@ const AuctionForm: React.FC<AuctionFormProps> = ({
       title: auction.title,
       description: auction.description || '',
       startingPrice: auction.startingPrice,
-      priceStep: auction.priceStep
+      bidStep: auction.bidStep
     } : {
       startingPrice: databaseService.settings.get().initialPrice,
-      priceStep: databaseService.settings.get().priceIncrement
+      bidStep: databaseService.settings.get().priceIncrement
     }
   });
 
@@ -53,7 +53,7 @@ const AuctionForm: React.FC<AuctionFormProps> = ({
           title: data.title,
           description: data.description,
           startingPrice: data.startingPrice,
-          priceStep: data.priceStep,
+          bidStep: data.bidStep,
           currentPrice: data.startingPrice // Reset current price to starting price
         });
 
@@ -66,7 +66,11 @@ const AuctionForm: React.FC<AuctionFormProps> = ({
           status: AUCTION_STATUS.SETUP,
           startingPrice: data.startingPrice,
           currentPrice: data.startingPrice,
-          priceStep: data.priceStep
+          bidStep: data.bidStep,
+          auctionItem: data.title, // Using title as auction item for now
+          auctioneer: 'System', // Default auctioneer
+          createdAt: new Date(),
+          updatedAt: new Date()
         });
 
         showToast('Auction created successfully', 'success');
@@ -120,16 +124,16 @@ const AuctionForm: React.FC<AuctionFormProps> = ({
           />
 
           <Input
-            label="Price Step (VND)"
+            label="Bid Step (VND)"
             type="number"
-            placeholder="Enter price step"
-            error={errors.priceStep?.message}
+            placeholder="Enter bid step"
+            error={errors.bidStep?.message}
             fullWidth
-            {...register('priceStep', {
-              required: 'Price step is required',
+            {...register('bidStep', {
+              required: 'Bid step is required',
               min: {
                 value: 1000,
-                message: 'Price step must be at least 1,000 VND'
+                message: 'Bid step must be at least 1,000 VND'
               },
               valueAsNumber: true
             })}

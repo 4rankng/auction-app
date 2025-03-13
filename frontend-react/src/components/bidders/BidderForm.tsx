@@ -4,12 +4,16 @@ import Button from '../ui/Button';
 import Input from '../ui/Input';
 import databaseService from '../../services/databaseService';
 import { useToast } from '../../contexts/ToastContext';
+import { Bidder } from '../../models/types';
 
 interface BidderFormData {
   name: string;
+  idNumber: string;
+  issuingAuthority: string;
+  address: string;
   phone?: string;
   email?: string;
-  address?: string;
+  avatar?: string;
 }
 
 interface BidderFormProps {
@@ -26,7 +30,12 @@ const BidderForm: React.FC<BidderFormProps> = ({ onBidderAdded, className = '' }
     setIsSubmitting(true);
 
     try {
-      await databaseService.bidder.create(data);
+      const bidderData: Omit<Bidder, "id"> = {
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      await databaseService.bidder.create(bidderData);
 
       reset();
       showToast('Bidder added successfully', 'success');

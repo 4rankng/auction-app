@@ -99,10 +99,10 @@ export const auctionService = {
   },
 
   // Create a new auction
-  create: (auction: Omit<Auction, 'id' | 'createdAt' | 'updatedAt'>): Auction => {
+  create: async (auction: Omit<Auction, 'id'>): Promise<Auction> => {
     const db = getDatabase();
     const id = uuidv4();
-    const now = new Date().toISOString();
+    const now = new Date();
 
     const newAuction: Auction = {
       ...auction,
@@ -122,7 +122,7 @@ export const auctionService = {
   },
 
   // Update an auction
-  update: (id: string, auction: Partial<Auction>): Auction => {
+  update: async (id: string, auction: Partial<Auction>): Promise<Auction> => {
     const db = getDatabase();
     const existingAuction = db.auctions[id];
 
@@ -133,7 +133,7 @@ export const auctionService = {
     const updatedAuction: Auction = {
       ...existingAuction,
       ...auction,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date()
     };
 
     db.auctions[id] = updatedAuction;
@@ -165,7 +165,7 @@ export const auctionService = {
   },
 
   // Start an auction
-  start: (id: string): Auction => {
+  start: async (id: string): Promise<Auction> => {
     const db = getDatabase();
     const auction = db.auctions[id];
 
@@ -186,7 +186,7 @@ export const auctionService = {
       startTime: now.toISOString(),
       endTime: endTime.toISOString(),
       timeLeft: db.settings.auctionDuration,
-      updatedAt: now.toISOString()
+      updatedAt: now
     };
 
     db.auctions[id] = updatedAuction;
@@ -196,16 +196,11 @@ export const auctionService = {
   },
 
   // End an auction
-  end: (id: string, winnerId?: string): Auction => {
+  end: async (id: string, winnerId?: string): Promise<Auction> => {
     const db = getDatabase();
     const auction = db.auctions[id];
-
     if (!auction) {
-      throw new Error(`Auction with ID ${id} not found`);
-    }
-
-    if (auction.status !== AUCTION_STATUS.IN_PROGRESS) {
-      throw new Error(`Auction with ID ${id} is not in progress`);
+      throw new Error('Auction not found');
     }
 
     const now = new Date();
@@ -213,36 +208,13 @@ export const auctionService = {
     const updatedAuction: Auction = {
       ...auction,
       status: AUCTION_STATUS.ENDED,
-      endTime: now.toISOString(),
       timeLeft: 0,
-      winnerId,
-      updatedAt: now.toISOString()
+      winner: winnerId,
+      updatedAt: now
     };
 
     db.auctions[id] = updatedAuction;
-    saveDatabase(db);
-
-    // Create and save auction result
-    if (winnerId) {
-      const winner = db.bidders[winnerId];
-      const bidHistory = db.bids[id] || [];
-
-      const auctionResult: AuctionResult = {
-        auctionId: id,
-        status: AUCTION_STATUS.ENDED,
-        startTime: auction.startTime || now.toISOString(),
-        endTime: now.toISOString(),
-        startingPrice: auction.startingPrice,
-        finalPrice: auction.currentPrice,
-        winner: winner,
-        bidHistory: bidHistory,
-        totalBids: bidHistory.length,
-        totalBidders: new Set(bidHistory.map(bid => bid.bidderId)).size
-      };
-
-      localStorage.setItem(`auction_result_${id}`, JSON.stringify(auctionResult));
-    }
-
+    await saveDatabase(db);
     return updatedAuction;
   },
 
@@ -278,13 +250,16 @@ export const bidderService = {
   },
 
   // Create a new bidder
-  create: (bidder: Omit<Bidder, 'id'>): Bidder => {
+  create: async (bidder: Omit<Bidder, 'id'>): Promise<Bidder> => {
     const db = getDatabase();
     const id = uuidv4();
+    const now = new Date();
 
     const newBidder: Bidder = {
       ...bidder,
-      id
+      id,
+      createdAt: now,
+      updatedAt: now
     };
 
     // Generate avatar if not provided
@@ -358,41 +333,25 @@ export const bidderService = {
   },
 
   // Import bidders from CSV
-  importFromCSV: (csvContent: string): Bidder[] => {
-    const lines = csvContent.split('\n');
-    const headers = lines[0].split(',');
+  importFromCSV: async (content: string): Promise<Bidder[]> => {
+    const rows = content.split('\n').map(row => row.split(',').map(cell => cell.trim()));
+    const headers = rows[0];
+    const data = rows.slice(1).filter(row => row.length === headers.length);
 
-    const nameIndex = headers.findIndex(h => h.toLowerCase().includes('name'));
-    const addressIndex = headers.findIndex(h => h.toLowerCase().includes('address'));
-    const phoneIndex = headers.findIndex(h => h.toLowerCase().includes('phone'));
-    const emailIndex = headers.findIndex(h => h.toLowerCase().includes('email'));
-
-    const bidders: Omit<Bidder, 'id'>[] = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      const values = line.split(',');
-
+    const bidders: Omit<Bidder, 'id'>[] = data.map(row => {
       const bidder: Omit<Bidder, 'id'> = {
-        name: nameIndex >= 0 ? values[nameIndex].trim() : `Bidder ${i}`
+        name: row[0] || '',
+        idNumber: row[1] || '',
+        issuingAuthority: row[2] || '',
+        address: row[3] || '',
+        phone: row[4] || undefined,
+        email: row[5] || undefined,
+        avatar: row[6] || undefined,
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
-
-      if (addressIndex >= 0 && values[addressIndex]) {
-        bidder.address = values[addressIndex].trim();
-      }
-
-      if (phoneIndex >= 0 && values[phoneIndex]) {
-        bidder.phone = values[phoneIndex].trim();
-      }
-
-      if (emailIndex >= 0 && values[emailIndex]) {
-        bidder.email = values[emailIndex].trim();
-      }
-
-      bidders.push(bidder);
-    }
+      return bidder;
+    });
 
     return bidderService.createMany(bidders);
   }
@@ -414,10 +373,10 @@ export const bidService = {
   },
 
   // Create a new bid
-  create: (bid: Omit<Bid, 'id' | 'timestamp' | 'round' | 'bidderName'>): Bid => {
+  create: async (bid: Omit<Bid, 'id' | 'timestamp' | 'round' | 'bidderName'>): Promise<Bid> => {
     const db = getDatabase();
     const id = uuidv4();
-    const now = new Date().toISOString();
+    const now = new Date();
 
     // Get the auction
     const auction = db.auctions[bid.auctionId];
@@ -438,7 +397,7 @@ export const bidService = {
     const newBid: Bid = {
       ...bid,
       id,
-      timestamp: now,
+      timestamp: now.toISOString(),
       round,
       bidderName: bidder.name
     };
@@ -455,8 +414,7 @@ export const bidService = {
     auction.currentPrice = bid.amount;
     auction.updatedAt = now;
 
-    saveDatabase(db);
-
+    await saveDatabase(db);
     return newBid;
   },
 
@@ -486,7 +444,7 @@ export const bidService = {
       auction.currentPrice = auction.startingPrice;
     }
 
-    auction.updatedAt = new Date().toISOString();
+    auction.updatedAt = new Date();
 
     saveDatabase(db);
   },
@@ -573,9 +531,13 @@ export const utilityService = {
       vietnameseNames.forEach((name, index) => {
         bidderService.create({
           name,
+          idNumber: `ID${index + 1}`,
+          issuingAuthority: 'Sample Authority',
           address: `Địa chỉ ${index + 1}, Việt Nam`,
           phone: `098${index.toString().padStart(7, '0')}`,
-          email: `bidder${index + 1}@example.com`
+          email: `bidder${index + 1}@example.com`,
+          createdAt: new Date(),
+          updatedAt: new Date()
         });
       });
     }
@@ -583,16 +545,17 @@ export const utilityService = {
     // Create a sample auction if none exist
     if (Object.keys(db.auctions).length === 0) {
       const auctionId = uuidv4();
-      const now = new Date().toISOString();
+      const now = new Date();
 
       const newAuction: Auction = {
         id: auctionId,
-        title: 'Phiên Đấu Giá Mẫu',
-        description: 'Đây là phiên đấu giá mẫu để kiểm tra hệ thống.',
+        title: 'Sample Auction',
         status: AUCTION_STATUS.SETUP,
         startingPrice: DEFAULT_SETTINGS.INITIAL_PRICE,
         currentPrice: DEFAULT_SETTINGS.INITIAL_PRICE,
-        priceStep: DEFAULT_SETTINGS.PRICE_INCREMENT,
+        bidStep: DEFAULT_SETTINGS.PRICE_INCREMENT,
+        auctionItem: 'Sample Auction Item',
+        auctioneer: 'Sample Auctioneer',
         createdAt: now,
         updatedAt: now
       };
@@ -621,6 +584,49 @@ export const utilityService = {
     // Initialize a new database
     const newDb = initializeDatabase();
     localStorage.setItem(STORAGE_KEYS.DATABASE, JSON.stringify(newDb));
+  },
+
+  // Initialize database with sample data
+  initializeSampleData: async (): Promise<void> => {
+    const db = getDatabase();
+    const now = new Date();
+
+    // Create sample bidders
+    const sampleBidders = Array.from({ length: 5 }, (_, index) => {
+      const name = `Bidder ${index + 1}`;
+      return {
+        name,
+        idNumber: `ID${index + 1}`,
+        issuingAuthority: 'Sample Authority',
+        address: `Sample Address ${index + 1}`,
+        phone: `098${index.toString().padStart(7, '0')}`,
+        email: `bidder${index + 1}@example.com`,
+        createdAt: now,
+        updatedAt: now
+      };
+    });
+
+    for (const bidder of sampleBidders) {
+      await databaseService.bidder.create(bidder);
+    }
+
+    // Create sample auction
+    const auctionId = uuidv4();
+    const newAuction: Auction = {
+      id: auctionId,
+      title: 'Sample Auction',
+      status: AUCTION_STATUS.SETUP,
+      startingPrice: DEFAULT_SETTINGS.INITIAL_PRICE,
+      currentPrice: DEFAULT_SETTINGS.INITIAL_PRICE,
+      bidStep: DEFAULT_SETTINGS.PRICE_INCREMENT,
+      auctionItem: 'Sample Auction Item',
+      auctioneer: 'Sample Auctioneer',
+      createdAt: now,
+      updatedAt: now
+    };
+
+    db.auctions[auctionId] = newAuction;
+    await saveDatabase(db);
   }
 };
 

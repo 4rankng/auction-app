@@ -88,7 +88,7 @@ const ResultPage: React.FC = () => {
       ['', ''],
       ['Starting Price', databaseService.formatCurrency(auction.startingPrice)],
       ['Current Price', databaseService.formatCurrency(auction.currentPrice)],
-      ['Price Step', databaseService.formatCurrency(auction.priceStep)],
+      ['Price Step', databaseService.formatCurrency(auction.bidStep)],
       ['Created At', new Date(auction.createdAt).toLocaleString()],
       ['Updated At', auction.updatedAt ? new Date(auction.updatedAt).toLocaleString() : ''],
       ['', ''],
@@ -246,7 +246,7 @@ const ResultPage: React.FC = () => {
                   <small className="text-muted d-block">
                     <i className="bi bi-arrow-up-circle me-1"></i>Price Step
                   </small>
-                  <span>{databaseService.formatCurrency(auction.priceStep)}</span>
+                  <span>{databaseService.formatCurrency(auction.bidStep)}</span>
                 </Col>
                 <Col sm={6} md={4} className="mb-3">
                   <small className="text-muted d-block">

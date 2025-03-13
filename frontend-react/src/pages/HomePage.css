@@ -1,190 +1,108 @@
-.auction-card {
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0,0,0,0.125);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  height: 100%;
-}
+/* Import shared styles */
+@import '../styles/shared.css';
 
-.auction-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  border-color: rgba(0,0,0,0.2);
+/* HomePage specific styles */
+.auction-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
 }
 
 .auction-card .card-title {
-  font-weight: 600;
   font-size: 1.25rem;
-  margin-bottom: 0.75rem;
-  color: #343a40;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-sm);
+}
+
+.auction-card .card-text {
+  color: var(--gray-600);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: var(--spacing-md);
+  flex-grow: 1;
 }
 
 .auction-card .card-header {
-  padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid rgba(0,0,0,0.125);
-  background-color: #f8f9fa;
-}
-
-.auction-card .card-body {
-  padding: 1.25rem;
-}
-
-.auction-card .card-footer {
-  padding: 0.75rem 1.25rem;
-  border-top: 1px solid rgba(0,0,0,0.125);
-  background-color: #f8f9fa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: linear-gradient(to right, var(--gray-100), #fff);
 }
 
 .auction-card .badge {
   font-size: 0.75rem;
-  padding: 0.35em 0.65em;
-  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
-.auction-card .badge.bg-primary {
-  background-color: #007bff !important;
-}
-
-.auction-card .badge.bg-success {
-  background-color: #28a745 !important;
-}
-
-.auction-card .badge.bg-secondary {
-  background-color: #6c757d !important;
+.auction-card .text-muted {
+  font-size: 0.875rem;
+  color: var(--gray-600) !important;
 }
 
 .auction-card .text-success {
-  color: #28a745 !important;
+  color: var(--success) !important;
   font-weight: 600;
 }
 
-.auction-card small.text-muted {
+.auction-card .card-footer {
+  background: linear-gradient(to right, #fff, var(--gray-100));
+  padding: var(--spacing-md);
+}
+
+.auction-card .btn {
+  min-width: 110px;
   font-size: 0.875rem;
-  color: #6c757d !important;
 }
 
-.page-header {
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid #dee2e6;
-  padding-bottom: 1rem;
-}
-
-/* Custom button styles */
-.btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #0069d9;
-  border-color: #0062cc;
-}
-
-.btn-success {
-  background-color: #28a745;
-  border-color: #28a745;
-}
-
-.btn-success:hover {
-  background-color: #218838;
-  border-color: #1e7e34;
-}
-
-/* Loading spinner */
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 80vh;
-}
-
-.loading-spinner {
-  margin-right: 0.5rem;
-}
-
-/* Empty state */
+/* Empty state styling */
 .empty-state-card {
-  padding: 3rem 1.5rem;
   text-align: center;
-  background-color: #fff;
-  border-radius: 0.25rem;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, #fff, var(--gray-100));
+  border-radius: 0.75rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+}
+
+.empty-state-card i {
+  font-size: 3rem;
+  color: var(--gray-400);
+  margin-bottom: var(--spacing-md);
 }
 
 .empty-state-card h2 {
+  color: var(--gray-800);
   font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #343a40;
+  margin-bottom: var(--spacing-sm);
 }
 
 .empty-state-card p {
-  color: #6c757d;
-  margin-bottom: 1.5rem;
+  color: var(--gray-600);
+  margin-bottom: var(--spacing-lg);
 }
 
-.empty-state-card .btn {
-  padding: 0.5rem 1.5rem;
+/* Grid layout */
+.auction-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
 }
 
-/* View Detail button styles */
-.view-detail-btn {
-  transition: all 0.2s ease;
-  border-width: 1px;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-}
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .auction-grid {
+    grid-template-columns: 1fr;
+  }
 
-.view-detail-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+  .empty-state-card {
+    padding: var(--spacing-lg);
+  }
 
-.btn-outline-primary {
-  color: #007bff;
-  border-color: #007bff;
-}
-
-.btn-outline-primary:hover {
-  background-color: #007bff;
-  color: white;
-}
-
-.btn-outline-success {
-  color: #28a745;
-  border-color: #28a745;
-}
-
-.btn-outline-success:hover {
-  background-color: #28a745;
-  color: white;
-}
-
-.btn-info {
-  background-color: #17a2b8;
-  border-color: #17a2b8;
-  color: white;
-}
-
-.btn-info:hover {
-  background-color: #138496;
-  border-color: #117a8b;
-  color: white;
-}
-
-/* Improve card footer spacing */
-.card-footer .d-flex.gap-2 {
-  gap: 0.5rem !important;
-}
-
-/* Make buttons more consistent in size */
-.card-footer .btn {
-  min-width: 110px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.375rem 0.75rem;
+  .empty-state-card i {
+    font-size: 2.5rem;
+  }
 }

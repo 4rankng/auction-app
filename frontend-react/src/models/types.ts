@@ -2,10 +2,14 @@
 export interface Bidder {
   id: string;
   name: string;
-  address?: string;
+  idNumber: string;
+  issuingAuthority: string;
+  address: string;
+  avatar?: string;
   phone?: string;
   email?: string;
-  avatar?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Bid model
@@ -26,16 +30,18 @@ export interface Auction {
   id: string;
   title: string;
   description?: string;
-  status: AuctionStatus;
+  status: typeof AUCTION_STATUS[keyof typeof AUCTION_STATUS];
   startingPrice: number;
   currentPrice: number;
-  priceStep: number;
+  bidStep: number;
+  auctionItem: string;
+  auctioneer: string;
+  winner?: string;
+  timeLeft?: number;
   startTime?: string;
   endTime?: string;
-  timeLeft?: number;
-  winnerId?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Auction result model

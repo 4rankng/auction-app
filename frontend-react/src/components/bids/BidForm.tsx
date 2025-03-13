@@ -20,7 +20,7 @@ const BidForm: React.FC<BidFormProps> = ({
   const [customAmount, setCustomAmount] = useState<number | ''>('');
   const [useCustomAmount, setUseCustomAmount] = useState(false);
 
-  const nextBidAmount = auction.currentPrice + auction.priceStep;
+  const nextBidAmount = auction.currentPrice + auction.bidStep;
 
   const handleSubmit = async (amount: number) => {
     if (!selectedBidder) return;
@@ -136,7 +136,7 @@ const BidForm: React.FC<BidFormProps> = ({
                   className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
                   placeholder="Enter amount"
                   min={nextBidAmount}
-                  step={auction.priceStep}
+                  step={auction.bidStep}
                   value={customAmount}
                   onChange={(e) => {
                     const value = e.target.value;

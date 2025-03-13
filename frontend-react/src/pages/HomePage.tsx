@@ -140,7 +140,7 @@ const HomePage: React.FC = () => {
                       <small className="text-muted d-block">
                         <i className="bi bi-arrow-up-circle me-1"></i>Price Step
                       </small>
-                      <span>{databaseService.formatCurrency(auction.priceStep)}</span>
+                      <span>{databaseService.formatCurrency(auction.bidStep)}</span>
                     </Col>
                     <Col xs={6}>
                       <small className="text-muted d-block">
