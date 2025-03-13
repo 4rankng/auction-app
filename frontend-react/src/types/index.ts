@@ -1,4 +1,3 @@
-// Bidder model
 export interface Bidder {
   id: string;
   name: string;
@@ -8,68 +7,63 @@ export interface Bidder {
   avatar?: string;
   phone?: string;
   email?: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
-// Bid model
 export interface Bid {
   id: string;
   auctionId: string;
   bidderId: string;
   bidderName: string;
   amount: number;
-  timestamp: string;
+  timestamp: number;
   round: number;
 }
 
-import { AuctionStatus, AUCTION_STATUS } from './constants';
-
-// Auction model
 export interface Auction {
   id: string;
   title: string;
-  description?: string;
-  status: typeof AUCTION_STATUS[keyof typeof AUCTION_STATUS];
+  description: string;
+  status: 'SETUP' | 'IN_PROGRESS' | 'ENDED';
   startingPrice: number;
   currentPrice: number;
   bidStep: number;
   auctionItem: string;
   auctioneer: string;
-  winner?: string;
+  winner?: {
+    id: string;
+    name: string;
+    finalBid: number;
+  };
   timeLeft?: number;
-  startTime?: string;
-  endTime?: string;
+  startTime?: number;
+  endTime?: number;
   finalPrice?: number;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
-// Auction result model
 export interface AuctionResult {
   auctionId: string;
-  endTime: string;
-  startTime?: string;
-  startingPrice?: number;
+  endTime: number;
+  startingPrice: number;
   finalPrice: number;
-  winner?: string;
+  winner: {
+    id: string;
+    name: string;
+    finalBid: number;
+  };
   totalBids: number;
-  totalBidders?: number;
-  status?: typeof AUCTION_STATUS.ENDED;
+  status: 'SUCCESS' | 'NO_BIDS';
 }
 
-// Settings model
 export interface Settings {
   initialPrice: number;
   priceIncrement: number;
-  auctionDuration: number; // in seconds
+  auctionDuration: number;
 }
 
-// Database model
 export interface Database {
   auctions: Record<string, Auction>;
   bidders: Record<string, Bidder>;
-  bids: Record<string, Bid[]>;
+  bids: Record<string, Bid>;
   settings: Settings;
   currentAuctionId?: string;
 }

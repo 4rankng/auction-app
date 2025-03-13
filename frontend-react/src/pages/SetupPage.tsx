@@ -1,438 +1,271 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Row, Col, Card, Button, Spinner, Form } from 'react-bootstrap';
-import BidderForm from '../components/bidders/BidderForm';
-import BidderImport from '../components/bidders/BidderImport';
-import Modal from 'react-bootstrap/Modal';
-import { useToast } from '../contexts/ToastContext';
-import databaseService from '../services/databaseService';
-import { Auction, Bidder } from '../models/types';
-import { ROUTES, AUCTION_STATUS } from '../models/constants';
-import './SetupPage.css';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuction } from '../hooks/useAuction';
+import { Bidder, Auction } from '../types';
+import * as XLSX from 'xlsx';
 
-const SetupPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+export const SetupPage: React.FC = () => {
   const navigate = useNavigate();
-  const { showToast } = useToast();
-
-  const [auction, setAuction] = useState<Auction | null>(null);
+  const { createAuction } = useAuction();
   const [bidders, setBidders] = useState<Bidder[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isStarting, setIsStarting] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [showAddBidderModal, setShowAddBidderModal] = useState(false);
-  const [startingPrice, setStartingPrice] = useState(0);
-  const [bidStep, setBidStep] = useState(1000);
-  const [auctionItem, setAuctionItem] = useState('');
-  const [auctioneer, setAuctioneer] = useState('');
-  const [newBidder, setNewBidder] = useState({
-    id: '',
-    name: '',
-    idNumber: '',
-    issuingAuthority: '',
-    address: ''
+  const [settings, setSettings] = useState({
+    title: '',
+    description: '',
+    startingPrice: 1000,
+    bidStep: 100,
+    duration: 300, // 5 minutes in seconds
   });
 
-  const canStartAuction = startingPrice > 0 && bidStep >= 1000 && auctionItem && auctioneer && bidders.length > 0;
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
+    const reader = new FileReader();
+    reader.onload = (e) => {
       try {
-        // Load bidders
-        const allBidders = await databaseService.bidder.getAll();
-        setBidders(allBidders);
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        // If we have an auction ID, load that auction
-        if (id) {
-          const auctionData = await databaseService.auction.getById(id);
-          if (auctionData) {
-            setAuction(auctionData);
-            setStartingPrice(auctionData.startingPrice);
-            setBidStep(auctionData.bidStep);
-            setAuctionItem(auctionData.auctionItem);
-            setAuctioneer(auctionData.auctioneer);
-          } else {
-            showToast('Auction not found', 'error');
-            navigate(ROUTES.SETUP);
-          }
-        }
+        const newBidders: Bidder[] = jsonData.map((row: any) => ({
+          id: getNextBidderId(),
+          name: row.name,
+          nric: row.nric,
+          issuingAuthority: row.issuingAuthority,
+          address: row.address,
+        }));
+
+        setBidders(prev => [...prev, ...newBidders]);
       } catch (error) {
-        console.error('Error loading data:', error);
-        showToast('Failed to load data', 'error');
-      } finally {
-        setIsLoading(false);
+        console.error('Error reading Excel file:', error);
       }
     };
-
-    loadData();
-  }, [id, navigate, showToast]);
-
-  const handleBidderAdded = async () => {
-    try {
-      const allBidders = await databaseService.bidder.getAll();
-      setBidders(allBidders);
-      setShowAddBidderModal(false);
-    } catch (error) {
-      console.error('Error reloading bidders:', error);
-    }
+    reader.readAsArrayBuffer(file);
   };
 
-  const handleAddBidder = async () => {
-    // Validate required fields
-    if (!newBidder.id || !newBidder.name) {
-      showToast('Participant ID and Name are required', 'error');
-      return;
-    }
-
-    // Check for duplicate ID
-    if (bidders.some(bidder => bidder.id === newBidder.id)) {
-      showToast('Participant ID already exists', 'error');
-      return;
-    }
-
-    try {
-      const bidderData = {
-        ...newBidder,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-
-      await databaseService.bidder.create(bidderData);
-      const allBidders = await databaseService.bidder.getAll();
-      setBidders(allBidders);
-
-      // Reset form
-      setNewBidder({
-        id: '',
-        name: '',
-        idNumber: '',
-        issuingAuthority: '',
-        address: ''
-      });
-
-      showToast('Participant added successfully', 'success');
-    } catch (error) {
-      console.error('Error adding participant:', error);
-      showToast('Failed to add participant', 'error');
-    }
+  const getNextBidderId = () => {
+    if (bidders.length === 0) return '1';
+    const maxId = Math.max(...bidders.map(bidder => parseInt(bidder.id) || 0));
+    return (maxId + 1).toString();
   };
 
-  const handleDeleteBidder = async (id: string) => {
-    try {
-      await databaseService.bidder.delete(id);
-      const allBidders = await databaseService.bidder.getAll();
-      setBidders(allBidders);
-      showToast('Participant deleted successfully', 'success');
-    } catch (error) {
-      console.error('Error deleting participant:', error);
-      showToast('Failed to delete participant', 'error');
-    }
+  const handleAddBidder = () => {
+    const newBidder: Bidder = {
+      id: getNextBidderId(),
+      name: '',
+      nric: '',
+      issuingAuthority: '',
+      address: '',
+    };
+    setBidders(prev => [...prev, newBidder]);
+  };
+
+  const handleBidderChange = (index: number, field: keyof Bidder, value: string) => {
+    setBidders(prev => prev.map((bidder, i) =>
+      i === index ? { ...bidder, [field]: value } : bidder
+    ));
   };
 
   const handleStartAuction = async () => {
-    let auctionId: string;
-
-    if (!auction) {
-      // Create new auction if none exists
-      try {
-        const newAuction = await databaseService.auction.create({
-          title: auctionItem,
-          startingPrice,
-          currentPrice: startingPrice,
-          bidStep,
-          auctionItem,
-          auctioneer,
-          status: AUCTION_STATUS.SETUP,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
-        setAuction(newAuction);
-        auctionId = newAuction.id;
-      } catch (error) {
-        console.error('Error creating auction:', error);
-        showToast('Failed to create auction', 'error');
-        return;
-      }
-    } else {
-      auctionId = auction.id;
-    }
-
-    setIsStarting(true);
-
     try {
-      const updatedAuction = await databaseService.auction.start(auctionId);
-      showToast('Auction started successfully', 'success');
-      navigate(`${ROUTES.BID}/${updatedAuction.id}`);
+      const auctionData: Omit<Auction, 'id'> = {
+        title: settings.title,
+        description: settings.description,
+        status: 'SETUP',
+        startingPrice: settings.startingPrice,
+        currentPrice: settings.startingPrice,
+        bidStep: settings.bidStep,
+        timeLeft: settings.duration,
+        auctionItem: 'Default Item',
+        auctioneer: 'Default Auctioneer',
+        startTime: Date.now(),
+      };
+
+      await createAuction(auctionData);
+      navigate('/bid');
     } catch (error) {
       console.error('Error starting auction:', error);
-      showToast('Failed to start auction', 'error');
-      setIsStarting(false);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: '80vh' }}>
-        <Spinner animation="border" role="status" variant="primary">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-        <span className="ms-2">Loading setup page...</span>
-      </div>
-    );
-  }
-
   return (
-    <div className="setup-page">
-      <div className="page-header">
-        <h1>Auction Setup</h1>
-        <div className="action-buttons">
-          <Button
-            variant="outline-primary"
-            className="me-2"
-            onClick={() => setShowImportModal(true)}
-          >
-            <i className="bi bi-file-earmark-excel me-2"></i>
-            Import Excel
-          </Button>
-          <Button
-            variant="success"
-            onClick={handleStartAuction}
-            disabled={!canStartAuction || isStarting}
-          >
-            <i className="bi bi-play-fill me-2"></i>
-            Start Auction
-          </Button>
+    <div className="container py-4">
+      <h1 className="text-center mb-4">Auction Setup</h1>
+
+      <div className="row mb-4">
+        <div className="col-md-6 mb-4">
+          <div className="card h-100">
+            <div className="card-header">
+              <h2 className="h4 mb-0">Auction Details</h2>
+            </div>
+            <div className="card-body">
+              <div className="mb-3">
+                <label htmlFor="title" className="form-label">Auction Title</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="title"
+                  value={settings.title}
+                  onChange={(e) => setSettings(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Enter auction title"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="description" className="form-label">Description</label>
+                <textarea
+                  className="form-control"
+                  id="description"
+                  value={settings.description}
+                  onChange={(e) => setSettings(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Enter auction description"
+                  rows={4}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-6 mb-4">
+          <div className="card h-100">
+            <div className="card-header">
+              <h2 className="h4 mb-0">Auction Settings</h2>
+            </div>
+            <div className="card-body">
+              <div className="mb-3">
+                <label htmlFor="startingPrice" className="form-label">Starting Price ($)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  id="startingPrice"
+                  value={settings.startingPrice}
+                  onChange={(e) => setSettings(prev => ({ ...prev, startingPrice: Number(e.target.value) }))}
+                  min="0"
+                  step="100"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="bidStep" className="form-label">Minimum Bid Increment ($)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  id="bidStep"
+                  value={settings.bidStep}
+                  onChange={(e) => setSettings(prev => ({ ...prev, bidStep: Number(e.target.value) }))}
+                  min="10"
+                  step="10"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="duration" className="form-label">Auction Duration (minutes)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  id="duration"
+                  value={settings.duration / 60}
+                  onChange={(e) => setSettings(prev => ({ ...prev, duration: Number(e.target.value) * 60 }))}
+                  min="1"
+                  max="60"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="row">
-        <div className="col-12">
-          <Card className="auction-details-card">
-            <Card.Header>
-              <h5 className="mb-0">
-                <i className="bi bi-info-circle me-2"></i>
-                Auction Details
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              <Form>
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Starting Price</Form.Label>
-                      <div className="currency-input">
-                        <Form.Control
-                          type="number"
-                          value={startingPrice}
-                          onChange={(e) => setStartingPrice(Number(e.target.value))}
-                          min="0"
-                          step="1000"
-                          placeholder="Enter starting price"
-                        />
-                      </div>
-                      <Form.Text className="text-muted">
-                        Starting price must be greater than 0
-                      </Form.Text>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Bid Step</Form.Label>
-                      <div className="currency-input">
-                        <Form.Control
-                          type="number"
-                          value={bidStep}
-                          onChange={(e) => setBidStep(Number(e.target.value))}
-                          min="1000"
-                          step="1000"
-                          placeholder="Enter bid step"
-                        />
-                      </div>
-                      <Form.Text className="text-muted">
-                        Bid step must be greater than or equal to 1,000 VND
-                      </Form.Text>
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Auction Item</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={auctionItem}
-                        onChange={(e) => setAuctionItem(e.target.value)}
-                        placeholder="Enter item name"
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Auctioneer</Form.Label>
-                      <Form.Select
-                        value={auctioneer}
-                        onChange={(e) => setAuctioneer(e.target.value)}
-                      >
-                        <option value="">Select auctioneer</option>
-                        <option value="John Smith">John Smith</option>
-                        <option value="Jane Doe">Jane Doe</option>
-                        <option value="Mike Johnson">Mike Johnson</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                </Row>
-              </Form>
-            </Card.Body>
-          </Card>
+      <div className="card mb-4">
+        <div className="card-header">
+          <h2 className="h4 mb-0">Bidder Management</h2>
         </div>
-      </div>
+        <div className="card-body">
+          <div className="row mb-4">
+            <div className="col-md-8">
+              <input
+                type="file"
+                className="form-control"
+                accept=".xlsx,.xls"
+                onChange={handleFileUpload}
+              />
+            </div>
+            <div className="col-md-4">
+              <button onClick={handleAddBidder} className="btn btn-primary w-100">
+                Add Bidder
+              </button>
+            </div>
+          </div>
 
-      <div className="row">
-        <div className="col-12">
-          <Card className="bidders-card">
-            <Card.Header>
-              <h5 className="mb-0">
-                <i className="bi bi-people me-2"></i>
-                Participant List
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              <Form className="mb-4">
-                <Row>
-                  <Col md={2}>
-                    <Form.Group>
-                      <Form.Control
+          <div className="row">
+            {bidders.map((bidder, index) => (
+              <div key={bidder.id} className="col-md-6 mb-3">
+                <div className="card">
+                  <div className="card-body">
+                    <div className="mb-3">
+                      <label className="form-label">ID</label>
+                      <input
                         type="text"
-                        value={newBidder.id}
-                        onChange={(e) => setNewBidder({ ...newBidder, id: e.target.value })}
-                        placeholder="ID"
+                        className="form-control"
+                        value={bidder.id}
+                        disabled
+                        readOnly
                       />
-                    </Form.Group>
-                  </Col>
-                  <Col md={2}>
-                    <Form.Group>
-                      <Form.Control
-                        type="text"
-                        value={newBidder.name}
-                        onChange={(e) => setNewBidder({ ...newBidder, name: e.target.value })}
-                        placeholder="Name"
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={2}>
-                    <Form.Group>
-                      <Form.Control
-                        type="text"
-                        value={newBidder.idNumber}
-                        onChange={(e) => setNewBidder({ ...newBidder, idNumber: e.target.value })}
-                        placeholder="ID Number"
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={2}>
-                    <Form.Group>
-                      <Form.Control
-                        type="text"
-                        value={newBidder.issuingAuthority}
-                        onChange={(e) => setNewBidder({ ...newBidder, issuingAuthority: e.target.value })}
-                        placeholder="Issuing Authority"
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={2}>
-                    <Form.Group>
-                      <Form.Control
-                        type="text"
-                        value={newBidder.address}
-                        onChange={(e) => setNewBidder({ ...newBidder, address: e.target.value })}
-                        placeholder="Address"
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={2}>
-                    <Button
-                      variant="primary"
-                      onClick={handleAddBidder}
-                      className="w-100"
-                    >
-                      <i className="bi bi-plus-lg me-2"></i>
-                      Add
-                    </Button>
-                  </Col>
-                </Row>
-              </Form>
-
-              {bidders.length === 0 ? (
-                <div className="empty-bidders text-center">
-                  <i className="bi bi-people fa-3x mb-3"></i>
-                  <p className="text-muted">No participants yet</p>
-                </div>
-              ) : (
-                <div className="bidder-list">
-                  {bidders.map((bidder) => (
-                    <div key={bidder.id} className="bidder-item">
-                      <div className="bidder-avatar">
-                        <i className="bi bi-person"></i>
-                      </div>
-                      <div className="bidder-info">
-                        <div className="bidder-name">{bidder.name}</div>
-                        <div className="bidder-contact">
-                          <div>ID: {bidder.id}</div>
-                          <div>ID Number: {bidder.idNumber}</div>
-                          <div>Issuing Authority: {bidder.issuingAuthority}</div>
-                          <div>Address: {bidder.address}</div>
-                        </div>
-                      </div>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => handleDeleteBidder(bidder.id)}
-                      >
-                        <i className="bi bi-trash"></i>
-                      </Button>
                     </div>
-                  ))}
+                    <div className="mb-3">
+                      <label className="form-label">Name</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={bidder.name}
+                        onChange={(e) => handleBidderChange(index, 'name', e.target.value)}
+                        placeholder="Enter bidder name"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">NRIC</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={bidder.nric}
+                        onChange={(e) => handleBidderChange(index, 'nric', e.target.value)}
+                        placeholder="Enter NRIC"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Issuing Authority</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={bidder.issuingAuthority}
+                        onChange={(e) => handleBidderChange(index, 'issuingAuthority', e.target.value)}
+                        placeholder="Enter issuing authority"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Address</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={bidder.address}
+                        onChange={(e) => handleBidderChange(index, 'address', e.target.value)}
+                        placeholder="Enter address"
+                      />
+                    </div>
+                  </div>
                 </div>
-              )}
-            </Card.Body>
-          </Card>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Import Bidders Modal */}
-      <Modal
-        show={showImportModal}
-        onHide={() => setShowImportModal(false)}
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Import Bidders</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <BidderImport onImportSuccess={() => {
-            handleBidderAdded();
-            setShowImportModal(false);
-          }} />
-        </Modal.Body>
-      </Modal>
-
-      {/* Add Bidder Modal */}
-      <Modal
-        show={showAddBidderModal}
-        onHide={() => setShowAddBidderModal(false)}
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Add Bidder</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <BidderForm onBidderAdded={handleBidderAdded} />
-        </Modal.Body>
-      </Modal>
+      <div className="text-center">
+        <button
+          onClick={handleStartAuction}
+          className="btn btn-success btn-lg px-5"
+          disabled={!settings.title || !settings.description || bidders.length === 0}
+        >
+          Start Auction
+        </button>
+      </div>
     </div>
   );
 };
-
-export default SetupPage;
