@@ -1,6 +1,6 @@
 module auction
 
-go 1.23
+go 1.20
 
 require (
 	github.com/gin-contrib/cors v1.6.0
