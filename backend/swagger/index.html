@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auction API Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.12.0/swagger-ui.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        .swagger-ui {
+            max-width: 1460px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .topbar {
+            background-color: #1a365d;
+            padding: 10px 0;
+            color: white;
+        }
+        .topbar-wrapper {
+            max-width: 1460px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+        }
+        .topbar-wrapper img {
+            height: 40px;
+            margin-right: 10px;
+        }
+        .topbar-wrapper span {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        /* Custom theme overrides */
+        .swagger-ui .opblock.opblock-post {
+            background: rgba(73, 204, 144, .1);
+            border-color: #49cc90;
+        }
+        .swagger-ui .opblock.opblock-get {
+            background: rgba(97, 175, 254, .1);
+            border-color: #61affe;
+        }
+        .swagger-ui .opblock.opblock-put {
+            background: rgba(252, 161, 48, .1);
+            border-color: #fca130;
+        }
+        .swagger-ui .opblock.opblock-delete {
+            background: rgba(249, 62, 62, .1);
+            border-color: #f93e3e;
+        }
+        .swagger-ui .opblock .opblock-summary-description {
+            font-size: 13px;
+            color: #3b4151;
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-wrapper">
+            <span>Auction API Documentation</span>
+        </div>
+    </div>
+    <div id="swagger-ui"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.12.0/swagger-ui-bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.12.0/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            const ui = SwaggerUIBundle({
+                url: './openapi.yaml',
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                defaultModelsExpandDepth: 3,
+                defaultModelExpandDepth: 3,
+                displayRequestDuration: true,
+                docExpansion: "list",
+                filter: true,
+                showExtensions: true,
+                showCommonExtensions: true,
+                tryItOutEnabled: true
+            });
+            window.ui = ui;
+        };
+    </script>
+</body>
+</html>
