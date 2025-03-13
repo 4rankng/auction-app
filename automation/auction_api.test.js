@@ -219,6 +219,128 @@ describe('Auction API Tests', () => {
       expect(response.status).toBe(200);
       expect(response.headers['content-type']).toBe('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     });
+
+    // NEW TEST: Pagination, bidder details, and bid history tests
+    test('should return paginated auctions with pagination metadata', async () => {
+      // Create multiple auctions for pagination test
+      for (let i = 0; i < 15; i++) {
+        await api.post('/api/v1/auctions', {
+          ...testAuction,
+          title: `Test Auction ${i}`
+        });
+        await wait(50);
+      }
+
+      // Test first page (default)
+      const response1 = await api.get('/api/v1/auctions');
+      expect(response1.status).toBe(200);
+      expect(response1.data).toHaveProperty('data');
+      expect(response1.data).toHaveProperty('total');
+      expect(response1.data).toHaveProperty('page', 1);
+      expect(response1.data).toHaveProperty('pageSize');
+      expect(response1.data).toHaveProperty('totalPages');
+      expect(response1.data.data.length).toBeLessThanOrEqual(response1.data.pageSize);
+
+      // Test second page
+      const response2 = await api.get('/api/v1/auctions?page=2');
+      expect(response2.status).toBe(200);
+      expect(response2.data).toHaveProperty('page', 2);
+
+      // Different pages should return different auctions
+      if (response2.data.data.length > 0 && response1.data.data.length > 0) {
+        expect(response1.data.data[0].id).not.toBe(response2.data.data[0].id);
+      }
+
+      // Test custom page size
+      const response3 = await api.get('/api/v1/auctions?pageSize=5');
+      expect(response3.status).toBe(200);
+      expect(response3.data).toHaveProperty('pageSize', 5);
+      expect(response3.data.data.length).toBeLessThanOrEqual(5);
+    });
+
+    test('should include bidder details in auction responses', async () => {
+      const response = await api.get('/api/v1/auctions');
+      expect(response.status).toBe(200);
+
+      // Check if auctions are returned
+      expect(response.data.data.length).toBeGreaterThan(0);
+
+      // For each auction in the response, verify bidder details are included
+      for (const auction of response.data.data) {
+        if (auction.bidders && auction.bidders.length > 0) {
+          // Verify that the bidders array contains detailed bidder information
+          expect(auction.bidders[0]).toHaveProperty('id');
+          expect(auction.bidders[0]).toHaveProperty('name');
+          expect(auction.bidders[0]).toHaveProperty('address');
+        }
+      }
+    });
+
+    test('should include bid history for completed auctions', async () => {
+      // Create and setup a completed auction with bids
+      const auctionId = await createAndSetupAuction();
+      await api.put(`/api/v1/auctions/${auctionId}/start`);
+      await wait(100);
+
+      // Place bids
+      await api.post(`/api/v1/auctions/${auctionId}/bids`, {
+        bidderId: "1",
+        amount: testAuction.startingPrice + testAuction.priceStep
+      });
+      await wait(100);
+
+      await api.post(`/api/v1/auctions/${auctionId}/bids`, {
+        bidderId: "2",
+        amount: testAuction.startingPrice + (2 * testAuction.priceStep)
+      });
+      await wait(100);
+
+      // End the auction
+      await api.put(`/api/v1/auctions/${auctionId}/end`);
+      await wait(100);
+
+      // Get all auctions and find our completed auction
+      const response = await api.get('/api/v1/auctions');
+      expect(response.status).toBe(200);
+
+      // Find our completed auction in the response
+      const completedAuction = response.data.data.find(a => a.id === auctionId);
+      expect(completedAuction).toBeDefined();
+      expect(completedAuction.auctionStatus).toBe('completed');
+
+      // Verify bid history is included
+      expect(completedAuction.bidHistory).toBeDefined();
+      expect(completedAuction.bidHistory.length).toBeGreaterThan(0);
+      expect(completedAuction.bidHistory[0]).toHaveProperty('round');
+      expect(completedAuction.bidHistory[0]).toHaveProperty('bidderId');
+      expect(completedAuction.bidHistory[0]).toHaveProperty('amount');
+    });
+
+    test('should not include bid history for in-progress auctions', async () => {
+      // Create and setup an in-progress auction with bids
+      const auctionId = await createAndSetupAuction();
+      await api.put(`/api/v1/auctions/${auctionId}/start`);
+      await wait(100);
+
+      // Place bids
+      await api.post(`/api/v1/auctions/${auctionId}/bids`, {
+        bidderId: "1",
+        amount: testAuction.startingPrice + testAuction.priceStep
+      });
+      await wait(100);
+
+      // Get all auctions and find our in-progress auction
+      const response = await api.get('/api/v1/auctions');
+      expect(response.status).toBe(200);
+
+      // Find our in-progress auction in the response
+      const inProgressAuction = response.data.data.find(a => a.id === auctionId);
+      expect(inProgressAuction).toBeDefined();
+      expect(inProgressAuction.auctionStatus).toBe('inProgress');
+
+      // Verify bid history is empty or undefined
+      expect(inProgressAuction.bidHistory || []).toHaveLength(0);
+    });
   });
 
   describe('Unhappy Path - Error Cases', () => {
