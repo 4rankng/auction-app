@@ -290,6 +290,64 @@ export const BidPage: React.FC = () => {
       // TODO: Implement the actual removal of the bid from the database
       // This would require adding a new function to the useAuction hook
 
+      /* OPTIMIZATION OPPORTUNITY:
+       * We could replace our current state management approach with Zustand:
+       *
+       * 1. Benefits:
+       *    - Simplified state management with less boilerplate
+       *    - Better performance with selective re-rendering
+       *    - Built-in middleware for debugging and persistence
+       *    - TypeScript support out of the box
+       *
+       * 2. Implementation:
+       *    - Create a store with all auction-related state and actions
+       *    - Replace useAuction hook with Zustand store
+       *    - Selectively subscribe to only needed parts of the state
+       *
+       * Example implementation:
+       * ```
+       * import create from 'zustand';
+       *
+       * const useAuctionStore = create((set, get) => ({
+       *   auction: null,
+       *   bidders: [],
+       *   bids: [],
+       *   loading: false,
+       *   error: null,
+       *
+       *   fetchAuctionById: async (id) => {
+       *     set({ loading: true });
+       *     try {
+       *       const db = databaseService.getDatabase();
+       *       const auction = db.auctions[id];
+       *       if (auction) {
+       *         set({
+       *           auction,
+       *           bidders: Object.values(db.bidders),
+       *           bids: Object.values(db.bids).filter(bid => bid.auctionId === id),
+       *           error: null
+       *         });
+       *       } else {
+       *         set({ error: `Auction with ID ${id} not found` });
+       *       }
+       *     } catch (err) {
+       *       set({ error: err.message || 'Failed to fetch auction' });
+       *     } finally {
+       *       set({ loading: false });
+       *     }
+       *   },
+       *
+       *   placeBid: async (bidderId, amount) => {
+       *     // Implementation
+       *   },
+       *
+       *   cancelBid: async (bidId) => {
+       *     // Implementation for removing a bid
+       *   }
+       * }));
+       * ```
+       */
+
       // For now, we'll just show a toast and reset the selection
       showToast('Đã hủy đấu giá cuối cùng', 'success');
       setSelectedBidder(null);
