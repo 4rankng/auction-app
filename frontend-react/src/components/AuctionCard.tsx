@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 
 interface AuctionCardProps {
   auction: {
@@ -12,26 +11,11 @@ interface AuctionCardProps {
     createdDate: string;
     timeLeft?: string;
   };
-  showToast?: (message: string, type: 'success' | 'error') => void;
 }
 
-const AuctionCard: React.FC<AuctionCardProps> = ({ auction, showToast }) => {
-  const navigate = useNavigate();
+const AuctionCard: React.FC<AuctionCardProps> = ({ auction }) => {
   const statusClass = auction.status === 'SETUP' ? 'bg-primary' : auction.status === 'ENDED' ? 'bg-secondary' : 'bg-success';
   const statusText = auction.status === 'SETUP' ? 'Setup' : auction.status === 'ENDED' ? 'Ended' : 'In Progress';
-
-  const handleBidNow = () => {
-    navigate(`/bid?id=${auction.id}`);
-  };
-
-  const handleViewDetail = () => {
-    // You can implement this later if needed
-    if (showToast) {
-      showToast(`View details for auction ${auction.id}`, 'success');
-    } else {
-      console.log(`View details for auction ${auction.id}`);
-    }
-  };
 
   return (
     <div className="card">
@@ -47,8 +31,8 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, showToast }) => {
         {auction.timeLeft && <p className="mb-1">{auction.timeLeft}</p>}
       </div>
       <div className="card-footer d-flex justify-content-between">
-        <button className="btn btn-outline-primary" onClick={handleViewDetail}>View Detail</button>
-        {auction.status === 'IN_PROGRESS' && <button className="btn btn-success" onClick={handleBidNow}>Bid Now</button>}
+        <button className="btn btn-outline-primary">View Detail</button>
+        {auction.status === 'IN_PROGRESS' && <button className="btn btn-success">Bid Now</button>}
       </div>
     </div>
   );

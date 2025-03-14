@@ -2,22 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuction } from '../hooks/useAuction';
 import { Bidder, Auction } from '../types';
-import * as XLSX from 'xlsx';
 import './SetupPage.css';
 import AuctionDetails from '../components/AuctionDetails';
 import PricingAndDuration from '../components/PricingAndDuration';
 import BidderManagement from '../components/BidderManagement';
 
-interface ExcelRow {
-  name?: string;
-  nric?: string;
-  issuingAuthority?: string;
-  address?: string;
-}
-
 export default function SetupPage() {
   const navigate = useNavigate();
-  const { createAuction, createBidder, bidders, refreshData, clearBidders } = useAuction();
+  const { createAuction, createBidder, bidders, refreshData } = useAuction();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [newBidder, setNewBidder] = useState<Omit<Bidder, 'id'>>({
     name: '',
@@ -26,7 +18,7 @@ export default function SetupPage() {
     address: '',
   });
   const [bidderId, setBidderId] = useState<string>('');
-  const [importing, setImporting] = useState(false);
+  const [importing, setImporting] = useState<boolean>(false);
   const [auctionDetails, setAuctionDetails] = useState({
     title: '',
     description: '',
@@ -61,98 +53,8 @@ export default function SetupPage() {
     refreshData();
   }, [refreshData]);
 
-  // Helper to get cell value safely
-  const getCellValue = (worksheet: any, row: number, col: number): string =>
-    worksheet[XLSX.utils.encode_cell({ r: row, c: col })]?.v?.toString().trim() || '';
-
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setImporting(true);
-
-      // Read file and parse workbook
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: 'array' });
-      const worksheet = workbook.Sheets['Đủ ĐK'];
-      if (!worksheet) {
-        handleError('Sheet "Đủ ĐK" not found in the Excel file');
-        return;
-      }
-
-      // Manually iterate through cells to find "STT"
-      let headerRow = -1;
-      let headerCol = -1;
-      const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
-
-      for (let R = range.s.r; R <= range.e.r; ++R) {
-        const cellValue = getCellValue(worksheet, R, 0);
-        if (cellValue.match(/^STT\.?$/i)) {
-          headerRow = R;
-          headerCol = 0;
-          break;
-        }
-      }
-
-      if (headerRow === -1) {
-        handleError('Could not find table header with "STT" in the Excel file');
-        return;
-      }
-
-      // Validate column headers
-      const expectedHeaders = ['STT', 'Họ tên', 'Địa chỉ', 'Giấy CMND/CCCD/ĐKDN', 'Số điện thoại'];
-      for (let i = 0; i < expectedHeaders.length; i++) {
-        const cellValue = getCellValue(worksheet, headerRow, headerCol + i);
-        if (!cellValue.includes(expectedHeaders[i])) {
-          handleError('Invalid column structure in Excel file');
-          return;
-        }
-      }
-
-      // Process rows
-      const bidders: Bidder[] = [];
-      for (let R = headerRow + 1; R <= range.e.r; ++R) {
-        const id = getCellValue(worksheet, R, headerCol);
-        const name = getCellValue(worksheet, R, headerCol + 1);
-        const address = getCellValue(worksheet, R, headerCol + 2);
-        const nric = getCellValue(worksheet, R, headerCol + 3);
-        const phone = getCellValue(worksheet, R, headerCol + 4);
-
-        if (!id || !name || !address || !nric || !phone) break;
-
-        bidders.push({
-          id,
-          name,
-          address,
-          nric,
-          phone,
-          issuingAuthority: 'NA',
-        });
-      }
-
-      if (bidders.length === 0) {
-        handleError('No valid bidders found');
-        return;
-      }
-
-      // Replace existing data
-      await clearBidders();
-      await Promise.all(bidders.map(createBidder));
-
-      showToast(`Imported ${bidders.length} valid bidders`, 'success');
-    } catch (error: any) {
-      console.error('Import failed:', error);
-      handleError(`Error: ${error.message}`);
-    } finally {
-      setImporting(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
   const handleImportClick = () => {
+    setImporting(true);
     fileInputRef.current?.click();
   };
 
@@ -227,17 +129,13 @@ export default function SetupPage() {
         auctioneer: 'Default Auctioneer',
       };
 
-      const newAuction = await createAuction(auctionData);
+      await createAuction(auctionData);
       showToast('Auction started successfully!', 'success');
-      navigate(`/bid?id=${newAuction.id}`);
+      navigate('/bid');
     } catch (error) {
       console.error('Error starting auction:', error);
       handleError('Failed to start the auction. Please try again.');
     }
-  };
-
-  const formatNumber = (value: number) => {
-    return value.toLocaleString('en-US');
   };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'startingPrice' | 'priceIncrement') => {
@@ -257,6 +155,13 @@ export default function SetupPage() {
       </div>
 
       <div className="row mb-4">
+        <div className="col">
+          <h1 className="mb-3">Thiết Lập Đấu Giá</h1>
+          <p className="text-muted">Nhập thông tin chi tiết về phiên đấu giá và thêm người tham gia.</p>
+        </div>
+      </div>
+
+      <div className="row g-4">
         <div className="col-md-6">
           <AuctionDetails
             title={auctionDetails.title}
@@ -264,29 +169,30 @@ export default function SetupPage() {
             onTitleChange={(e) => setAuctionDetails(prev => ({ ...prev, title: e.target.value }))}
             onDescriptionChange={(e) => setAuctionDetails(prev => ({ ...prev, description: e.target.value }))}
           />
-        </div>
-        <div className="col-md-6">
+
           <PricingAndDuration
             startingPrice={auctionDetails.startingPrice}
             priceIncrement={auctionDetails.priceIncrement}
             duration={auctionDetails.duration}
             onPriceChange={handlePriceChange}
-            onDurationChange={(e) => setAuctionDetails(prev => ({ ...prev, duration: parseInt(e.target.value) || 0 }))}
+            onDurationChange={(e) => setAuctionDetails(prev => ({ ...prev, duration: parseInt(e.target.value) || 300 }))}
+          />
+        </div>
+
+        <div className="col-md-6">
+          <BidderManagement
+            bidders={bidders}
+            newBidder={newBidder}
+            bidderId={bidderId}
+            importing={importing}
+            onIdChange={handleIdChange}
+            onNewBidderChange={(field, value) => setNewBidder(prev => ({ ...prev, [field]: value }))}
+            onAddBidder={handleAddBidder}
+            onImportClick={handleImportClick}
+            fileInputRef={fileInputRef}
           />
         </div>
       </div>
-
-      <BidderManagement
-        bidders={bidders}
-        newBidder={newBidder}
-        bidderId={bidderId}
-        importing={importing}
-        onIdChange={handleIdChange}
-        onNewBidderChange={(field, value) => setNewBidder(prev => ({ ...prev, [field]: value }))}
-        onAddBidder={handleAddBidder}
-        onImportClick={handleImportClick}
-        fileInputRef={fileInputRef}
-      />
 
       <div className="d-grid">
         <button

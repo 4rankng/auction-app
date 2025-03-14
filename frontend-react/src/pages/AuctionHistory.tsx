@@ -16,16 +16,6 @@ interface Auction {
 const AuctionHistory: React.FC = () => {
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const navigate = useNavigate();
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({
-    show: false,
-    message: '',
-    type: 'success'
-  });
-
-  const showToast = (message: string, type: 'success' | 'error') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
-  };
 
   useEffect(() => {
     const storedAuctions = localStorage.getItem('auctions');
@@ -37,7 +27,6 @@ const AuctionHistory: React.FC = () => {
   const handleRemoveAllAuctions = () => {
     localStorage.removeItem('auctions');
     setAuctions([]);
-    showToast('All auctions have been removed', 'success');
   };
 
   const handleCreateNewAuction = () => {
@@ -46,15 +35,6 @@ const AuctionHistory: React.FC = () => {
 
   return (
     <div className="container py-4">
-      {/* Toast Container */}
-      <div className="toast-container position-fixed top-0 end-0 p-3">
-        <div className={`toast ${toast.show ? 'show' : ''} ${toast.type === 'success' ? 'bg-success' : 'bg-danger'} text-white`} role="alert">
-          <div className="toast-body">
-            {toast.message}
-          </div>
-        </div>
-      </div>
-
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1>Auction System</h1>
         <div>
@@ -71,7 +51,7 @@ const AuctionHistory: React.FC = () => {
         <div className="row">
           {auctions.map((auction) => (
             <div className="col-md-4 mb-4" key={auction.id}>
-              <AuctionCard auction={auction} showToast={showToast} />
+              <AuctionCard auction={auction} />
             </div>
           ))}
         </div>
