@@ -905,7 +905,6 @@ export const BidPage: React.FC = () => {
               endTime={auction.endTime || Date.now()}
               totalRounds={6}
               totalBids={bidHistory.length}
-              onExportData={handleExportData}
             />
           ) : (
             <>
@@ -957,11 +956,11 @@ export const BidPage: React.FC = () => {
         refreshTrigger={refreshTrigger}
       />}
 
-      <div className="text-end">
-        <button className="btn btn-secondary" onClick={handleGoBack}>
-          <i className="bi bi-arrow-left me-1"></i> Quay Lại Thiết Lập
-        </button>
-      </div>
+      {/* Floating Back Button - Always visible */}
+      <button className="floating-back-btn" onClick={handleGoBack}>
+        <i className="bi bi-arrow-left"></i>
+        Quay Lại Thiết Lập
+      </button>
     </div>
   );
 };

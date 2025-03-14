@@ -759,3 +759,112 @@
     padding: 1rem;
   }
 }
+
+/* Floating Back Button */
+.floating-back-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: rgba(108, 117, 125, 0.75);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  margin: 0;
+  backdrop-filter: blur(4px);
+}
+
+.floating-back-btn:hover {
+  background-color: rgba(108, 117, 125, 0.85);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.floating-back-btn:active {
+  transform: translateY(-1px);
+  background-color: rgba(108, 117, 125, 0.9);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.floating-back-btn i {
+  margin-right: 8px;
+  font-size: 1.1rem;
+}
+
+/* Export Data Container - Outer version for placement outside AuctionResult */
+.export-data-container-outer {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem auto;
+  padding: 1.5rem 0;
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+}
+
+/* Responsive adjustments for export button */
+@media (max-width: 768px) {
+  .export-data-container-outer {
+    margin: 1rem auto;
+    padding: 1rem 0;
+    max-width: 90%;
+  }
+
+  .export-data-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.95rem;
+    min-width: 180px;
+  }
+
+  .export-data-btn i {
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .export-data-container-outer {
+    margin: 0.75rem auto;
+    padding: 0.75rem 0;
+  }
+
+  .export-data-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    min-width: 160px;
+  }
+}
+
+/* Responsive adjustments for floating button */
+@media (max-width: 768px) {
+  .floating-back-btn {
+    bottom: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-back-btn {
+    bottom: 15px;
+    right: 15px;
+    padding: 7px 14px;
+    font-size: 0.85rem;
+    background-color: rgba(108, 117, 125, 0.8);
+  }
+
+  .floating-back-btn i {
+    margin-right: 6px;
+    font-size: 0.9rem;
+  }
+}

@@ -71,11 +71,8 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
   return (
     <div className={`auction-result-container ${isVisible ? 'visible' : ''}`}>
       <div className="auction-result-card">
-
-
         {winnerName && winningPrice ? (
           <div className="winner-section">
-
             <div className="winner-card">
               <div className="winner-info">
                 <div className="trophy-container">
@@ -84,9 +81,7 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
                 <div className="winner-name">{winnerName}</div>
               </div>
               <div className="winning-price-container">
-
                 <div className="winning-price">
-
                   <span>{formatCurrency(winningPrice)}</span>
                 </div>
               </div>

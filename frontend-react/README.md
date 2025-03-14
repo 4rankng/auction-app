@@ -1,527 +1,418 @@
 # Auction App Product Specification
 
-The Auction App is a single-page application (SPA) developed with **React.js** and styled exclusively with **Bootstrap**. Data persistence is managed via **local storage**. The app is divided into three core pages: **Setup**, **Bidding**, and **Result**.
+The Auction App is a single-page application (SPA) built with **React.js** and styled exclusively with **Bootstrap**. Data persistence is handled via **local storage**. The application consists of three core pages: **Setup Page**, **Bid Page**, and **Auctioneer Management Page**.
+
+> **Note:** Only the features detailed below must be implemented. No additional functionalities are permitted.
 
 ---
 
-## Pages Overview
+## Table of Contents
 
-1. **Setup Page**
-2. **Bidding Page**
-3. **Result Page**
-
-*Note: Only the features detailed below must be implemented. No additional elements or functionalities are permitted.*
+1. [Setup Page](#setup-page)
+   1. [Import Bidders](#import-bidders)
+   2. [Auction Configuration](#auction-configuration)
+   3. [Bidder Management](#bidder-management)
+   4. [Start Auction](#start-auction)
+2. [Bid Page](#bid-page)
+   1. [Overall Layout](#overall-layout)
+   2. [Color Specifications](#color-specifications)
+   3. [Component Specifications](#component-specifications)
+   4. [Text Content](#text-content)
+   5. [Sample Data](#sample-data)
+   6. [Responsive Behavior](#responsive-behavior)
+   7. [Auction Bidding Logic](#auction-bidding-logic)
+3. [Auction Round Instructions](#auction-round-instructions)
+4. [Auctioneer Management](#auctioneer-management)
+5. [Popup Auction Info Page](#popup-auction-info-page)
 
 ---
 
 ## 1. Setup Page
 
-This page is responsible for auction configuration and bidder management. All specifications must be followed exactly without deviations.
+The Setup Page is responsible for auction configuration and bidder management. All specifications must be strictly followed.
 
 ### 1.1 Import Bidders
 
-- **Functionality:**
-  - Provide a button to import a list of bidders from an Excel file.
+**Functionality:**
+- Provide a button to import a list of bidders from an Excel file.
 
-- **Design & Behavior:**
-  - The button displays an Excel icon alongside the text "Import".
-  - **Styling:**
-    - **Border Color:** Excel green
-    - **Background Color:** White
-    - **Hover:** Include a noticeable animation effect
-  - **Layout:**
-    - Position the Import button to the right of the Add New Bidder button.
-    - Ensure that buttons and input fields are aligned horizontally on the right side of the page and occupy the full page width.
+**Design & Behavior:**
+- The button displays an Excel icon with the text **"Import"**.
+- **Styling:**
+  - **Border Color:** Excel green
+  - **Background Color:** White
+  - **Hover Effect:** Noticeable animation
+- **Layout:**
+  - Position the Import button to the right of the Add New Bidder button.
+  - Align all buttons and input fields horizontally on the right side, occupying the full page width.
+
+**Excel Import Requirements:**
+- **Table Location:** Read the Excel file and locate the table in the sheet named **"Đủ ĐK"**.
+- **Table Structure (in order):**
+  1. **STT** (Serial Number)
+  2. **ID**
+  3. **Name**
+  4. **Address**
+  5. **NRIC** (National Registration Identity Card)
+  6. **Phone Number**
+- **Data Extraction Process:**
+  1. Locate the header cell containing **"STT"** (e.g., `A10`).
+  2. Validate that the next consecutive cells contain:
+     - `B10`: **"Họ tên"**
+     - `C10`: **"Địa chỉ"**
+     - `D10`: **"Giấy CMND/CCCD/ĐKDN"**
+     - `E10`: **"Số điện thoại"**
+  3. Extract data from the row immediately below the header until encountering an empty cell.
+  4. Replace any existing bidder data in the database and the displayed list with the new data.
+
+**Example Table:**
+
+| STT | Họ tên            | Địa chỉ                                      | Giấy CMND/CCCD/ĐKDN | Số điện thoại |
+|-----|-------------------|----------------------------------------------|---------------------|---------------|
+| 1   | Nguyễn Ngọc Mai   | 476 Trần Hưng Đạo, Ngọc Châu, TP. Hải Dương   | 030183002000        | 0966592838    |
+| 2   | Đinh Thị Hường    | 23B/182 Phương Lưu, Vạn Mỹ, Ngô Quyền, Hải Phòng | 031166017315      | 0912052234    |
+| 3   | Hoàng Thị Chi     | TDP Đông Hải Sơn, Đồ Sơn, Hải Phòng            | 031163007523        | 0906032859    |
+
+---
 
 ### 1.2 Auction Configuration
 
-- **Auction Details Card:**
-  - Contains input fields for:
-    - **Auction Title:** Mandatory
-    - **Auction Description:** Optional
+**Auction Details Card:**
+- **Auction Title:** Mandatory
+- **Auction Description:** Optional
 
-- **Pricing and Duration Card:**
-  - Contains input fields for:
-    - **Starting Price:** Mandatory; numeric value with thousand separators; default 0
-    - **Minimum Bid Increment:** Mandatory; positive numeric value; default 0
-    - **Auction Duration:** Mandatory; positive numeric value; default 0
+**Pricing and Duration Card:**
+- **Starting Price:** Mandatory; numeric with thousand separators; default is 0.
+- **Minimum Bid Increment:** Mandatory; positive number; default is 0.
+- **Auction Duration:** Mandatory; positive number; default is 0.
+
+**Layout:**
+- Auction Details appear on the left side.
+- Pricing and Duration appear on the right side.
+- Both cards span the full width of the page.
+
+---
 
 ### 1.3 Bidder Management
 
-- **Display Existing Bidders:**
-  - Retrieve and display bidders from the database in a table format with the following columns:
-    - **ID** (unique identifier used during bidding)
-    - **Name**
-    - **NRIC**
-    - **Issuing Authority**
-    - **Address**
+**Display Existing Bidders:**
+- Retrieve bidder data from the database and display it in a table with columns:
+  - **ID** (unique identifier)
+  - **Name**
+  - **NRIC**
+  - **Issuing Authority**
+  - **Address**
 
-- **Add New Bidder Section:**
-  - **Add Button:**
-    - A square-shaped button featuring a plus sign icon (no text).
-    - On click, save the new bidder’s details to the database and update the displayed list.
-  - **Input Fields:**
-    - **ID:** User-entered value; if left blank, auto-assign the next sequential number based on the highest existing ID.
-    - **Name**
-    - **NRIC**
-    - **Issuing Authority**
-    - **Address**
+**Add New Bidder Section:**
+- **Add Button:**
+  - A square button featuring a plus sign icon (no text).
+  - On click, save the new bidder’s details to the database and update the displayed list.
+- **Input Fields:**
+  - **ID:** User-entered; if left blank, auto-assign the next sequential number.
+  - **Name**
+  - **NRIC**
+  - **Issuing Authority**
+  - **Address**
 
-Auction Details on the left side of the page
-Pricing and Duration on the right side of the page
-Both of them occupy the full width of the page
+**Page Layout:**
+- The Bidder Management section occupies the bottom of the page (100% width).
+- The **Start Auction** button is fixed at the bottom, always visible (100% width).
 
-Bidder Management is on the bottom of the page and take 100% width of the page
-
-Start Auction button always at the bottom of the page, always visible even if we scroll, button take 100% width of the page
-
-
-
-
-### Import Bidders From Excel File
-
-#### Requirements
-The application must be able to read an Excel file and locate a table within the sheet name "Đủ ĐK". The table starts with a specific cell containing the value **"STT"**. The columns within the table must follow this order:
-
-1. **STT** (Serial Number)
-2. **ID**
-3. **Name**
-4. **Address**
-5. **NRIC** (National Registration Identity Card)
-6. **Phone Number**
-
-All values in these columns must be non-empty. If any value in a row is empty, that row is considered outside the table.
-
-#### Process Flow
-1. **Extract Data**
-   - Identify the table header by finding the cell containing **"STT"**.
-   - Validate that the next consecutive columns contain:
-     - **"Họ tên"** (Name)
-     - **"Địa chỉ"** (Address)
-     - **"Giấy CMND/CCCD/ĐKDN"** (NRIC)
-     - **"Số điện thoại"** (Phone Number)
-   - Begin extracting data from the row immediately below the header.
-   - Continue extracting until a row contains an empty value, indicating the end of the table.
-
-2. **Save to Database**
-   - The extracted bidder data (excluding the header row) must be saved to the database.
-   - The displayed list in the application must be updated accordingly.
-
-3. **Replacement of Existing Data**
-   - When this function is executed, the new list of bidders extracted from the Excel file will **replace** the existing bidders in both the database and the displayed list.
-
-#### Algorithm to Locate the Table
-1. Search for the cell containing **"STT"**, e.g., `A10`.
-2. Validate that the following cells contain the correct headers:
-   - `B10`: **"Họ tên"**
-   - `C10`: **"Địa chỉ"**
-   - `D10`: **"Giấy CMND/CCCD/ĐKDN"**
-   - `E10`: **"Số điện thoại"**
-3. Begin extracting bidder details from row `A11, B11, C11, D11, E11`, ensuring all values are non-empty.
-4. Move to the next row (`A12, B12, C12, D12, E12`) and repeat until a row contains an empty value.
-5. The table ends at the first row with missing values.
-
-#### Example Table
-
-| STT | Họ tên            | Địa chỉ                                      | Giấy CMND/CCCD/ĐKDN | Số điện thoại |
-|----|------------------|------------------------------------------|--------------------|--------------|
-| 1  | Nguyễn Ngọc Mai  | 476 Trần Hưng Đạo, Ngọc Châu, TP. Hải Dương, Hải Dương | 030183002000       | 0966592838   |
-| 2  | Đinh Thị Hường   | 23B/182 Phương Lưu, Vạn Mỹ, Ngô Quyền, Hải Phòng | 031166017315       | 0912052234   |
-| 3  | Hoàng Thị Chi    | TDP Đông Hải Sơn, Đồ Sơn, Hải Phòng      | 031163007523       | 0906032859   |
+---
 
 ### 1.4 Start Auction
 
-- **Validation Criteria:**
-  The app must validate the following before starting the auction:
-  - **Auction Title:** Must be provided
-  - **Starting Price:** Must be provided and be a positive number
-  - **Minimum Bid Increment:** Must be provided and be a positive number
-  - **Auction Duration:** Must be provided and be a positive number
-  - **Bidder List:** Must include at least two bidders
+**Validation Criteria:**
+- **Auction Title:** Must be provided.
+- **Starting Price:** Must be provided and be a positive number.
+- **Minimum Bid Increment:** Must be provided and be a positive number.
+- **Auction Duration:** Must be provided and be a positive number.
+- **Bidder List:** Must include at least two bidders.
 
-- **User Feedback:**
-  - If any validation fails, display a toast message indicating the specific error.
+**User Feedback:**
+- If any validation fails, display a toast message indicating the specific error.
 
-- **Action:**
-  - Upon successful validation, save the auction details to the database, get the auction id and transition to the **Bidding Page** while transferring:
-    - List of bidders
-    - Starting price
-    - Minimum bid increment
-    - Auction title
-    - Auction description
-
----
-
-**IMPORTANT NOTICE:**
-Implement only the features specified in this document. Do not introduce any additional fields, functionalities, or extraneous information.
+**Action:**
+- Upon successful validation, save the auction details to the database, obtain the auction ID, and transition to the **Bid Page** with:
+  - List of bidders
+  - Starting price
+  - Minimum bid increment
+  - Auction title
+  - Auction description
 
 ---
 
-# Vietnamese Auction Interface Design Specifications (Improved)
+## 2. Bid Page
 
+The Bid Page manages live bidding and real-time auction updates.
 
-## 1. Overall Layout
+### 2.1 Overall Layout
 
-1. **Header (Single Row)**
-   - **Left**:
-     - Title: “Phiên Đấu Giá” (Auction Session)
-     - Status pill: “Đang diễn ra” (In progress) with green background
-   - **Center**:
-     - Countdown Timer (e.g., `04:35`) in large, bold green text
-   - **Right**:
-     - Red button labeled “Kết Thúc Đấu Giá” (End Auction)
+1. **Header (Single Row):**
+   - **Left:**
+     - Title: **“Phiên Đấu Giá”** (Auction Session)
+     - Status pill: **“Đang diễn ra”** (green background)
+   - **Center:**
+     - Countdown Timer (e.g., `04:35`) in large, bold green text.
+   - **Right:**
+     - Red button labeled **“Kết Thúc Đấu Giá”** (End Auction)
 
-2. **Auction Information Panel (Below Header)**
+2. **Auction Information Panel:**
    - Four equally sized columns displaying:
      1. **“Vòng đấu giá”** (Auction round): e.g., `6`
      2. **“Giá hiện tại”** (Current price): e.g., `1,500,000 VND`
      3. **“Bước giá”** (Bid increment): e.g., `100,000 VND`
      4. **“Người tham gia”** (Participants): e.g., `20`
 
-3. **Participant Selection Grid**
-   - Title: “Chọn người tham gia” (Select participant)
-   - 5 rows, each containing up to 3 participant buttons (total 15)
-   - Each button:
+3. **Participant Selection Grid:**
+   - Title: **“Chọn người tham gia”** (Select participant)
+   - Grid: 5 rows, each with up to 3 buttons (15 total).
+   - Each button is:
      - Square (approx. 32px x 32px)
-     - Thin 1px border
-     - 4px border radius
-     - Displays a participant number
+     - Bordered (1px) with a 4px radius
+     - Labeled with a participant number
 
-4. **Bidding Form**
-   - **Name Field** (100% width)
-   - **Price Field** (approx. 40% width)
-   - **Action Buttons**:
-     1. Blue button with white text: “Đấu Giá” (Bid)
-     2. White button with red text: “Hủy Đấu Giá Cuối” (Cancel Last Bid)
+4. **Bidding Form:**
+   - **Name Field:** 100% width.
+   - **Price Field:** Approximately 40% width.
+   - **Action Buttons:**
+     - Blue button with white text: **“Đấu Giá”** (Bid)
+     - White button with red text: **“Hủy Đấu Giá Cuối”** (Cancel Last Bid)
 
-5. **Auction History Table**
-   - Section title: “Lịch Sử Đấu Giá” (Auction History)
-   - Columns: “Vòng” (Round), “Người tham gia” (Participant), “Số tiền” (Amount), “Thời gian” (Time)
-   - Alternating row backgrounds (light gray, white)
+5. **Auction History Table:**
+   - Section title: **“Lịch Sử Đấu Giá”** (Auction History)
+   - Columns: **“Vòng”** (Round), **“Người tham gia”** (Participant), **“Số tiền”** (Amount), **“Thời gian”** (Time)
+   - Alternating row backgrounds (light gray, white).
 
-6. **Footer**
-   - Button aligned right: “← Quay Lại Thiết Lập” (Return to Setup)
-
----
-
-## 2. Color Specifications
-
-- **Main Background**: White (`#FFFFFF`)
-- **Section Backgrounds**: Light gray (`#F5F5F5`)
-- **Primary Button**: Blue (`#0D6EFD`)
-- **Secondary Button**: White with red text (`#FFFFFF` / `#DC3545`)
-- **Action Button**: Red (`#DC3545`)
-- **Status Indicator**: Green (`#198754`)
-- **Countdown Timer Text**: Green (`#198754`)
-- **Borders**: Light gray (`#DEE2E6`)
-- **Text**: Dark gray/black (`#212529`)
-
-Use these colors consistently to reinforce brand identity and ensure visual clarity.
+6. **Footer:**
+   - Right-aligned button: **“← Quay Lại Thiết Lập”** (Return to Setup)
 
 ---
 
-## 3. Component Specifications
+### 2.2 Color Specifications
 
-1. **Status Pill**
-   - Rounded rectangle (4px border radius)
-   - Green background (`#198754`)
-   - White text
-   - Padding: 4px 8px
-
-2. **Buttons**
-   - Border radius: 4px
-   - Padding: 6px 12px
-   - Font size: 14px
-   - Consistent vertical spacing to maintain a neat visual hierarchy
-
-3. **Participant Selection Buttons**
-   - 32px x 32px
-   - 1px border (`#DEE2E6`)
-   - 4px border radius
-   - Numeric labels (1, 2, 3, etc.)
-
-4. **Input Fields**
-   - Height: 38px
-   - Border: 1px solid light gray (`#DEE2E6`)
-   - Border radius: 4px
-   - Padding: 6px 12px
-   - Name field: 100% width
-   - Price field: ~40% width
-
-5. **Table**
-   - 100% width
-   - Thin borders (`#DEE2E6`)
-   - 8px padding in cells
-   - Header row with slightly darker background
-   - Alternating row background colors (white, light gray)
+- **Main Background:** White (`#FFFFFF`)
+- **Section Backgrounds:** Light gray (`#F5F5F5`)
+- **Primary Button:** Blue (`#0D6EFD`)
+- **Secondary Button:** White with red text (`#FFFFFF` / `#DC3545`)
+- **Action Button:** Red (`#DC3545`)
+- **Status Indicator & Timer Text:** Green (`#198754`)
+- **Borders:** Light gray (`#DEE2E6`)
+- **Text:** Dark gray/black (`#212529`)
 
 ---
 
-## 4. Text Content
+### 2.3 Component Specifications
 
-1. **Header**
-   - “Phiên Đấu Giá” (Auction Session)
-   - “Đang diễn ra” (In progress)
-   - “Kết Thúc Đấu Giá” (End Auction)
+1. **Status Pill:**
+   - Rounded rectangle (4px radius), green background (`#198754`), white text, padding: 4px 8px.
 
-2. **Auction Information**
-   - “Vòng đấu giá” (Auction round)
-   - “Giá hiện tại” (Current price)
-   - “Bước giá” (Bid increment)
-   - “Người tham gia” (Participants)
+2. **Buttons:**
+   - Border radius: 4px, padding: 6px 12px, font size: 14px, with consistent vertical spacing.
 
-3. **Countdown Timer**
-   - “Thời gian còn lại” (Time remaining)
-   - Display the time (e.g., `04:35`)
+3. **Participant Selection Buttons:**
+   - Dimensions: 32px x 32px, 1px border (`#DEE2E6`), 4px border radius, labeled with numbers.
 
-4. **Form Elements**
-   - “Chọn người tham gia” (Select participant)
-   - “Name” (Name)
-   - “Price” (Price)
-   - “Đấu Giá” (Bid)
-   - “Hủy Đấu Giá Cuối” (Cancel Last Bid)
+4. **Input Fields:**
+   - Height: 38px, 1px solid light gray border (`#DEE2E6`), 4px border radius, padding: 6px 12px.
+   - Name field: 100% width; Price field: approximately 40% width.
 
-5. **History Table**
-   - “Lịch Sử Đấu Giá” (Auction History)
-   - “Vòng” (Round)
-   - “Người tham gia” (Participant)
-   - “Số tiền” (Amount)
-   - “Thời gian” (Time)
-
-6. **Footer**
-   - “← Quay Lại Thiết Lập” (Return to Setup)
+5. **Table:**
+   - Full width, 8px cell padding, thin borders (`#DEE2E6`), header with a slightly darker background, alternating row colors.
 
 ---
 
-## 5. Sample Data to Include
+### 2.4 Text Content
 
-- **Current Auction State**
+1. **Header:**
+   - **“Phiên Đấu Giá”**, **“Đang diễn ra”**, **“Kết Thúc Đấu Giá”**.
+
+2. **Auction Information:**
+   - **“Vòng đấu giá”**, **“Giá hiện tại”**, **“Bước giá”**, **“Người tham gia”**.
+
+3. **Countdown Timer:**
+   - Label: **“Thời gian còn lại”** (e.g., `04:35`).
+
+4. **Form Elements:**
+   - **“Chọn người tham gia”**, **“Name”**, **“Price”**, **“Đấu Giá”**, **“Hủy Đấu Giá Cuối”**.
+
+5. **Auction History Table:**
+   - **“Lịch Sử Đấu Giá”**, **“Vòng”**, **“Người tham gia”**, **“Số tiền”**, **“Thời gian”**.
+
+6. **Footer:**
+   - **“← Quay Lại Thiết Lập”**.
+
+---
+
+### 2.5 Sample Data
+
+- **Current Auction State:**
   - Round: `6`
-  - Current price: `1,500,000 VND`
-  - Bid increment: `100,000 VND`
+  - Current Price: `1,500,000 VND`
+  - Bid Increment: `100,000 VND`
   - Participants: `20`
-  - Remaining time: `04:35`
+  - Remaining Time: `04:35`
 
-- **Auction History**
-  1. Round 5: Nguyễn Văn A, 1,500,000 VND, 13/03/2023 10:25:30
-  2. Round 4: Trần Thị B, 1,400,000 VND, 13/03/2023 10:24:15
-  3. Round 3: Lê Văn C , 1,300,000 VND, 13/03/2023 10:23:05
-  4. Round 2: Phạm Thị D, 1,200,000 VND, 13/03/2023 10:22:10
-  5. Round 1: Hoàng Văn E, 1,100,000 VND, 13/03/2023 10:21:00
-
----
-
-## 6. Responsive Behavior
-
-- Maintain layout integrity for screens ≥768px wide.
-- On smaller screens:
-  - Stack the four auction info columns vertically if needed.
-  - Adjust participant grid to remain easily tappable.
-  - Ensure the timer and “Kết Thúc Đấu Giá” button remain visible and distinct.
+- **Auction History:**
+  1. Round 5: Nguyễn Văn A, `1,500,000 VND`, 13/03/2023 10:25:30
+  2. Round 4: Trần Thị B, `1,400,000 VND`, 13/03/2023 10:24:15
+  3. Round 3: Lê Văn C, `1,300,000 VND`, 13/03/2023 10:23:05
+  4. Round 2: Phạm Thị D, `1,200,000 VND`, 13/03/2023 10:22:10
+  5. Round 1: Hoàng Văn E, `1,100,000 VND`, 13/03/2023 10:21:00
 
 ---
 
-## 7. Auction Bidding Logic
+### 2.6 Responsive Behavior
 
-A robust bidding logic enforces fairness and transparency:
-
-1. **Initial State**
-   - Auction starts at a predefined round (e.g., Round 6).
-   - Current price: `1,500,000 VND`.
-   - Bid increment: `100,000 VND`.
-   - Countdown timer: `04:35`.
-
-2. **Placing a Bid**
-   - User selects a participant and inputs Name + Price.
-   - Clicking “Đấu Giá” checks:
-     - **Validation**: Price ≥ Current Price + Bid Increment.
-       - If valid:
-         - Round number increments by 1.
-         - Current price updates to the new bid.
-         - Auction history logs the bid with a timestamp.
-         - Timer may reset or continue based on rules.
-       - If invalid:
-         - Show an error (e.g., “Bid too low”).
-         - No data changes.
-
-3. **Cancel Last Bid**
-   - Clicking “Hủy Đấu Giá Cuối” reverts to the previous round:
-     - Round number decrements by 1.
-     - Current price reverts to its previous value.
-     - Last entry removed from Auction History.
-   - Strictly limit who can perform this action (e.g., admin only).
-
-4. **End Auction**
-   - Clicking “Kết Thúc Đấu Giá” immediately stops the auction:
-     - Timer halts.
-     - No more bids accepted.
-     - Highest bid at that moment is final.
-
-5. **Enforcement**
-   - Disallow bids below the required increment threshold.
-   - No negative or zero bids.
-   - Each participant can only place bids for themselves unless configured otherwise.
-
-Adhering to these rules ensures a fair, transparent auction that participants can trust.
-
-
-
-Bid Page Logic
-
-If the bid history is empty and Vong Dau Gia is 1, we will have three bid options:
-Tra Bang Gia Khoi Diem, Tra Theo Buoc Gia, Nhap Gia Tra
-Otherwise, we will only have two bid options:
-Tra Theo Buoc Gia, Nhap Gia Tra
-
-When the page is loaded, we will load auction data and bid history from database. The  bid history should be part of the
-auction data in the database.
-
-When Tra Theo Buoc Gia is selected, we will use icon of up triangle to increase the price by bid increment, down triangle to decrease the price by bid increment instead of using - + icon
-
-The list of bidder should be loaded from database and displayed in the participant selection grid.
-
-
-When we select a bidder, the 60 second countdown timer will start. At the end of 60 seconds, the Dau Gia button will be disabled for that bidder. When we select another bidder, the 60 second countdown timer will start again.
-
-After the bidder place the bid, the Dau Gia button will be disabled for that bidder until other bidder place the bid.
-
-In the "Chon nguoi tham gia" grid, the bidder number should be displayed in the button. We should have very small yellow star at the top right of the bidder square if the bidder is the current highest bidder.
-
-The lich su dau gia table must be sorted by Thoi gian in descending order. The latest bid should be at the top.
-
-After the bidder place the bid, the Dau Gia button is disabled but the Huy Dau Gia Cuoi button is enabled. I should be able to click the Huy Dau Gia Cuoi button to cancel the last bid.
-
-After each bid, dont deselect the bidder, dont remove the value in the Ma So / Ten textbox.
-
-The value in the Ma So / Ten textbox should be formatted as {BidderID} - {BidderName}
-
-Dau Gia button
-
-- If bid history is not empty check if the price is greater than the current price
-- If bid history is empty and Vong Dau Gia is 1, check if the price is >= the current price
-- Update the current price to the new bid
-- Add the bid to the auction history
-- Add bid with bidder id in the bid history of auction data in database. It is very important to persist data in database.
-
-Huy Dau Gia Cuoi button
-
-- Remove the last bid from the bidder from the auction history, after that the button is disabled for that bidder until he place the bid again
-
-- No constant database polling in our app, we will use the data from the database when the page is loaded, and we will update the data in the database when the user place the bid or cancel the last bid
-
-
-# Auction Round Instructions
-
-At the start, the auction round ("Vong Dau Gia") is set to 1.
-
-Each round has a timer (for example, **300 seconds**). When the timer reaches **0**, the round number stays the same and bidding stops temporarily.
-
-Instead of the timer, a button appears labeled **"Start Next Round"**.
-
-When you click this button:
-
-- The round number increases by 1 (for example, from **round 1 to round 2**).
-- The timer resets back to its original duration (**300 seconds**) and starts counting down again.
-- The new round number and timer reset are updated in the **database**.
-
-This process continues until you reach **round 6**.
-
-After **round 6** ends (timer reaches **0**), the auction **finishes** and no more bids can be placed.
-
-
-Auctioneer Management
-
-- We should have page "Auctioneer Management" to add / edit / remove the auctioneer's information in the database.
-- There should be a button "Quan Ly Dau Gia Vien" in the Setup Page. When we click the button, the Auctioneer Management page will be opened.
-- The auctioneer should be in the auction set up in the Setup Page.
-- When we click "Bat Dau Dau Gia" button, the auctioneer's information will be parted of the auction data sent to database and to the next page (Bidding Page).
-- Change "Gia & Thoi Gian" in the Setup Page to "Cai Dat Dau Gia"
-- In the "Cai Dat Dau Gia" card, Gia Khoi Diem and Buoc Gia Toi Thieu can be same line to save space since the one price textbox does not need much space.
-- Create option to select Dau Gia Vien from the dropdown list in the "Cai Dat Dau Gia" card.
--
-
-
-# Product Specification: Popup Aunction Info Page
-
-This should a browser popup page that display the auction information.
+- For screens **≥768px**: Maintain the layout as described.
+- For smaller screens:
+  - Stack auction information columns vertically if needed.
+  - Adjust the participant grid for ease of tapping.
+  - Ensure the timer and **“Kết Thúc Đấu Giá”** button remain visible.
 
 ---
 
-## Layout Structure
-1. **Header Section**
-   - Display the company name prominently at the top.
-   - Include the auction session ID (`Phiên đấu giá tài sản`) and the auctioneer's name (`Đấu giá viên`).
+### 2.7 Auction Bidding Logic
 
-2. **Auction Details Section**
-   - Show key information like:
-     - Starting price (`Giá khởi điểm`)
-     - Bidding step (`Bước giá`)
-   - Use a simple grid or card layout to organize this data.
+**Initial State:**
+- Auction starts at a predefined round (e.g., `6`).
+- Current Price: `1,500,000 VND`
+- Bid Increment: `100,000 VND`
+- Countdown Timer: `04:35`
 
-3. **Bid Information Section**
-   - Display the following details:
-     - Current bidding round (`Lần trả giá`)
-     - Highest bidder (`Người trả giá cao nhất`) — show "Chưa có" if no bids yet.
-     - Highest bid amount (`Giá trả cao nhất`) — default to "0 đồng" if no bids yet.
+**Placing a Bid:**
+- User selects a participant and enters Name and Price.
+- Clicking **“Đấu Giá”** validates:
+  - **If bid history is not empty:** Price must be greater than the current price.
+  - **If bid history is empty and round is 1:** Price must be at least equal to the current price.
+- On a valid bid:
+  - Increment the round number.
+  - Update the current price.
+  - Log the bid with a timestamp in the auction history.
+  - Persist the bid (including bidder ID) to the database.
+- Disable the **“Đấu Giá”** button for the current bidder until another bid is placed.
+
+**Cancel Last Bid:**
+- Clicking **“Hủy Đấu Giá Cuối”**:
+  - Reverts to the previous round.
+  - Resets the current price to its previous value.
+  - Removes the last bid from the auction history.
+  - Disables the cancel button for that bidder until a new bid is placed.
+
+**Conditional Bid Options:**
+- **If bid history is empty and round is 1:**
+  - Display three options: **Tra Bang Gia Khoi Diem**, **Tra Theo Buoc Gia**, **Nhap Gia Tra**.
+- **Otherwise:**
+  - Display two options: **Tra Theo Buoc Gia**, **Nhap Gia Tra**.
+
+**Additional UI Behavior:**
+- When **Tra Theo Buoc Gia** is selected, use up/down triangle icons to adjust the price by the bid increment.
+- Load the bidder list from the database and display it in the participant grid.
+- On selecting a bidder, start a 60-second countdown; once expired, disable the **“Đấu Giá”** button for that bidder.
+- After placing a bid, retain the selected bidder and the value in the **Ma So / Ten** textbox, formatted as `{BidderID} - {BidderName}`.
+- Sort the auction history table by time in descending order (latest bid on top).
+
+**Data Persistence:**
+- Do not use constant database polling.
+- Load auction data and bid history when the page initializes.
+- Update the database only when bids are placed or cancelled.
+
+---
+
+## 3. Auction Round Instructions
+
+- **Initial Round:**
+  The auction round (**Vong Dau Gia**) starts at **1**.
+- **Timer:**
+  Each round has a timer (e.g., **300 seconds**).
+- **Transition:**
+  - When the timer reaches **0**, bidding stops and a **"Start Next Round"** button appears.
+  - Clicking this button:
+    - Increments the round number.
+    - Resets the timer to **300 seconds**.
+    - Updates the new round number and timer in the database.
+- **Conclusion:**
+  After **round 6** ends (timer reaches **0**), the auction finishes and no further bids are accepted.
+
+---
+
+## 4. Auctioneer Management
+
+**Functionality:**
+- Provide a dedicated page to add, edit, or remove auctioneer information in the database.
+
+**Integration with Setup Page:**
+- Include a button labeled **“Quan Ly Dau Gia Vien”** on the Setup Page.
+- Clicking this button navigates to the Auctioneer Management page.
+- Auctioneer information is part of the auction setup.
+- When the **“Bat Dau Dau Gia”** button is clicked, include the auctioneer's details in the auction data sent to the database and passed to the Bid Page.
+
+**UI Adjustments in Setup Page:**
+- Rename the **“Gia & Thoi Gian”** card to **“Cai Dat Dau Gia”**.
+- Display **Gia Khoi Diem** and **Buoc Gia Toi Thieu** on the same line to save space.
+- Provide a dropdown option to select the auctioneer.
+
+---
+
+## 5. Popup Auction Info Page
+
+This browser popup displays key auction details.
+
+### Layout Structure
+
+1. **Header:**
+   - Display the company name prominently.
+   - Show the auction session ID (**“Phiên đấu giá tài sản”**) and the auctioneer's name (**“Đấu giá viên”**).
+
+2. **Auction Details Section:**
+   - Display key information:
+     - **Starting Price (Giá khởi điểm)**
+     - **Bidding Step (Bước giá)**
+   - Organize using a simple grid or card layout.
+
+3. **Bid Information Section:**
+   - Display:
+     - **Current Bidding Round (Lần trả giá)**
+     - **Highest Bidder (Người trả giá cao nhất)** – show **“Chưa có”** if no bids.
+     - **Highest Bid Amount (Giá trả cao nhất)** – default to **“0 đồng”** if no bids.
    - Use a table or list format for clarity.
 
----
+### Functional Requirements
 
-## Functional Requirements
-1. **Dynamic Data Display**
-   - Fetch auction data from an API or database.
-   - Update the bidding round, highest bid, and bidder dynamically based on real-time data.
+- **Dynamic Data Display:**
+  Fetch auction data from an API or database and update bid details in real time.
+- **Responsive Design:**
+  Use the Bootstrap grid system to ensure proper display on desktop, tablet, and mobile.
+- **Styling & Error Handling:**
+  - Utilize Bootstrap typography and spacing classes (e.g., `h1`, `h2`, `text-center`, `mt-3`, `mb-4`).
+  - Display fallback text (**“Chưa có”**) if data is missing.
+- **Export Feature:**
+  When the auction ends, include a button labeled **“Xuất dữ liệu”** to export:
+  - Auctioneer's name
+  - Winner's name
+  - Winning price
+  - Start time
+  - End time
+  - Total rounds
+  - Total bids
+  - Bid history
 
-2. **Responsive Design**
-   - Ensure the page looks good on desktop, tablet, and mobile screens.
-   - Use Bootstrap grid system for layout responsiveness.
+### Suggested Components
 
-3. **Styling**
-   - Use Bootstrap typography classes (e.g., `h1`, `h2`, `text-center`, etc.) for headings and text alignment.
-   - Add padding/margins using Bootstrap utility classes (e.g., `mt-3`, `mb-4`, etc.).
-   - Use a card or bordered container for the bid information section.
+1. **Header Component:**
+   Contains the company name, session ID, and auctioneer name (center-aligned).
+2. **Auction Details Component:**
+   Displays starting price and bidding step in a grid layout.
+3. **Bid Information Component:**
+   Displays current round, highest bidder, and highest bid in a card or table format.
 
-4. **Error Handling**
-   - Display fallback text ("Chưa có") if no bids or bidder information is available.
-   - Ensure that all data fields are properly validated before rendering.
+### User Interaction & Accessibility
 
----
-
-## Suggested Components
-1. **Header Component**
-   - Contains company name, session ID, and auctioneer name.
-   - Use Bootstrap classes like `text-center` for alignment.
-
-2. **Auction Details Component**
-   - Displays starting price and bidding step in a grid layout using Bootstrap's `row` and `col`.
-
-3. **Bid Information Component**
-   - Displays current round, highest bidder, and highest bid in a table or card format.
-
----
-
-## User Interaction
-- This page is static for now (no buttons or interactive elements).
-- Future enhancements can include:
-  - A countdown timer for the auction duration.
-  - Buttons to place bids or advance to the next round.
+- The page is static (no interactive buttons initially).
+- Future enhancements may include a countdown timer or interactive bid controls.
+- Ensure semantic HTML (proper headings and labels) and high contrast for readability.
 
 ---
 
-## Accessibility Considerations
-- Ensure proper semantic structure with headings (`<h1>`, `<h2>`) and labels.
-- Use high-contrast colors for text and background to improve readability.
-
----
-
-## Example Bootstrap Classes to Use
-- For text alignment: `text-center`, `text-left`
-- For spacing: `mt-3`, `mb-4`, `p-4`
-- For layout: `container`, `row`, `col-md-6`
-- For cards: `card`, `card-body`
-
----
-
-## Notes
-This design should be simple, clean, and easy to understand for users viewing auction details. React will handle dynamic data updates, while Bootstrap ensures responsive styling.
-
+**IMPORTANT NOTICE:**
+Implement only the features specified in this document. Any deviation or additional functionality is not permitted.
