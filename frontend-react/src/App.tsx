@@ -58,6 +58,7 @@ function App() {
       <ErrorBoundary>
         <Routes>
           <Route path="/" element={<SetupPage />} />
+          <Route path="/setup" element={<SetupPage />} />
           <Route path="/bid" element={<BidPage />} />
           <Route path="/result" element={<ResultPage />} />
         </Routes>

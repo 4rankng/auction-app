@@ -380,7 +380,6 @@ When Tra Theo Buoc Gia is selected, we will use icon of up triangle to increase 
 
 The list of bidder should be loaded from database and displayed in the participant selection grid.
 
-At the begining, the Vong Dau Gia is 1, at the end of Auction Duration, the Vong Dau Gia will be increased by 1, auction duration is reset (eg if we initially set it at 300s, when 300s is up, the Vong Dau Gia will be increased by 1, the auction duration is reset to 300s again). The auction data will be updated in the database. When the last vong dau gia is 6. End of vong dau gia 6, no more bid can be placed.
 
 When we select a bidder, the 60 second countdown timer will start. At the end of 60 seconds, the Dau Gia button will be disabled for that bidder. When we select another bidder, the 60 second countdown timer will start again.
 
@@ -391,6 +390,10 @@ In the "Chon nguoi tham gia" grid, the bidder number should be displayed in the 
 The lich su dau gia table must be sorted by Thoi gian in descending order. The latest bid should be at the top.
 
 After the bidder place the bid, the Dau Gia button is disabled but the Huy Dau Gia Cuoi button is enabled. I should be able to click the Huy Dau Gia Cuoi button to cancel the last bid.
+
+After each bid, dont deselect the bidder, dont remove the value in the Ma So / Ten textbox.
+
+The value in the Ma So / Ten textbox should be formatted as {BidderID} - {BidderName}
 
 Dau Gia button
 
@@ -405,4 +408,23 @@ Huy Dau Gia Cuoi button
 - Remove the last bid from the bidder from the auction history, after that the button is disabled for that bidder until he place the bid again
 
 - No constant database polling in our app, we will use the data from the database when the page is loaded, and we will update the data in the database when the user place the bid or cancel the last bid
+
+
+# Auction Round Instructions
+
+At the start, the auction round ("Vong Dau Gia") is set to 1.
+
+Each round has a timer (for example, **300 seconds**). When the timer reaches **0**, the round number stays the same and bidding stops temporarily.
+
+Instead of the timer, a button appears labeled **"Start Next Round"**.
+
+When you click this button:
+
+- The round number increases by 1 (for example, from **round 1 to round 2**).
+- The timer resets back to its original duration (**300 seconds**) and starts counting down again.
+- The new round number and timer reset are updated in the **database**.
+
+This process continues until you reach **round 6**.
+
+After **round 6** ends (timer reaches **0**), the auction **finishes** and no more bids can be placed.
 

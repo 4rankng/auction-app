@@ -6,7 +6,7 @@ interface BidControlsProps {
   currentPrice: string;
   bidIncrement: string;
   onBidAmountChange: (amount: string) => void;
-  onPlaceBid: () => void;
+  onPlaceBid: (amount: string) => void;
   onCancelBid: () => void;
   isPlaceBidDisabled: boolean;
   isCancelBidDisabled?: boolean; // New prop to control when cancel button is disabled
@@ -133,11 +133,9 @@ const BidControls: React.FC<BidControlsProps> = ({
       // Update the bid amount in the parent component
       onBidAmountChange(numericAmount);
 
-      // Call the parent's onPlaceBid function with a small delay to ensure state is updated
-      setTimeout(() => {
-        console.log('Calling onPlaceBid with amount:', numericAmount);
-        onPlaceBid();
-      }, 10);
+      // Call the parent's onPlaceBid function directly with the calculated amount
+      console.log('Calling onPlaceBid with amount:', numericAmount);
+      onPlaceBid(numericAmount);
 
       // Reset steps
       setSteps(1);
@@ -177,11 +175,9 @@ const BidControls: React.FC<BidControlsProps> = ({
     // Update the bid amount in the parent component
     onBidAmountChange(numericAmount);
 
-    // Call the parent's onPlaceBid function with a small delay to ensure state is updated
-    setTimeout(() => {
-      console.log('Calling onPlaceBid with amount:', numericAmount);
-      onPlaceBid();
-    }, 10);
+    // Call the parent's onPlaceBid function directly with the calculated amount
+    console.log('Calling onPlaceBid with amount:', numericAmount);
+    onPlaceBid(numericAmount);
 
     // Reset the form after successful submission
     if (bidMethod === 'customPrice') {

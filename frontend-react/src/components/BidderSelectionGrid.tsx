@@ -14,6 +14,7 @@ interface BidderSelectionGridProps {
   onBidderSelect: (bidderId: string) => void;
   disabledBidders?: string[];
   lastBidderId?: string | null;
+  highestBidderId?: string | null;
 }
 
 /**
@@ -24,7 +25,8 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
   selectedBidder,
   onBidderSelect,
   disabledBidders = [],
-  lastBidderId = null
+  lastBidderId = null,
+  highestBidderId = null
 }) => {
   return (
     <div className="bidder-selection-container mb-3">
@@ -38,6 +40,7 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
           {bidders.map((bidder) => {
             const isDisabled = disabledBidders.includes(bidder.id);
             const isLastBidder = bidder.id === lastBidderId;
+            const isHighestBidder = bidder.id === highestBidderId;
 
             let tooltipText = `${bidder.name}${bidder.nric ? ` - CMND/CCCD: ${bidder.nric}` : ''}`;
 
@@ -49,40 +52,65 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
               tooltipText = 'Người này không thể đấu giá lúc này.';
             }
 
+            if (isHighestBidder) {
+              tooltipText = `${tooltipText} (Người đấu giá cao nhất)`;
+            }
+
             return (
-              <button
+              <div
                 key={bidder.id}
-                className={`btn ${
-                  selectedBidder === bidder.id
-                    ? 'btn-primary'
-                    : isLastBidder
-                      ? 'btn-outline-danger'
-                      : isDisabled
-                        ? 'btn-light'
-                        : 'btn-outline-secondary'
-                }`}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  padding: '0',
-                  borderRadius: '4px',
-                  margin: '3px',
-                  border: selectedBidder === bidder.id
-                    ? '2px solid #0d6efd'
-                    : isLastBidder
-                      ? '2px solid #dc3545'
-                      : '1px solid #6c757d',
-                  fontWeight: 'bold',
-                  opacity: isDisabled ? 0.6 : 1,
-                  cursor: 'pointer'
-                }}
-                onClick={() => onBidderSelect(bidder.id)}
-                title={tooltipText}
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
+                className="position-relative"
+                style={{ margin: '3px' }}
               >
-                {bidder.id}
-              </button>
+                <button
+                  className={`btn ${
+                    selectedBidder === bidder.id
+                      ? 'btn-primary'
+                      : isLastBidder
+                        ? 'btn-outline-danger'
+                        : isDisabled
+                          ? 'btn-light'
+                          : 'btn-outline-secondary'
+                  }`}
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    padding: '0',
+                    borderRadius: '4px',
+                    border: selectedBidder === bidder.id
+                      ? '2px solid #0d6efd'
+                      : isLastBidder
+                        ? '2px solid #dc3545'
+                        : '1px solid #6c757d',
+                    fontWeight: 'bold',
+                    opacity: isDisabled ? 0.6 : 1,
+                    cursor: 'pointer',
+                    position: 'relative'
+                  }}
+                  onClick={() => onBidderSelect(bidder.id)}
+                  title={tooltipText}
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                >
+                  {bidder.id}
+                  {isHighestBidder && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-8px',
+                        right: '-8px',
+                        color: '#FFD700',
+                        fontSize: '12px',
+                        backgroundColor: 'white',
+                        borderRadius: '50%',
+                        padding: '1px'
+                      }}
+                    >
+                      <i className="bi bi-star-fill"></i>
+                    </span>
+                  )}
+                </button>
+              </div>
             );
           })}
         </div>
