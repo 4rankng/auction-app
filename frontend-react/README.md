@@ -132,7 +132,7 @@ All values in these columns must be non-empty. If any value in a row is empty, t
   - If any validation fails, display a toast message indicating the specific error.
 
 - **Action:**
-  - Upon successful validation, transition to the **Bidding Page** while transferring:
+  - Upon successful validation, save the auction details to the database, get the auction id and transition to the **Bidding Page** while transferring:
     - List of bidders
     - Starting price
     - Minimum bid increment
@@ -143,3 +143,215 @@ All values in these columns must be non-empty. If any value in a row is empty, t
 
 **IMPORTANT NOTICE:**
 Implement only the features specified in this document. Do not introduce any additional fields, functionalities, or extraneous information.
+
+---
+
+# Vietnamese Auction Interface Design Specifications (Improved)
+
+
+## 1. Overall Layout
+
+1. **Header (Single Row)**
+   - **Left**:
+     - Title: “Phiên Đấu Giá” (Auction Session)
+     - Status pill: “Đang diễn ra” (In progress) with green background
+   - **Center**:
+     - Countdown Timer (e.g., `04:35`) in large, bold green text
+   - **Right**:
+     - Red button labeled “Kết Thúc Đấu Giá” (End Auction)
+
+2. **Auction Information Panel (Below Header)**
+   - Four equally sized columns displaying:
+     1. **“Vòng đấu giá”** (Auction round): e.g., `6`
+     2. **“Giá hiện tại”** (Current price): e.g., `1,500,000 VND`
+     3. **“Bước giá”** (Bid increment): e.g., `100,000 VND`
+     4. **“Người tham gia”** (Participants): e.g., `20`
+
+3. **Participant Selection Grid**
+   - Title: “Chọn người tham gia” (Select participant)
+   - 5 rows, each containing up to 3 participant buttons (total 15)
+   - Each button:
+     - Square (approx. 32px x 32px)
+     - Thin 1px border
+     - 4px border radius
+     - Displays a participant number
+
+4. **Bidding Form**
+   - **Name Field** (100% width)
+   - **Price Field** (approx. 40% width)
+   - **Action Buttons**:
+     1. Blue button with white text: “Đấu Giá” (Bid)
+     2. White button with red text: “Hủy Đấu Giá Cuối” (Cancel Last Bid)
+
+5. **Auction History Table**
+   - Section title: “Lịch Sử Đấu Giá” (Auction History)
+   - Columns: “Vòng” (Round), “Người tham gia” (Participant), “Số tiền” (Amount), “Thời gian” (Time)
+   - Alternating row backgrounds (light gray, white)
+
+6. **Footer**
+   - Button aligned right: “← Quay Lại Thiết Lập” (Return to Setup)
+
+---
+
+## 2. Color Specifications
+
+- **Main Background**: White (`#FFFFFF`)
+- **Section Backgrounds**: Light gray (`#F5F5F5`)
+- **Primary Button**: Blue (`#0D6EFD`)
+- **Secondary Button**: White with red text (`#FFFFFF` / `#DC3545`)
+- **Action Button**: Red (`#DC3545`)
+- **Status Indicator**: Green (`#198754`)
+- **Countdown Timer Text**: Green (`#198754`)
+- **Borders**: Light gray (`#DEE2E6`)
+- **Text**: Dark gray/black (`#212529`)
+
+Use these colors consistently to reinforce brand identity and ensure visual clarity.
+
+---
+
+## 3. Component Specifications
+
+1. **Status Pill**
+   - Rounded rectangle (4px border radius)
+   - Green background (`#198754`)
+   - White text
+   - Padding: 4px 8px
+
+2. **Buttons**
+   - Border radius: 4px
+   - Padding: 6px 12px
+   - Font size: 14px
+   - Consistent vertical spacing to maintain a neat visual hierarchy
+
+3. **Participant Selection Buttons**
+   - 32px x 32px
+   - 1px border (`#DEE2E6`)
+   - 4px border radius
+   - Numeric labels (1, 2, 3, etc.)
+
+4. **Input Fields**
+   - Height: 38px
+   - Border: 1px solid light gray (`#DEE2E6`)
+   - Border radius: 4px
+   - Padding: 6px 12px
+   - Name field: 100% width
+   - Price field: ~40% width
+
+5. **Table**
+   - 100% width
+   - Thin borders (`#DEE2E6`)
+   - 8px padding in cells
+   - Header row with slightly darker background
+   - Alternating row background colors (white, light gray)
+
+---
+
+## 4. Text Content
+
+1. **Header**
+   - “Phiên Đấu Giá” (Auction Session)
+   - “Đang diễn ra” (In progress)
+   - “Kết Thúc Đấu Giá” (End Auction)
+
+2. **Auction Information**
+   - “Vòng đấu giá” (Auction round)
+   - “Giá hiện tại” (Current price)
+   - “Bước giá” (Bid increment)
+   - “Người tham gia” (Participants)
+
+3. **Countdown Timer**
+   - “Thời gian còn lại” (Time remaining)
+   - Display the time (e.g., `04:35`)
+
+4. **Form Elements**
+   - “Chọn người tham gia” (Select participant)
+   - “Name” (Name)
+   - “Price” (Price)
+   - “Đấu Giá” (Bid)
+   - “Hủy Đấu Giá Cuối” (Cancel Last Bid)
+
+5. **History Table**
+   - “Lịch Sử Đấu Giá” (Auction History)
+   - “Vòng” (Round)
+   - “Người tham gia” (Participant)
+   - “Số tiền” (Amount)
+   - “Thời gian” (Time)
+
+6. **Footer**
+   - “← Quay Lại Thiết Lập” (Return to Setup)
+
+---
+
+## 5. Sample Data to Include
+
+- **Current Auction State**
+  - Round: `6`
+  - Current price: `1,500,000 VND`
+  - Bid increment: `100,000 VND`
+  - Participants: `20`
+  - Remaining time: `04:35`
+
+- **Auction History**
+  1. Round 5: Nguyễn Văn A, 1,500,000 VND, 13/03/2023 10:25:30
+  2. Round 4: Trần Thị B, 1,400,000 VND, 13/03/2023 10:24:15
+  3. Round 3: Lê Văn C , 1,300,000 VND, 13/03/2023 10:23:05
+  4. Round 2: Phạm Thị D, 1,200,000 VND, 13/03/2023 10:22:10
+  5. Round 1: Hoàng Văn E, 1,100,000 VND, 13/03/2023 10:21:00
+
+---
+
+## 6. Responsive Behavior
+
+- Maintain layout integrity for screens ≥768px wide.
+- On smaller screens:
+  - Stack the four auction info columns vertically if needed.
+  - Adjust participant grid to remain easily tappable.
+  - Ensure the timer and “Kết Thúc Đấu Giá” button remain visible and distinct.
+
+---
+
+## 7. Auction Bidding Logic
+
+A robust bidding logic enforces fairness and transparency:
+
+1. **Initial State**
+   - Auction starts at a predefined round (e.g., Round 6).
+   - Current price: `1,500,000 VND`.
+   - Bid increment: `100,000 VND`.
+   - Countdown timer: `04:35`.
+
+2. **Placing a Bid**
+   - User selects a participant and inputs Name + Price.
+   - Clicking “Đấu Giá” checks:
+     - **Validation**: Price ≥ Current Price + Bid Increment.
+       - If valid:
+         - Round number increments by 1.
+         - Current price updates to the new bid.
+         - Auction history logs the bid with a timestamp.
+         - Timer may reset or continue based on rules.
+       - If invalid:
+         - Show an error (e.g., “Bid too low”).
+         - No data changes.
+
+3. **Cancel Last Bid**
+   - Clicking “Hủy Đấu Giá Cuối” reverts to the previous round:
+     - Round number decrements by 1.
+     - Current price reverts to its previous value.
+     - Last entry removed from Auction History.
+   - Strictly limit who can perform this action (e.g., admin only).
+
+4. **End Auction**
+   - Clicking “Kết Thúc Đấu Giá” immediately stops the auction:
+     - Timer halts.
+     - No more bids accepted.
+     - Highest bid at that moment is final.
+
+5. **Enforcement**
+   - Disallow bids below the required increment threshold.
+   - No negative or zero bids.
+   - Each participant can only place bids for themselves unless configured otherwise.
+
+Adhering to these rules ensures a fair, transparent auction that participants can trust.
+
+
+

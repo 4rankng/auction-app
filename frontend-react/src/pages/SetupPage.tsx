@@ -227,9 +227,9 @@ export default function SetupPage() {
         auctioneer: 'Default Auctioneer',
       };
 
-      await createAuction(auctionData);
+      const newAuction = await createAuction(auctionData);
       showToast('Auction started successfully!', 'success');
-      navigate('/bid');
+      navigate(`/bid?id=${newAuction.id}`);
     } catch (error) {
       console.error('Error starting auction:', error);
       handleError('Failed to start the auction. Please try again.');
