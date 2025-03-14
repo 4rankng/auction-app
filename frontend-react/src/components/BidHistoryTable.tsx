@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 interface BidHistory {
   id: number;
-  round: number;
+  bidNumber?: number; // Make optional for continuous bidding
   bidder: string;
   amount: string;
   timestamp: string;
@@ -27,13 +27,14 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(Date.now());
 
   // Helper function to extract numeric value from formatted currency string
-  const extractNumericValue = (formattedAmount: string): number => {
+  const extractNumericValue = useCallback((formattedAmount: string): number => {
     return parseInt(formattedAmount.replace(/\D/g, '')) || 0;
-  };
+  }, []);
 
   // Helper function to sort bid history with consistent rules
   const sortBidHistory = useCallback((bids: BidHistory[]): BidHistory[] => {
-    return [...bids].sort((a, b) => {
+    // First sort the bids
+    const sortedBids = [...bids].sort((a, b) => {
       // Primary sort by timestamp (newest first)
       const aTimestamp = a.rawTimestamp || 0;
       const bTimestamp = b.rawTimestamp || 0;
@@ -48,7 +49,13 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
 
       return bAmount - aAmount;
     });
-  }, []);
+
+    // Assign sequential bidNumbers to the sorted bids
+    return sortedBids.map((bid, index) => ({
+      ...bid,
+      bidNumber: sortedBids.length - index // Newest bid gets highest number
+    }));
+  }, [extractNumericValue]);
 
   const fetchBidHistory = useCallback(async () => {
     try {
@@ -81,7 +88,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
       // Format the bids for display
       const formattedBids = allBids.map((bid: any, index: number) => ({
         id: bid.id || index,
-        round: bid.round,
+        bidNumber: bid.bidNumber,
         bidder: bid.bidderName,
         amount: `${parseInt(bid.amount).toLocaleString('vi-VN')} VND`,
         timestamp: new Date(bid.timestamp).toLocaleString('vi-VN'),
@@ -134,7 +141,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
       setBidHistory(sortedData);
       setLoading(false);
     }
-  }, [initialData, sortBidHistory]);
+  }, [initialData, sortBidHistory, extractNumericValue]);
 
   if (loading && bidHistory.length === 0) {
     return (
@@ -195,7 +202,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
             <table className="table table-striped mb-0">
               <thead className="sticky-top bg-white">
                 <tr>
-                  <th>Vòng</th>
+                  <th>Lượt</th>
                   <th>Người tham gia</th>
                   <th>Số tiền</th>
                   <th>Thời gian</th>
@@ -204,7 +211,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
               <tbody>
                 {bidHistory.map((bid, index) => (
                   <tr key={bid.id || index}>
-                    <td>{bid.round}</td>
+                    <td>{bid.bidNumber || bidHistory.length - index}</td>
                     <td>{bid.bidder}</td>
                     <td>{bid.amount}</td>
                     <td>{bid.timestamp}</td>

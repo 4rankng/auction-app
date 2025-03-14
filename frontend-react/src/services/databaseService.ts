@@ -68,22 +68,8 @@ export class DatabaseService {
     const bidder = this.database.bidders[bidderId];
     if (!bidder) throw new Error('Người đấu giá không tồn tại');
 
-    // Validate the bid amount
-    if (amount <= auction.currentPrice) {
-      throw new Error(`Giá trả phải lớn hơn giá hiện tại (${auction.currentPrice.toLocaleString('vi-VN')} VND)`);
-    }
-
-    if (amount < auction.currentPrice + auction.bidStep) {
-      throw new Error(`Giá trả phải cao hơn giá hiện tại ít nhất ${auction.bidStep.toLocaleString('vi-VN')} VND`);
-    }
-
-    // Get all bids for this auction
-    const auctionBids = Object.values(this.database.bids).filter(b => b.auctionId === auctionId);
-
-    // Determine the current round based on existing bids or the auction's currentRound property
-    const currentRound = auction.currentRound || (auctionBids.length > 0
-      ? Math.max(...auctionBids.map(bid => bid.round))
-      : 1);
+    // Validation is now handled in useAuction, no need to validate here
+    // This allows for consistent validation logic in one place
 
     const id = Date.now().toString();
     const newBid: Bid = {
@@ -93,7 +79,6 @@ export class DatabaseService {
       bidderName: bidder.name,
       amount,
       timestamp: Date.now(),
-      round: currentRound,
     };
 
     // Add the bid to the database
@@ -107,7 +92,7 @@ export class DatabaseService {
     this.saveDatabase();
 
     // More detailed logging
-    console.log(`Bid created: ID=${id}, bidder=${bidder.name}, amount=${amount.toLocaleString('vi-VN')} VND, round=${currentRound}`);
+    console.log(`Bid created: ID=${id}, bidder=${bidder.name}, amount=${amount.toLocaleString('vi-VN')} VND`);
     console.log(`Updated auction ${auctionId} current price to ${amount.toLocaleString('vi-VN')} VND`);
     console.log(`Total bids for auction ${auctionId}: ${Object.values(this.database.bids).filter(b => b.auctionId === auctionId).length}`);
 

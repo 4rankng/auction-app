@@ -6,7 +6,6 @@ import {
   auctionError,
   bidPlaced,
   bidCancelled,
-  roundStarted,
   auctionEnded
 } from './auctionSlice';
 import { Auction, Bid } from '../types';
@@ -80,44 +79,6 @@ export const cancelBid = createAsyncThunk(
       return bidId;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to cancel bid';
-      dispatch(auctionError(errorMessage));
-      throw error;
-    }
-  }
-);
-
-// Start next round
-export const startNextRound = createAsyncThunk(
-  'auction/startNextRound',
-  async ({ auctionId, duration }: { auctionId: string; duration: number }, { dispatch, getState }) => {
-    try {
-      // Get database
-      const database = databaseService.getDatabase();
-
-      // Get auction
-      const auction = database.auctions[auctionId];
-      if (!auction) {
-        throw new Error('Auction not found');
-      }
-
-      // Calculate end time
-      const endTime = Date.now() + duration * 1000;
-
-      // Update auction in database
-      const updatedAuction: Auction = {
-        ...auction,
-        currentRound: (auction.currentRound || 1) + 1,
-        endTime
-      };
-
-      await databaseService.updateAuction(updatedAuction);
-
-      // Dispatch action to update state
-      dispatch(roundStarted({ endTime }));
-
-      return updatedAuction;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to start next round';
       dispatch(auctionError(errorMessage));
       throw error;
     }

@@ -7,22 +7,18 @@ interface AuctionResultProps {
   winningPrice?: number;
   startTime: string | number | Date;
   endTime: string | number | Date;
-  totalRounds: number;
+
   totalBids: number;
   onExportData?: () => void;
 }
 
-/**
- * A modern, visually appealing component to display auction results at the end of the last round
- * Designed to blend seamlessly with the parent component
- */
 const AuctionResult: React.FC<AuctionResultProps> = ({
   title,
   winnerName,
   winningPrice,
   startTime,
   endTime,
-  totalRounds,
+
   totalBids,
 }) => {
   // Animation states
@@ -66,6 +62,14 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
       console.error('Error formatting date:', error);
       return 'N/A';
     }
+  };
+
+  // Format duration
+  const formatDuration = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+    return `${hours} giờ ${minutes} phút ${remainingSeconds} giây`;
   };
 
   return (
@@ -117,15 +121,19 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
                 <div className="detail-value">{formatDate(endTime)}</div>
               </div>
             </div>
+
             <div className="detail-item">
               <div className="detail-icon">
-                <i className="bi bi-layers-half"></i>
+                <i className="bi bi-clock"></i>
               </div>
               <div className="detail-content">
-                <div className="detail-label">Tổng số vòng</div>
-                <div className="detail-value">{totalRounds}</div>
+                <div className="detail-label">Thời gian diễn ra</div>
+                <div className="detail-value">
+                  {formatDuration(Math.floor((new Date(endTime).getTime() - new Date(startTime).getTime()) / 1000))}
+                </div>
               </div>
             </div>
+
             <div className="detail-item">
               <div className="detail-icon">
                 <i className="bi bi-hammer"></i>

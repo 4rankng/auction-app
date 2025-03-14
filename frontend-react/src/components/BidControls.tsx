@@ -62,6 +62,8 @@ const BidControls: React.FC<BidControlsProps> = ({
   const calculateBidAmount = () => {
     switch (bidMethod) {
       case 'basePrice':
+        // For the first bid, return the exact current price
+        console.log('Base price method selected, returning:', currentPrice);
         return currentPrice;
       case 'stepPrice': {
         // Calculate the step price and ensure it's properly formatted
@@ -118,51 +120,7 @@ const BidControls: React.FC<BidControlsProps> = ({
     const calculatedAmount = calculateBidAmount();
     console.log('Calculated bid amount:', calculatedAmount);
 
-    // For step price method, we don't need additional validation as the amount is calculated correctly
-    if (bidMethod === 'stepPrice') {
-      // Format the amount properly
-      let formattedAmount = calculatedAmount;
-      if (!formattedAmount.includes('VND')) {
-        formattedAmount = `${formattedAmount} VND`;
-      }
-
-      // Get the numeric amount without VND
-      const numericAmount = formattedAmount.replace(' VND', '');
-      console.log('Setting bid amount for step price:', numericAmount);
-
-      // Update the bid amount in the parent component
-      onBidAmountChange(numericAmount);
-
-      // Call the parent's onPlaceBid function directly with the calculated amount
-      console.log('Calling onPlaceBid with amount:', numericAmount);
-      onPlaceBid(numericAmount);
-
-      // Reset steps
-      setSteps(1);
-
-      // Reset validation error
-      setValidationError(null);
-      return;
-    }
-
-    // For other methods, validate the bid
-    if (!validateBid(calculatedAmount)) {
-      return;
-    }
-
-    // If bidder name is empty, show error
-    if (!bidderName) {
-      setValidationError('Vui lòng chọn người đấu giá');
-      return;
-    }
-
-    // If time is up, show error
-    if (bidderTimeLeft <= 0) {
-      setValidationError('Thời gian đấu giá đã kết thúc');
-      return;
-    }
-
-    // Format the amount properly
+    // Format the amount properly for validation and submission
     let formattedAmount = calculatedAmount;
     if (!formattedAmount.includes('VND')) {
       formattedAmount = `${formattedAmount} VND`;
@@ -170,12 +128,19 @@ const BidControls: React.FC<BidControlsProps> = ({
 
     // Get the numeric amount without VND
     const numericAmount = formattedAmount.replace(' VND', '');
-    console.log('Setting bid amount for custom price:', numericAmount);
+    console.log('Validating bid amount:', numericAmount);
+
+    // Validate the bid amount
+    if (!validateBid(numericAmount)) {
+      console.log('Bid validation failed');
+      return;
+    }
 
     // Update the bid amount in the parent component
+    console.log('Setting bid amount:', numericAmount);
     onBidAmountChange(numericAmount);
 
-    // Call the parent's onPlaceBid function directly with the calculated amount
+    // Call the parent's onPlaceBid function with the validated amount
     console.log('Calling onPlaceBid with amount:', numericAmount);
     onPlaceBid(numericAmount);
 

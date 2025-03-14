@@ -119,25 +119,36 @@ export function useAuction() {
 
       console.log(`Starting placeBid process for auction ${auction.id}, bidder ${bidderId}, amount ${amount}`);
 
-      // Validate the bid amount
-      if (amount <= auction.currentPrice) {
-        throw new Error(`Giá trả phải lớn hơn giá hiện tại (${auction.currentPrice.toLocaleString('vi-VN')} VND)`);
-      }
+      // Get the current bids for this auction
+      const db = databaseService.getDatabase();
+      const auctionBids = Object.values(db.bids || {})
+        .filter((bid: any) => bid.auctionId === auction.id);
 
-      if (amount < auction.currentPrice + auction.bidStep) {
-        throw new Error(`Giá trả phải cao hơn giá hiện tại ít nhất ${auction.bidStep.toLocaleString('vi-VN')} VND`);
-      }
+      const isFirstBid = auctionBids.length === 0;
 
-      // Get the current round from the auction object or default to 1
-      const currentRound = auction.currentRound || 1;
-      console.log(`Current round for this bid: ${currentRound}`);
+      // Different validation for first bid vs. subsequent bids
+      if (isFirstBid) {
+        // For the first bid, allow amount to be equal to or greater than the starting price
+        if (amount < auction.startingPrice) {
+          throw new Error(`Giá trả đầu tiên phải lớn hơn hoặc bằng giá khởi điểm (${auction.startingPrice.toLocaleString('vi-VN')} VND)`);
+        }
+      } else {
+        // For subsequent bids, require amount to be greater than current price
+        if (amount <= auction.currentPrice) {
+          throw new Error(`Giá trả phải lớn hơn giá hiện tại (${auction.currentPrice.toLocaleString('vi-VN')} VND)`);
+        }
+
+        // Always check the minimum bid increment
+        if (amount < auction.currentPrice + auction.bidStep) {
+          throw new Error(`Giá trả phải cao hơn giá hiện tại ít nhất ${auction.bidStep.toLocaleString('vi-VN')} VND`);
+        }
+      }
 
       // Create the new bid directly with databaseService to avoid race conditions
       const newBid = await databaseService.createBid(auction.id, bidderId, amount);
       console.log('Bid created successfully:', newBid);
 
       // Get the latest auction data to ensure we have the most up-to-date state
-      const db = databaseService.getDatabase();
       const updatedAuction = db.auctions[auction.id];
 
       if (updatedAuction) {

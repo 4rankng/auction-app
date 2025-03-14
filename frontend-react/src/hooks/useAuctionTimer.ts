@@ -1,33 +1,52 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import * as timerService from '../services/timerService';
+import { formatCountdown } from '../utils/timeUtils';
 
 interface UseAuctionTimerProps {
   endTime: number | undefined;
-  currentRound: number;
   onTimerEnd: () => void;
-  onFinalRoundEnd: () => void;
 }
 
 export const useAuctionTimer = ({
   endTime,
-  currentRound,
-  onTimerEnd,
-  onFinalRoundEnd
+  onTimerEnd
 }: UseAuctionTimerProps) => {
-  const [timeLeft, setTimeLeft] = useState<string>('00:00');
+  const [timeLeft, setTimeLeft] = useState<string>('--:--');
   const [isTimerEnded, setIsTimerEnded] = useState<boolean>(false);
-  const timerEndMessageShownRef = useRef<boolean>(false);
 
-  // Store callback references to prevent unnecessary re-renders
-  const onTimerEndRef = useRef(onTimerEnd);
-  const onFinalRoundEndRef = useRef(onFinalRoundEnd);
+  // Store callbacks in refs to avoid re-creating the interval on every callback change
+  const onTimerEndRef = useRef<() => void>(onTimerEnd);
+  const timerEndMessageShownRef = useRef<boolean>(false);
+  const timerIdRef = useRef<string>(`auction_timer_${Date.now()}`);
 
   // Update refs when callbacks change
   useEffect(() => {
     onTimerEndRef.current = onTimerEnd;
-    onFinalRoundEndRef.current = onFinalRoundEnd;
-  }, [onTimerEnd, onFinalRoundEnd]);
+  }, [onTimerEnd]);
 
-  // Add these changes to prevent infinite loops
+  const handleComplete = useCallback(() => {
+    setTimeLeft('00:00');
+    setIsTimerEnded(true);
+
+    if (!timerEndMessageShownRef.current) {
+      timerEndMessageShownRef.current = true;
+      console.log('Timer ended');
+
+      // Use setTimeout to break synchronous update chain
+      setTimeout(() => {
+        console.log('Auction time ended. Waiting for user to manually end the auction.');
+        onTimerEndRef.current();
+      }, 0);
+    }
+  }, []);
+
+  // Handle timer tick
+  const handleTick = useCallback((seconds: number) => {
+    setTimeLeft(formatCountdown(seconds));
+    setIsTimerEnded(seconds <= 0);
+  }, []);
+
+  // Initialize or update timer when endTime changes
   useEffect(() => {
     if (!endTime) return;
 
@@ -35,62 +54,56 @@ export const useAuctionTimer = ({
     timerEndMessageShownRef.current = false;
     setIsTimerEnded(false);
 
-    let timer: NodeJS.Timeout;
+    // Calculate remaining time in seconds
+    const now = Date.now();
+    const remainingSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
 
-    // Move timer logic outside to prevent stale closures
-    const checkTimer = () => {
-      const now = Date.now();
-      const timeLeftMs = endTime - now;
+    // Create or update the timer
+    timerService.createTimer(timerIdRef.current, remainingSeconds, {
+      onTick: handleTick,
+      onComplete: handleComplete,
+      tickInterval: 1000
+    });
 
-      if (timeLeftMs > 0) {
-        // Update display logic
-        const minutes = Math.floor(timeLeftMs / 60000);
-        const seconds = Math.floor((timeLeftMs % 60000) / 1000);
-        setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
-        setIsTimerEnded(false);
-      } else {
-        // Clean up immediately
-        clearInterval(timer);
-        setTimeLeft('00:00');
-        setIsTimerEnded(true);
+    // Start the timer
+    timerService.startTimer(timerIdRef.current);
 
-        if (!timerEndMessageShownRef.current) {
-          timerEndMessageShownRef.current = true;
-          console.log(`Timer ended for round ${currentRound}`);
+    // Initial update
+    handleTick(remainingSeconds);
 
-          // Use setTimeout to break synchronous update chain
-          setTimeout(() => {
-            if (currentRound >= 6) {
-              // For the final round, just call the callback to show a notification
-              // but don't trigger any automatic actions
-              console.log('Final round ended. Waiting for user to manually end the auction.');
-              onFinalRoundEndRef.current();
-            } else {
-              console.log(`Round ${currentRound} ended. Waiting for next round`);
-              onTimerEndRef.current();
-            }
-          }, 0);
-        }
-      }
-    };
-
-    timer = setInterval(checkTimer, 1000);
-    checkTimer(); // Initial check
-
+    // Clean up on unmount or when dependencies change
     return () => {
-      clearInterval(timer);
+      timerService.stopTimer(timerIdRef.current);
       timerEndMessageShownRef.current = false;
     };
-  }, [endTime, currentRound]); // We use refs for callbacks, so they don't need to be dependencies
+  }, [endTime, handleTick, handleComplete]);
 
-  const resetTimer = () => {
+  // Reset timer function
+  const resetTimer = useCallback(() => {
     timerEndMessageShownRef.current = false;
     setIsTimerEnded(false);
-  };
+
+    if (endTime) {
+      // Calculate new remaining time
+      const now = Date.now();
+      const remainingSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
+
+      // Reset the timer with the new duration
+      timerService.resetTimer(timerIdRef.current, remainingSeconds, true);
+    }
+  }, [endTime]);
+
+  // Sync timer with server
+  const syncWithServer = useCallback((serverEndTime: number) => {
+    if (serverEndTime) {
+      timerService.syncTimerWithServer(timerIdRef.current, serverEndTime);
+    }
+  }, []);
 
   return {
     timeLeft,
     isTimerEnded,
-    resetTimer
+    resetTimer,
+    syncWithServer
   };
 };

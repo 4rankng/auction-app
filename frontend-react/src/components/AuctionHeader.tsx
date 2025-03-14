@@ -2,87 +2,42 @@ import React from 'react';
 
 interface AuctionHeaderProps {
   title: string;
-  timeLeft: string;
+  elapsedTime: string;
   onEndAuction: () => void;
-  currentRound: number;
-  isTimerEnded: boolean;
-  onStartNextRound: () => void;
-  isLastRoundEnded?: boolean;
-  totalRounds?: number;
+  totalBids: number;
+  isAuctionEnded?: boolean;
 }
 
 /**
- * A reusable component for displaying the auction header with title, status, timer and end button
+ * A reusable component for displaying the auction header with title, elapsed time, and end button
  */
 const AuctionHeader: React.FC<AuctionHeaderProps> = ({
   title,
-  timeLeft,
+  elapsedTime,
   onEndAuction,
-  currentRound,
-  isTimerEnded,
-  onStartNextRound,
-  isLastRoundEnded = false,
-  totalRounds = 6
+  totalBids,
+  isAuctionEnded = false
 }) => {
-  const showNextRoundButton = isTimerEnded && currentRound < totalRounds && !isLastRoundEnded;
-  const nextRound = currentRound + 1;
-
   return (
     <div className="card-header d-flex justify-content-between align-items-center py-3">
       <div className="d-flex align-items-center">
         <h3 className="mb-0 me-2 fw-bold" style={{ fontSize: '1.75rem' }}>{title}</h3>
       </div>
       <div className="d-flex align-items-center">
-        {isLastRoundEnded ? (
-          <div className="text-success fw-bold me-3">
-            <i className="bi bi-check-circle-fill me-2"></i>
-            Phiên đấu giá đã kết thúc
+        <div className="text-center me-3 d-flex flex-column align-items-center">
+
+          <h2 className="mb-0 text-success">{elapsedTime}</h2>
+        </div>
+        {isAuctionEnded ? (
+          <div className="badge bg-danger p-2 fs-6">
+            <i className="bi bi-stopwatch-fill me-1"></i> Đã Kết Thúc
           </div>
         ) : (
-          <div className="text-center me-3">
-            {showNextRoundButton ? (
-              <button
-                className="btn btn-primary btn-lg"
-                onClick={onStartNextRound}
-                style={{
-                  minWidth: '220px',
-                  fontWeight: 'bold',
-                  animation: 'pulse 1.5s infinite',
-                  boxShadow: '0 0 10px rgba(0,123,255,0.5)'
-                }}
-              >
-                <i className="bi bi-arrow-right-circle me-1"></i> Bắt Đầu Vòng {nextRound}
-              </button>
-            ) : (
-              <div>
-                <h2 className={`mb-0 ${timeLeft === '00:00' ? 'text-danger' : 'text-success'}`}>{timeLeft}</h2>
-              </div>
-            )}
-          </div>
-        )}
-        {!isLastRoundEnded && (
           <button className="btn btn-danger" onClick={onEndAuction}>
             <i className="bi bi-stop-circle me-1"></i> Kết Thúc Đấu Giá
           </button>
         )}
       </div>
-
-      {/* Add CSS for the pulse animation */}
-      <style>
-        {`
-        @keyframes pulse {
-          0% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.05);
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-        `}
-      </style>
     </div>
   );
 };

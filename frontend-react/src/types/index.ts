@@ -16,7 +16,6 @@ export interface Bid {
   bidderName: string;
   amount: number;
   timestamp: number;
-  round: number;
 }
 
 export interface Auction {

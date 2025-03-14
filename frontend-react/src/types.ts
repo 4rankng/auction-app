@@ -16,7 +16,6 @@ export interface Bid {
   bidderName: string;
   amount: number;
   timestamp: number;
-  round: number;
 }
 
 export interface Auction {
@@ -33,7 +32,6 @@ export interface Auction {
   startTime: number;
   endTime?: number;
   finalPrice?: number;
-  currentRound?: number;
   winner?: {
     id: string;
     name: string;

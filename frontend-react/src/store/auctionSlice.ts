@@ -33,11 +33,7 @@ const auctionSlice = createSlice({
   name: 'auction',
   initialState,
   reducers: {
-    roundStarted: (state, action: PayloadAction<{ endTime: number }>) => {
-      state.currentRound += 1;
-      state.endTime = action.payload.endTime;
-      state.status = 'active';
-    },
+
     auctionLoading: (state) => {
       state.status = 'loading';
     },
@@ -45,7 +41,6 @@ const auctionSlice = createSlice({
       state.auction = action.payload.auction;
       state.bidders = action.payload.bidders;
       state.bids = action.payload.bids;
-      state.currentRound = action.payload.auction.currentRound || 1;
       state.endTime = action.payload.auction.endTime || null;
       state.status = 'active';
 
@@ -119,7 +114,6 @@ const auctionSlice = createSlice({
 });
 
 export const {
-  roundStarted,
   auctionLoading,
   auctionLoaded,
   auctionError,

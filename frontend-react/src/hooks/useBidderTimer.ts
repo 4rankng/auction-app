@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import * as timerService from '../services/timerService';
 
 interface UseBidderTimerProps {
   initialTime: number;
@@ -6,60 +7,59 @@ interface UseBidderTimerProps {
 
 export const useBidderTimer = ({ initialTime }: UseBidderTimerProps) => {
   const [timeLeft, setTimeLeft] = useState<number>(initialTime);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const isRunningRef = useRef<boolean>(false);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const timerIdRef = useRef<string>(`bidder_timer_${Date.now()}`);
+
+  // Handle timer tick
+  const handleTick = useCallback((seconds: number) => {
+    setTimeLeft(seconds);
+  }, []);
+
+  // Handle timer completion
+  const handleComplete = useCallback(() => {
+    setTimeLeft(0);
+    setIsRunning(false);
+  }, []);
+
+  // Initialize timer on mount
+  useEffect(() => {
+    // Store the current timer ID in a local variable to avoid
+    // the ref value changing before the cleanup function runs
+    const timerId = timerIdRef.current;
+
+    // Create the timer
+    timerService.createTimer(timerId, initialTime, {
+      onTick: handleTick,
+      onComplete: handleComplete,
+      tickInterval: 1000
+    });
+
+    // Clean up on unmount
+    return () => {
+      timerService.stopTimer(timerId);
+    };
+  }, [initialTime, handleTick, handleComplete]);
 
   const startTimer = useCallback(() => {
-    // Clear any existing timer first
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-
-    // Reset time and start new timer
-    setTimeLeft(initialTime);
-    isRunningRef.current = true;
-
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          // Stop timer when it reaches 0
-          if (timerRef.current) {
-            clearInterval(timerRef.current);
-            timerRef.current = null;
-            isRunningRef.current = false;
-          }
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    // Reset the timer to initial time and start it
+    timerService.resetTimer(timerIdRef.current, initialTime, true);
+    setIsRunning(true);
   }, [initialTime]);
 
   const stopTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-      isRunningRef.current = false;
-    }
+    timerService.pauseTimer(timerIdRef.current);
+    setIsRunning(false);
   }, []);
 
   const resetTimer = useCallback((newTime = initialTime) => {
-    stopTimer();
+    timerService.resetTimer(timerIdRef.current, newTime, false);
     setTimeLeft(newTime);
-  }, [initialTime, stopTimer]);
-
-  // Clean up on unmount
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, []);
+    setIsRunning(false);
+  }, [initialTime]);
 
   return {
     timeLeft,
-    isRunning: isRunningRef.current,
+    isRunning,
     startTimer,
     stopTimer,
     resetTimer
