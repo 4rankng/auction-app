@@ -428,3 +428,100 @@ This process continues until you reach **round 6**.
 
 After **round 6** ends (timer reaches **0**), the auction **finishes** and no more bids can be placed.
 
+
+Auctioneer Management
+
+- We should have page "Auctioneer Management" to add / edit / remove the auctioneer's information in the database.
+- There should be a button "Quan Ly Dau Gia Vien" in the Setup Page. When we click the button, the Auctioneer Management page will be opened.
+- The auctioneer should be in the auction set up in the Setup Page.
+- When we click "Bat Dau Dau Gia" button, the auctioneer's information will be parted of the auction data sent to database and to the next page (Bidding Page).
+- Change "Gia & Thoi Gian" in the Setup Page to "Cai Dat Dau Gia"
+- In the "Cai Dat Dau Gia" card, Gia Khoi Diem and Buoc Gia Toi Thieu can be same line to save space since the one price textbox does not need much space.
+- Create option to select Dau Gia Vien from the dropdown list in the "Cai Dat Dau Gia" card.
+-
+
+
+# Product Specification: Popup Aunction Info Page
+
+This should a browser popup page that display the auction information.
+
+---
+
+## Layout Structure
+1. **Header Section**
+   - Display the company name prominently at the top.
+   - Include the auction session ID (`Phiên đấu giá tài sản`) and the auctioneer's name (`Đấu giá viên`).
+
+2. **Auction Details Section**
+   - Show key information like:
+     - Starting price (`Giá khởi điểm`)
+     - Bidding step (`Bước giá`)
+   - Use a simple grid or card layout to organize this data.
+
+3. **Bid Information Section**
+   - Display the following details:
+     - Current bidding round (`Lần trả giá`)
+     - Highest bidder (`Người trả giá cao nhất`) — show "Chưa có" if no bids yet.
+     - Highest bid amount (`Giá trả cao nhất`) — default to "0 đồng" if no bids yet.
+   - Use a table or list format for clarity.
+
+---
+
+## Functional Requirements
+1. **Dynamic Data Display**
+   - Fetch auction data from an API or database.
+   - Update the bidding round, highest bid, and bidder dynamically based on real-time data.
+
+2. **Responsive Design**
+   - Ensure the page looks good on desktop, tablet, and mobile screens.
+   - Use Bootstrap grid system for layout responsiveness.
+
+3. **Styling**
+   - Use Bootstrap typography classes (e.g., `h1`, `h2`, `text-center`, etc.) for headings and text alignment.
+   - Add padding/margins using Bootstrap utility classes (e.g., `mt-3`, `mb-4`, etc.).
+   - Use a card or bordered container for the bid information section.
+
+4. **Error Handling**
+   - Display fallback text ("Chưa có") if no bids or bidder information is available.
+   - Ensure that all data fields are properly validated before rendering.
+
+---
+
+## Suggested Components
+1. **Header Component**
+   - Contains company name, session ID, and auctioneer name.
+   - Use Bootstrap classes like `text-center` for alignment.
+
+2. **Auction Details Component**
+   - Displays starting price and bidding step in a grid layout using Bootstrap's `row` and `col`.
+
+3. **Bid Information Component**
+   - Displays current round, highest bidder, and highest bid in a table or card format.
+
+---
+
+## User Interaction
+- This page is static for now (no buttons or interactive elements).
+- Future enhancements can include:
+  - A countdown timer for the auction duration.
+  - Buttons to place bids or advance to the next round.
+
+---
+
+## Accessibility Considerations
+- Ensure proper semantic structure with headings (`<h1>`, `<h2>`) and labels.
+- Use high-contrast colors for text and background to improve readability.
+
+---
+
+## Example Bootstrap Classes to Use
+- For text alignment: `text-center`, `text-left`
+- For spacing: `mt-3`, `mb-4`, `p-4`
+- For layout: `container`, `row`, `col-md-6`
+- For cards: `card`, `card-body`
+
+---
+
+## Notes
+This design should be simple, clean, and easy to understand for users viewing auction details. React will handle dynamic data updates, while Bootstrap ensures responsive styling.
+
