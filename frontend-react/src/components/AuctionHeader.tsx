@@ -21,6 +21,7 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
   onStartNextRound
 }) => {
   const showNextRoundButton = isTimerEnded && currentRound < 6;
+  const nextRound = currentRound + 1;
 
   return (
     <div className="card-header d-flex justify-content-between align-items-center py-2">
@@ -40,7 +41,7 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
                 boxShadow: '0 0 10px rgba(0,123,255,0.5)'
               }}
             >
-              <i className="bi bi-arrow-right-circle me-1"></i> Bắt Đầu Vòng Tiếp Theo
+              <i className="bi bi-arrow-right-circle me-1"></i> Bắt Đầu Vòng {nextRound}
             </button>
           ) : (
             <div>

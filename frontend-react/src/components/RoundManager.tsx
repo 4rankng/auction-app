@@ -18,34 +18,6 @@ export const RoundManager: React.FC<RoundManagerProps> = ({
 
   return (
     <div className="round-controls mb-3">
-      {/* Add CSS for the pulse animation */}
-      <style>
-        {`
-        @keyframes pulse {
-          0% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.05);
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-        `}
-      </style>
-
-      {/* Add button to start next round if timer has ended and it's not the final round */}
-      {isTimerEnded && !isFinalRound && (
-        <button
-          className="btn btn-primary mt-3"
-          onClick={onNextRound}
-          style={{ animation: 'pulse 1.5s infinite' }}
-        >
-          Bắt đầu vòng {currentRound + 1}
-        </button>
-      )}
-
       {/* Show message if it's the final round */}
       {isFinalRound && (
         <div className="alert alert-info mt-3">
