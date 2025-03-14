@@ -7,6 +7,8 @@ interface AuctionHeaderProps {
   currentRound: number;
   isTimerEnded: boolean;
   onStartNextRound: () => void;
+  isLastRoundEnded?: boolean;
+  totalRounds?: number;
 }
 
 /**
@@ -18,9 +20,11 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
   onEndAuction,
   currentRound,
   isTimerEnded,
-  onStartNextRound
+  onStartNextRound,
+  isLastRoundEnded = false,
+  totalRounds = 6
 }) => {
-  const showNextRoundButton = isTimerEnded && currentRound < 6;
+  const showNextRoundButton = isTimerEnded && currentRound < totalRounds && !isLastRoundEnded;
   const nextRound = currentRound + 1;
 
   return (
@@ -29,29 +33,38 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
         <h3 className="mb-0 me-2 fw-bold" style={{ fontSize: '1.75rem' }}>{title}</h3>
       </div>
       <div className="d-flex align-items-center">
-        <div className="text-center me-3">
-          {showNextRoundButton ? (
-            <button
-              className="btn btn-primary btn-lg"
-              onClick={onStartNextRound}
-              style={{
-                minWidth: '220px',
-                fontWeight: 'bold',
-                animation: 'pulse 1.5s infinite',
-                boxShadow: '0 0 10px rgba(0,123,255,0.5)'
-              }}
-            >
-              <i className="bi bi-arrow-right-circle me-1"></i> Bắt Đầu Vòng {nextRound}
-            </button>
-          ) : (
-            <div>
-              <h2 className={`mb-0 ${timeLeft === '00:00' ? 'text-danger' : 'text-success'}`}>{timeLeft}</h2>
-            </div>
-          )}
-        </div>
-        <button className="btn btn-danger" onClick={onEndAuction}>
-          <i className="bi bi-stop-circle me-1"></i> Kết Thúc Đấu Giá
-        </button>
+        {isLastRoundEnded ? (
+          <div className="text-success fw-bold me-3">
+            <i className="bi bi-check-circle-fill me-2"></i>
+            Phiên đấu giá đã kết thúc
+          </div>
+        ) : (
+          <div className="text-center me-3">
+            {showNextRoundButton ? (
+              <button
+                className="btn btn-primary btn-lg"
+                onClick={onStartNextRound}
+                style={{
+                  minWidth: '220px',
+                  fontWeight: 'bold',
+                  animation: 'pulse 1.5s infinite',
+                  boxShadow: '0 0 10px rgba(0,123,255,0.5)'
+                }}
+              >
+                <i className="bi bi-arrow-right-circle me-1"></i> Bắt Đầu Vòng {nextRound}
+              </button>
+            ) : (
+              <div>
+                <h2 className={`mb-0 ${timeLeft === '00:00' ? 'text-danger' : 'text-success'}`}>{timeLeft}</h2>
+              </div>
+            )}
+          </div>
+        )}
+        {!isLastRoundEnded && (
+          <button className="btn btn-danger" onClick={onEndAuction}>
+            <i className="bi bi-stop-circle me-1"></i> Kết Thúc Đấu Giá
+          </button>
+        )}
       </div>
 
       {/* Add CSS for the pulse animation */}

@@ -99,8 +99,9 @@ export class DatabaseService {
     // Add the bid to the database
     this.database.bids[id] = newBid;
 
-    // Update the auction's current price
+    // Update the auction's current price and ensure status is IN_PROGRESS
     auction.currentPrice = amount;
+    auction.status = 'IN_PROGRESS';
 
     // Save changes to localStorage
     this.saveDatabase();

@@ -5,6 +5,7 @@ import BidderSelectionGrid from '../components/BidderSelectionGrid';
 import BidControls from '../components/BidControls';
 import AuctionSummary from '../components/AuctionSummary';
 import AuctionHeader from '../components/AuctionHeader';
+import AuctionResult from '../components/AuctionResult';
 import { useAuction } from '../hooks/useAuction';
 import { useAuctionTimer } from '../hooks/useAuctionTimer';
 import { useBidderTimer } from '../hooks/useBidderTimer';
@@ -419,7 +420,9 @@ export const BidPage: React.FC = () => {
         // Update the auction with the current round
         const updatedAuction = {
           ...auction,
-          currentRound: currentRound
+          currentRound: currentRound,
+          // Ensure the auction status is set to IN_PROGRESS
+          status: 'IN_PROGRESS' as const
         };
         await updateAuction(updatedAuction);
         console.log(`Updated auction with current round: ${currentRound}`);
@@ -451,7 +454,9 @@ export const BidPage: React.FC = () => {
       // Update the auction's current price in the database
       const updatedAuction = {
         ...auction,
-        currentPrice: numericAmount
+        currentPrice: numericAmount,
+        // Ensure the auction status is set to IN_PROGRESS
+        status: 'IN_PROGRESS' as const
       };
       await updateAuction(updatedAuction);
       console.log(`Updated auction current price to: ${numericAmount}`);
@@ -837,44 +842,61 @@ export const BidPage: React.FC = () => {
           currentRound={currentRound}
           isTimerEnded={isTimerEnded}
           onStartNextRound={handleStartNextRound}
+          isLastRoundEnded={currentRound === 6 && isTimerEnded}
+          totalRounds={6}
         />
 
-        <div className="card-body py-2">
-          {/* Auction Summary Component */}
-          <AuctionSummary
-            currentRound={currentRound}
-            currentPrice={currentPrice}
-            bidIncrement={bidIncrement}
-            participantsCount={participantsCount}
-          />
-
-          {/* Bidder Selection Grid Component */}
-          <BidderSelectionGrid
-                bidders={bidders}
-            selectedBidder={selectedBidder}
-            onBidderSelect={handleBidderSelect}
-            disabledBidders={getDisabledBidders()}
-            lastBidderId={lastBidderId}
-            highestBidderId={highestBidderId}
-            isTimerEnded={isTimerEnded}
-          />
-
-          {/* Bid Controls Component - Only show when timer is not ended */}
-          {!isTimerEnded && (
-            <BidControls
-              bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
-              bidAmount={bidAmount}
-              currentPrice={currentPrice.replace(' VND', '')}
-              bidIncrement={bidIncrement.replace(' VND', '')}
-              onBidAmountChange={handleBidAmountChange}
-              onPlaceBid={handlePlaceBid}
-              onCancelBid={handleCancelBid}
-              isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
-              isCancelBidDisabled={isCancelBidDisabled()}
-              bidHistoryEmpty={bidHistory.length === 0}
-              bidderTimeLeft={bidderTimeLeft}
-              isLastBidder={selectedBidder === lastBidderId}
+        <div className={`card-body ${currentRound === 6 && isTimerEnded ? 'p-0' : 'py-2'}`}>
+          {/* Show AuctionResult at the end of the last round, otherwise show regular components */}
+          {currentRound === 6 && isTimerEnded ? (
+            <AuctionResult
+              title={auctionTitle}
+              winnerName={lastBidderId ? bidders.find(b => b.id === lastBidderId)?.name || '' : ''}
+              winningPrice={parseInt(currentPrice.replace(/[^\d]/g, ''))}
+              startTime={auction.startTime ? new Date(auction.startTime).toLocaleString('vi-VN') : ''}
+              endTime={new Date().toLocaleString('vi-VN')}
+              totalRounds={6}
+              totalBids={bidHistory.length}
             />
+          ) : (
+            <>
+              {/* Auction Summary Component */}
+              <AuctionSummary
+                currentRound={currentRound}
+                currentPrice={currentPrice}
+                bidIncrement={bidIncrement}
+                participantsCount={participantsCount}
+              />
+
+              {/* Bidder Selection Grid Component */}
+              <BidderSelectionGrid
+                bidders={bidders}
+                selectedBidder={selectedBidder}
+                onBidderSelect={handleBidderSelect}
+                disabledBidders={getDisabledBidders()}
+                lastBidderId={lastBidderId}
+                highestBidderId={highestBidderId}
+                isTimerEnded={isTimerEnded}
+              />
+
+              {/* Bid Controls Component - Only show when timer is not ended */}
+              {!isTimerEnded && (
+                <BidControls
+                  bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
+                  bidAmount={bidAmount}
+                  currentPrice={currentPrice.replace(' VND', '')}
+                  bidIncrement={bidIncrement.replace(' VND', '')}
+                  onBidAmountChange={handleBidAmountChange}
+                  onPlaceBid={handlePlaceBid}
+                  onCancelBid={handleCancelBid}
+                  isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
+                  isCancelBidDisabled={isCancelBidDisabled()}
+                  bidHistoryEmpty={bidHistory.length === 0}
+                  bidderTimeLeft={bidderTimeLeft}
+                  isLastBidder={selectedBidder === lastBidderId}
+                />
+              )}
+            </>
           )}
         </div>
       </div>
