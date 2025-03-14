@@ -387,7 +387,7 @@ This browser popup displays key auction details.
   - Utilize Bootstrap typography and spacing classes (e.g., `h1`, `h2`, `text-center`, `mt-3`, `mb-4`).
   - Display fallback text (**“Chưa có”**) if data is missing.
 - **Export Feature:**
-  When the auction ends, include a button labeled **“Xuất dữ liệu”** to export:
+  When the auction ends, include a button labeled **“Xuất dữ liệu”** to export to Excel file:
   - Auctioneer's name
   - Winner's name
   - Winning price

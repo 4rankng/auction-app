@@ -10,6 +10,7 @@ import { useAuction } from '../hooks/useAuction';
 import { useAuctionTimer } from '../hooks/useAuctionTimer';
 import { useBidderTimer } from '../hooks/useBidderTimer';
 import { Bid } from '../types';
+import * as XLSX from 'xlsx';
 
 // Interface for the bid history display format
 interface BidHistoryDisplay {
@@ -799,44 +800,88 @@ export const BidPage: React.FC = () => {
   const handleExportData = () => {
     if (!auction) return;
 
-    // Create export data object
-    const exportData = {
-      auctionTitle: auctionTitle,
-      winner: lastBidderId ? bidders.find(b => b.id === lastBidderId)?.name || 'Không có người thắng' : 'Không có người thắng',
-      winningPrice: parseInt(currentPrice.replace(/[^\d]/g, '')),
-      startTime: formatTimestamp(auction.startTime),
-      endTime: formatTimestamp(auction.endTime || Date.now()),
-      totalRounds: 6,
-      totalBids: bidHistory.length,
-      bidHistory: bids
+    try {
+      // Create workbook and worksheet
+      const wb = XLSX.utils.book_new();
+
+      // Create auction info data
+      const auctionInfoData = [
+        ['Thông tin đấu giá', 'Giá trị'],
+        ['Tên phiên đấu giá', auctionTitle],
+        ['Người tổ chức', auction.auctioneer || 'Admin'],
+        ['Người thắng cuộc', lastBidderId ? bidders.find(b => b.id === lastBidderId)?.name || 'Không có người thắng' : 'Không có người thắng'],
+        ['Giá thắng cuộc', formatCurrency(parseInt(currentPrice.replace(/[^\d]/g, '')))],
+        ['Thời gian bắt đầu', formatTimestamp(auction.startTime)],
+        ['Thời gian kết thúc', formatTimestamp(auction.endTime || Date.now())],
+        ['Tổng số vòng', 6],
+        ['Tổng số lượt đặt giá', bidHistory.length]
+      ];
+
+      // Create auction info worksheet
+      const wsInfo = XLSX.utils.aoa_to_sheet(auctionInfoData);
+
+      // Set column widths for info sheet
+      wsInfo['!cols'] = [
+        { wch: 25 }, // Column A width
+        { wch: 40 }  // Column B width
+      ];
+
+      // Add the info worksheet to the workbook
+      XLSX.utils.book_append_sheet(wb, wsInfo, "Thông tin đấu giá");
+
+      // Format bid history data for the second sheet
+      const bidHistoryHeaders = ['Người đặt giá', 'Số tiền', 'Thời gian', 'Vòng'];
+
+      const bidHistoryData = bids
         .filter(bid => bid.auctionId === auction.id)
-        .map(bid => ({
-          bidderName: bid.bidderName,
-          amount: bid.amount,
-          timestamp: formatTimestamp(bid.timestamp),
-          round: bid.round
-        }))
-    };
+        .sort((a, b) => b.timestamp - a.timestamp) // Sort by timestamp (newest first)
+        .map(bid => [
+          bid.bidderName,
+          formatCurrency(bid.amount),
+          formatTimestamp(bid.timestamp),
+          bid.round
+        ]);
 
-    // Convert to JSON string with pretty formatting
-    const jsonString = JSON.stringify(exportData, null, 2);
+      // Add headers to bid history data
+      bidHistoryData.unshift(bidHistoryHeaders);
 
-    // Create a blob and download link
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+      // Create bid history worksheet
+      const wsBids = XLSX.utils.aoa_to_sheet(bidHistoryData);
 
-    // Create download link and trigger click
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `auction-data-${auction.id}.json`;
-    document.body.appendChild(a);
-    a.click();
+      // Set column widths for bid history sheet
+      wsBids['!cols'] = [
+        { wch: 30 }, // Người đặt giá
+        { wch: 20 }, // Số tiền
+        { wch: 25 }, // Thời gian
+        { wch: 10 }  // Vòng
+      ];
 
-    // Clean up
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+      // Add the bid history worksheet to the workbook
+      XLSX.utils.book_append_sheet(wb, wsBids, "Lịch sử đấu giá");
 
-    showToast('Dữ liệu đấu giá đã được xuất thành công', 'success');
+      // Generate Excel file
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+
+      // Create a Blob from the buffer
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+      // Create download link and trigger click
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `auction-data-${auction.id}-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('Dữ liệu đấu giá đã được xuất thành công dưới dạng Excel', 'success');
+    } catch (error) {
+      console.error('Error exporting data to Excel:', error);
+      showToast('Không thể xuất dữ liệu Excel. Vui lòng thử lại.', 'error');
+    }
   };
 
   if (loading) {
@@ -966,7 +1011,7 @@ export const BidPage: React.FC = () => {
       {currentRound === 6 && isTimerEnded && (
         <button className="floating-export-btn" onClick={handleExportData}>
           <i className="bi bi-file-earmark-excel"></i>
-          Xuất dữ liệu
+          Xuất Excel
         </button>
       )}
     </div>
