@@ -22,15 +22,10 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
 }) => {
   const showNextRoundButton = isTimerEnded && currentRound < 6;
 
-  // Determine if this is the final round
-  const isFinalRound = currentRound === 6;
-
   return (
     <div className="card-header d-flex justify-content-between align-items-center py-2">
       <div className="d-flex align-items-center">
         <h5 className="mb-0 me-2">{title}</h5>
-        <span className="badge bg-success">Đang diễn ra</span>
-        <span className="badge bg-primary ms-2 fs-6">Vòng {currentRound}{isFinalRound ? ' (Cuối)' : ''}</span>
       </div>
       <div className="d-flex align-items-center">
         <div className="text-center me-3">
