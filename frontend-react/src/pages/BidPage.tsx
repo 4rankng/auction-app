@@ -21,7 +21,7 @@ interface BidHistoryDisplay {
 
 export const BidPage: React.FC = () => {
   // Get auction data from useAuction hook
-  const { auction, bidders, bids, loading: dataLoading, error: dataError, placeBid, updateAuction, getAuctionById } = useAuction();
+  const { auction, bidders, bids, loading: dataLoading, error: dataError, placeBid, updateAuction, getAuctionById, removeBid } = useAuction();
 
   const [currentRound, setCurrentRound] = useState<number>(1); // Start at round 1
   const [currentPrice, setCurrentPrice] = useState<string>('0 VND');
@@ -44,6 +44,7 @@ export const BidPage: React.FC = () => {
   const [bidderTimeLeft, setBidderTimeLeft] = useState<number>(60);
   const [lastBidderId, setLastBidderId] = useState<string | null>(null);
   const bidderTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState<number>(0); // Add refresh trigger state
 
   // Add a ref to track if we've already loaded the auction
   const auctionLoadedRef = useRef<boolean>(false);
@@ -125,16 +126,12 @@ export const BidPage: React.FC = () => {
 
       showToast('Đấu giá kết thúc thành công', 'success');
 
-      // Navigate to the history page after a short delay
-      setTimeout(() => {
-        navigate('/history');
-      }, 3000);
 
     } catch (error) {
       console.error('Error ending auction:', error);
       showToast(error instanceof Error ? error.message : 'Không thể kết thúc đấu giá', 'error');
     }
-  }, [auction, bids, bidders, updateAuction, navigate]);
+  }, [auction, bids, bidders, updateAuction]);
 
   useEffect(() => {
     // Get auction ID from URL query parameters
@@ -307,7 +304,15 @@ export const BidPage: React.FC = () => {
     }
 
     setSelectedBidder(bidderId);
-    setBidderTimeLeft(60); // Reset timer to 60 seconds
+
+    // If this is the last bidder, set timer to 0
+    if (bidderId === lastBidderId) {
+      setBidderTimeLeft(0);
+      return;
+    }
+
+    // Otherwise, reset timer to 60 seconds
+    setBidderTimeLeft(60);
 
     // Start new timer for this bidder
     bidderTimerRef.current = setInterval(() => {
@@ -334,7 +339,29 @@ export const BidPage: React.FC = () => {
   }, []);
 
   const handlePlaceBid = async () => {
-    if (!selectedBidder || !bidAmount || !auction) return;
+    console.log('handlePlaceBid called with bidAmount:', bidAmount);
+
+    // Ensure we have a selected bidder and auction
+    if (!selectedBidder || !auction) {
+      showToast('Vui lòng chọn người đấu giá', 'error');
+      return;
+    }
+
+    // Calculate default bid amount if not provided
+    let effectiveBidAmount = bidAmount;
+    if (!effectiveBidAmount) {
+      // If bid amount is empty, calculate it from current price + bid increment
+      const currentPriceValue = parseInt(currentPrice.replace(/\D/g, '')) || 0;
+      const bidIncrementValue = parseInt(bidIncrement.replace(/\D/g, '')) || 0;
+      effectiveBidAmount = (currentPriceValue + bidIncrementValue).toString();
+      console.log('Using calculated bid amount:', effectiveBidAmount);
+    }
+
+    // Check if we still don't have a bid amount
+    if (!effectiveBidAmount) {
+      showToast('Vui lòng nhập số tiền đấu giá', 'error');
+      return;
+    }
 
     // Check if we're past round 6
     if (currentRound > 6) {
@@ -350,7 +377,7 @@ export const BidPage: React.FC = () => {
 
     try {
       // Convert bid amount from formatted string to number
-      const numericAmount = parseInt(bidAmount.replace(/\D/g, '')) || 0;
+      const numericAmount = parseInt(effectiveBidAmount.replace(/\D/g, '')) || 0;
       const currentPriceValue = parseInt(currentPrice.replace(/\D/g, '')) || 0;
       const bidIncrementValue = parseInt(bidIncrement.replace(/\D/g, '')) || 0;
 
@@ -363,7 +390,8 @@ export const BidPage: React.FC = () => {
         currentPriceValue,
         bidIncrementValue,
         bidHistoryEmpty,
-        currentRound
+        currentRound,
+        effectiveBidAmount
       });
 
       // Check if the bid meets the minimum increment requirement
@@ -396,6 +424,9 @@ export const BidPage: React.FC = () => {
       // Reset the auction loaded flag to force a refresh
       auctionLoadedRef.current = false;
 
+      // Increment refresh trigger to force BidHistoryTable to refresh
+      setRefreshTrigger(prev => prev + 1);
+
       // Refresh data to get the updated auction and bids
       if (auctionId) {
         await getAuctionById(auctionId);
@@ -421,13 +452,14 @@ export const BidPage: React.FC = () => {
       const storedDatabase = localStorage.getItem('auction_app_db');
       if (!storedDatabase) {
         console.log('No database found in localStorage');
+        setBidHistory([]);
         return;
       }
 
       const database = JSON.parse(storedDatabase);
 
       // Get all bids for this auction
-      const allBids = Object.values(database.bids).filter((bid: any) => bid.auctionId === auctionId);
+      const allBids = Object.values(database.bids || {}).filter((bid: any) => bid.auctionId === auctionId);
       console.log(`Found ${allBids.length} bids for auction ${auctionId}`);
 
       // Format the bids for display
@@ -460,16 +492,36 @@ export const BidPage: React.FC = () => {
   }, [formatCurrency, formatTimestamp]);
 
   const handleCancelBid = async () => {
-    if (!selectedBidder || !auction) {
-      showToast('Vui lòng chọn người đấu giá', 'error');
+    console.log('handleCancelBid called');
+
+    if (!auction) {
+      showToast('Không tìm thấy phiên đấu giá', 'error');
+      return;
+    }
+
+    // If no bidder is selected, use the last bidder
+    const bidderToCancel = selectedBidder || lastBidderId;
+    console.log('Bidder to cancel:', bidderToCancel, 'Selected bidder:', selectedBidder, 'Last bidder:', lastBidderId);
+
+    if (!bidderToCancel) {
+      showToast('Không có người đấu giá để hủy', 'error');
+      return;
+    }
+
+    // Check if the selected bidder is the last bidder
+    if (selectedBidder && selectedBidder !== lastBidderId) {
+      // If a bidder is selected but they're not the last bidder, show an error
+      showToast('Chỉ có thể hủy đấu giá cuối cùng', 'error');
       return;
     }
 
     try {
       // Find the last bid from this bidder
       const bidderBids = bids
-        .filter(bid => bid.bidderId === selectedBidder && bid.auctionId === auction.id)
+        .filter(bid => bid.bidderId === bidderToCancel && bid.auctionId === auction.id)
         .sort((a, b) => b.timestamp - a.timestamp);
+
+      console.log('Bidder bids found:', bidderBids.length);
 
       if (bidderBids.length === 0) {
         showToast('Không tìm thấy lịch sử đấu giá của người này', 'error');
@@ -478,36 +530,27 @@ export const BidPage: React.FC = () => {
 
       // Get the last bid from this bidder
       const lastBid = bidderBids[0];
+      console.log('Last bid to cancel:', lastBid);
 
-      // TODO: Implement the actual removal of the bid from the database
-      // For now, we'll simulate it by finding the previous highest bid
+      // Use the removeBid function to remove the bid
+      await removeBid(lastBid.id);
+      console.log('Bid removed successfully');
 
       // Find all bids for this auction except the one we're canceling
       const otherBids = bids
         .filter(bid => bid.id !== lastBid.id && bid.auctionId === auction.id)
         .sort((a, b) => b.amount - a.amount);
 
-      // Determine the new current price (previous highest bid or starting price)
-      let newCurrentPrice = auction.startingPrice;
+      console.log('Other bids after cancellation:', otherBids.length);
+
+      // If there are other bids, set the new last bidder
       if (otherBids.length > 0) {
-        newCurrentPrice = otherBids[0].amount;
+        setLastBidderId(otherBids[0].bidderId);
+        console.log('New last bidder set to:', otherBids[0].bidderId);
+      } else {
+        setLastBidderId(null);
+        console.log('No last bidder (all bids canceled)');
       }
-
-      // Update the auction with the new current price
-      const updatedAuction = {
-        ...auction,
-        currentPrice: newCurrentPrice
-      };
-
-      console.log('Canceling bid:', lastBid);
-      console.log('New current price will be:', newCurrentPrice);
-      console.log('Updated auction will be:', updatedAuction);
-
-      // In a real implementation, you would remove the bid from the database here
-      // await databaseService.removeBid(lastBid.id);
-
-      // Update the auction
-      await updateAuction(updatedAuction);
 
       showToast('Đã hủy đấu giá cuối cùng', 'success');
       setSelectedBidder(null);
@@ -516,12 +559,18 @@ export const BidPage: React.FC = () => {
       // Reset the auction loaded flag to force a refresh
       auctionLoadedRef.current = false;
 
+      // Increment refresh trigger to force BidHistoryTable to refresh
+      setRefreshTrigger(prev => prev + 1);
+      console.log('Refresh trigger incremented to force UI update');
+
       // Refresh data to get the updated auction and bids
       if (auctionId) {
         await getAuctionById(auctionId);
+        console.log('Auction data refreshed');
 
         // Immediately fetch the latest bid history to update the UI
         await fetchLatestBidHistory(auctionId);
+        console.log('Bid history refreshed');
       }
     } catch (error) {
       console.error('Error canceling bid:', error);
@@ -547,6 +596,24 @@ export const BidPage: React.FC = () => {
     return true;
   };
 
+  // Check if cancel bid should be disabled
+  const isCancelBidDisabled = () => {
+    // Can't cancel if there are no bids
+    if (bidHistory.length === 0) return true;
+
+    // Can't cancel if no bidder is selected and we're not the last bidder
+    if (!selectedBidder && !lastBidderId) return true;
+
+    return false;
+  };
+
+  // Get disabled bidders based on current action
+  const getDisabledBidders = () => {
+    // We don't disable any bidders from being selected
+    // The bid button will be disabled based on canBidderPlaceBid
+    return [];
+  };
+
   // Add a useEffect to refresh bid history when auction or bids change
   useEffect(() => {
     if (auctionId && auction) {
@@ -554,6 +621,12 @@ export const BidPage: React.FC = () => {
       fetchLatestBidHistory(auctionId);
     }
   }, [auction, bids, auctionId, fetchLatestBidHistory]);
+
+  // Create a wrapper for setBidAmount to add logging
+  const handleBidAmountChange = (amount: string) => {
+    console.log('Bid amount changed to:', amount);
+    setBidAmount(amount);
+  };
 
   if (loading) {
     return (
@@ -616,10 +689,11 @@ export const BidPage: React.FC = () => {
 
           {/* Bidder Selection Grid Component */}
           <BidderSelectionGrid
-                bidders={bidders}
+            bidders={bidders}
             selectedBidder={selectedBidder}
             onBidderSelect={handleBidderSelect}
-            disabledBidders={[lastBidderId].filter(Boolean) as string[]}
+            disabledBidders={getDisabledBidders()}
+            lastBidderId={lastBidderId}
           />
 
           {/* Bid Controls Component */}
@@ -628,13 +702,15 @@ export const BidPage: React.FC = () => {
             bidAmount={bidAmount}
             currentPrice={currentPrice.replace(' VND', '')}
             bidIncrement={bidIncrement.replace(' VND', '')}
-            onBidAmountChange={setBidAmount}
+            onBidAmountChange={handleBidAmountChange}
             onPlaceBid={handlePlaceBid}
             onCancelBid={handleCancelBid}
             isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
+            isCancelBidDisabled={isCancelBidDisabled()}
             bidHistoryEmpty={bidHistory.length === 0}
             bidderTimeLeft={bidderTimeLeft}
-                  />
+            isLastBidder={selectedBidder === lastBidderId}
+          />
                 </div>
                   </div>
 
@@ -642,6 +718,7 @@ export const BidPage: React.FC = () => {
       {auctionId && <BidHistoryTable
         auctionId={auctionId}
         initialData={bidHistory}
+        refreshTrigger={refreshTrigger}
       />}
 
       <div className="text-end">

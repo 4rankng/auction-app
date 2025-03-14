@@ -113,6 +113,43 @@ export class DatabaseService {
     return newBid;
   }
 
+  public async removeBid(bidId: string): Promise<void> {
+    // Check if the bid exists
+    if (!this.database.bids[bidId]) {
+      throw new Error(`Bid with ID ${bidId} does not exist`);
+    }
+
+    // Get the bid to be removed
+    const bidToRemove = this.database.bids[bidId];
+    console.log(`Removing bid: ID=${bidId}, bidder=${bidToRemove.bidderName}, amount=${bidToRemove.amount.toLocaleString('vi-VN')} VND`);
+
+    // Remove the bid from the database
+    delete this.database.bids[bidId];
+
+    // Get the auction
+    const auction = this.database.auctions[bidToRemove.auctionId];
+    if (auction) {
+      // Find the highest remaining bid for this auction
+      const remainingBids = Object.values(this.database.bids)
+        .filter(bid => bid.auctionId === bidToRemove.auctionId)
+        .sort((a, b) => b.amount - a.amount);
+
+      // Update the auction's current price to the highest remaining bid or the starting price
+      if (remainingBids.length > 0) {
+        auction.currentPrice = remainingBids[0].amount;
+        console.log(`Updated auction ${auction.id} current price to ${auction.currentPrice.toLocaleString('vi-VN')} VND (highest remaining bid)`);
+      } else {
+        auction.currentPrice = auction.startingPrice;
+        console.log(`Updated auction ${auction.id} current price to ${auction.currentPrice.toLocaleString('vi-VN')} VND (starting price)`);
+      }
+    }
+
+    // Save changes to localStorage
+    this.saveDatabase();
+    console.log(`Bid ${bidId} removed successfully`);
+    console.log(`Total bids for auction ${bidToRemove.auctionId}: ${Object.values(this.database.bids).filter(b => b.auctionId === bidToRemove.auctionId).length}`);
+  }
+
   private getNextBidderId(): string {
     const bidders = Object.values(this.database.bidders);
     if (bidders.length === 0) return '1';

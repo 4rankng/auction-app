@@ -390,6 +390,8 @@ In the "Chon nguoi tham gia" grid, the bidder number should be displayed in the 
 
 The lich su dau gia table must be sorted by Thoi gian in descending order. The latest bid should be at the top.
 
+After the bidder place the bid, the Dau Gia button is disabled but the Huy Dau Gia Cuoi button is enabled. I should be able to click the Huy Dau Gia Cuoi button to cancel the last bid.
+
 Dau Gia button
 
 - If bid history is not empty check if the price is greater than the current price

@@ -35,27 +35,32 @@ export function useAuction() {
   const getAuctionById = async (auctionId: string) => {
     try {
       setLoading(true);
+
+      // Get fresh data from localStorage to ensure we have the latest
       const db = databaseService.getDatabase();
       const foundAuction = db.auctions[auctionId] || null;
 
       if (foundAuction) {
         setAuction(foundAuction);
         setBidders(Object.values(db.bidders));
-        setBids(Object.values(db.bids).filter(bid => bid.auctionId === auctionId));
+
+        // Get all bids for this auction
+        const auctionBids = Object.values(db.bids || {}).filter(bid => bid.auctionId === auctionId);
+        console.log(`Found ${auctionBids.length} bids for auction ${auctionId} in getAuctionById`);
+        setBids(auctionBids);
+
         setSettings(db.settings);
         setError(null);
         // Reduce logging to prevent console spam
         console.log(`Loaded auction: ${foundAuction.title} (ID: ${auctionId})`);
       } else {
         console.error(`Auction with ID ${auctionId} not found`);
-        // Don't try to find any auction in progress as a fallback
-        // Just set the error message
         setAuction(null);
-        setError(`Không tìm thấy phiên đấu giá với ID ${auctionId}`);
+        setError(`Auction with ID ${auctionId} not found`);
       }
     } catch (err) {
-      console.error('Error in getAuctionById:', err);
-      setError(err instanceof Error ? err.message : 'Không thể tải phiên đấu giá');
+      console.error('Error getting auction by ID:', err);
+      setError(err instanceof Error ? err.message : `Failed to get auction with ID ${auctionId}`);
     } finally {
       setLoading(false);
     }
@@ -140,17 +145,54 @@ export function useAuction() {
         setAuction(updatedAuction);
 
         // Get all bids for this auction and update the bids state
-        const auctionBids = Object.values(db.bids).filter(bid => bid.auctionId === auction.id);
+        const auctionBids = Object.values(db.bids || {}).filter(bid => bid.auctionId === auction.id);
+        console.log(`Found ${auctionBids.length} bids for auction ${auction.id} after placing bid`);
         setBids(auctionBids);
 
-        console.log('Updated auction data:', updatedAuction);
-        console.log('Updated bids data:', auctionBids);
+        // Update the auction with the new current price
+        const updatedAuctionWithPrice = {
+          ...updatedAuction,
+          currentPrice: amount
+        };
+
+        await databaseService.updateAuction(updatedAuctionWithPrice);
+        setAuction(updatedAuctionWithPrice);
+        console.log('Auction updated with new price:', amount);
       }
 
       return newBid;
     } catch (err) {
-      console.error('Error in placeBid:', err);
-      setError(err instanceof Error ? err.message : 'Không thể đấu giá');
+      console.error('Error placing bid:', err);
+      setError(err instanceof Error ? err.message : 'Failed to place bid');
+      throw err;
+    }
+  };
+
+  const removeBid = async (bidId: string) => {
+    try {
+      console.log(`Removing bid ${bidId}`);
+      await databaseService.removeBid(bidId);
+
+      // Refresh data to get the updated state
+      const db = databaseService.getDatabase();
+
+      // Update auction state if we have a current auction
+      if (auction) {
+        const updatedAuction = db.auctions[auction.id];
+        if (updatedAuction) {
+          setAuction(updatedAuction);
+        }
+      }
+
+      // Update bids state
+      const updatedBids = Object.values(db.bids || {});
+      console.log(`After removal, found ${updatedBids.length} total bids`);
+      setBids(updatedBids);
+
+      return true;
+    } catch (err) {
+      console.error('Error removing bid:', err);
+      setError(err instanceof Error ? err.message : 'Failed to remove bid');
       throw err;
     }
   };
@@ -177,6 +219,7 @@ export function useAuction() {
     createBidder,
     createBid,
     placeBid,
+    removeBid,
     refreshData,
     clearBidders,
     getAuctionById,

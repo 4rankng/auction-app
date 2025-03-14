@@ -13,11 +13,13 @@ interface BidHistory {
 interface BidHistoryTableProps {
   auctionId: string;
   initialData?: BidHistory[];
+  refreshTrigger?: number; // Add refreshTrigger prop
 }
 
 const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
   auctionId,
-  initialData = []
+  initialData = [],
+  refreshTrigger = 0 // Default to 0
 }) => {
   const [bidHistory, setBidHistory] = useState<BidHistory[]>(initialData);
   const [loading, setLoading] = useState<boolean>(initialData.length === 0);
@@ -101,10 +103,12 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
     }
   }, [auctionId, sortBidHistory]);
 
-  // Only fetch bid history when the component mounts or when auctionId changes
+  // Fetch bid history when component mounts or auctionId changes
   useEffect(() => {
-    fetchBidHistory();
-  }, [auctionId, fetchBidHistory]);
+    if (auctionId) {
+      fetchBidHistory();
+    }
+  }, [auctionId, fetchBidHistory, refreshTrigger]); // Add refreshTrigger to dependencies
 
   // Update bid history when initialData changes
   useEffect(() => {

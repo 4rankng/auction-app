@@ -13,6 +13,7 @@ interface BidderSelectionGridProps {
   selectedBidder: string | null;
   onBidderSelect: (bidderId: string) => void;
   disabledBidders?: string[];
+  lastBidderId?: string | null;
 }
 
 /**
@@ -22,7 +23,8 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
   bidders,
   selectedBidder,
   onBidderSelect,
-  disabledBidders = []
+  disabledBidders = [],
+  lastBidderId = null
 }) => {
   return (
     <div className="bidder-selection-container mb-3">
@@ -35,27 +37,46 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
         <div className="d-flex flex-wrap justify-content-center">
           {bidders.map((bidder) => {
             const isDisabled = disabledBidders.includes(bidder.id);
-            const tooltipText = isDisabled
-              ? 'Người này vừa đấu giá, không thể đấu giá tiếp'
-              : `${bidder.name}${bidder.nric ? ` - CMND/CCCD: ${bidder.nric}` : ''}`;
+            const isLastBidder = bidder.id === lastBidderId;
+
+            let tooltipText = `${bidder.name}${bidder.nric ? ` - CMND/CCCD: ${bidder.nric}` : ''}`;
+
+            if (isLastBidder && isDisabled) {
+              tooltipText = 'Người này vừa đấu giá, không thể đấu giá tiếp. Chọn để hủy đấu giá cuối cùng.';
+            } else if (isLastBidder) {
+              tooltipText = 'Người này vừa đấu giá. Chọn để hủy đấu giá cuối cùng.';
+            } else if (isDisabled) {
+              tooltipText = 'Người này không thể đấu giá lúc này.';
+            }
 
             return (
               <button
                 key={bidder.id}
-                className={`btn ${selectedBidder === bidder.id ? 'btn-primary' : isDisabled ? 'btn-light' : 'btn-outline-secondary'}`}
+                className={`btn ${
+                  selectedBidder === bidder.id
+                    ? 'btn-primary'
+                    : isLastBidder
+                      ? 'btn-outline-danger'
+                      : isDisabled
+                        ? 'btn-light'
+                        : 'btn-outline-secondary'
+                }`}
                 style={{
                   width: '40px',
                   height: '40px',
                   padding: '0',
                   borderRadius: '4px',
                   margin: '3px',
-                  border: selectedBidder === bidder.id ? '2px solid #0d6efd' : '1px solid #6c757d',
+                  border: selectedBidder === bidder.id
+                    ? '2px solid #0d6efd'
+                    : isLastBidder
+                      ? '2px solid #dc3545'
+                      : '1px solid #6c757d',
                   fontWeight: 'bold',
                   opacity: isDisabled ? 0.6 : 1,
-                  cursor: isDisabled ? 'not-allowed' : 'pointer'
+                  cursor: 'pointer'
                 }}
-                onClick={() => !isDisabled && onBidderSelect(bidder.id)}
-                disabled={isDisabled}
+                onClick={() => onBidderSelect(bidder.id)}
                 title={tooltipText}
                 data-bs-toggle="tooltip"
                 data-bs-placement="top"
