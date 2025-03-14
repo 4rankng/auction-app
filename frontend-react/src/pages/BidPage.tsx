@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import BidHistoryTable from '../components/BidHistoryTable';
 import BidderSelectionGrid from '../components/BidderSelectionGrid';
 import BidControls from '../components/BidControls';
 import AuctionSummary from '../components/AuctionSummary';
 import AuctionHeader from '../components/AuctionHeader';
+import { useAuction } from '../hooks/useAuction';
+import { Bid } from '../types';
 
-// We're using the Bidder interface from BidderSelectionGrid component
-// This interface is used for the bidders array
-interface BidHistory {
+// Interface for the bid history display format
+interface BidHistoryDisplay {
+  id: number;
   round: number;
   bidder: string;
   amount: string;
@@ -16,23 +18,17 @@ interface BidHistory {
 }
 
 export const BidPage: React.FC = () => {
-  const [currentRound, setCurrentRound] = useState<number>(6);
-  const [currentPrice, setCurrentPrice] = useState<string>('1.500.000 VND');
-  const [bidIncrement, setBidIncrement] = useState<string>('100.000 VND');
-  // participantsCount would be updated from the backend in a real application
-  // keeping the setter for future implementation
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [participantsCount, setParticipantsCount] = useState<number>(20);
-  const [timeLeft, setTimeLeft] = useState<string>('04:35');
+  // Get auction data from useAuction hook
+  const { auction, bidders, bids, loading: dataLoading, error: dataError, placeBid, refreshData, updateAuction, getAuctionById } = useAuction();
+
+  const [currentRound, setCurrentRound] = useState<number>(1); // Start at round 1
+  const [currentPrice, setCurrentPrice] = useState<string>('0 VND');
+  const [bidIncrement, setBidIncrement] = useState<string>('0 VND');
+  const [participantsCount, setParticipantsCount] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<string>('00:00');
   const [selectedBidder, setSelectedBidder] = useState<string | null>(null);
   const [bidAmount, setBidAmount] = useState<string>('');
-  const [bidHistory, setBidHistory] = useState<BidHistory[]>([
-    { round: 5, bidder: 'Nguyễn Văn A (bidder-1)', amount: '1.500.000 VND', timestamp: '13/03/2023 10:25:30' },
-    { round: 4, bidder: 'Trần Thị B (bidder-2)', amount: '1.400.000 VND', timestamp: '13/03/2023 10:24:15' },
-    { round: 3, bidder: 'Lê Văn C (bidder-3)', amount: '1.300.000 VND', timestamp: '13/03/2023 10:23:05' },
-    { round: 2, bidder: 'Phạm Thị D (bidder-4)', amount: '1.200.000 VND', timestamp: '13/03/2023 10:22:10' },
-    { round: 1, bidder: 'Hoàng Văn E (bidder-5)', amount: '1.100.000 VND', timestamp: '13/03/2023 10:21:00' },
-  ]);
+  const [bidHistory, setBidHistory] = useState<BidHistoryDisplay[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [auctionTitle, setAuctionTitle] = useState<string>('Phiên Đấu Giá');
   const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({
@@ -40,7 +36,12 @@ export const BidPage: React.FC = () => {
     message: '',
     type: 'success'
   });
-  const [auctionId, setAuctionId] = useState<number | null>(null);
+  const [auctionId, setAuctionId] = useState<string | null>(null);
+
+  // New states for bidder timer and last bidder
+  const [bidderTimeLeft, setBidderTimeLeft] = useState<number>(60);
+  const [lastBidderId, setLastBidderId] = useState<string | null>(null);
+  const bidderTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,11 +51,26 @@ export const BidPage: React.FC = () => {
     setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
   };
 
-  // Generate bidders (1-20)
-  const bidders = Array.from({ length: 20 }, (_, i) => ({
-    id: (i + 1).toString(),
-    name: `Bidder ${i + 1}`
-  }));
+  // Format timestamp to readable date string
+  const formatTimestamp = (timestamp: number): string => {
+    return new Date(timestamp).toLocaleString('vi-VN');
+  };
+
+  // Format number to currency string
+  const formatCurrency = (amount: number): string => {
+    return `${amount.toLocaleString('vi-VN')} VND`;
+  };
+
+  // Convert bids from database to display format
+  const convertBidsToDisplayFormat = useCallback((bids: Bid[]): BidHistoryDisplay[] => {
+    return bids.map((bid, index) => ({
+      id: index,
+      round: bid.round,
+      bidder: bid.bidderName,
+      amount: formatCurrency(bid.amount),
+      timestamp: formatTimestamp(bid.timestamp)
+    }));
+  }, []);
 
   useEffect(() => {
     // Get auction ID from URL query parameters
@@ -67,98 +83,277 @@ export const BidPage: React.FC = () => {
       return;
     }
 
-    const parsedAuctionId = parseInt(auctionIdParam);
-    setAuctionId(parsedAuctionId);
+    setAuctionId(auctionIdParam);
 
-    // In a real app, you would fetch the auction data from your backend or localStorage
-    const loadAuctionData = () => {
-      try {
-        const storedAuctions = localStorage.getItem('auctions');
-        if (storedAuctions) {
-          const auctions = JSON.parse(storedAuctions);
-          const auction = auctions.find((a: any) => a.id === parsedAuctionId);
+    // Load the specific auction by ID
+    getAuctionById(auctionIdParam);
+  }, [location.search, navigate, getAuctionById]);
 
-          if (auction) {
-            setAuctionTitle(auction.title || 'Phiên Đấu Giá');
-            setCurrentPrice(auction.currentPrice || '1.500.000 VND');
-            setBidIncrement(auction.priceStep || '100.000 VND');
-            // Load other auction data as needed
-          } else {
-            showToast('Auction not found', 'error');
-            navigate('/history');
-          }
-        }
-      } catch (error) {
-        console.error('Error loading auction data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Update component state when auction data changes
+  useEffect(() => {
+    if (dataLoading) {
+      setLoading(true);
+      return;
+    }
 
-    loadAuctionData();
+    if (dataError) {
+      showToast(dataError, 'error');
+      setLoading(false);
+      return;
+    }
 
-    // Start a timer to update the time left
+    if (!auction) {
+      showToast('Auction not found', 'error');
+      navigate('/history');
+      return;
+    }
+
+    // Check if this is the auction we're looking for
+    if (auctionId && auction.id !== auctionId) {
+      showToast('Auction not found', 'error');
+      navigate('/history');
+      return;
+    }
+
+    // Update auction details
+    setAuctionTitle(auction.title);
+    setCurrentPrice(formatCurrency(auction.currentPrice));
+    setBidIncrement(formatCurrency(auction.bidStep));
+    setParticipantsCount(bidders.length);
+
+    // Calculate time left
+    const now = Date.now();
+    const timeLeftMs = Math.max(0, (auction.endTime || 0) - now);
+    const minutes = Math.floor(timeLeftMs / 60000);
+    const seconds = Math.floor((timeLeftMs % 60000) / 1000);
+    setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+
+    // Filter bids for this auction and sort by timestamp (newest first)
+    const auctionBids = bids
+      .filter(bid => bid.auctionId === auction.id)
+      .sort((a, b) => b.timestamp - a.timestamp);
+
+    // Set current round based on the highest round in the bids or default to 1
+    const maxRound = auctionBids.length > 0
+      ? Math.max(...auctionBids.map(bid => bid.round))
+      : 1;
+    setCurrentRound(maxRound);
+
+    // Set last bidder if there are bids
+    if (auctionBids.length > 0) {
+      setLastBidderId(auctionBids[0].bidderId);
+    }
+
+    // Convert bids to display format
+    setBidHistory(convertBidsToDisplayFormat(auctionBids));
+
+    setLoading(false);
+  }, [auction, bidders, bids, dataLoading, dataError, auctionId, navigate, convertBidsToDisplayFormat]);
+
+  // Start a timer to update the auction time left
+  useEffect(() => {
+    if (!auction || !auction.endTime) return;
+
     const timer = setInterval(() => {
-      // This is a simple countdown timer, in a real app you would sync with the server
-      setTimeLeft(prev => {
-        const [minutes, seconds] = prev.split(':').map(Number);
-        let newSeconds = seconds - 1;
-        let newMinutes = minutes;
+      const now = Date.now();
+      const timeLeftMs = Math.max(0, auction.endTime! - now);
+      const minutes = Math.floor(timeLeftMs / 60000);
+      const seconds = Math.floor((timeLeftMs % 60000) / 1000);
 
-        if (newSeconds < 0) {
-          newSeconds = 59;
-          newMinutes -= 1;
+      setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+
+      // If time is up, increase the round (up to round 6)
+      if (timeLeftMs <= 0 && currentRound < 6) {
+        setCurrentRound(prev => Math.min(prev + 1, 6));
+
+        // Update auction end time for the next round
+        if (auction && auction.endTime) {
+          const newEndTime = auction.endTime + (auction.timeLeft * 1000);
+          updateAuction({
+            ...auction,
+            endTime: newEndTime
+          });
         }
+      }
 
-        if (newMinutes < 0) {
-          clearInterval(timer);
-          return '00:00';
-        }
-
-        return `${newMinutes.toString().padStart(2, '0')}:${newSeconds.toString().padStart(2, '0')}`;
-      });
+      if (timeLeftMs <= 0) {
+        clearInterval(timer);
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [location.search, navigate]);
+  }, [auction, currentRound, updateAuction]);
 
+  // Handle bidder selection and start 60-second timer
   const handleBidderSelect = (bidderId: string) => {
-    setSelectedBidder(bidderId === selectedBidder ? null : bidderId);
+    // Clear previous timer
+    if (bidderTimerRef.current) {
+      clearInterval(bidderTimerRef.current);
+      bidderTimerRef.current = null;
+    }
+
+    // Toggle selection if clicking the same bidder
+    if (bidderId === selectedBidder) {
+      setSelectedBidder(null);
+      return;
+    }
+
+    setSelectedBidder(bidderId);
+    setBidderTimeLeft(60); // Reset timer to 60 seconds
+
+    // Start new timer for this bidder
+    bidderTimerRef.current = setInterval(() => {
+      setBidderTimeLeft(prev => {
+        if (prev <= 1) {
+          if (bidderTimerRef.current) {
+            clearInterval(bidderTimerRef.current);
+            bidderTimerRef.current = null;
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
   };
 
-  const handlePlaceBid = () => {
-    if (!selectedBidder || !bidAmount) return;
-
-    // In a real app, you would send this to your backend
-    const newBid: BidHistory = {
-      round: currentRound + 1,
-      bidder: `Bidder ${selectedBidder}`,
-      amount: `${bidAmount} VND`,
-      timestamp: new Date().toLocaleString()
+  // Clean up timer on component unmount
+  useEffect(() => {
+    return () => {
+      if (bidderTimerRef.current) {
+        clearInterval(bidderTimerRef.current);
+      }
     };
+  }, []);
 
-    setBidHistory([newBid, ...bidHistory]);
-    setCurrentRound(currentRound + 1);
-    setCurrentPrice(`${bidAmount} VND`);
-    setSelectedBidder(null);
-    setBidAmount('');
-    showToast('Bid placed successfully', 'success');
+  const handlePlaceBid = async () => {
+    if (!selectedBidder || !bidAmount || !auction) return;
+
+    // Check if we're past round 6
+    if (currentRound > 6) {
+      showToast('Đấu giá đã kết thúc ở vòng 6', 'error');
+      return;
+    }
+
+    // Check if bidder timer has expired
+    if (bidderTimeLeft <= 0) {
+      showToast('Thời gian đấu giá đã hết', 'error');
+      return;
+    }
+
+    try {
+      // Convert bid amount from formatted string to number
+      const numericAmount = parseInt(bidAmount.replace(/\D/g, '')) || 0;
+
+      // Place the bid with the current round
+      await placeBid(selectedBidder, numericAmount);
+
+      // Set this bidder as the last bidder
+      setLastBidderId(selectedBidder);
+
+      // Reset selection and amount
+      setSelectedBidder(null);
+      setBidAmount('');
+
+      // Clear bidder timer
+      if (bidderTimerRef.current) {
+        clearInterval(bidderTimerRef.current);
+        bidderTimerRef.current = null;
+      }
+
+      // Refresh data to get the updated auction and bids
+      await refreshData();
+
+      showToast('Đấu giá thành công', 'success');
+    } catch (error) {
+      console.error('Error placing bid:', error);
+      showToast(error instanceof Error ? error.message : 'Không thể đấu giá', 'error');
+    }
   };
 
-  const handleEndAuction = () => {
-    // In a real app, you would send this to your backend
-    showToast('Auction ended successfully', 'success');
-    navigate('/history');
+  const handleCancelBid = async () => {
+    if (!selectedBidder || !auction) {
+      showToast('Vui lòng chọn người đấu giá', 'error');
+      return;
+    }
+
+    try {
+      // Find the last bid from this bidder
+      const bidderBids = bids
+        .filter(bid => bid.bidderId === selectedBidder && bid.auctionId === auction.id)
+        .sort((a, b) => b.timestamp - a.timestamp);
+
+      if (bidderBids.length === 0) {
+        showToast('Không tìm thấy lịch sử đấu giá của người này', 'error');
+        return;
+      }
+
+      // TODO: Implement the actual removal of the bid from the database
+      // This would require adding a new function to the useAuction hook
+
+      // For now, we'll just show a toast and reset the selection
+      showToast('Đã hủy đấu giá cuối cùng', 'success');
+      setSelectedBidder(null);
+      setBidAmount('');
+
+      // Refresh data to get the updated auction and bids
+      await refreshData();
+    } catch (error) {
+      console.error('Error canceling bid:', error);
+      showToast(error instanceof Error ? error.message : 'Không thể hủy đấu giá', 'error');
+    }
   };
 
-  const handleCancelBid = () => {
-    setSelectedBidder(null);
-    setBidAmount('');
-    showToast('Bid canceled', 'success');
+  const handleEndAuction = async () => {
+    if (!auction) return;
+
+    try {
+      // Update auction status to ENDED
+      const updatedAuction = { ...auction, status: 'ENDED' as const };
+
+      // Find the highest bid to set as the winner
+      const highestBid = bids
+        .filter(bid => bid.auctionId === auction.id)
+        .sort((a, b) => b.amount - a.amount)[0];
+
+      if (highestBid) {
+        const winningBidder = bidders.find(bidder => bidder.id === highestBid.bidderId);
+        if (winningBidder) {
+          updatedAuction.winner = {
+            id: winningBidder.id,
+            name: winningBidder.name,
+            finalBid: highestBid.amount
+          };
+          updatedAuction.finalPrice = highestBid.amount;
+        }
+      }
+
+      // Save the updated auction
+      await updateAuction(updatedAuction);
+
+      showToast('Đấu giá kết thúc thành công', 'success');
+      navigate('/history');
+    } catch (error) {
+      console.error('Error ending auction:', error);
+      showToast(error instanceof Error ? error.message : 'Không thể kết thúc đấu giá', 'error');
+    }
   };
 
   const handleGoBack = () => {
     navigate('/history');
+  };
+
+  // Check if a bidder can place a bid
+  const canBidderPlaceBid = (bidderId: string) => {
+    // Can't bid if this was the last bidder
+    if (bidderId === lastBidderId) return false;
+
+    // Can't bid if past round 6
+    if (currentRound > 6) return false;
+
+    // Can't bid if timer expired
+    if (selectedBidder === bidderId && bidderTimeLeft <= 0) return false;
+
+    return true;
   };
 
   if (loading) {
@@ -204,18 +399,21 @@ export const BidPage: React.FC = () => {
             bidders={bidders}
             selectedBidder={selectedBidder}
             onBidderSelect={handleBidderSelect}
+            disabledBidders={[lastBidderId].filter(Boolean) as string[]}
           />
 
           {/* Bid Controls Component */}
           <BidControls
-            bidderName={selectedBidder ? `Bidder ${selectedBidder}` : ''}
+            bidderName={selectedBidder ? bidders.find(b => b.id === selectedBidder)?.name || '' : ''}
             bidAmount={bidAmount}
             currentPrice={currentPrice.replace(' VND', '')}
             bidIncrement={bidIncrement.replace(' VND', '')}
             onBidAmountChange={setBidAmount}
             onPlaceBid={handlePlaceBid}
             onCancelBid={handleCancelBid}
-            isPlaceBidDisabled={!selectedBidder}
+            isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
+            bidHistoryEmpty={bidHistory.length === 0}
+            bidderTimeLeft={bidderTimeLeft}
           />
         </div>
       </div>
@@ -223,10 +421,7 @@ export const BidPage: React.FC = () => {
       {/* Bid History Table Component */}
       {auctionId && <BidHistoryTable
         auctionId={auctionId}
-        initialData={bidHistory.map((bid, index) => ({
-          id: index,
-          ...bid
-        }))}
+        initialData={bidHistory}
         refreshInterval={10000} // Refresh every 10 seconds
       />}
 

@@ -366,3 +366,34 @@ Adhering to these rules ensures a fair, transparent auction that participants ca
 
 
 
+Bid Page Logic
+
+If the bid history is empty and Vong Dau Gia is 1, we will have three bid options:
+Tra Bang Gia Khoi Diem, Tra Theo Buoc Gia, Nhap Gia Tra
+Otherwise, we will only have two bid options:
+Tra Theo Buoc Gia, Nhap Gia Tra
+
+When the page is loaded, we will load auction data and bid history from database. The  bid history should be part of the
+auction data in the database.
+
+When Tra Theo Buoc Gia is selected, we will use icon of up triangle to increase the price by bid increment, down triangle to decrease the price by bid increment instead of using - + icon
+
+The list of bidder should be loaded from database and displayed in the participant selection grid.
+
+At the begining, the Vong Dau Gia is 1, at the end of Auction Duration, the Vong Dau Gia will be increased by 1, the last vong dau gia is 6. End of vong dau gia 6, no more bid can be placed.
+
+When we select a bidder, the 60 second countdown timer will start. At the end of 60 seconds, the Dau Gia button will be disabled for that bidder. When we select another bidder, the 60 second countdown timer will start again.
+
+After the bidder place the bid, the Dau Gia button will be disabled for that bidder until other bidder place the bid.
+
+Dau Gia button
+
+- If bid history is not empty check if the price is greater than the current price + bid increment
+- If bid history is empty and Vong Dau Gia is 1, check if the price is >= the current price
+- Update the current price to the new bid
+- Add the bid to the auction history, add bid with bidder id in the bid history of auction data in database
+
+Huy Dau Gia Cuoi button
+
+- Remove the last bid from the bidder from the auction history, after that the button is disabled for that bidder until he place the bid again
+

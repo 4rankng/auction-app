@@ -9,7 +9,7 @@ interface BidHistory {
 }
 
 interface BidHistoryTableProps {
-  auctionId: number;
+  auctionId: string;
   initialData?: BidHistory[];
   refreshInterval?: number; // in milliseconds, for auto-refresh
 }
@@ -34,14 +34,18 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
       // For demo purposes, we're simulating an API call with localStorage
       const storedAuctions = localStorage.getItem('auctions');
       if (!storedAuctions) {
-        throw new Error('No auctions found in storage');
+        // Instead of throwing an error, just set empty bid history
+        setBidHistory([]);
+        return;
       }
 
       const auctions = JSON.parse(storedAuctions);
       const auction = auctions.find((a: any) => a.id === auctionId);
 
       if (!auction) {
-        throw new Error(`Auction with ID ${auctionId} not found`);
+        // Instead of throwing an error, just set empty bid history
+        setBidHistory([]);
+        return;
       }
 
       // If the auction has a bids array, use it; otherwise, use a default empty array
@@ -130,7 +134,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
         {bidHistory.length === 0 ? (
           <div className="text-center py-4 text-muted">
             <i className="bi bi-clock-history fs-4 d-block mb-2"></i>
-            No bid history available
+            Chưa có lịch sử đấu giá
           </div>
         ) : (
           <div className="table-responsive">

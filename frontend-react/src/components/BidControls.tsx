@@ -9,6 +9,8 @@ interface BidControlsProps {
   onPlaceBid: () => void;
   onCancelBid: () => void;
   isPlaceBidDisabled: boolean;
+  bidHistoryEmpty?: boolean; // New prop to check if bid history is empty
+  bidderTimeLeft?: number; // New prop for bidder countdown timer
 }
 
 /**
@@ -23,10 +25,14 @@ const BidControls: React.FC<BidControlsProps> = ({
   onBidAmountChange,
   onPlaceBid,
   onCancelBid,
-  isPlaceBidDisabled
+  isPlaceBidDisabled,
+  bidHistoryEmpty = true, // Default to true if not provided
+  bidderTimeLeft = 60 // Default to 60 seconds if not provided
 }) => {
-  // State for bid method selection
-  const [bidMethod, setBidMethod] = useState<'basePrice' | 'stepPrice' | 'customPrice'>('basePrice');
+  // State for bid method selection - default to stepPrice if bid history is not empty
+  const [bidMethod, setBidMethod] = useState<'basePrice' | 'stepPrice' | 'customPrice'>(
+    bidHistoryEmpty ? 'basePrice' : 'stepPrice'
+  );
 
   // State for number of steps when using incremental bidding
   const [steps, setSteps] = useState<number>(1);
@@ -34,8 +40,8 @@ const BidControls: React.FC<BidControlsProps> = ({
   // State for custom bid amount
   const [customBidAmount, setCustomBidAmount] = useState<string>('');
 
-  // State for time left (in seconds)
-  const [timeLeft, setTimeLeft] = useState<number>(60);
+  // State for time left (in seconds) - use the prop instead
+  // const [timeLeft, setTimeLeft] = useState<number>(60);
 
   // State for validation errors
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -43,6 +49,13 @@ const BidControls: React.FC<BidControlsProps> = ({
   // Parse current price and bid increment to numbers for calculations
   const currentPriceValue = parseInt(currentPrice.replace(/\D/g, '')) || 0;
   const bidIncrementValue = parseInt(bidIncrement.replace(/\D/g, '')) || 0;
+
+  // Update bid method when bid history changes
+  useEffect(() => {
+    if (!bidHistoryEmpty && bidMethod === 'basePrice') {
+      setBidMethod('stepPrice');
+    }
+  }, [bidHistoryEmpty, bidMethod]);
 
   // Calculate bid amount based on selected method
   const calculateBidAmount = () => {
@@ -70,10 +83,19 @@ const BidControls: React.FC<BidControlsProps> = ({
     // Parse the amount (remove non-numeric characters)
     const numericAmount = parseInt(amount.replace(/\D/g, '')) || 0;
 
-    // Check if the amount is greater than the current price
-    if (numericAmount <= currentPriceValue) {
-      setValidationError('Giá trả phải cao hơn giá hiện tại');
-      return false;
+    // Different validation based on bid history
+    if (bidHistoryEmpty) {
+      // If bid history is empty, check if the price is >= the current price
+      if (numericAmount < currentPriceValue) {
+        setValidationError('Giá trả phải lớn hơn hoặc bằng giá khởi điểm');
+        return false;
+      }
+    } else {
+      // If bid history is not empty, check if the price is greater than the current price + bid increment
+      if (numericAmount <= currentPriceValue + bidIncrementValue) {
+        setValidationError(`Giá trả phải cao hơn giá hiện tại ít nhất ${bidIncrement}`);
+        return false;
+      }
     }
 
     // Check if the amount is a multiple of the bid increment when using step price
@@ -83,12 +105,6 @@ const BidControls: React.FC<BidControlsProps> = ({
         setValidationError('Giá trả phải đúng với số bước giá đã chọn');
         return false;
       }
-    }
-
-    // For custom price, check if it's at least one increment higher than current price
-    if (bidMethod === 'customPrice' && numericAmount < currentPriceValue + bidIncrementValue) {
-      setValidationError(`Giá trả phải cao hơn giá hiện tại ít nhất ${bidIncrement}`);
-      return false;
     }
 
     return true;
@@ -111,7 +127,7 @@ const BidControls: React.FC<BidControlsProps> = ({
     }
 
     // If time is up, show error
-    if (timeLeft <= 0) {
+    if (bidderTimeLeft <= 0) {
       setValidationError('Thời gian đấu giá đã kết thúc');
       return;
     }
@@ -164,25 +180,10 @@ const BidControls: React.FC<BidControlsProps> = ({
     }
   };
 
-  // Countdown timer effect
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prevTime => {
-        if (prevTime <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
   // Get color for countdown timer based on time left
   const getTimerColor = () => {
-    if (timeLeft <= 10) return '#dc3545'; // red for last 10 seconds
-    if (timeLeft <= 30) return '#ffc107'; // yellow for 30-10 seconds
+    if (bidderTimeLeft <= 10) return '#dc3545'; // red for last 10 seconds
+    if (bidderTimeLeft <= 30) return '#ffc107'; // yellow for 30-10 seconds
     return '#28a745'; // green for > 30 seconds
   };
 
@@ -190,7 +191,7 @@ const BidControls: React.FC<BidControlsProps> = ({
   const isBidButtonDisabled = () => {
     if (isPlaceBidDisabled) return true;
     if (!bidderName) return true;
-    if (timeLeft <= 0) return true;
+    if (bidderTimeLeft <= 0) return true;
     if (bidMethod === 'customPrice' && !customBidAmount) return true;
     return false;
   };
@@ -220,7 +221,7 @@ const BidControls: React.FC<BidControlsProps> = ({
         }}
       >
         <i className="bi bi-clock me-1"></i>
-        <span className="countdown-timer">{timeLeft}s</span>
+        <span className="countdown-timer">{bidderTimeLeft}s</span>
       </div>
 
       <div>
@@ -241,20 +242,23 @@ const BidControls: React.FC<BidControlsProps> = ({
           <div className="col-md-9">
             <label className="form-label mb-1">Phương Thức Trả Giá</label>
             <div className="d-flex">
-              <div className="form-check me-3">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="bidMethod"
-                  id="basePrice"
-                  value="basePrice"
-                  checked={bidMethod === 'basePrice'}
-                  onChange={() => setBidMethod('basePrice')}
-                />
-                <label className="form-check-label" htmlFor="basePrice">
-                  Trả Bằng Giá Khởi Điểm
-                </label>
-              </div>
+              {/* Only show base price option if bid history is empty */}
+              {bidHistoryEmpty && (
+                <div className="form-check me-3">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="bidMethod"
+                    id="basePrice"
+                    value="basePrice"
+                    checked={bidMethod === 'basePrice'}
+                    onChange={() => setBidMethod('basePrice')}
+                  />
+                  <label className="form-check-label" htmlFor="basePrice">
+                    Trả Bằng Giá Khởi Điểm
+                  </label>
+                </div>
+              )}
               <div className="form-check me-3">
                 <input
                   className="form-check-input"
@@ -322,7 +326,7 @@ const BidControls: React.FC<BidControlsProps> = ({
                       type="button"
                       onClick={handleStepDecrement}
                     >
-                      -
+                      <i className="bi bi-triangle-fill" style={{ transform: 'rotate(180deg)' }}></i>
                     </button>
                     <input
                       type="text"
@@ -336,7 +340,7 @@ const BidControls: React.FC<BidControlsProps> = ({
                       type="button"
                       onClick={handleStepIncrement}
                     >
-                      +
+                      <i className="bi bi-triangle-fill"></i>
                     </button>
                   </div>
                 </div>

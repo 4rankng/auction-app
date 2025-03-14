@@ -31,6 +31,29 @@ export function useAuction() {
     }
   };
 
+  // New function to get auction by ID
+  const getAuctionById = async (auctionId: string) => {
+    try {
+      setLoading(true);
+      const db = databaseService.getDatabase();
+      const foundAuction = db.auctions[auctionId] || null;
+
+      if (foundAuction) {
+        setAuction(foundAuction);
+        setBidders(Object.values(db.bidders));
+        setBids(Object.values(db.bids).filter(bid => bid.auctionId === auctionId));
+        setSettings(db.settings);
+        setError(null);
+      } else {
+        setError(`Auction with ID ${auctionId} not found`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to get auction');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     refreshData();
   }, []);
@@ -113,5 +136,6 @@ export function useAuction() {
     placeBid,
     refreshData,
     clearBidders,
+    getAuctionById,
   };
 }
