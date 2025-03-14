@@ -215,7 +215,7 @@ export const BidPage: React.FC = () => {
             onBidAmountChange={setBidAmount}
             onPlaceBid={handlePlaceBid}
             onCancelBid={handleCancelBid}
-            isPlaceBidDisabled={!selectedBidder || !bidAmount}
+            isPlaceBidDisabled={!selectedBidder}
           />
         </div>
       </div>
