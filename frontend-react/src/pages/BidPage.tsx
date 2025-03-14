@@ -961,6 +961,14 @@ export const BidPage: React.FC = () => {
         <i className="bi bi-arrow-left"></i>
         Quay Lại Thiết Lập
       </button>
+
+      {/* Floating Export Button - Only visible when auction ends */}
+      {currentRound === 6 && isTimerEnded && (
+        <button className="floating-export-btn" onClick={handleExportData}>
+          <i className="bi bi-file-earmark-excel"></i>
+          Xuất dữ liệu
+        </button>
+      )}
     </div>
   );
 };

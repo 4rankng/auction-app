@@ -101,7 +101,7 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
           <div className="details-grid">
             <div className="detail-item">
               <div className="detail-icon">
-                <i className="bi bi-calendar-date"></i>
+                <i className="bi bi-calendar3"></i>
               </div>
               <div className="detail-content">
                 <div className="detail-label">Bắt đầu lúc</div>
@@ -110,7 +110,7 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
             </div>
             <div className="detail-item">
               <div className="detail-icon">
-                <i className="bi bi-clock"></i>
+                <i className="bi bi-clock-history"></i>
               </div>
               <div className="detail-content">
                 <div className="detail-label">Kết thúc lúc</div>
@@ -119,7 +119,7 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
             </div>
             <div className="detail-item">
               <div className="detail-icon">
-                <i className="bi bi-layers"></i>
+                <i className="bi bi-layers-half"></i>
               </div>
               <div className="detail-content">
                 <div className="detail-label">Tổng số vòng</div>
