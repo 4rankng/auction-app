@@ -33,6 +33,7 @@ export interface Auction {
   startTime: number;
   endTime?: number;
   finalPrice?: number;
+  currentRound?: number;
   winner?: {
     id: string;
     name: string;

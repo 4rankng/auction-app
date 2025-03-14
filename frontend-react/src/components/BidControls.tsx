@@ -91,18 +91,15 @@ const BidControls: React.FC<BidControlsProps> = ({
         return false;
       }
     } else {
-      // If bid history is not empty, check if the price is greater than the current price + bid increment
-      if (numericAmount <= currentPriceValue + bidIncrementValue) {
-        setValidationError(`Giá trả phải cao hơn giá hiện tại ít nhất ${bidIncrement}`);
+      // If bid history is not empty, check if the price is greater than the current price
+      if (numericAmount <= currentPriceValue) {
+        setValidationError(`Giá trả phải cao hơn giá hiện tại`);
         return false;
       }
-    }
 
-    // Check if the amount is a multiple of the bid increment when using step price
-    if (bidMethod === 'stepPrice') {
-      const expectedAmount = currentPriceValue + (bidIncrementValue * steps);
-      if (numericAmount !== expectedAmount) {
-        setValidationError('Giá trả phải đúng với số bước giá đã chọn');
+      // Check if the bid meets the minimum increment requirement
+      if (numericAmount < currentPriceValue + bidIncrementValue) {
+        setValidationError(`Giá trả phải cao hơn giá hiện tại ít nhất ${bidIncrement}`);
         return false;
       }
     }
@@ -115,7 +112,29 @@ const BidControls: React.FC<BidControlsProps> = ({
     // Calculate the bid amount based on the selected method
     const calculatedAmount = calculateBidAmount();
 
-    // Validate the bid
+    // For step price method, we don't need additional validation as the amount is calculated correctly
+    if (bidMethod === 'stepPrice') {
+      // Format the amount properly
+      let formattedAmount = calculatedAmount;
+      if (!formattedAmount.includes('VND')) {
+        formattedAmount = `${formattedAmount} VND`;
+      }
+
+      // Update the bid amount in the parent component
+      onBidAmountChange(formattedAmount.replace(' VND', ''));
+
+      // Call the parent's onPlaceBid function
+      onPlaceBid();
+
+      // Reset steps
+      setSteps(1);
+
+      // Reset validation error
+      setValidationError(null);
+      return;
+    }
+
+    // For other methods, validate the bid
     if (!validateBid(calculatedAmount)) {
       return;
     }
@@ -145,9 +164,7 @@ const BidControls: React.FC<BidControlsProps> = ({
     onPlaceBid();
 
     // Reset the form after successful submission
-    if (bidMethod === 'stepPrice') {
-      setSteps(1);
-    } else if (bidMethod === 'customPrice') {
+    if (bidMethod === 'customPrice') {
       setCustomBidAmount('');
     }
 
@@ -326,7 +343,7 @@ const BidControls: React.FC<BidControlsProps> = ({
                       type="button"
                       onClick={handleStepDecrement}
                     >
-                      <i className="bi bi-triangle-fill" style={{ transform: 'rotate(180deg)' }}></i>
+                      <i className="bi bi-caret-down-fill"></i>
                     </button>
                     <input
                       type="text"
@@ -340,7 +357,7 @@ const BidControls: React.FC<BidControlsProps> = ({
                       type="button"
                       onClick={handleStepIncrement}
                     >
-                      <i className="bi bi-triangle-fill"></i>
+                      <i className="bi bi-caret-up-fill"></i>
                     </button>
                   </div>
                 </div>

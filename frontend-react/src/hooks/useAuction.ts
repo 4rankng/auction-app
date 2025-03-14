@@ -44,11 +44,18 @@ export function useAuction() {
         setBids(Object.values(db.bids).filter(bid => bid.auctionId === auctionId));
         setSettings(db.settings);
         setError(null);
+        // Reduce logging to prevent console spam
+        console.log(`Loaded auction: ${foundAuction.title} (ID: ${auctionId})`);
       } else {
-        setError(`Auction with ID ${auctionId} not found`);
+        console.error(`Auction with ID ${auctionId} not found`);
+        // Don't try to find any auction in progress as a fallback
+        // Just set the error message
+        setAuction(null);
+        setError(`Không tìm thấy phiên đấu giá với ID ${auctionId}`);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to get auction');
+      console.error('Error in getAuctionById:', err);
+      setError(err instanceof Error ? err.message : 'Không thể tải phiên đấu giá');
     } finally {
       setLoading(false);
     }
@@ -103,11 +110,47 @@ export function useAuction() {
 
   const placeBid = async (bidderId: string, amount: number) => {
     try {
-      if (!auction) throw new Error('No active auction');
-      const newBid = await createBid(auction.id, bidderId, amount);
+      if (!auction) throw new Error('Không có phiên đấu giá đang diễn ra');
+
+      console.log(`Starting placeBid process for auction ${auction.id}, bidder ${bidderId}, amount ${amount}`);
+
+      // Validate the bid amount
+      if (amount <= auction.currentPrice) {
+        throw new Error(`Giá trả phải lớn hơn giá hiện tại (${auction.currentPrice.toLocaleString('vi-VN')} VND)`);
+      }
+
+      if (amount < auction.currentPrice + auction.bidStep) {
+        throw new Error(`Giá trả phải cao hơn giá hiện tại ít nhất ${auction.bidStep.toLocaleString('vi-VN')} VND`);
+      }
+
+      // Get the current round from the auction object or default to 1
+      const currentRound = auction.currentRound || 1;
+      console.log(`Current round for this bid: ${currentRound}`);
+
+      // Create the new bid directly with databaseService to avoid race conditions
+      const newBid = await databaseService.createBid(auction.id, bidderId, amount);
+      console.log('Bid created successfully:', newBid);
+
+      // Get the latest auction data to ensure we have the most up-to-date state
+      const db = databaseService.getDatabase();
+      const updatedAuction = db.auctions[auction.id];
+
+      if (updatedAuction) {
+        // Update local state with the latest auction data
+        setAuction(updatedAuction);
+
+        // Get all bids for this auction and update the bids state
+        const auctionBids = Object.values(db.bids).filter(bid => bid.auctionId === auction.id);
+        setBids(auctionBids);
+
+        console.log('Updated auction data:', updatedAuction);
+        console.log('Updated bids data:', auctionBids);
+      }
+
       return newBid;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to place bid');
+      console.error('Error in placeBid:', err);
+      setError(err instanceof Error ? err.message : 'Không thể đấu giá');
       throw err;
     }
   };

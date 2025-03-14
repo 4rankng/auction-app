@@ -60,9 +60,6 @@ function App() {
           <Route path="/" element={<SetupPage />} />
           <Route path="/bid" element={<BidPage />} />
           <Route path="/result" element={<ResultPage />} />
-          {/* Commented out routes that were causing errors */}
-          {/* <Route path="/history" element={<AuctionHistory />} /> */}
-          {/* <Route path="/bid-card-demo" element={<BidCardDemo />} /> */}
         </Routes>
       </ErrorBoundary>
     </Router>
