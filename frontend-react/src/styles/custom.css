@@ -1,0 +1,56 @@
+/* Custom styles for form elements */
+
+/* Make radio buttons more visible with darker outline */
+.form-check-input[type="radio"] {
+  border: 2px solid #495057 !important; /* Darker border */
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2); /* Add shadow for better visibility */
+  width: 1.2em; /* Slightly larger */
+  height: 1.2em; /* Slightly larger */
+}
+
+/* Style for checked radio buttons */
+.form-check-input[type="radio"]:checked {
+  background-color: #0d6efd; /* Bootstrap primary color */
+  border-color: #0d6efd !important;
+  box-shadow: 0 0 0 1px rgba(13, 110, 253, 0.25); /* Add shadow for better visibility */
+}
+
+/* Hover effect for better UX */
+.form-check-input[type="radio"]:hover:not(:disabled) {
+  border-color: #0d6efd !important;
+  cursor: pointer;
+}
+
+/* Focus state for accessibility */
+.form-check-input[type="radio"]:focus {
+  border-color: #0d6efd !important;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Disabled state */
+.form-check-input[type="radio"]:disabled {
+  opacity: 0.6;
+  border-color: #6c757d !important;
+}
+
+/* Custom radio button container */
+.radio-custom {
+  padding: 0.5rem;
+  margin-right: 0.75rem;
+  border-radius: 0.25rem;
+  background-color: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Add a class that can be toggled with JavaScript for selected state */
+.radio-custom-selected {
+  background-color: rgba(13, 110, 253, 0.1);
+  border-color: rgba(13, 110, 253, 0.3);
+}
+
+/* Improve spacing between radio button and label */
+.form-check-label {
+  padding-left: 0.25rem;
+  font-weight: 500;
+}

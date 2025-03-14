@@ -24,9 +24,9 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
   const nextRound = currentRound + 1;
 
   return (
-    <div className="card-header d-flex justify-content-between align-items-center py-2">
+    <div className="card-header d-flex justify-content-between align-items-center py-3">
       <div className="d-flex align-items-center">
-        <h5 className="mb-0 me-2">{title}</h5>
+        <h3 className="mb-0 me-2 fw-bold" style={{ fontSize: '1.75rem' }}>{title}</h3>
       </div>
       <div className="d-flex align-items-center">
         <div className="text-center me-3">

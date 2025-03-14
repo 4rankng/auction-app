@@ -61,9 +61,12 @@ export const useAuctionTimer = ({
           // Use setTimeout to break synchronous update chain
           setTimeout(() => {
             if (currentRound >= 6) {
+              // For the final round, just call the callback to show a notification
+              // but don't trigger any automatic actions
+              console.log('Final round ended. Waiting for user to manually end the auction.');
               onFinalRoundEndRef.current();
             } else {
-              console.log(`Round ${currentRound} ended. Waiting next round`);
+              console.log(`Round ${currentRound} ended. Waiting for next round`);
               onTimerEndRef.current();
             }
           }, 0);

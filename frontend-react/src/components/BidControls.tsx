@@ -276,52 +276,49 @@ const BidControls: React.FC<BidControlsProps> = ({
           <div className="col-md-9">
             <label className="form-label mb-1">Phương Thức Trả Giá</label>
             <div className="d-flex">
-              {/* Only show base price option if bid history is empty */}
+              {/* Replace radio buttons with styled buttons */}
               {bidHistoryEmpty && (
-                <div className="form-check form-check-inline">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="bidMethod"
-                    id="basePrice"
-                    value="basePrice"
-                    checked={bidMethod === 'basePrice'}
-                    onChange={() => setBidMethod('basePrice')}
-                    disabled={!bidHistoryEmpty} // Disable if bid history is not empty
-                  />
-                  <label className="form-check-label" htmlFor="basePrice">
-                    Trả Bằng Giá Ban Đầu
-                  </label>
-                </div>
+                <button
+                  type="button"
+                  className={`btn me-2 ${bidMethod === 'basePrice' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                  onClick={() => setBidMethod('basePrice')}
+                  disabled={!bidHistoryEmpty}
+                  style={{
+                    minWidth: '140px',
+                    fontWeight: bidMethod === 'basePrice' ? 'bold' : 'normal',
+                    boxShadow: bidMethod === 'basePrice' ? '0 0 0 0.2rem rgba(0,123,255,.25)' : 'none'
+                  }}
+                >
+                  <i className={`bi ${bidMethod === 'basePrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
+                  Trả Bằng Giá Ban Đầu
+                </button>
               )}
-              <div className="form-check form-check-inline">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="bidMethod"
-                  id="stepPrice"
-                  value="stepPrice"
-                  checked={bidMethod === 'stepPrice'}
-                  onChange={() => setBidMethod('stepPrice')}
-                />
-                <label className="form-check-label" htmlFor="stepPrice">
-                  Trả Theo Bước Giá
-                </label>
-              </div>
-              <div className="form-check form-check-inline">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="bidMethod"
-                  id="customPrice"
-                  value="customPrice"
-                  checked={bidMethod === 'customPrice'}
-                  onChange={() => setBidMethod('customPrice')}
-                />
-                <label className="form-check-label" htmlFor="customPrice">
-                  Nhập Giá Trả
-                </label>
-              </div>
+              <button
+                type="button"
+                className={`btn me-2 ${bidMethod === 'stepPrice' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                onClick={() => setBidMethod('stepPrice')}
+                style={{
+                  minWidth: '140px',
+                  fontWeight: bidMethod === 'stepPrice' ? 'bold' : 'normal',
+                  boxShadow: bidMethod === 'stepPrice' ? '0 0 0 0.2rem rgba(0,123,255,.25)' : 'none'
+                }}
+              >
+                <i className={`bi ${bidMethod === 'stepPrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
+                Trả Theo Bước Giá
+              </button>
+              <button
+                type="button"
+                className={`btn ${bidMethod === 'customPrice' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                onClick={() => setBidMethod('customPrice')}
+                style={{
+                  minWidth: '140px',
+                  fontWeight: bidMethod === 'customPrice' ? 'bold' : 'normal',
+                  boxShadow: bidMethod === 'customPrice' ? '0 0 0 0.2rem rgba(0,123,255,.25)' : 'none'
+                }}
+              >
+                <i className={`bi ${bidMethod === 'customPrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
+                Nhập Giá Trả
+              </button>
             </div>
           </div>
         </div>

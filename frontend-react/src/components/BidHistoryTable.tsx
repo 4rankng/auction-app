@@ -103,12 +103,13 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
     }
   }, [auctionId, sortBidHistory]);
 
-  // Fetch bid history when component mounts or auctionId changes
+  // Fetch bid history when component mounts, auctionId changes, or refreshTrigger changes
   useEffect(() => {
     if (auctionId) {
+      console.log(`Refreshing bid history due to trigger change: ${refreshTrigger}`);
       fetchBidHistory();
     }
-  }, [auctionId, fetchBidHistory, refreshTrigger]); // Add refreshTrigger to dependencies
+  }, [auctionId, fetchBidHistory, refreshTrigger]); // refreshTrigger in dependencies ensures refresh when it changes
 
   // Update bid history when initialData changes
   useEffect(() => {
