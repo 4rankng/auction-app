@@ -106,8 +106,12 @@ export const BidPage: React.FC = () => {
     if (!auction) return;
 
     try {
-      // Update auction status to ENDED
-      const updatedAuction = { ...auction, status: 'ENDED' as const };
+      // Update auction status to ENDED and set endTime to current time
+      const updatedAuction = {
+        ...auction,
+        status: 'ENDED' as const,
+        endTime: Date.now() // Set the end time to the current timestamp
+      };
 
       // Find the highest bid to set as the winner
       const highestBid = bids
@@ -791,6 +795,50 @@ export const BidPage: React.FC = () => {
     }
   }, [auction?.currentRound, currentRound]);
 
+  // Handle exporting auction data
+  const handleExportData = () => {
+    if (!auction) return;
+
+    // Create export data object
+    const exportData = {
+      auctionTitle: auctionTitle,
+      winner: lastBidderId ? bidders.find(b => b.id === lastBidderId)?.name || 'Không có người thắng' : 'Không có người thắng',
+      winningPrice: parseInt(currentPrice.replace(/[^\d]/g, '')),
+      startTime: formatTimestamp(auction.startTime),
+      endTime: formatTimestamp(auction.endTime || Date.now()),
+      totalRounds: 6,
+      totalBids: bidHistory.length,
+      bidHistory: bids
+        .filter(bid => bid.auctionId === auction.id)
+        .map(bid => ({
+          bidderName: bid.bidderName,
+          amount: bid.amount,
+          timestamp: formatTimestamp(bid.timestamp),
+          round: bid.round
+        }))
+    };
+
+    // Convert to JSON string with pretty formatting
+    const jsonString = JSON.stringify(exportData, null, 2);
+
+    // Create a blob and download link
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    // Create download link and trigger click
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `auction-data-${auction.id}.json`;
+    document.body.appendChild(a);
+    a.click();
+
+    // Clean up
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('Dữ liệu đấu giá đã được xuất thành công', 'success');
+  };
+
   if (loading) {
     return (
       <div className="container py-4 text-center">
@@ -853,10 +901,11 @@ export const BidPage: React.FC = () => {
               title={auctionTitle}
               winnerName={lastBidderId ? bidders.find(b => b.id === lastBidderId)?.name || '' : ''}
               winningPrice={parseInt(currentPrice.replace(/[^\d]/g, ''))}
-              startTime={auction.startTime ? new Date(auction.startTime).toLocaleString('vi-VN') : ''}
-              endTime={new Date().toLocaleString('vi-VN')}
+              startTime={auction.startTime || Date.now()}
+              endTime={auction.endTime || Date.now()}
               totalRounds={6}
               totalBids={bidHistory.length}
+              onExportData={handleExportData}
             />
           ) : (
             <>

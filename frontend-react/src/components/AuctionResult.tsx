@@ -5,10 +5,11 @@ interface AuctionResultProps {
   title: string;
   winnerName?: string;
   winningPrice?: number;
-  startTime: string;
-  endTime: string;
+  startTime: string | number | Date;
+  endTime: string | number | Date;
   totalRounds: number;
   totalBids: number;
+  onExportData?: () => void;
 }
 
 /**
@@ -39,6 +40,34 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
+  // Format date safely
+  const formatDate = (dateInput: string | number | Date) => {
+    if (!dateInput) return 'N/A';
+
+    try {
+      // If it's a timestamp (number)
+      if (typeof dateInput === 'number') {
+        return new Date(dateInput).toLocaleString('vi-VN');
+      }
+
+      // If it's already a Date object
+      if (dateInput instanceof Date) {
+        return dateInput.toLocaleString('vi-VN');
+      }
+
+      // If it's a string that's already formatted
+      if (typeof dateInput === 'string' && dateInput.includes('/')) {
+        return dateInput;
+      }
+
+      // Otherwise try to parse it as a date
+      return new Date(dateInput).toLocaleString('vi-VN');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'N/A';
+    }
+  };
+
   return (
     <div className={`auction-result-container ${isVisible ? 'visible' : ''}`}>
       <div className="auction-result-card">
@@ -46,9 +75,7 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
 
         {winnerName && winningPrice ? (
           <div className="winner-section">
-            <h3 className="section-title">
-              Người thắng cuộc
-            </h3>
+
             <div className="winner-card">
               <div className="winner-info">
                 <div className="trophy-container">
@@ -57,7 +84,11 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
                 <div className="winner-name">{winnerName}</div>
               </div>
               <div className="winning-price-container">
-                <div className="winning-price">{formatCurrency(winningPrice)}</div>
+
+                <div className="winning-price">
+
+                  <span>{formatCurrency(winningPrice)}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -78,8 +109,8 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
                 <i className="bi bi-calendar-date"></i>
               </div>
               <div className="detail-content">
-                <div className="detail-label">Thời gian bắt đầu</div>
-                <div className="detail-value">{new Date(startTime).toLocaleString('vi-VN')}</div>
+                <div className="detail-label">Bắt đầu lúc</div>
+                <div className="detail-value">{formatDate(startTime)}</div>
               </div>
             </div>
             <div className="detail-item">
@@ -87,8 +118,8 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
                 <i className="bi bi-clock"></i>
               </div>
               <div className="detail-content">
-                <div className="detail-label">Thời gian kết thúc</div>
-                <div className="detail-value">{new Date(endTime).toLocaleString('vi-VN')}</div>
+                <div className="detail-label">Kết thúc lúc</div>
+                <div className="detail-value">{formatDate(endTime)}</div>
               </div>
             </div>
             <div className="detail-item">

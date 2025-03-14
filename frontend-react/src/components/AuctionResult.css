@@ -33,13 +33,13 @@
   position: relative;
   border-radius: 8px;
   margin-bottom: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #2a56c7;
 }
 
 .trophy-icon {
   font-size: 2.5rem;
   color: #FFD700;
-  text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+  text-shadow: none;
   animation: float 3s ease-in-out infinite, shine 2s ease-in-out infinite alternate;
   transform-origin: center;
 }
@@ -62,6 +62,7 @@
   background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.5) 0%, rgba(255, 215, 0, 0) 70%);
   border-radius: 50%;
   animation: shadow-pulse 3s ease-in-out infinite;
+  display: none; /* Hide the shadow effect */
 }
 
 .result-title {
@@ -97,7 +98,7 @@
   text-align: center;
   border-radius: 8px;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #dee2e6;
 }
 
 .round-number {
@@ -122,13 +123,39 @@
   margin: 0.5rem 0 1.5rem;
 }
 
+/* Section Title Row */
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.section-title-row .section-title {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.section-title-row .section-title:first-child {
+  margin-left: 15%; /* Move "Người Thắng Cuộc" more to the right */
+}
+
+.section-title-row .winning-title {
+  color: #28a745;
+  margin-right: 15%; /* Move "Giá Thắng" more to the left */
+}
+
 /* Section Title Styling */
 .section-title {
   display: flex;
   align-items: center;
   margin-bottom: 1.25rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   font-size: 1.25rem;
   font-weight: 600;
   color: #333;
@@ -149,32 +176,33 @@
 
 /* Winner Section */
 .winner-section, .no-winner-section {
-  background-color: #fff;
+  background-color: transparent;
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
+  border: none;
 }
 
 .winner-card {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 10px;
+  background-color: white;
+  border: 1px solid #dee2e6;
 }
 
 .winner-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .winner-info {
   display: flex;
   align-items: center;
+  margin-left: 15%; /* Align with the title above */
 }
 
 .winner-avatar {
@@ -196,34 +224,64 @@
 
 .winner-name {
   font-family: 'Poppins', sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.6rem;
   font-weight: 600;
   color: #212529;
+  margin-left: 5px;
 }
 
 .winning-price-container {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  min-width: 40%;
+  margin-right: 15%; /* Align with the title above */
+}
+
+.winning-price-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .winning-price {
   font-weight: 700;
-  font-size: 1.5rem;
-  color: #28a745;
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  font-size: 2.2rem;
+  text-align: right;
+  position: relative;
+  color: transparent;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%, #28a745 200%);
+  background-size: 200% 200%;
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 1px rgba(40, 167, 69, 0.2);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  border: 2px solid rgba(40, 167, 69, 0.2);
-  animation: pulse 2s infinite;
+  animation: price-pulse 2s infinite, price-color 6s infinite alternate;
+  transition: all 0.3s ease;
+  transform-origin: center;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  text-shadow: 0 0 1px rgba(40, 167, 69, 0.1);
+}
+
+.winning-price::after {
+  display: none;
+}
+
+.winning-price i {
+  margin-right: 0.5rem;
+  color: #28a745;
+  -webkit-text-fill-color: #28a745;
+  animation: icon-pulse 2s infinite;
+  font-size: 1.8rem;
+  vertical-align: middle;
 }
 
 .no-winner-section .info-alert {
-  background-color: #f8f9fa;
+  background-color: rgba(0, 0, 0, 0.02);
   padding: 1.25rem;
   border-radius: 8px;
   color: #6c757d;
@@ -232,15 +290,17 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 /* Details Section */
 .details-section {
-  background-color: #fff;
+  background-color: transparent;
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
+  border: none;
 }
 
 .details-grid {
@@ -250,46 +310,66 @@
 }
 
 .detail-item {
+  background-color: white;
+  border-radius: 10px;
+  padding: 15px;
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  border-radius: 6px;
-  background-color: #f8f9fa;
-  transition: background-color 0.3s ease;
+  align-items: center;
+  border: 1px solid #dee2e6;
 }
 
 .detail-item:hover {
-  background-color: #e9ecef;
+  transform: translateY(-3px);
+  transition: transform 0.3s ease;
 }
 
 .detail-icon {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background-color: #4a86f7;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 1.1rem;
   flex-shrink: 0;
+  border: 1px solid #3a76e7;
 }
 
 .detail-content {
   flex-grow: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-left: 12px;
+  width: calc(100% - 52px);
 }
 
 .detail-label {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #6c757d;
-  margin-bottom: 0.25rem;
+  font-weight: 500;
 }
 
 .detail-value {
-  font-weight: 500;
+  font-weight: 600;
   color: #212529;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
+  text-align: right;
+  background-color: #f8f9fa;
+  padding: 5px 10px;
+  border-radius: 6px;
+  min-width: 120px;
+  display: inline-block;
+  border: 1px solid #dee2e6;
+  border-left: 3px solid #4a86f7;
+  transition: all 0.2s ease;
+}
+
+.detail-item:hover .detail-value {
+  background-color: #e9ecef;
+  transform: translateX(3px);
 }
 
 /* Footer Section */
@@ -303,15 +383,54 @@
   align-items: center;
   gap: 0.75rem;
   color: #0c5460;
-  background-color: #d1ecf1;
+  background-color: rgba(209, 236, 241, 0.5);
   border-radius: 8px;
   padding: 0.75rem 1.25rem;
   font-size: 0.9rem;
+  border: 1px solid rgba(23, 162, 184, 0.1);
 }
 
 .info-alert i {
   font-size: 1.1rem;
   color: #17a2b8;
+}
+
+/* Export Data Button */
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.export-data-btn {
+  background-color: white;
+  color: #2a56c7;
+  border: 1px solid #2a56c7;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-data-btn:hover {
+  background-color: #f0f4ff;
+  transform: translateY(-2px);
+}
+
+.export-data-btn:active {
+  transform: translateY(0);
+  background-color: #e6ecff;
+}
+
+.export-data-btn i {
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
 }
 
 /* Animations */
@@ -345,7 +464,6 @@
 @keyframes shine {
   0% {
     opacity: 0.8;
-    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
     transform: scale(1);
   }
   50% {
@@ -353,7 +471,6 @@
   }
   100% {
     opacity: 1;
-    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 215, 0, 0.5);
     transform: scale(1.1) rotate(-5deg);
   }
 }
@@ -367,6 +484,79 @@
   }
   100% {
     box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+  }
+}
+
+@keyframes pulse-width {
+  0% {
+    width: 70%;
+    opacity: 0.6;
+  }
+  50% {
+    width: 100%;
+    opacity: 1;
+  }
+  100% {
+    width: 70%;
+    opacity: 0.6;
+  }
+}
+
+@keyframes price-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes price-color {
+  0% {
+    background-position: 0% 50%;
+    filter: brightness(1);
+  }
+  33% {
+    background-position: 50% 50%;
+    filter: brightness(1.2);
+  }
+  66% {
+    background-position: 100% 50%;
+    filter: brightness(1.1);
+  }
+  100% {
+    background-position: 0% 50%;
+    filter: brightness(1.3);
+  }
+}
+
+@keyframes line-move {
+  0% {
+    background-position: -100% 0;
+  }
+  50% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes icon-pulse {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2) rotate(5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.8;
   }
 }
 
@@ -392,15 +582,54 @@
 
   .winning-price-container {
     width: 100%;
-    justify-content: flex-start;
+    align-items: flex-start;
+    margin-top: 1rem;
+    margin-right: 0;
   }
 
   .winning-price {
-    font-size: 1.25rem;
+    font-size: 1.8rem;
+    text-align: left;
   }
 
   .details-grid {
     grid-template-columns: 1fr;
+  }
+
+  .winner-name {
+    font-size: 1.4rem;
+  }
+
+  .section-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .section-title-row .winning-title {
+    margin-top: 0;
+  }
+
+  .section-title-row .section-title:first-child,
+  .section-title-row .winning-title {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .winner-info,
+  .winning-price-container {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .detail-content {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .detail-value {
+    font-size: 1rem;
+    min-width: 100px;
   }
 }
 
@@ -418,13 +647,23 @@
   }
 
   .detail-item {
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    text-align: center;
+    text-align: left;
   }
 
   .detail-icon {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .detail-content {
+    margin-left: 10px;
+  }
+
+  .detail-value {
+    font-size: 0.95rem;
+    min-width: 90px;
+    padding: 4px 8px;
   }
 
   .trophy-icon {
@@ -432,12 +671,22 @@
   }
 
   .winner-name {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
   }
 
   .winning-price {
-    font-size: 1.1rem;
-    padding: 0.3rem 0.7rem;
+    font-size: 1.5rem;
+    text-align: left;
+  }
+
+  .section-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .section-title-row .winning-title {
+    margin-top: 0;
   }
 }
 
@@ -461,17 +710,20 @@
 .card-body .winner-section,
 .card-body .no-winner-section,
 .card-body .details-section {
-  background-color: #f8f9fa;
+  background-color: transparent;
   box-shadow: none;
-  border: 1px solid #e9ecef;
+  border: none;
 }
 
 .card-body .winner-card {
-  background-color: white;
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
 }
 
 .card-body .detail-item {
-  background-color: white;
+  background-color: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 /* Match Bootstrap Card Styling */
