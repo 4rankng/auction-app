@@ -67,6 +67,17 @@ This page is responsible for auction configuration and bidder management. All sp
     - **Issuing Authority**
     - **Address**
 
+Auction Details on the left side of the page
+Pricing and Duration on the right side of the page
+Both of them occupy the full width of the page
+
+Bidder Management is on the bottom of the page and take 100% width of the page
+
+Start Auction button always at the bottom of the page, always visible even if we scroll, button take 100% width of the page
+
+
+
+
 ### Import Bidders From Excel File
 
 #### Requirements

@@ -1,3 +1,28 @@
+.setup-page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: 80px; /* Space for the fixed button */
+  position: relative;
+}
+
+.start-auction-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(5px);
+  padding: 15px 0;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+}
+
+.start-auction-container:hover {
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
 .excel-import-btn:hover:not(:disabled) {
   background-color: #217346 !important;
   color: white !important;
@@ -8,4 +33,177 @@
 .excel-import-btn:active:not(:disabled) {
   transform: translateY(0);
   box-shadow: none;
+}
+
+.card {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.card-header {
+  background: linear-gradient(to right, #f5f7fa, #e4e8f0);
+  border-bottom: 1px solid #e0e4e9;
+  padding: 1.25rem 1.5rem;
+  position: relative;
+}
+
+.card-title {
+  color: #3a5175;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.5px;
+  font-size: 1.1rem;
+}
+
+.form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+  transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-success:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toast {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table th {
+  font-weight: 600;
+  background-color: #f8f9fa;
+}
+
+/* Add animation for the import button */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.excel-import-btn:hover {
+  animation: pulse 1.5s infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .setup-page-container {
+    padding-bottom: 100px;
+  }
+
+  .start-auction-container {
+    padding: 10px;
+  }
+}
+
+/* Ensure equal height for auction details and pricing cards */
+.setup-page-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.setup-page-row > div {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.setup-page-row .card {
+  flex-grow: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.setup-page-row .card-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modal styling */
+.modal.fade.show {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease;
+}
+
+.modal-header {
+  border-bottom: 1px solid #e0e4e9;
+  background: linear-gradient(to right, #f5f7fa, #e4e8f0);
+  border-radius: 10px 10px 0 0;
+  padding: 1rem 1.5rem;
+}
+
+.modal-title {
+  color: #3a5175;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  border-top: 1px solid #e0e4e9;
+  padding: 1rem 1.5rem;
+}
+
+.list-group-item {
+  border-color: #e0e4e9;
+  padding: 0.75rem 1.25rem;
+}
+
+.modal-backdrop.fade.show {
+  opacity: 0.5;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 0.5; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Spinner styling */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.2em;
 }

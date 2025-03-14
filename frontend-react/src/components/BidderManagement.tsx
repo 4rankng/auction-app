@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bidder } from '../types';
+import './BidderManagement.css';
 
 interface BidderManagementProps {
   bidders: Bidder[];
@@ -11,12 +12,13 @@ interface BidderManagementProps {
   onAddBidder: (e: React.FormEvent) => void;
   onImportClick: () => void;
   fileInputRef: React.RefObject<HTMLInputElement>;
+  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const BidderManagement: React.FC<BidderManagementProps> = React.memo(({ bidders, newBidder, bidderId, importing, onIdChange, onNewBidderChange, onAddBidder, onImportClick, fileInputRef }) => {
+const BidderManagement: React.FC<BidderManagementProps> = React.memo(({ bidders, newBidder, bidderId, importing, onIdChange, onNewBidderChange, onAddBidder, onImportClick, fileInputRef, onFileChange }) => {
   return (
-    <div className="card mb-4">
-      <div className="card-header">
+    <div className="card mb-4 bidder-management-card">
+      <div className="card-header d-flex justify-content-between align-items-center">
         <h5 className="card-title mb-0">Bidder Management</h5>
       </div>
       <div className="card-body">
@@ -82,19 +84,13 @@ const BidderManagement: React.FC<BidderManagementProps> = React.memo(({ bidders,
                   type="file"
                   className="d-none"
                   accept=".xlsx,.xls"
-                  onChange={onImportClick}
+                  onChange={onFileChange}
                 />
                 <button
                   type="button"
-                  className="btn flex-grow-1 excel-import-btn"
+                  className="btn excel-import-btn flex-grow-1"
                   onClick={onImportClick}
                   disabled={importing}
-                  style={{
-                    backgroundColor: 'white',
-                    border: '1px solid #217346',
-                    color: '#217346',
-                    transition: 'all 0.3s ease'
-                  }}
                 >
                   {importing ? (
                     <>
@@ -125,15 +121,23 @@ const BidderManagement: React.FC<BidderManagementProps> = React.memo(({ bidders,
               </tr>
             </thead>
             <tbody>
-              {bidders.map((bidder) => (
-                <tr key={bidder.id}>
-                  <td>{bidder.id}</td>
-                  <td>{bidder.name}</td>
-                  <td>{bidder.nric}</td>
-                  <td>{bidder.issuingAuthority}</td>
-                  <td>{bidder.address}</td>
+              {bidders.length > 0 ? (
+                bidders.map((bidder) => (
+                  <tr key={bidder.id}>
+                    <td>{bidder.id}</td>
+                    <td>{bidder.name}</td>
+                    <td>{bidder.nric}</td>
+                    <td>{bidder.issuingAuthority}</td>
+                    <td>{bidder.address}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center py-3">
+                    No bidders added yet. Add bidders using the form above or import from Excel.
+                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

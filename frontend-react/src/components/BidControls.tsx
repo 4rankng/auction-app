@@ -37,6 +37,9 @@ const BidControls: React.FC<BidControlsProps> = ({
   // State for time left (in seconds)
   const [timeLeft, setTimeLeft] = useState<number>(60);
 
+  // State for validation errors
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   // Parse current price and bid increment to numbers for calculations
   const currentPriceValue = parseInt(currentPrice.replace(/\D/g, '')) || 0;
   const bidIncrementValue = parseInt(bidIncrement.replace(/\D/g, '')) || 0;
@@ -55,11 +58,85 @@ const BidControls: React.FC<BidControlsProps> = ({
     }
   };
 
+  // Validate bid amount
+  const validateBid = (amount: string): boolean => {
+    setValidationError(null);
+
+    if (!amount) {
+      setValidationError('Vui lòng nhập số tiền');
+      return false;
+    }
+
+    // Parse the amount (remove non-numeric characters)
+    const numericAmount = parseInt(amount.replace(/\D/g, '')) || 0;
+
+    // Check if the amount is greater than the current price
+    if (numericAmount <= currentPriceValue) {
+      setValidationError('Giá trả phải cao hơn giá hiện tại');
+      return false;
+    }
+
+    // Check if the amount is a multiple of the bid increment when using step price
+    if (bidMethod === 'stepPrice') {
+      const expectedAmount = currentPriceValue + (bidIncrementValue * steps);
+      if (numericAmount !== expectedAmount) {
+        setValidationError('Giá trả phải đúng với số bước giá đã chọn');
+        return false;
+      }
+    }
+
+    // For custom price, check if it's at least one increment higher than current price
+    if (bidMethod === 'customPrice' && numericAmount < currentPriceValue + bidIncrementValue) {
+      setValidationError(`Giá trả phải cao hơn giá hiện tại ít nhất ${bidIncrement}`);
+      return false;
+    }
+
+    return true;
+  };
+
   // Handle bid submission
   const handleSubmit = () => {
+    // Calculate the bid amount based on the selected method
     const calculatedAmount = calculateBidAmount();
-    onBidAmountChange(calculatedAmount);
+
+    // Validate the bid
+    if (!validateBid(calculatedAmount)) {
+      return;
+    }
+
+    // If bidder name is empty, show error
+    if (!bidderName) {
+      setValidationError('Vui lòng chọn người đấu giá');
+      return;
+    }
+
+    // If time is up, show error
+    if (timeLeft <= 0) {
+      setValidationError('Thời gian đấu giá đã kết thúc');
+      return;
+    }
+
+    // Format the amount properly
+    let formattedAmount = calculatedAmount;
+    if (!formattedAmount.includes('VND')) {
+      formattedAmount = `${formattedAmount} VND`;
+    }
+
+    // Update the bid amount in the parent component
+    onBidAmountChange(formattedAmount.replace(' VND', ''));
+
+    // Call the parent's onPlaceBid function
     onPlaceBid();
+
+    // Reset the form after successful submission
+    if (bidMethod === 'stepPrice') {
+      setSteps(1);
+    } else if (bidMethod === 'customPrice') {
+      setCustomBidAmount('');
+    }
+
+    // Reset validation error
+    setValidationError(null);
   };
 
   // Handle step increment/decrement
@@ -70,6 +147,20 @@ const BidControls: React.FC<BidControlsProps> = ({
   const handleStepDecrement = () => {
     if (steps > 1) {
       setSteps(prev => prev - 1);
+    }
+  };
+
+  // Handle custom bid amount change with formatting
+  const handleCustomBidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Remove non-numeric characters
+    const numericValue = e.target.value.replace(/\D/g, '');
+
+    // Format with thousand separators
+    if (numericValue) {
+      const formattedValue = parseInt(numericValue).toLocaleString('vi-VN');
+      setCustomBidAmount(formattedValue);
+    } else {
+      setCustomBidAmount('');
     }
   };
 
@@ -93,6 +184,15 @@ const BidControls: React.FC<BidControlsProps> = ({
     if (timeLeft <= 10) return '#dc3545'; // red for last 10 seconds
     if (timeLeft <= 30) return '#ffc107'; // yellow for 30-10 seconds
     return '#28a745'; // green for > 30 seconds
+  };
+
+  // Check if the bid button should be disabled
+  const isBidButtonDisabled = () => {
+    if (isPlaceBidDisabled) return true;
+    if (!bidderName) return true;
+    if (timeLeft <= 0) return true;
+    if (bidMethod === 'customPrice' && !customBidAmount) return true;
+    return false;
   };
 
   return (
@@ -181,6 +281,14 @@ const BidControls: React.FC<BidControlsProps> = ({
           </div>
         </div>
 
+        {/* Validation error message */}
+        {validationError && (
+          <div className="alert alert-danger py-2 mb-3">
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            {validationError}
+          </div>
+        )}
+
         {/* Bid amount section - changes based on selected method */}
         <div className="row mb-3 align-items-end">
           {bidMethod === 'basePrice' && (
@@ -250,7 +358,7 @@ const BidControls: React.FC<BidControlsProps> = ({
                     type="text"
                     className="form-control"
                     value={customBidAmount}
-                    onChange={(e) => setCustomBidAmount(e.target.value)}
+                    onChange={handleCustomBidChange}
                     placeholder="Nhập số tiền"
                   />
                   <span className="input-group-text">VND</span>
@@ -270,7 +378,7 @@ const BidControls: React.FC<BidControlsProps> = ({
                 padding: '8px 15px'
               }}
               onClick={handleSubmit}
-              disabled={isPlaceBidDisabled || (bidMethod === 'customPrice' && !customBidAmount)}
+              disabled={isBidButtonDisabled()}
             >
               <i className="bi bi-check-circle me-1"></i> Đấu Giá
             </button>

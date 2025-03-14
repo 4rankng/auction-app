@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import SetupPage from './pages/SetupPage';
 import { BidPage } from './pages/BidPage';
 import { ResultPage } from './pages/ResultPage';
-import AuctionHistory from './pages/AuctionHistory';
+
 import './App.css';
 
 const App: React.FC = () => {
@@ -14,7 +14,6 @@ const App: React.FC = () => {
           <Route path="/setup" element={<SetupPage />} />
           <Route path="/bid" element={<BidPage />} />
           <Route path="/result" element={<ResultPage />} />
-          <Route path="/history" element={<AuctionHistory />} />
           <Route path="/" element={<Navigate to="/setup" replace />} />
         </Routes>
       </div>

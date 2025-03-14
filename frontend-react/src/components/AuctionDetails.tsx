@@ -9,29 +9,33 @@ interface AuctionDetailsProps {
 
 const AuctionDetails: React.FC<AuctionDetailsProps> = React.memo(({ title, description, onTitleChange, onDescriptionChange }) => {
   return (
-    <div className="card">
+    <div className="card mb-4">
       <div className="card-header">
         <h5 className="card-title mb-0">Auction Details</h5>
       </div>
       <div className="card-body">
         <div className="mb-3">
-          <label className="form-label">Title</label>
+          <label className="form-label">Auction Title</label>
           <input
             type="text"
             className="form-control"
             value={title}
             onChange={onTitleChange}
+            placeholder="Enter auction title"
             required
           />
+
         </div>
         <div className="mb-3">
-          <label className="form-label">Description</label>
+          <label className="form-label">Auction Description</label>
           <textarea
             className="form-control"
             rows={3}
             value={description}
             onChange={onDescriptionChange}
+            placeholder="Enter auction description (optional)"
           ></textarea>
+
         </div>
       </div>
     </div>
