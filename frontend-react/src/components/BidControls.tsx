@@ -196,7 +196,13 @@ const BidControls: React.FC<BidControlsProps> = ({
   };
 
   return (
-    <div className="card p-3 my-3 position-relative">
+    <div className="position-relative border-0" style={{
+      padding: '1rem',
+      marginTop: '1rem',
+      marginBottom: '1rem',
+      backgroundColor: 'transparent',
+      borderTop: '1px solid rgba(0,0,0,0.125)'
+    }}>
       {/* Countdown Timer */}
       <div
         className="position-absolute"
@@ -217,7 +223,7 @@ const BidControls: React.FC<BidControlsProps> = ({
         <span className="countdown-timer">{timeLeft}s</span>
       </div>
 
-      <div className="card-body">
+      <div>
         {/* Top row with bidder name and bid method selection */}
         <div className="row mb-3 align-items-center">
           <div className="col-md-3">
