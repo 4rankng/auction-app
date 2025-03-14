@@ -15,6 +15,7 @@ interface BidderSelectionGridProps {
   disabledBidders?: string[];
   lastBidderId?: string | null;
   highestBidderId?: string | null;
+  isTimerEnded?: boolean;
 }
 
 /**
@@ -26,16 +27,28 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
   onBidderSelect,
   disabledBidders = [],
   lastBidderId = null,
-  highestBidderId = null
+  highestBidderId = null,
+  isTimerEnded = false
 }) => {
   return (
     <div className="bidder-selection-container mb-3">
       <h5 className="mb-2">Chọn người tham gia</h5>
-      {bidders.length === 0 ? (
+
+      {isTimerEnded && (
+        <div className="alert alert-warning mb-3">
+          <i className="bi bi-exclamation-triangle-fill me-2"></i>
+          Vòng đấu giá đã kết thúc. Không thể chọn người tham gia cho đến khi vòng tiếp theo bắt đầu.
+        </div>
+      )}
+
+      {bidders.length === 0 && (
         <div className="alert alert-info">
           Không có người tham gia. Vui lòng thêm người tham gia trong trang thiết lập.
         </div>
-      ) : (
+      )}
+
+      {!isTimerEnded && bidders.length >= 0 &&
+       (
         <div className="d-flex flex-wrap justify-content-center">
           {bidders.map((bidder) => {
             const isDisabled = disabledBidders.includes(bidder.id);
@@ -44,7 +57,9 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
 
             let tooltipText = `${bidder.name}${bidder.nric ? ` - CMND/CCCD: ${bidder.nric}` : ''}`;
 
-            if (isLastBidder && isDisabled) {
+            if (isTimerEnded) {
+              tooltipText = 'Vòng đấu giá đã kết thúc. Không thể chọn người tham gia cho đến khi vòng tiếp theo bắt đầu.';
+            } else if (isLastBidder && isDisabled) {
               tooltipText = 'Người này vừa đấu giá, không thể đấu giá tiếp. Chọn để hủy đấu giá cuối cùng.';
             } else if (isLastBidder) {
               tooltipText = 'Người này vừa đấu giá. Chọn để hủy đấu giá cuối cùng.';
@@ -84,13 +99,14 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
                         : '1px solid #6c757d',
                     fontWeight: 'bold',
                     opacity: isDisabled ? 0.6 : 1,
-                    cursor: 'pointer',
+                    cursor: isDisabled ? 'not-allowed' : 'pointer',
                     position: 'relative'
                   }}
                   onClick={() => onBidderSelect(bidder.id)}
                   title={tooltipText}
                   data-bs-toggle="tooltip"
                   data-bs-placement="top"
+                  disabled={isTimerEnded || isDisabled}
                 >
                   {bidder.id}
                   {isHighestBidder && (
@@ -115,10 +131,7 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
           })}
         </div>
       )}
-      <div className="mt-2 text-muted small">
-        <i className="bi bi-info-circle me-1"></i>
-        Chọn một người tham gia để bắt đầu đấu giá. Mỗi người có 60 giây để đấu giá.
-      </div>
+
     </div>
   );
 };

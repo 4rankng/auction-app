@@ -45,7 +45,6 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
             </button>
           ) : (
             <div>
-              <div className="small text-muted mb-1">Thời gian còn lại</div>
               <h2 className={`mb-0 ${timeLeft === '00:00' ? 'text-danger' : 'text-success'}`}>{timeLeft}</h2>
             </div>
           )}

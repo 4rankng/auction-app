@@ -5,7 +5,6 @@ import BidderSelectionGrid from '../components/BidderSelectionGrid';
 import BidControls from '../components/BidControls';
 import AuctionSummary from '../components/AuctionSummary';
 import AuctionHeader from '../components/AuctionHeader';
-import RoundManager from '../components/RoundManager';
 import { useAuction } from '../hooks/useAuction';
 import { useAuctionTimer } from '../hooks/useAuctionTimer';
 import { useBidderTimer } from '../hooks/useBidderTimer';
@@ -319,6 +318,12 @@ export const BidPage: React.FC = () => {
 
   // Handle bidder selection and start 60-second timer
   const handleBidderSelect = (bidderId: string) => {
+    // Prevent selection if timer has ended
+    if (isTimerEnded) {
+      showToast('Không thể chọn người tham gia khi vòng đấu giá đã kết thúc', 'error');
+      return;
+    }
+
     // Toggle selection if clicking the same bidder
     if (bidderId === selectedBidder) {
       setSelectedBidder(null);
@@ -635,7 +640,12 @@ export const BidPage: React.FC = () => {
 
   // Get disabled bidders based on current action
   const getDisabledBidders = () => {
-    // We don't disable any bidders from being selected
+    // If the timer has ended, disable all bidders
+    if (isTimerEnded) {
+      return bidders.map(bidder => bidder.id);
+    }
+
+    // Otherwise, we don't disable any bidders from being selected
     // The bid button will be disabled based on canBidderPlaceBid
     return [];
   };
@@ -716,13 +726,6 @@ export const BidPage: React.FC = () => {
         />
 
         <div className="card-body py-2">
-          {/* Round Manager Component */}
-          <RoundManager
-            currentRound={currentRound}
-            isTimerEnded={isTimerEnded}
-            onNextRound={handleStartNextRound}
-          />
-
           {/* Auction Summary Component */}
           <AuctionSummary
             currentRound={currentRound}
@@ -733,31 +736,34 @@ export const BidPage: React.FC = () => {
 
           {/* Bidder Selection Grid Component */}
           <BidderSelectionGrid
-                bidders={bidders}
+            bidders={bidders}
             selectedBidder={selectedBidder}
             onBidderSelect={handleBidderSelect}
             disabledBidders={getDisabledBidders()}
             lastBidderId={lastBidderId}
             highestBidderId={highestBidderId}
+            isTimerEnded={isTimerEnded}
           />
 
-          {/* Bid Controls Component */}
-          <BidControls
-            bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
-            bidAmount={bidAmount}
-            currentPrice={currentPrice.replace(' VND', '')}
-            bidIncrement={bidIncrement.replace(' VND', '')}
-            onBidAmountChange={handleBidAmountChange}
-            onPlaceBid={handlePlaceBid}
-            onCancelBid={handleCancelBid}
-            isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
-            isCancelBidDisabled={isCancelBidDisabled()}
-            bidHistoryEmpty={bidHistory.length === 0}
-            bidderTimeLeft={bidderTimeLeft}
-            isLastBidder={selectedBidder === lastBidderId}
-                  />
-                </div>
-                  </div>
+          {/* Bid Controls Component - Only show when timer is not ended */}
+          {!isTimerEnded && (
+            <BidControls
+              bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
+              bidAmount={bidAmount}
+              currentPrice={currentPrice.replace(' VND', '')}
+              bidIncrement={bidIncrement.replace(' VND', '')}
+              onBidAmountChange={handleBidAmountChange}
+              onPlaceBid={handlePlaceBid}
+              onCancelBid={handleCancelBid}
+              isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
+              isCancelBidDisabled={isCancelBidDisabled()}
+              bidHistoryEmpty={bidHistory.length === 0}
+              bidderTimeLeft={bidderTimeLeft}
+              isLastBidder={selectedBidder === lastBidderId}
+            />
+          )}
+        </div>
+      </div>
 
       {/* Bid History Table Component */}
       {auctionId && <BidHistoryTable
@@ -770,7 +776,7 @@ export const BidPage: React.FC = () => {
         <button className="btn btn-secondary" onClick={handleGoBack}>
           <i className="bi bi-arrow-left me-1"></i> Quay Lại Thiết Lập
         </button>
-              </div>
-            </div>
+      </div>
+    </div>
   );
 };
