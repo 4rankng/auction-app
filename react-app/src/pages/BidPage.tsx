@@ -69,12 +69,18 @@ export const BidPage: React.FC = () => {
   }, []);
 
   // Format timestamp to readable date string
-  const formatTimestamp = useCallback((timestamp: number): string => {
+  const formatTimestamp = useCallback((timestamp: number | undefined): string => {
+    if (timestamp === undefined || timestamp === null) {
+      return new Date().toLocaleString('vi-VN');
+    }
     return new Date(timestamp).toLocaleString('vi-VN');
   }, []);
 
   // Format number to currency string
-  const formatCurrency = useCallback((amount: number): string => {
+  const formatCurrency = useCallback((amount: number | undefined): string => {
+    if (amount === undefined || amount === null) {
+      return "0 VND";
+    }
     return `${amount.toLocaleString('vi-VN')} VND`;
   }, []);
 
@@ -124,18 +130,24 @@ export const BidPage: React.FC = () => {
     const sortedBids = [...bids].sort((a, b) => b.timestamp - a.timestamp);
 
     // Then map bids to display format with sequential bidNumbers
-    const formattedBids = sortedBids.map((bid, index) => ({
-      id: index,
-      bidNumber: sortedBids.length - index, // Newest bid gets highest number
-      bidder: bid.bidderName,
-      amount: formatCurrency(bid.amount),
-      timestamp: formatTimestamp(bid.timestamp),
-      rawTimestamp: bid.timestamp,
-      rawAmount: bid.amount
-    }));
+    const formattedBids = sortedBids.map((bid, index) => {
+      // Get bidder name from bidders array
+      const bidder = bidders.find(b => b.id === bid.bidderId);
+      const bidderName = bidder ? `${bid.bidderId} - ${bidder.name}` : bid.bidderId;
+
+      return {
+        id: index,
+        bidNumber: sortedBids.length - index, // Newest bid gets highest number
+        bidder: bidderName,
+        amount: formatCurrency(bid.amount),
+        timestamp: formatTimestamp(bid.timestamp),
+        rawTimestamp: bid.timestamp,
+        rawAmount: bid.amount
+      };
+    });
 
     return formattedBids;
-  }, [formatCurrency, formatTimestamp]);
+  }, [formatCurrency, formatTimestamp, bidders]);
 
   // Define handleEndAuction function with useCallback
   const handleEndAuction = useCallback(async () => {
@@ -146,23 +158,29 @@ export const BidPage: React.FC = () => {
       const updatedAuction = {
         ...auction,
         status: 'ENDED' as const,
-        endTime: Date.now() // Set the end time to the current timestamp
+        endTime: Date.now(), // Set the end time to the current timestamp
+        result: {
+          ...auction.result,
+          endTime: Date.now(),
+          finalPrice: auction.currentPrice,
+          totalBids: bids.length
+        }
       };
 
       // Find the highest bid to set as the winner
       const highestBid = bids
-        .filter(bid => bid.auctionId === auction.id)
         .sort((a, b) => b.amount - a.amount)[0];
 
       if (highestBid) {
         const winningBidder = bidders.find(bidder => bidder.id === highestBid.bidderId);
         if (winningBidder) {
-          updatedAuction.winner = {
-            id: winningBidder.id,
-            name: winningBidder.name,
-            finalBid: highestBid.amount
+          // Update result with winner information
+          updatedAuction.result = {
+            ...updatedAuction.result,
+            winnerId: winningBidder.id,
+            winnerName: winningBidder.name,
+            finalPrice: highestBid.amount
           };
-          updatedAuction.finalPrice = highestBid.amount;
 
           console.log(`Auction ended. Winner: ${winningBidder.name} with final bid: ${highestBid.amount.toLocaleString('vi-VN')} VND`);
         }
@@ -193,7 +211,7 @@ export const BidPage: React.FC = () => {
     startTimer: startBidderTimer,
     stopTimer: stopBidderTimer,
     resetTimer: resetBidderTimer
-  } = useBidderTimer({ initialTime: auction?.timeLeft || 60 });
+  } = useBidderTimer({ initialTime: auction?.settings?.bidDuration || 60 });
 
   // Get auction ID from URL
   useEffect(() => {
@@ -248,43 +266,54 @@ export const BidPage: React.FC = () => {
       return;
     }
 
-    // Update auction details
-    setAuctionTitle(auction.title);
-    setCurrentPrice(formatCurrency(auction.currentPrice));
-    setBidIncrement(formatCurrency(auction.bidStep));
+    try {
+      // Update auction details with safe access to properties
+      setAuctionTitle(auction.title || 'Phiên Đấu Giá');
+      setCurrentPrice(formatCurrency(auction.currentPrice));
+      // Make sure settings exists before accessing bidStep
+      if (auction.settings && auction.settings.bidStep !== undefined) {
+        setBidIncrement(formatCurrency(auction.settings.bidStep));
+      } else {
+        setBidIncrement("0 VND");
+      }
 
-    // Log the bidders loaded from the database
-    console.log(`Loaded ${bidders.length} bidders from database:`, bidders);
-    setParticipantsCount(bidders.length);
+      // Log the bidders loaded from the database
+      console.log(`Loaded ${bidders.length} bidders from database:`, bidders);
+      setParticipantsCount(bidders.length);
 
-    // Filter bids for this auction and sort by timestamp (newest first)
-    const auctionBids = bids
-      .filter(bid => bid.auctionId === auction.id)
-      .sort((a, b) => b.timestamp - a.timestamp);
+      // Filter bids for this auction and sort by timestamp (newest first)
+      const auctionBids = bids.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-    // Check if auction is ended
-    setIsAuctionEnded(auction.status === 'ENDED');
+      // Check if auction is ended
+      setIsAuctionEnded(auction.status === 'ENDED');
 
-    // Set last bidder if there are bids
-    if (auctionBids.length > 0) {
-      setLastBidderId(auctionBids[0].bidderId);
+      // Set last bidder if there are bids
+      if (auctionBids.length > 0) {
+        setLastBidderId(auctionBids[0].bidderId);
+      }
+
+      // Find the highest bidder (by amount)
+      if (auctionBids.length > 0) {
+        const highestBid = [...auctionBids].sort((a, b) => (b.amount || 0) - (a.amount || 0))[0];
+        setHighestBidderId(highestBid.bidderId);
+        // Get bidder name from the bidders array
+        const bidderName = bidders.find(b => b.id === highestBid.bidderId)?.name || 'Unknown';
+        console.log(`Highest bidder is ${bidderName} (ID: ${highestBid.bidderId}) with amount ${highestBid.amount}`);
+      } else {
+        setHighestBidderId(null);
+      }
+
+      // Convert bids to display format and ensure they are sorted by timestamp (newest first)
+      const sortedBidHistory = convertBidsToDisplayFormat(auctionBids);
+      console.log('Sorted bid history on initial load:', sortedBidHistory);
+      setBidHistory(sortedBidHistory);
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error updating component state:", error);
+      showToast("Error loading auction data: " + (error instanceof Error ? error.message : "Unknown error"), 'error', 'top-center');
+      setLoading(false);
     }
-
-    // Find the highest bidder (by amount)
-    if (auctionBids.length > 0) {
-      const highestBid = [...auctionBids].sort((a, b) => b.amount - a.amount)[0];
-      setHighestBidderId(highestBid.bidderId);
-      console.log(`Highest bidder is ${highestBid.bidderName} (ID: ${highestBid.bidderId}) with amount ${highestBid.amount}`);
-    } else {
-      setHighestBidderId(null);
-    }
-
-    // Convert bids to display format and ensure they are sorted by timestamp (newest first)
-    const sortedBidHistory = convertBidsToDisplayFormat(auctionBids);
-    console.log('Sorted bid history on initial load:', sortedBidHistory);
-    setBidHistory(sortedBidHistory);
-
-    setLoading(false);
   }, [auction, bidders, bids, dataLoading, dataError, auctionId, navigate, convertBidsToDisplayFormat, formatCurrency, showToast]);
 
   // Handle bidder selection and start timer
@@ -310,8 +339,8 @@ export const BidPage: React.FC = () => {
       return;
     }
 
-    // Otherwise, reset timer to the auction's timeLeft value and start it
-    resetBidderTimer(auction?.timeLeft || 60);
+    // Otherwise, reset timer to the auction's bidDuration setting and start it
+    resetBidderTimer(auction?.settings?.bidDuration || 60);
     startBidderTimer();
   };
 
@@ -400,7 +429,6 @@ export const BidPage: React.FC = () => {
 
       // Update the highest bidder if this is the highest bid
       const currentHighestBid = bids
-        .filter(bid => bid.auctionId === auction.id)
         .sort((a, b) => b.amount - a.amount)[0];
 
       if (!currentHighestBid || numericAmount > currentHighestBid.amount) {
@@ -468,41 +496,54 @@ export const BidPage: React.FC = () => {
 
       const database = JSON.parse(storedDatabase);
 
-      // Get all bids for this auction
-      const allBids = Object.values(database.bids || {}).filter((bid: any) => bid.auctionId === auctionId);
+      // Check if the auction exists
+      if (!database.auctions || !database.auctions[auctionId]) {
+        console.log(`Auction with ID ${auctionId} not found in database`);
+        setBidHistory([]);
+        return;
+      }
+
+      const auctionFromDB = database.auctions[auctionId];
+
+      // Get all bids for this auction - safely access bids from auction object
+      const allBids = auctionFromDB.bids ? Object.values(auctionFromDB.bids) : [];
       console.log(`Found ${allBids.length} bids for auction ${auctionId}`);
 
-      // Sort all bids by timestamp (newest first)
-      const sortedAllBids = [...allBids].sort((a: any, b: any) => b.timestamp - a.timestamp);
+      // Sort all bids by timestamp (newest first) with null safety
+      const sortedAllBids = [...allBids].sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0));
 
       // Find the highest bidder (by amount)
       if (allBids.length > 0) {
-        const highestBid = [...allBids].sort((a: any, b: any) => b.amount - a.amount)[0] as {
+        const highestBid = [...allBids].sort((a: any, b: any) => (b.amount || 0) - (a.amount || 0))[0] as {
           bidderId: string;
-          bidderName: string;
           amount: number;
         };
-        setHighestBidderId(highestBid.bidderId);
-        console.log(`Highest bidder is ${highestBid.bidderName} (ID: ${highestBid.bidderId}) with amount ${highestBid.amount}`);
 
-        // Update the current price based on the highest bid
-        setCurrentPrice(formatCurrency(highestBid.amount));
+        if (highestBid?.bidderId) {
+          setHighestBidderId(highestBid.bidderId);
+          // Get bidder name from the bidders array
+          const bidderName = bidders.find(b => b.id === highestBid.bidderId)?.name || 'Unknown';
+          console.log(`Highest bidder is ${bidderName} (ID: ${highestBid.bidderId}) with amount ${highestBid.amount}`);
 
-        // Also update the auction's current price in the database if needed
-        if (auction && auction.currentPrice !== highestBid.amount) {
-          const updatedAuction = {
-            ...auction,
-            currentPrice: highestBid.amount
-          };
-          await updateAuction(updatedAuction);
-          console.log(`Updated auction current price to: ${highestBid.amount}`);
+          // Update the current price based on the highest bid
+          setCurrentPrice(formatCurrency(highestBid.amount));
+
+          // Also update the auction's current price in the database if needed
+          if (auction && auction.currentPrice !== highestBid.amount) {
+            const updatedAuction = {
+              ...auction,
+              currentPrice: highestBid.amount
+            };
+            await updateAuction(updatedAuction);
+            console.log(`Updated auction current price to: ${highestBid.amount}`);
+          }
         }
       } else {
         setHighestBidderId(null);
 
         // If no bids, reset to starting price
-        if (auction) {
-          const startingPrice = auction.startingPrice || 0;
+        if (auction && auction.settings) {
+          const startingPrice = auction.settings.startingPrice || 0;
           setCurrentPrice(formatCurrency(startingPrice));
 
           // Update the auction's current price in the database
@@ -518,35 +559,45 @@ export const BidPage: React.FC = () => {
       }
 
       // Find the last bidder (by timestamp)
-      if (allBids.length > 0) {
+      if (allBids.length > 0 && sortedAllBids.length > 0) {
         const lastBid = sortedAllBids[0] as {
           bidderId: string;
-          bidderName: string;
           timestamp: number;
         };
-        setLastBidderId(lastBid.bidderId);
-        console.log(`Last bidder is ${lastBid.bidderName} (ID: ${lastBid.bidderId})`);
+
+        if (lastBid?.bidderId) {
+          setLastBidderId(lastBid.bidderId);
+          // Get bidder name from the bidders array
+          const bidderName = bidders.find(b => b.id === lastBid.bidderId)?.name || 'Unknown';
+          console.log(`Last bidder is ${bidderName} (ID: ${lastBid.bidderId})`);
+        }
       } else {
         setLastBidderId(null);
       }
 
       // Format the bids for display with sequential bid numbers
-      const formattedBids = sortedAllBids.map((bid: any, index: number) => ({
-        id: bid.id || index,
-        bidNumber: sortedAllBids.length - index, // Newest bid gets highest number
-        bidder: bid.bidderName,
-        amount: formatCurrency(bid.amount),
-        timestamp: formatTimestamp(bid.timestamp),
-        rawTimestamp: bid.timestamp,
-        rawAmount: bid.amount
-      }));
+      const formattedBids = sortedAllBids.map((bid: any, index: number) => {
+        // Get bidder name from bidders array
+        const bidder = bidders.find(b => b.id === bid.bidderId);
+        const bidderName = bidder ? `${bidder.name}` : (bid.bidderId || 'Unknown');
+
+        return {
+          id: bid.id || index,
+          bidNumber: sortedAllBids.length - index, // Newest bid gets highest number
+          bidder: bidderName,
+          amount: formatCurrency(bid.amount || 0),
+          timestamp: formatTimestamp(bid.timestamp || Date.now()),
+          rawTimestamp: bid.timestamp || Date.now(),
+          rawAmount: bid.amount || 0
+        };
+      });
 
       console.log('Updated bid history from database:', formattedBids);
       setBidHistory(formattedBids);
     } catch (error) {
       console.error('Error fetching latest bid history:', error);
     }
-  }, [formatCurrency, formatTimestamp, auction, updateAuction]);
+  }, [formatCurrency, formatTimestamp, auction, updateAuction, bidders]);
 
   const handleCancelBid = async () => {
     console.log('handleCancelBid called');
@@ -575,7 +626,7 @@ export const BidPage: React.FC = () => {
     try {
       // Find the last bid from this bidder
       const bidderBids = bids
-        .filter(bid => bid.bidderId === bidderToCancel && bid.auctionId === auction.id)
+        .filter(bid => bid.bidderId === bidderToCancel)
         .sort((a, b) => b.timestamp - a.timestamp);
 
       console.log('Bidder bids found:', bidderBids.length);
@@ -595,14 +646,14 @@ export const BidPage: React.FC = () => {
 
       // Find all bids for this auction except the one we're canceling
       const otherBids = bids
-        .filter(bid => bid.id !== lastBid.id && bid.auctionId === auction.id)
+        .filter(bid => bid.id !== lastBid.id)
         .sort((a, b) => b.timestamp - a.timestamp);
 
       console.log('Other bids after cancellation:', otherBids.length);
 
       // Find the new highest bid
       const newHighestBid = bids
-        .filter(bid => bid.id !== lastBid.id && bid.auctionId === auction.id)
+        .filter(bid => bid.id !== lastBid.id)
         .sort((a, b) => b.amount - a.amount)[0];
 
       // If there are other bids, set the new last bidder and update the current price
@@ -634,7 +685,7 @@ export const BidPage: React.FC = () => {
         setHighestBidderId(null);
 
         // Reset the current price to the starting price
-        const startingPrice = auction.startingPrice || 0;
+        const startingPrice = auction.settings.startingPrice || 0;
         setCurrentPrice(formatCurrency(startingPrice));
 
         // Update the auction's current price in the database
@@ -650,7 +701,6 @@ export const BidPage: React.FC = () => {
       setBidHistory(prevHistory =>
         prevHistory.filter(bid =>
           !(bid.rawTimestamp === lastBid.timestamp &&
-            bid.bidder.includes(lastBid.bidderName) &&
             bid.rawAmount === lastBid.amount)
         )
       );
@@ -715,14 +765,6 @@ export const BidPage: React.FC = () => {
     return [];
   };
 
-  // Add a useEffect to refresh bid history when auction or bids change
-  useEffect(() => {
-    if (auctionId && auction) {
-      console.log('Auction or bids changed, refreshing bid history');
-      fetchLatestBidHistory(auctionId);
-    }
-  }, [auction, bids, auctionId, fetchLatestBidHistory]);
-
   // Create a wrapper for setBidAmount to add logging
   const handleBidAmountChange = (amount: string) => {
     console.log('Bid amount changed to:', amount);
@@ -741,10 +783,10 @@ export const BidPage: React.FC = () => {
       const auctionInfoData = [
         ['Thông tin đấu giá', 'Giá trị'],
         ['Tên phiên đấu giá', auctionTitle],
-        ['Người tổ chức', auction.auctioneer || 'Admin'],
+        ['Người tổ chức', auction.settings.auctioneer || 'Admin'],
         ['Người thắng cuộc', lastBidderId ? bidders.find(b => b.id === lastBidderId)?.name || 'Không có người thắng' : 'Không có người thắng'],
         ['Giá thắng cuộc', formatCurrency(parseInt(currentPrice.replace(/[^\d]/g, '')))],
-        ['Thời gian bắt đầu', formatTimestamp(auction.startTime)],
+        ['Thời gian bắt đầu', auction.startTime ? formatTimestamp(auction.startTime) : formatTimestamp(Date.now())],
         ['Thời gian kết thúc', formatTimestamp(auction.endTime || Date.now())],
         ['Thời gian diễn ra', elapsedTime],
         ['Tổng số lượt đặt giá', bidHistory.length]
@@ -766,13 +808,16 @@ export const BidPage: React.FC = () => {
       const bidHistoryHeaders = ['Người đặt giá', 'Số tiền', 'Thời gian'];
 
       const bidHistoryData = bids
-        .filter(bid => bid.auctionId === auction.id)
         .sort((a, b) => b.timestamp - a.timestamp) // Sort by timestamp (newest first)
-        .map(bid => [
-          bid.bidderName,
-          formatCurrency(bid.amount),
-          formatTimestamp(bid.timestamp)
-        ]);
+        .map(bid => {
+          // Get bidder name from bidders array
+          const bidder = bidders.find(b => b.id === bid.bidderId);
+          return [
+            bidder ? bidder.name : bid.bidderId,
+            formatCurrency(bid.amount),
+            formatTimestamp(bid.timestamp)
+          ];
+        });
 
       // Add headers to bid history data
       bidHistoryData.unshift(bidHistoryHeaders);
@@ -812,6 +857,14 @@ export const BidPage: React.FC = () => {
     } catch (error) {
       console.error('Error exporting data to Excel:', error);
       showToast('Không thể xuất dữ liệu Excel. Vui lòng thử lại.', 'error');
+    }
+  };
+
+  // Replace with a function to manually fetch bid history
+  const handleRefreshBidHistory = () => {
+    if (auctionId) {
+      console.log('Manually refreshing bid history');
+      fetchLatestBidHistory(auctionId);
     }
   };
 
@@ -930,6 +983,7 @@ export const BidPage: React.FC = () => {
         auctionId={auctionId}
         initialData={bidHistory}
         refreshTrigger={refreshTrigger}
+        onRefresh={handleRefreshBidHistory}
       />}
 
       {/* Floating Back Button - Always visible */}

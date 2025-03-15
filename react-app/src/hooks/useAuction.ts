@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { databaseService } from '../services/databaseService';
-import { Auction, Bidder, Bid, Settings } from '../types';
+import { Auction, Bidder, Bid, AuctionSettings } from '../types';
+import { DEFAULT_AUCTIONEER, DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE } from '../utils/constants';
 
 export function useAuction() {
   const [auction, setAuction] = useState<Auction | null>(null);
   const [bidders, setBidders] = useState<Bidder[]>([]);
   const [bids, setBids] = useState<Bid[]>([]);
-  const [settings, setSettings] = useState<Settings>({
-    initialPrice: 1000,
-    priceIncrement: 100,
-    auctionDuration: 300,
+  const [settings, setSettings] = useState<AuctionSettings>({
+    startingPrice: DEFAULT_STARTING_PRICE,
+    bidStep: DEFAULT_BID_STEP,
+    bidDuration: DEFAULT_BID_DURATION,
+    auctioneer: DEFAULT_AUCTIONEER
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,10 +21,26 @@ export function useAuction() {
       setLoading(true);
       const db = databaseService.getDatabase();
       const currentAuction = Object.values(db.auctions).find(a => a.status === 'IN_PROGRESS') || null;
+
       setAuction(currentAuction);
-      setBidders(Object.values(db.bidders));
-      setBids(Object.values(db.bids));
-      setSettings(db.settings);
+
+      // Get bidders from current auction if available
+      if (currentAuction) {
+        // Access bidders from the current auction
+        setBidders(Object.values(currentAuction.bidders || {}));
+
+        // Access bids from the current auction
+        setBids(Object.values(currentAuction.bids || {}));
+      } else {
+        setBidders([]);
+        setBids([]);
+      }
+
+      // Get auction settings if available, otherwise use default settings
+      if (currentAuction?.settings) {
+        setSettings(currentAuction.settings);
+      }
+
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to refresh data');
@@ -42,14 +60,18 @@ export function useAuction() {
 
       if (foundAuction) {
         setAuction(foundAuction);
-        setBidders(Object.values(db.bidders));
 
-        // Get all bids for this auction
-        const auctionBids = Object.values(db.bids || {}).filter(bid => bid.auctionId === auctionId);
-        console.log(`Found ${auctionBids.length} bids for auction ${auctionId} in getAuctionById`);
-        setBids(auctionBids);
+        // Get bidders directly from the auction object
+        setBidders(Object.values(foundAuction.bidders || {}));
 
-        setSettings(db.settings);
+        // Get bids directly from the auction object
+        setBids(Object.values(foundAuction.bids || {}));
+
+        // Set auction settings
+        if (foundAuction.settings) {
+          setSettings(foundAuction.settings);
+        }
+
         setError(null);
         // Reduce logging to prevent console spam
         console.log(`Loaded auction: ${foundAuction.title} (ID: ${auctionId})`);
@@ -72,7 +94,12 @@ export function useAuction() {
 
   const createAuction = async (auctionData: Omit<Auction, 'id'>) => {
     try {
-      const newAuction = await databaseService.createAuction(auctionData);
+      const { title, description, settings } = auctionData;
+      const newAuction = await databaseService.createAuction(
+        title,
+        description,
+        settings
+      );
       await refreshData();
       return newAuction;
     } catch (err) {
@@ -93,7 +120,10 @@ export function useAuction() {
 
   const createBidder = async (bidderData: Omit<Bidder, 'id'>) => {
     try {
-      const newBidder = await databaseService.createBidder(bidderData);
+      if (!auction?.id) {
+        throw new Error('No active auction found');
+      }
+      const newBidder = await databaseService.createBidder(auction.id, bidderData);
       await refreshData();
       return newBidder;
     } catch (err) {
@@ -119,18 +149,12 @@ export function useAuction() {
 
       console.log(`Starting placeBid process for auction ${auction.id}, bidder ${bidderId}, amount ${amount}`);
 
-      // Get the current bids for this auction
-      const db = databaseService.getDatabase();
-      const auctionBids = Object.values(db.bids || {})
-        .filter((bid: any) => bid.auctionId === auction.id);
-
-      const isFirstBid = auctionBids.length === 0;
-
       // Different validation for first bid vs. subsequent bids
-      if (isFirstBid) {
+      if (bids.length === 0) {
         // For the first bid, allow amount to be equal to or greater than the starting price
-        if (amount < auction.startingPrice) {
-          throw new Error(`Giá trả đầu tiên phải lớn hơn hoặc bằng giá khởi điểm (${auction.startingPrice.toLocaleString('vi-VN')} VND)`);
+        const startingPrice = auction.settings.startingPrice;
+        if (amount < startingPrice) {
+          throw new Error(`Giá trả đầu tiên phải lớn hơn hoặc bằng giá khởi điểm (${startingPrice.toLocaleString('vi-VN')} VND)`);
         }
       } else {
         // For subsequent bids, require amount to be greater than current price
@@ -139,26 +163,27 @@ export function useAuction() {
         }
 
         // Always check the minimum bid increment
-        if (amount < auction.currentPrice + auction.bidStep) {
-          throw new Error(`Giá trả phải cao hơn giá hiện tại ít nhất ${auction.bidStep.toLocaleString('vi-VN')} VND`);
+        const bidStep = auction.settings.bidStep;
+        if (amount < auction.currentPrice + bidStep) {
+          throw new Error(`Giá trả phải cao hơn giá hiện tại ít nhất ${bidStep.toLocaleString('vi-VN')} VND`);
         }
       }
 
-      // Create the new bid directly with databaseService to avoid race conditions
+      // Create the new bid directly with databaseService
       const newBid = await databaseService.createBid(auction.id, bidderId, amount);
       console.log('Bid created successfully:', newBid);
 
-      // Get the latest auction data to ensure we have the most up-to-date state
+      // Get the latest database to ensure we have the most up-to-date state
+      const db = databaseService.getDatabase();
       const updatedAuction = db.auctions[auction.id];
 
       if (updatedAuction) {
         // Update local state with the latest auction data
         setAuction(updatedAuction);
 
-        // Get all bids for this auction and update the bids state
-        const auctionBids = Object.values(db.bids || {}).filter(bid => bid.auctionId === auction.id);
-        console.log(`Found ${auctionBids.length} bids for auction ${auction.id} after placing bid`);
-        setBids(auctionBids);
+        // Get all bids for this auction from the updated auction
+        setBids(Object.values(updatedAuction.bids || {}));
+        console.log(`Found ${Object.values(updatedAuction.bids || {}).length} bids for auction ${auction.id} after placing bid`);
 
         // Update the auction with the new current price
         const updatedAuctionWithPrice = {
@@ -181,24 +206,24 @@ export function useAuction() {
 
   const removeBid = async (bidId: string) => {
     try {
-      console.log(`Removing bid ${bidId}`);
-      await databaseService.removeBid(bidId);
+      if (!auction?.id) {
+        throw new Error('No active auction found');
+      }
+
+      console.log(`Removing bid ${bidId} from auction ${auction.id}`);
+      await databaseService.removeBid(auction.id, bidId);
 
       // Refresh data to get the updated state
       const db = databaseService.getDatabase();
+      const updatedAuction = db.auctions[auction.id];
 
-      // Update auction state if we have a current auction
-      if (auction) {
-        const updatedAuction = db.auctions[auction.id];
-        if (updatedAuction) {
-          setAuction(updatedAuction);
-        }
+      // Update auction state if we have the updated auction
+      if (updatedAuction) {
+        setAuction(updatedAuction);
+        // Get bids directly from the updated auction
+        setBids(Object.values(updatedAuction.bids || {}));
+        console.log(`After removal, found ${Object.values(updatedAuction.bids || {}).length} bids for auction ${auction.id}`);
       }
-
-      // Update bids state
-      const updatedBids = Object.values(db.bids || {});
-      console.log(`After removal, found ${updatedBids.length} total bids`);
-      setBids(updatedBids);
 
       return true;
     } catch (err) {
@@ -210,10 +235,24 @@ export function useAuction() {
 
   const clearBidders = async () => {
     try {
-      await databaseService.clearBidders();
+      if (!auction?.id) {
+        throw new Error('No active auction found');
+      }
+
+      // Get all bidders from the current auction
+      const bidders = await databaseService.getBidders(auction.id);
+
+      // Delete each bidder individually
+      for (const bidder of bidders) {
+        await databaseService.deleteBidder(auction.id, bidder.id);
+      }
+
+      // Update local state
       setBidders([]);
+
     } catch (error) {
       console.error('Error clearing bidders:', error);
+      setError(error instanceof Error ? error.message : 'Failed to clear bidders');
       throw error;
     }
   };

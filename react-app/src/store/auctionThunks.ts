@@ -8,7 +8,9 @@ import {
   bidCancelled,
   auctionEnded
 } from './auctionSlice';
-import { Auction, Bid } from '../types';
+import { Auction, Bid, Bidder } from '../types';
+import { AUCTION_STATUS } from '../utils/constants';
+import { RootState } from './index';
 
 // Fetch auction data
 export const fetchAuctionData = createAsyncThunk(
@@ -17,21 +19,17 @@ export const fetchAuctionData = createAsyncThunk(
     try {
       dispatch(auctionLoading());
 
-      // Get database
-      const database = databaseService.getDatabase();
-
       // Get auction
-      const auction = database.auctions[auctionId];
+      const auction = await databaseService.getAuctionById(auctionId);
       if (!auction) {
         throw new Error('Auction not found');
       }
 
       // Get bidders
-      const bidders = Object.values(database.bidders);
+      const bidders = await databaseService.getBidders(auctionId);
 
       // Get bids for this auction
-      const bids = Object.values(database.bids)
-        .filter(bid => bid.auctionId === auctionId);
+      const bids = await databaseService.getBids(auctionId);
 
       // Dispatch action to update state
       dispatch(auctionLoaded({ auction, bidders, bids }));
@@ -68,10 +66,10 @@ export const placeBid = createAsyncThunk(
 // Cancel a bid
 export const cancelBid = createAsyncThunk(
   'auction/cancelBid',
-  async (bidId: string, { dispatch }) => {
+  async ({ auctionId, bidId }: { auctionId: string; bidId: string }, { dispatch }) => {
     try {
       // Remove bid from database
-      await databaseService.removeBid(bidId);
+      await databaseService.removeBid(auctionId, bidId);
 
       // Update Redux state
       dispatch(bidCancelled(bidId));
@@ -88,33 +86,41 @@ export const cancelBid = createAsyncThunk(
 // End auction
 export const endAuction = createAsyncThunk(
   'auction/endAuction',
-  async (auctionId: string, { dispatch }) => {
+  async (auctionId: string | undefined, { getState, dispatch }) => {
     try {
-      // Get database
-      const database = databaseService.getDatabase();
+      const state = getState() as RootState;
+      const auction = state.auction.auction;
 
-      // Get auction
-      const auction = database.auctions[auctionId];
-      if (!auction) {
+      // If auctionId is provided, use it; otherwise use the one from state
+      const targetAuctionId = auctionId || auction?.id;
+
+      if (!targetAuctionId) {
+        throw new Error('No auction ID provided and no active auction found in state');
+      }
+
+      // Get the auction from the database
+      const auctionToEnd = await databaseService.getAuctionById(targetAuctionId);
+
+      if (!auctionToEnd) {
         throw new Error('Auction not found');
       }
 
-      // Update auction status
+      // Update auction status to COMPLETED
       const updatedAuction: Auction = {
-        ...auction,
-        status: 'ENDED',
+        ...auctionToEnd,
+        status: AUCTION_STATUS.COMPLETED as any,
         endTime: Date.now()
       };
 
+      // Update the auction in the database
       await databaseService.updateAuction(updatedAuction);
 
-      // Dispatch action to update state
+      // Update the local state
       dispatch(auctionEnded());
 
       return updatedAuction;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to end auction';
-      dispatch(auctionError(errorMessage));
+      console.error('Failed to end auction:', error);
       throw error;
     }
   }

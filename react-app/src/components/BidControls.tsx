@@ -155,12 +155,26 @@ const BidControls: React.FC<BidControlsProps> = ({
 
   // Handle step increment/decrement
   const handleStepIncrement = () => {
-    setSteps(prev => prev + 1);
+    const newSteps = steps + 1;
+    setSteps(newSteps);
+
+    // Immediately update the bid amount if stepPrice method is selected
+    if (bidMethod === 'stepPrice') {
+      const stepPrice = (currentPriceValue + (bidIncrementValue * newSteps));
+      onBidAmountChange(stepPrice.toLocaleString('vi-VN'));
+    }
   };
 
   const handleStepDecrement = () => {
     if (steps > 1) {
-      setSteps(prev => prev - 1);
+      const newSteps = steps - 1;
+      setSteps(newSteps);
+
+      // Immediately update the bid amount if stepPrice method is selected
+      if (bidMethod === 'stepPrice') {
+        const stepPrice = (currentPriceValue + (bidIncrementValue * newSteps));
+        onBidAmountChange(stepPrice.toLocaleString('vi-VN'));
+      }
     }
   };
 
@@ -173,8 +187,18 @@ const BidControls: React.FC<BidControlsProps> = ({
     if (numericValue) {
       const formattedValue = parseInt(numericValue).toLocaleString('vi-VN');
       setCustomBidAmount(formattedValue);
+
+      // Update parent's bid amount if we're in custom price mode
+      if (bidMethod === 'customPrice') {
+        onBidAmountChange(formattedValue);
+      }
     } else {
       setCustomBidAmount('');
+
+      // Clear parent's bid amount if we're in custom price mode
+      if (bidMethod === 'customPrice') {
+        onBidAmountChange('');
+      }
     }
   };
 
@@ -247,7 +271,11 @@ const BidControls: React.FC<BidControlsProps> = ({
                 <button
                   type="button"
                   className={`btn me-2 ${bidMethod === 'basePrice' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                  onClick={() => setBidMethod('basePrice')}
+                  onClick={() => {
+                    setBidMethod('basePrice');
+                    // Update bid amount to current price
+                    onBidAmountChange(currentPrice);
+                  }}
                   disabled={!bidHistoryEmpty}
                   style={{
                     minWidth: '140px',
@@ -262,7 +290,12 @@ const BidControls: React.FC<BidControlsProps> = ({
               <button
                 type="button"
                 className={`btn me-2 ${bidMethod === 'stepPrice' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                onClick={() => setBidMethod('stepPrice')}
+                onClick={() => {
+                  setBidMethod('stepPrice');
+                  // Update bid amount based on steps
+                  const stepPrice = (currentPriceValue + (bidIncrementValue * steps));
+                  onBidAmountChange(stepPrice.toLocaleString('vi-VN'));
+                }}
                 style={{
                   minWidth: '140px',
                   fontWeight: bidMethod === 'stepPrice' ? 'bold' : 'normal',
@@ -275,7 +308,13 @@ const BidControls: React.FC<BidControlsProps> = ({
               <button
                 type="button"
                 className={`btn ${bidMethod === 'customPrice' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                onClick={() => setBidMethod('customPrice')}
+                onClick={() => {
+                  setBidMethod('customPrice');
+                  // Update bid amount only if customBidAmount has a value
+                  if (customBidAmount) {
+                    onBidAmountChange(customBidAmount);
+                  }
+                }}
                 style={{
                   minWidth: '140px',
                   fontWeight: bidMethod === 'customPrice' ? 'bold' : 'normal',
@@ -330,7 +369,16 @@ const BidControls: React.FC<BidControlsProps> = ({
                       type="text"
                       className="form-control text-center"
                       value={steps}
-                      onChange={(e) => setSteps(parseInt(e.target.value) || 1)}
+                      onChange={(e) => {
+                        const newSteps = parseInt(e.target.value) || 1;
+                        setSteps(newSteps);
+
+                        // Update bid amount if stepPrice method is selected
+                        if (bidMethod === 'stepPrice') {
+                          const stepPrice = (currentPriceValue + (bidIncrementValue * newSteps));
+                          onBidAmountChange(stepPrice.toLocaleString('vi-VN'));
+                        }
+                      }}
                       style={{ maxWidth: '60px' }}
                     />
                     <button

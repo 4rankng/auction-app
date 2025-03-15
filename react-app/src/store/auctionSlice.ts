@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Bid, Auction, Bidder } from '../types';
+import { AUCTION_STATUS } from '../utils/constants';
 
 interface AuctionState {
   auction: Auction | null;
@@ -44,8 +45,8 @@ const auctionSlice = createSlice({
       state.endTime = action.payload.auction.endTime || null;
       state.status = 'active';
 
-      // Set bidderTimeLeft from auction's timeLeft
-      state.bidderTimeLeft = action.payload.auction.timeLeft;
+      // Set bidderTimeLeft from auction's bidDuration setting
+      state.bidderTimeLeft = action.payload.auction.settings.bidDuration;
 
       // Set last bidder if there are bids
       if (action.payload.bids.length > 0) {
@@ -69,8 +70,8 @@ const auctionSlice = createSlice({
       const highestBid = [...state.bids].sort((a, b) => b.amount - a.amount)[0];
       state.highestBidderId = highestBid.bidderId;
 
-      // Reset bidder timer using the auction's timeLeft value
-      state.bidderTimeLeft = state.auction?.timeLeft || 60;
+      // Reset bidder timer using the auction's bidDuration setting
+      state.bidderTimeLeft = state.auction?.settings.bidDuration || 60;
     },
     bidCancelled: (state, action: PayloadAction<string>) => {
       // Remove the bid with the given ID
@@ -97,8 +98,8 @@ const auctionSlice = createSlice({
 
       // Reset bidder timer if a new bidder is selected
       if (action.payload && action.payload !== state.lastBidderId) {
-        // Use the auction's timeLeft value if available, otherwise fall back to 60 seconds
-        state.bidderTimeLeft = state.auction?.timeLeft || 60;
+        // Use the auction's bidDuration setting if available, otherwise fall back to 60 seconds
+        state.bidderTimeLeft = state.auction?.settings.bidDuration || 60;
       } else if (action.payload === state.lastBidderId) {
         state.bidderTimeLeft = 0;
       }
@@ -112,7 +113,9 @@ const auctionSlice = createSlice({
       state.bidderTimeLeft = action.payload;
     },
     auctionEnded: (state) => {
-      state.status = 'ended';
+      if (state.auction) {
+        (state.auction as any).status = AUCTION_STATUS.COMPLETED;
+      }
     }
   }
 });

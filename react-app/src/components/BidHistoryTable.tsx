@@ -14,12 +14,14 @@ interface BidHistoryTableProps {
   auctionId: string;
   initialData?: BidHistory[];
   refreshTrigger?: number; // Add refreshTrigger prop
+  onRefresh?: () => void; // Add onRefresh prop
 }
 
 const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
   auctionId,
   initialData = [],
-  refreshTrigger = 0 // Default to 0
+  refreshTrigger = 0, // Default to 0
+  onRefresh
 }) => {
   const [bidHistory, setBidHistory] = useState<BidHistory[]>(initialData);
   const [loading, setLoading] = useState<boolean>(initialData.length === 0);
@@ -69,31 +71,36 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
       if (!storedDatabase) {
         console.log('No database found in localStorage');
         setBidHistory([]);
+        setLoading(false);
         return;
       }
 
       const database = JSON.parse(storedDatabase);
-      const auction = database.auctions[auctionId];
 
-      if (!auction) {
+      // Check if database.auctions exists and has the specified auction
+      if (!database.auctions || !database.auctions[auctionId]) {
         console.log(`Auction with ID ${auctionId} not found in database`);
         setBidHistory([]);
+        setLoading(false);
         return;
       }
 
+      const auction = database.auctions[auctionId];
+
       // Get all bids for this auction
-      const allBids = Object.values(database.bids).filter((bid: any) => bid.auctionId === auctionId);
+      // Make sure auction.bids exists before calling Object.values
+      const allBids = auction.bids ? Object.values(auction.bids) : [];
       console.log(`Found ${allBids.length} bids for auction ${auctionId}`);
 
       // Format the bids for display
       const formattedBids = allBids.map((bid: any, index: number) => ({
         id: bid.id || index,
         bidNumber: bid.bidNumber,
-        bidder: bid.bidderName,
-        amount: `${parseInt(bid.amount).toLocaleString('vi-VN')} VND`,
-        timestamp: new Date(bid.timestamp).toLocaleString('vi-VN'),
-        rawTimestamp: bid.timestamp, // Store the raw timestamp for sorting
-        rawAmount: bid.amount // Store the raw amount for secondary sorting
+        bidder: bid.bidderId ? (auction.bidders && auction.bidders[bid.bidderId] ? auction.bidders[bid.bidderId].name : bid.bidderId) : 'Unknown',
+        amount: `${parseInt(bid.amount || 0).toLocaleString('vi-VN')} VND`,
+        timestamp: new Date(bid.timestamp || Date.now()).toLocaleString('vi-VN'),
+        rawTimestamp: bid.timestamp || Date.now(), // Store the raw timestamp for sorting
+        rawAmount: bid.amount || 0 // Store the raw amount for secondary sorting
       }));
 
       // Sort bids using the helper function
@@ -110,13 +117,14 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
     }
   }, [auctionId, sortBidHistory]);
 
-  // Fetch bid history when component mounts, auctionId changes, or refreshTrigger changes
+  // Only fetch bid history on initial load and when refreshTrigger changes
+  // This prevents infinite loops by not including fetchBidHistory in dependencies
   useEffect(() => {
     if (auctionId) {
       console.log(`Refreshing bid history due to trigger change: ${refreshTrigger}`);
       fetchBidHistory();
     }
-  }, [auctionId, fetchBidHistory, refreshTrigger]); // refreshTrigger in dependencies ensures refresh when it changes
+  }, [auctionId, refreshTrigger]); // Deliberately exclude fetchBidHistory to prevent loops
 
   // Update bid history when initialData changes
   useEffect(() => {
@@ -183,7 +191,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
           {(
             <button
               className="btn btn-sm btn-outline-secondary ms-2"
-              onClick={fetchBidHistory}
+              onClick={onRefresh || fetchBidHistory}
               title="Làm mới"
             >
               <i className="bi bi-arrow-clockwise"></i>

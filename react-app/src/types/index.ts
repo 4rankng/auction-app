@@ -1,7 +1,7 @@
 export interface Bidder {
   id: string;
   name: string;
-  nirc: string;
+  nric: string;
   issuingAuthority: string;
   address: string;
   phone?: string;

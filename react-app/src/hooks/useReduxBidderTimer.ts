@@ -26,8 +26,10 @@ export const useReduxBidderTimer = () => {
 
   // Reset the bidder timer
   const resetBidderTimer = useCallback((seconds?: number) => {
-    // Use provided seconds, or fall back to auction timeLeft, or default to 60
-    const timerValue = seconds !== undefined ? seconds : (auction?.timeLeft || 60);
+    // Use provided seconds, or fall back to auction bidDuration setting, or default to 60
+    const timerValue = seconds !== undefined
+      ? seconds
+      : (auction?.settings?.bidDuration || 60);
     dispatch(bidderTimerReset(timerValue));
   }, [dispatch, auction]);
 
