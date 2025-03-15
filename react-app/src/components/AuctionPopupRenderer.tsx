@@ -360,6 +360,9 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
   // Add a ref to track if we've already created a popup window
   const popupCreatedRef = useRef<boolean>(false);
 
+  // Track the previous auction end state to detect changes
+  const prevEndedStateRef = useRef<boolean>(isAuctionEnded);
+
   // Timer subscription
   useEffect(() => {
     // This effect should only run once when the component mounts
@@ -367,13 +370,6 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
     // Set a flag to track that we're rendering a popup to prevent duplicates
     popupCreatedRef.current = true;
-
-    // Set the window title
-    if (containerRef.current?.ownerDocument) {
-      containerRef.current.ownerDocument.title = isAuctionEnded
-        ? 'Kết Quả Đấu Giá'
-        : 'Thông Tin Đấu Giá';
-    }
 
     // Subscribe to timer updates
     const subscription = timerService.getTimerObservable().subscribe((timeLeft: number) => {
@@ -406,6 +402,45 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
       // Reset the flag
       popupCreatedRef.current = false;
     };
+  }, []);
+
+  // Update the window title when the auction status changes
+  useEffect(() => {
+    if (containerRef.current?.ownerDocument) {
+      // Set the window title based on auction state
+      const popupWindow = containerRef.current.ownerDocument.defaultView as Window;
+      popupWindow.document.title = isAuctionEnded
+        ? 'Kết Quả Đấu Giá'
+        : 'Thông Tin Đấu Giá';
+
+      // Check if the auction end state has changed
+      if (isAuctionEnded !== prevEndedStateRef.current) {
+        console.log("AuctionPopupRenderer: Auction end state changed to", isAuctionEnded);
+        prevEndedStateRef.current = isAuctionEnded;
+
+        // If the auction just ended, flash the title bar to get user attention
+        if (isAuctionEnded) {
+          const flashTitleBar = (window: Window) => {
+            const originalTitle = window.document.title;
+            let count = 0;
+            const interval = setInterval(() => {
+              if (count >= 10) {
+                clearInterval(interval);
+                window.document.title = originalTitle;
+                return;
+              }
+
+              window.document.title = count % 2 === 0
+                ? '🏆 ĐẤU GIÁ ĐÃ KẾT THÚC 🏆'
+                : 'Kết Quả Đấu Giá';
+              count++;
+            }, 500);
+          };
+
+          flashTitleBar(popupWindow);
+        }
+      }
+    }
   }, [isAuctionEnded]);
 
   // Format time for display

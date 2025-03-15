@@ -237,12 +237,24 @@ export const BidPage: React.FC = () => {
         console.log("BidPage: Setting shouldShowPopup to true");
         setShouldShowPopup(true);
       }
+
+      // Make sure to refresh the popup content when auction ends
+      if (isAuctionEnded && auction.result) {
+        console.log("BidPage: Auction ended, refreshing popup content");
+        setAuctionResults({
+          winnerName: auction.result.winnerName || '',
+          winnerId: auction.result.winnerId || highestBidderId || '',
+          finalPrice: formatCurrency(auction.result.finalPrice || 0),
+          totalBids: auction.result.totalBids || (bids ? bids.length : 0),
+          auctionDuration: elapsedTime
+        });
+      }
     } else if (shouldShowPopup) {
       console.log("BidPage: Setting shouldShowPopup to false");
       setShouldShowPopup(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, auction, isAuctionEnded]); // Added isAuctionEnded to dependencies
+  }, [isOpen, auction, isAuctionEnded]); // Dependencies include isAuctionEnded
 
   // Ensure proper cleanup on unmount
   useEffect(() => {
@@ -379,24 +391,15 @@ export const BidPage: React.FC = () => {
       console.log("✉️ Showing success toast");
       showToast('Phiên đấu giá đã kết thúc thành công!', 'success');
 
-      // Close any existing popups and reset state
-      console.log("🚪 Closing any existing popups");
-      closePopup();
-      popupService.closeAllPopups(true);
+      // Instead of closing and reopening the popup, just update the existing one
+      // by toggling the isAuctionEnded state which will cause the popup content to update
+      console.log("🔄 Updating existing popup with auction results");
 
-      // Reset popup flags to ensure we create a fresh popup
-      popupInitializedRef.current = false;
-      popupCreationInProgressRef.current = false;
-      setShouldShowPopup(false);
-
-      // Wait a moment before showing the popup with results
-      console.log("⏱️ Waiting before showing popup with results");
-      setTimeout(() => {
-        console.log("🪟 Creating new popup with auction results");
-        popupInitializedRef.current = true;
-        openPopup();
+      // If the popup is not currently visible, make it visible
+      if (!shouldShowPopup && popupInitializedRef.current) {
+        console.log("🪟 Making popup visible");
         setShouldShowPopup(true);
-      }, 500);
+      }
 
     } catch (error) {
       console.error('❌ Error ending auction:', error);
@@ -470,15 +473,15 @@ export const BidPage: React.FC = () => {
         setBidIncrement("0 VND");
       }
 
-      // Log the bidders loaded from the database
-      console.log(`Loaded ${bidders.length} bidders from database:`, bidders);
-      setParticipantsCount(bidders.length);
+    // Log the bidders loaded from the database
+    console.log(`Loaded ${bidders.length} bidders from database:`, bidders);
+    setParticipantsCount(bidders.length);
 
-      // Filter bids for this auction and sort by timestamp (newest first)
+    // Filter bids for this auction and sort by timestamp (newest first)
       const auctionBids = bids.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-      // Check if auction is ended
-      setIsAuctionEnded(auction.status === 'ENDED');
+    // Check if auction is ended
+    setIsAuctionEnded(auction.status === 'ENDED');
 
       // Initialize elapsed time immediately based on auction status
       if (auction.status === 'ENDED' && auction.result?.duration) {
@@ -499,28 +502,28 @@ export const BidPage: React.FC = () => {
         setElapsedTime(initialTime);
       }
 
-      // Set last bidder if there are bids
-      if (auctionBids.length > 0) {
-        setLastBidderId(auctionBids[0].bidderId);
-      }
+    // Set last bidder if there are bids
+    if (auctionBids.length > 0) {
+      setLastBidderId(auctionBids[0].bidderId);
+    }
 
-      // Find the highest bidder (by amount)
-      if (auctionBids.length > 0) {
+    // Find the highest bidder (by amount)
+    if (auctionBids.length > 0) {
         const highestBid = [...auctionBids].sort((a, b) => (b.amount || 0) - (a.amount || 0))[0];
-        setHighestBidderId(highestBid.bidderId);
+      setHighestBidderId(highestBid.bidderId);
         // Get bidder name from the bidders array
         const bidderName = bidders.find(b => b.id === highestBid.bidderId)?.name || 'Unknown';
         console.log(`Highest bidder is ${bidderName} (ID: ${highestBid.bidderId}) with amount ${highestBid.amount}`);
-      } else {
-        setHighestBidderId(null);
-      }
+    } else {
+      setHighestBidderId(null);
+    }
 
-      // Convert bids to display format and ensure they are sorted by timestamp (newest first)
-      const sortedBidHistory = convertBidsToDisplayFormat(auctionBids);
-      console.log('Sorted bid history on initial load:', sortedBidHistory);
-      setBidHistory(sortedBidHistory);
+    // Convert bids to display format and ensure they are sorted by timestamp (newest first)
+    const sortedBidHistory = convertBidsToDisplayFormat(auctionBids);
+    console.log('Sorted bid history on initial load:', sortedBidHistory);
+    setBidHistory(sortedBidHistory);
 
-      setLoading(false);
+    setLoading(false);
     } catch (error) {
       console.error("Error updating component state:", error);
       showToast("Error loading auction data: " + (error instanceof Error ? error.message : "Unknown error"), 'error', 'top-center');
@@ -727,7 +730,7 @@ export const BidPage: React.FC = () => {
     if (selectedBidder && selectedBidder !== lastBidderId) {
       // If a bidder is selected but they're not the last bidder, show an error
       showToast('Chỉ có thể hủy đấu giá cuối cùng', 'error', 'bottom-center');
-      return;
+        return;
     }
 
     try {
@@ -1010,10 +1013,10 @@ export const BidPage: React.FC = () => {
         <div className="card-body py-2">
           {isAuctionEnded ? (
             <>
-              <AuctionResult
+            <AuctionResult
                 result={auction.result}
-                totalBids={bidHistory.length}
-              />
+              totalBids={bidHistory.length}
+            />
             </>
           ) : (
             <>
@@ -1037,20 +1040,20 @@ export const BidPage: React.FC = () => {
               />
 
               {/* Bid Controls Component */}
-              <BidControls
-                bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
-                bidAmount={bidAmount}
-                currentPrice={currentPrice.replace(' VND', '')}
-                bidIncrement={bidIncrement.replace(' VND', '')}
-                onBidAmountChange={handleBidAmountChange}
-                onPlaceBid={handlePlaceBid}
-                onCancelBid={handleCancelBid}
-                isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
-                isCancelBidDisabled={isCancelBidDisabled()}
-                bidHistoryEmpty={bidHistory.length === 0}
-                bidderTimeLeft={bidderTimeLeft}
-                isLastBidder={selectedBidder === lastBidderId}
-              />
+                <BidControls
+                  bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
+                  bidAmount={bidAmount}
+                  currentPrice={currentPrice.replace(' VND', '')}
+                  bidIncrement={bidIncrement.replace(' VND', '')}
+                  onBidAmountChange={handleBidAmountChange}
+                  onPlaceBid={handlePlaceBid}
+                  onCancelBid={handleCancelBid}
+                  isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
+                  isCancelBidDisabled={isCancelBidDisabled()}
+                  bidHistoryEmpty={bidHistory.length === 0}
+                  bidderTimeLeft={bidderTimeLeft}
+                  isLastBidder={selectedBidder === lastBidderId}
+                />
             </>
           )}
         </div>
@@ -1095,11 +1098,11 @@ export const BidPage: React.FC = () => {
             console.log('Popup closed by user');
             closePopup();
           }}
-          // Pass auction result data if available
-          winnerId={auctionResults?.winnerId}
-          finalPrice={auctionResults?.finalPrice}
-          totalBids={auctionResults?.totalBids}
-          auctionDuration={auctionResults?.auctionDuration}
+          // Pass auction result data
+          winnerId={isAuctionEnded ? (auctionResults?.winnerId || highestBidderId || '') : undefined}
+          finalPrice={isAuctionEnded ? (auctionResults?.finalPrice || formatCurrency(bids && bids.length > 0 ? bids[0].amount : (auction.settings?.startingPrice || 0))) : undefined}
+          totalBids={isAuctionEnded ? (auctionResults?.totalBids || (bids ? bids.length : 0)) : undefined}
+          auctionDuration={isAuctionEnded ? (auctionResults?.auctionDuration || elapsedTime) : undefined}
         />
       )}
     </div>

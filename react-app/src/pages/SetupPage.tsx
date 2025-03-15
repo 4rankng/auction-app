@@ -45,6 +45,15 @@ export default function SetupPage() {
   const [setupAuctionId, setSetupAuctionId] = useState<string | null>(null);
   const [auctionDetails, setAuctionDetails] = useState(DEFAULT_AUCTION_DETAILS);
 
+  // Store default values in a ref to avoid dependency issues
+  const defaultSettingsRef = useRef({
+    startingPrice: DEFAULT_STARTING_PRICE,
+    bidStep: DEFAULT_BID_STEP,
+    bidDuration: DEFAULT_BID_DURATION,
+    auctioneer: "",
+    bidRound: "1"
+  });
+
   // Load bidders on component mount
   useEffect(() => {
     const loadBidders = async () => {
@@ -58,16 +67,30 @@ export default function SetupPage() {
           setSetupAuctionId(setupAuction.id);
           const auctionBidders = await databaseService.getBidders(setupAuction.id);
           setBidders(auctionBidders);
+
+          // Update auctionDetails with the existing settings
+          setAuctionDetails(prevDetails => ({
+            ...prevDetails,
+            title: setupAuction.title || DEFAULT_AUCTION_TITLE,
+            description: setupAuction.description || DEFAULT_AUCTION_DESCRIPTION,
+            startingPrice: setupAuction.settings.startingPrice || DEFAULT_STARTING_PRICE,
+            bidStep: setupAuction.settings.bidStep || DEFAULT_BID_STEP,
+            bidDuration: setupAuction.settings.bidDuration || DEFAULT_BID_DURATION,
+            auctioneer: setupAuction.settings.auctioneer || "",
+            bidRound: setupAuction.settings.bidRound || "1"
+          }));
         } else {
-          // Create a temporary auction for setup
+          // Create a temporary auction for setup using default values from ref
+          const defaults = defaultSettingsRef.current;
           const newAuction = await databaseService.createAuction(
-            'Temporary Setup',
-            'Temporary auction for setup phase',
+            DEFAULT_AUCTION_TITLE,
+            DEFAULT_AUCTION_DESCRIPTION,
             {
-              startingPrice: auctionDetails.startingPrice,
-              bidStep: auctionDetails.bidStep,
-              bidDuration: auctionDetails.bidDuration,
-              auctioneer: auctionDetails.auctioneer
+              startingPrice: defaults.startingPrice,
+              bidStep: defaults.bidStep,
+              bidDuration: defaults.bidDuration,
+              auctioneer: defaults.auctioneer,
+              bidRound: defaults.bidRound
             }
           );
           setSetupAuctionId(newAuction.id);
@@ -83,12 +106,7 @@ export default function SetupPage() {
     };
 
     loadBidders();
-  }, [
-    auctionDetails.startingPrice,
-    auctionDetails.bidStep,
-    auctionDetails.bidDuration,
-    auctionDetails.auctioneer
-  ]);
+  }, []);  // Empty dependency array is now valid as we use ref values
 
   const handleImportClick = () => {
     setImporting(true);
@@ -210,6 +228,11 @@ export default function SetupPage() {
     // Validate duration
     if (!auctionDetails.bidDuration || auctionDetails.bidDuration <= 0) {
       return { isValid: false, errorMessage: 'Thời gian đấu giá phải là số dương' };
+    }
+
+    // Validate auctioneer
+    if (!auctionDetails.auctioneer) {
+      return { isValid: false, errorMessage: 'Vui lòng chọn đấu giá viên' };
     }
 
     // Validate bidder list
@@ -422,7 +445,7 @@ export default function SetupPage() {
 
                 {/* Second row: Thời Gian and Vòng Đấu Giá */}
                 <div className="row mb-3">
-                  <div className="col-md-6">
+          <div className="col-md-6">
                     <label className="form-label">Thời Gian (giây)</label>
                     <input
                       type="number"
@@ -430,9 +453,9 @@ export default function SetupPage() {
                       value={auctionDetails.bidDuration}
                       onChange={handleDurationChange}
                       min="60"
-                    />
-                  </div>
-                  <div className="col-md-6">
+            />
+          </div>
+          <div className="col-md-6">
                     <label className="form-label">Vòng Đấu Giá</label>
                     <input
                       type="text"

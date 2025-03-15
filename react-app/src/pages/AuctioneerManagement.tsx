@@ -89,9 +89,9 @@ const AuctioneerManagement: React.FC = () => {
   // Render loading state
   if (loading && auctioneers.length === 0) {
     return (
-      <div className="container py-4">
-        <div className="d-flex justify-content-center">
-          <div className="spinner-border" role="status">
+      <div className="container py-5">
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '300px' }}>
+          <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Đang tải...</span>
           </div>
         </div>
@@ -101,19 +101,24 @@ const AuctioneerManagement: React.FC = () => {
 
   return (
     <div className="container py-4">
-      <div className="card">
+      <div className="card shadow">
         <div className="card-header d-flex justify-content-between align-items-center">
           <h4 className="mb-0">Quản lý Đấu Giá Viên</h4>
-          <div>
+          <div className="action-buttons">
             <button
-              className="btn btn-primary me-2"
+              className="btn btn-primary"
               onClick={handleAddClick}
               disabled={isAdding || isEditing}
             >
-              <i className="bi bi-plus-circle me-1"></i> Thêm Đấu Giá Viên
+              <i className="bi bi-plus-circle me-2"></i>
+              Thêm Đấu Giá Viên
             </button>
-            <button className="btn btn-secondary" onClick={handleBackClick}>
-              <i className="bi bi-arrow-left me-1"></i> Quay Lại
+            <button
+              className="btn btn-secondary"
+              onClick={handleBackClick}
+            >
+              <i className="bi bi-arrow-left me-2"></i>
+              Quay Lại
             </button>
           </div>
         </div>
@@ -121,49 +126,74 @@ const AuctioneerManagement: React.FC = () => {
         <div className="card-body">
           {error && (
             <div className="alert alert-danger" role="alert">
+              <i className="bi bi-exclamation-triangle-fill me-2"></i>
               {error}
             </div>
           )}
 
           {(isAdding || isEditing) && (
-            <div className="card mb-3">
-              <div className="card-header">
-                <h5 className="mb-0">{isAdding ? 'Thêm Đấu Giá Viên Mới' : 'Chỉnh Sửa Đấu Giá Viên'}</h5>
-              </div>
-              <div className="card-body">
-                <form onSubmit={handleSubmit}>
-                  {formError && (
-                    <div className="alert alert-danger" role="alert">
-                      {formError}
+            <div className="form-section mb-4">
+              <div className="card">
+                <div className="card-header">
+                  <h5 className="mb-0">
+                    {isAdding ? (
+                      <><i className="bi bi-plus-circle me-2"></i>Thêm Đấu Giá Viên Mới</>
+                    ) : (
+                      <><i className="bi bi-pencil me-2"></i>Chỉnh Sửa Đấu Giá Viên</>
+                    )}
+                  </h5>
+                </div>
+                <div className="card-body">
+                  <form onSubmit={handleSubmit}>
+                    {formError && (
+                      <div className="alert alert-danger" role="alert">
+                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                        {formError}
+                      </div>
+                    )}
+                    <div className="mb-3">
+                      <label htmlFor="auctioneerName" className="form-label">
+                        Tên Đấu Giá Viên
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="auctioneerName"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        placeholder="Nhập tên đấu giá viên"
+                        autoFocus
+                      />
                     </div>
-                  )}
-                  <div className="mb-3">
-                    <label htmlFor="auctioneerName" className="form-label">Tên Đấu Giá Viên</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="auctioneerName"
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      placeholder="Nhập tên đấu giá viên"
-                      autoFocus
-                    />
-                  </div>
-                  <div className="d-flex justify-content-end">
-                    <button type="button" className="btn btn-secondary me-2" onClick={handleCancel}>
-                      Hủy
-                    </button>
-                    <button type="submit" className="btn btn-primary">
-                      {isAdding ? 'Thêm' : 'Lưu Thay Đổi'}
-                    </button>
-                  </div>
-                </form>
+                    <div className="form-buttons">
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={handleCancel}
+                      >
+                        <i className="bi bi-x-circle me-2"></i>
+                        Hủy
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
+                      >
+                        {isAdding ? (
+                          <><i className="bi bi-plus-lg me-2"></i>Thêm</>
+                        ) : (
+                          <><i className="bi bi-check-lg me-2"></i>Lưu Thay Đổi</>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           )}
 
           {auctioneers.length === 0 ? (
             <div className="alert alert-info" role="alert">
+              <i className="bi bi-info-circle-fill me-2"></i>
               Chưa có đấu giá viên nào. Hãy thêm đấu giá viên mới.
             </div>
           ) : (
@@ -171,17 +201,17 @@ const AuctioneerManagement: React.FC = () => {
               <table className="table table-striped table-hover">
                 <thead>
                   <tr>
-                    <th>ID</th>
+                    <th style={{ width: '70px' }}>ID</th>
                     <th>Tên Đấu Giá Viên</th>
-                    <th>Ngày Tạo</th>
-                    <th className="text-center">Hành Động</th>
+                    <th style={{ width: '150px' }}>Ngày Tạo</th>
+                    <th style={{ width: '120px' }} className="text-center">Hành Động</th>
                   </tr>
                 </thead>
                 <tbody>
                   {auctioneers.map((auctioneer) => (
                     <tr key={auctioneer.id}>
                       <td>{auctioneer.id}</td>
-                      <td>{auctioneer.name}</td>
+                      <td className="fw-medium">{auctioneer.name}</td>
                       <td>
                         {auctioneer.createdAt
                           ? new Date(auctioneer.createdAt).toLocaleDateString('vi-VN')
@@ -192,6 +222,7 @@ const AuctioneerManagement: React.FC = () => {
                           className="btn btn-sm btn-outline-primary me-2"
                           onClick={() => handleEditClick(auctioneer)}
                           disabled={isAdding || isEditing}
+                          title="Chỉnh sửa"
                         >
                           <i className="bi bi-pencil"></i>
                         </button>
@@ -199,6 +230,7 @@ const AuctioneerManagement: React.FC = () => {
                           className="btn btn-sm btn-outline-danger"
                           onClick={() => handleDeleteClick(auctioneer.id)}
                           disabled={isAdding || isEditing}
+                          title="Xóa"
                         >
                           <i className="bi bi-trash"></i>
                         </button>

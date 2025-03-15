@@ -1,48 +1,247 @@
 /* AuctioneerManagement.css */
 
-.table-responsive {
-  overflow-x: auto;
+/* Main container styling */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.table th, .table td {
-  vertical-align: middle;
+/* Card styling */
+.card {
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.card.shadow {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .card-header {
   background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 16px 20px;
 }
 
-.btn-icon {
-  padding: 0.25rem 0.5rem;
+.card-header h4 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
 }
 
-/* Increase spacing between rows */
-.table tr {
-  height: 3rem;
+.card-header h5 {
+  font-size: 17px;
+  font-weight: 500;
+  color: #444;
 }
 
-/* Add hover effect on rows */
-.table-hover tbody tr:hover {
-  background-color: rgba(0, 123, 255, 0.05);
+.card-body {
+  padding: 20px;
 }
 
-/* Style for the alert when there are no auctioneers */
-.alert-info {
-  background-color: #e8f4f8;
-  border-color: #bee5eb;
+/* Action buttons styling */
+.action-buttons {
+  display: flex;
+  gap: 12px;
 }
 
-/* Style for form inputs */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 8px 16px;
+  transition: all 0.2s ease;
+}
+
+.btn:focus {
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+  background-color: #5c636a;
+  border-color: #565e64;
+}
+
+.btn-outline-primary {
+  color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-outline-primary:hover {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.btn-outline-danger {
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 14px;
+}
+
+/* Form section styling */
+.form-section {
+  margin-bottom: 24px;
+  border-radius: 8px;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #444;
+}
+
+.form-control {
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  padding: 10px 12px;
+  font-size: 15px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
 .form-control:focus {
-  border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
 }
 
-/* Animation for loading spinner */
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.form-control::placeholder {
+  color: #6c757d;
+  opacity: 0.8;
 }
 
+.form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* Alert styling */
+.alert {
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c2c7;
+  color: #842029;
+}
+
+.alert-info {
+  background-color: #cff4fc;
+  border-color: #b6effb;
+  color: #055160;
+}
+
+/* Table styling */
+.table-responsive {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table {
+  margin-bottom: 0;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table th {
+  font-weight: 600;
+  color: #495057;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  padding: 12px 16px;
+  vertical-align: middle;
+}
+
+.table td {
+  padding: 14px 16px;
+  vertical-align: middle;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.fw-medium {
+  font-weight: 500;
+}
+
+/* Spinner styling */
 .spinner-border {
-  animation: spin 1s linear infinite;
+  width: 2rem;
+  height: 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .action-buttons {
+    width: 100%;
+  }
+
+  .table th, .table td {
+    padding: 10px 12px;
+  }
+
+  .btn {
+    padding: 6px 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .action-buttons .btn {
+    width: 100%;
+  }
+
+  .form-buttons {
+    flex-direction: column;
+  }
+
+  .form-buttons .btn {
+    width: 100%;
+  }
 }

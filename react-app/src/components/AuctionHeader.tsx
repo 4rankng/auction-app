@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { auctioneerService } from '../services/auctioneerService';
 import './AuctionHeader.css';
 
 interface AuctionHeaderProps {
@@ -7,7 +8,7 @@ interface AuctionHeaderProps {
   onEndAuction: () => void;
   totalBids: number;
   isAuctionEnded?: boolean;
-  auctioneer?: string;
+  auctioneer?: string;  // This will now be the auctioneer ID
 }
 
 /**
@@ -19,21 +20,52 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
   onEndAuction,
   totalBids,
   isAuctionEnded = false,
-  auctioneer = 'Không có thông tin'
+  auctioneer = ''
 }) => {
+  const [auctioneerName, setAuctioneerName] = useState<string>('Không có thông tin');
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchAuctioneerDetails = async () => {
+      if (!auctioneer) {
+        setAuctioneerName('Không có thông tin');
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const auctioneerData = await auctioneerService.getAuctioneerById(auctioneer);
+        if (auctioneerData) {
+          setAuctioneerName(auctioneerData.name);
+        } else {
+          setAuctioneerName('Không tìm thấy đấu giá viên');
+        }
+      } catch (err) {
+        console.error('Error fetching auctioneer details:', err);
+        setAuctioneerName('Lỗi tải thông tin');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAuctioneerDetails();
+  }, [auctioneer]);
+
   return (
     <div className="auction-header-container">
       <div className="auction-header-info">
         <h3 className="auction-title">{title}</h3>
 
         <div className="auction-metadata">
-          {auctioneer && (
-            <div className="auction-metadata-item">
-              <i className="bi bi-person-badge me-2"></i>
-              <span className="auction-metadata-label">Đấu Giá Viên:</span>
-              <span className="auction-metadata-value">{auctioneer}</span>
-            </div>
-          )}
+          <div className="auction-metadata-item">
+            <i className="bi bi-person-badge me-2"></i>
+            <span className="auction-metadata-label">Đấu Giá Viên:</span>
+            <span className="auction-metadata-value">
+              {loading ? (
+                <small><i className="bi bi-hourglass-split me-1"></i>Đang tải...</small>
+              ) : auctioneerName}
+            </span>
+          </div>
         </div>
       </div>
 

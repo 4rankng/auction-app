@@ -356,21 +356,22 @@ export class DatabaseService {
 
   // Auctioneer management functions
   public getAuctioneers = (): Auctioneer[] => {
-    const db = this.loadDatabase();
-    return db.auctioneers || [];
+    if (!this.database.auctioneers) {
+      this.database.auctioneers = [];
+    }
+    return this.database.auctioneers || [];
   };
 
   public getAuctioneerById = (id: string): Auctioneer | undefined => {
-    const db = this.loadDatabase();
-    return db.auctioneers?.find((auctioneer: Auctioneer) => auctioneer.id === id);
+    if (!this.database.auctioneers) {
+      return undefined;
+    }
+    return this.database.auctioneers.find((auctioneer: Auctioneer) => auctioneer.id === id);
   };
 
   public createAuctioneer = (name: string): Auctioneer => {
-    const db = this.loadDatabase();
-
-    // Initialize auctioneers array if it doesn't exist
-    if (!db.auctioneers) {
-      db.auctioneers = [];
+    if (!this.database.auctioneers) {
+      this.database.auctioneers = [];
     }
 
     // Create new auctioneer
@@ -382,7 +383,7 @@ export class DatabaseService {
     };
 
     // Add to array
-    db.auctioneers.push(newAuctioneer);
+    this.database.auctioneers.push(newAuctioneer);
 
     // Save changes
     this.saveDatabase();
@@ -391,19 +392,22 @@ export class DatabaseService {
   };
 
   public updateAuctioneer = (auctioneer: Auctioneer): Auctioneer => {
-    const db = this.loadDatabase();
+    if (!this.database.auctioneers) {
+      this.database.auctioneers = [];
+      throw new Error(`Auctioneer with ID ${auctioneer.id} not found`);
+    }
 
     // Find the auctioneer index
-    const index = db.auctioneers?.findIndex((a: Auctioneer) => a.id === auctioneer.id) ?? -1;
+    const index = this.database.auctioneers.findIndex((a: Auctioneer) => a.id === auctioneer.id);
 
     // If auctioneer exists, update it
-    if (index !== -1 && db.auctioneers) {
+    if (index !== -1) {
       const updatedAuctioneer = {
         ...auctioneer,
         updatedAt: Date.now()
       };
 
-      db.auctioneers[index] = updatedAuctioneer;
+      this.database.auctioneers[index] = updatedAuctioneer;
       this.saveDatabase();
 
       return updatedAuctioneer;
@@ -413,19 +417,16 @@ export class DatabaseService {
   };
 
   public deleteAuctioneer = (id: string): boolean => {
-    const db = this.loadDatabase();
-
-    // Check if auctioneers array exists
-    if (!db.auctioneers) {
+    if (!this.database.auctioneers) {
       return false;
     }
 
     // Find the auctioneer index
-    const index = db.auctioneers.findIndex((a: Auctioneer) => a.id === id);
+    const index = this.database.auctioneers.findIndex((a: Auctioneer) => a.id === id);
 
     // If auctioneer exists, remove it
     if (index !== -1) {
-      db.auctioneers.splice(index, 1);
+      this.database.auctioneers.splice(index, 1);
       this.saveDatabase();
       return true;
     }

@@ -44,7 +44,7 @@ const AuctioneerSelector: React.FC<AuctioneerSelectorProps> = ({ value, onChange
         >
           <option value="">-- Chọn đấu giá viên --</option>
           {auctioneers.map((auctioneer) => (
-            <option key={auctioneer.id} value={auctioneer.name}>
+            <option key={auctioneer.id} value={auctioneer.id}>
               {auctioneer.name}
             </option>
           ))}
@@ -58,14 +58,21 @@ const AuctioneerSelector: React.FC<AuctioneerSelectorProps> = ({ value, onChange
           <i className="bi bi-gear"></i>
         </button>
       </div>
-      {loading && (
+      {loading ? (
         <div className="form-text">
           <small>
             <i className="bi bi-hourglass-split me-1"></i>
             Đang tải danh sách đấu giá viên...
           </small>
         </div>
-      )}
+      ) : auctioneers.length === 0 ? (
+        <div className="form-text text-warning">
+          <small>
+            <i className="bi bi-exclamation-triangle me-1"></i>
+            Chưa có đấu giá viên nào. Hãy thêm đấu giá viên mới.
+          </small>
+        </div>
+      ) : null}
     </div>
   );
 };

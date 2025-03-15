@@ -31,10 +31,3 @@ export const DEFAULT_TOAST_DURATION = 2000; // Default toast duration in millise
 export const DEFAULT_AUCTION_TITLE = 'Phiên đấu giá mới' // Default auction title
 export const DEFAULT_AUCTION_DESCRIPTION = 'Mô tả chi tiết về phiên đấu giá' // Default auction description
 
-// Default auctioneer options
-export const DEFAULT_AUCTIONEER_OPTIONS = [
-
-  'Trần Đại Lam',
-  'Phạm Thị Bình',
-  'Phùng Chí Cường'
-]
