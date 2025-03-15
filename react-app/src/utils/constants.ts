@@ -27,6 +27,13 @@ export const DEFAULT_BID_DURATION = 60; // Default bid duration in seconds
 export const DEFAULT_BID_STEP = 10000000; // Default bid step in VND
 export const DEFAULT_STARTING_PRICE = 1000000000; // Default starting price in VND
 export const DEFAULT_TOAST_DURATION = 2000; // Default toast duration in milliseconds
-export const DEFAULT_AUCTIONEER = 'NA' // Default auctioneer
+export const DEFAULT_AUCTIONEER = 'Nguyen Viet Dung' // Default auctioneer
 export const DEFAULT_AUCTION_TITLE = 'Phiên đấu giá mới' // Default auction title
 export const DEFAULT_AUCTION_DESCRIPTION = 'Mô tả chi tiết về phiên đấu giá' // Default auction description
+
+// Default auctioneer options
+export const DEFAULT_AUCTIONEER_OPTIONS = [
+  'Trần Đại Lam',
+  'Phạm Thị Bình',
+  'Phùng Chí Cường'
+]

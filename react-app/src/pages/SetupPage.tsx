@@ -5,16 +5,14 @@ import {
   Auction
 } from '../types';
 import './SetupPage.css';
-import AuctionDetails from '../components/AuctionDetails';
-import PricingAndDuration from '../components/PricingAndDuration';
-import BidderManagement from '../components/BidderManagement';
+
 import { parseBiddersFromExcel } from '../utils/excelParser';
 import { Modal, Button, ListGroup } from 'react-bootstrap';
 import { databaseService } from '../services/databaseService';
 import { errorService, ErrorType } from '../services/errorService';
 import { toastService } from '../services/toastService';
 import ToastContainer from '../components/ToastContainer';
-import { AUCTION_STATUS, DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE, DEFAULT_AUCTIONEER, DEFAULT_AUCTION_TITLE, DEFAULT_AUCTION_DESCRIPTION } from '../utils/constants';
+import { AUCTION_STATUS, DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE, DEFAULT_AUCTIONEER, DEFAULT_AUCTION_TITLE, DEFAULT_AUCTION_DESCRIPTION, DEFAULT_AUCTIONEER_OPTIONS } from '../utils/constants';
 
 // Define the form input types to match BidderManagement
 type BidderFormInputs = {
@@ -300,68 +298,293 @@ export default function SetupPage() {
     }
   };
 
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'startingPrice' | 'priceIncrement') => {
-    const value = parseInt(e.target.value.replace(/,/g, '')) || 0;
+  // Event handlers for form inputs
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAuctionDetails(prev => ({
+      ...prev,
+      title: e.target.value
+    }));
+  };
 
-    // Map priceIncrement to bidStep in our state
-    const stateField = field === 'priceIncrement' ? 'bidStep' : field;
-    setAuctionDetails(prev => ({ ...prev, [stateField]: value }));
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setAuctionDetails(prev => ({
+      ...prev,
+      description: e.target.value
+    }));
+  };
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'startingPrice' | 'bidStep') => {
+    const valueStr = e.target.value.replace(/\D/g, '');
+    const value = valueStr ? parseInt(valueStr) : 0;
+
+    setAuctionDetails(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAuctionDetails(prev => ({
+      ...prev,
+      bidDuration: e.target.valueAsNumber || DEFAULT_BID_DURATION
+    }));
+  };
+
+  const handleAuctioneerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setAuctionDetails(prev => ({
+      ...prev,
+      auctioneer: e.target.value
+    }));
   };
 
   return (
     <div className="setup-page-container">
-      {/* Use the ToastContainer component */}
-      <ToastContainer position="top-right" />
+      <h1 className="mt-4 mb-4 text-center">Thiết Lập Đấu Giá</h1>
 
-      <div className="container py-4 mb-5">
-        {/* Top section: Auction Details (left) and Pricing & Duration (right) */}
-        <div className="row g-4 mb-4 setup-page-row">
-          <div className="col-md-6">
-            <AuctionDetails
-              title={auctionDetails.title}
-              description={auctionDetails.description}
-              onTitleChange={(e) => setAuctionDetails(prev => ({ ...prev, title: e.target.value }))}
-              onDescriptionChange={(e) => setAuctionDetails(prev => ({ ...prev, description: e.target.value }))}
-            />
-          </div>
-          <div className="col-md-6">
-            <PricingAndDuration
-              startingPrice={auctionDetails.startingPrice}
-              priceIncrement={auctionDetails.bidStep}
-              duration={auctionDetails.bidDuration}
-              onPriceChange={handlePriceChange}
-              onDurationChange={(e) => setAuctionDetails(prev => ({ ...prev, bidDuration: parseInt(e.target.value) || 300 }))}
-            />
-          </div>
-        </div>
-
-        {/* Middle section: Bidder Management (full width) */}
-        <div className="row mb-5">
-          <div className="col-12">
-            <BidderManagement
-              bidders={bidders}
-              importing={importing}
-              onAddBidder={handleAddBidder}
-              onImportClick={handleImportClick}
-              fileInputRef={fileInputRef}
-              onFileChange={handleFileChange}
-            />
+      <div className="container">
+        <div className="row">
+          {/* Left column - Thông Tin */}
+          <div className="col-md-6 mb-4">
+            <div className="card outline-card h-100">
+              <div className="card-header">
+                <h5 className="card-title mb-0">Thông Tin</h5>
+              </div>
+              <div className="card-body">
+                <div className="mb-3">
+                  <label className="form-label">Tiêu Đề Đấu Giá</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={auctionDetails.title}
+                    onChange={handleTitleChange}
+                    placeholder="Nhập tiêu đề đấu giá"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Mô Tả Đấu Giá</label>
+                  <textarea
+                    className="form-control"
+                    rows={5}
+                    value={auctionDetails.description}
+                    onChange={handleDescriptionChange}
+                    placeholder="Nhập mô tả chi tiết về đấu giá"
+                  />
+                </div>
           </div>
         </div>
       </div>
 
-      {/* Fixed bottom section: Start Auction button (full width) */}
+          {/* Right column - Cài Đặt */}
+          <div className="col-md-6 mb-4">
+            <div className="card outline-card h-100">
+              <div className="card-header">
+                <h5 className="card-title mb-0">Cài Đặt</h5>
+              </div>
+              <div className="card-body">
+                {/* First row: Giá Khởi Điểm and Bước Giá */}
+                <div className="row mb-3">
+                  <div className="col-md-6">
+                    <label className="form-label">Giá Khởi Điểm</label>
+                    <div className="input-group">
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={auctionDetails.startingPrice.toLocaleString('vi-VN')}
+                        onChange={(e) => handlePriceChange(e, 'startingPrice')}
+                      />
+                      <span className="input-group-text">VND</span>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Bước Giá</label>
+                    <div className="input-group">
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={auctionDetails.bidStep.toLocaleString('vi-VN')}
+                        onChange={(e) => handlePriceChange(e, 'bidStep')}
+                      />
+                      <span className="input-group-text">VND</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Second row: Thời Gian and Nhân viên đấu giá */}
+                <div className="row mb-3">
+          <div className="col-md-6">
+                    <label className="form-label">Thời Gian (giây)</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      value={auctionDetails.bidDuration}
+                      onChange={handleDurationChange}
+                      min="60"
+            />
+          </div>
+          <div className="col-md-6">
+                    <label className="form-label">Nhân viên đấu giá</label>
+                    <select
+                      className="form-select"
+                      value={auctionDetails.auctioneer}
+                      onChange={handleAuctioneerChange}
+                    >
+                      {DEFAULT_AUCTIONEER_OPTIONS.map((auctioneer, index) => (
+                        <option key={index} value={auctioneer}>{auctioneer}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom section - Người Tham Gia */}
+        <div className="row">
+          <div className="col-12">
+            <div className="card outline-card mb-4">
+              <div className="card-header d-flex justify-content-between align-items-center">
+                <h5 className="card-title mb-0">Người Tham Gia</h5>
+              </div>
+              <div className="card-body">
+                <div className="mb-4">
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    const bidderData = {
+                      id: formData.get('id') as string || '',
+                      name: formData.get('name') as string || '',
+                      nric: formData.get('nric') as string || '',
+                      issuingAuthority: formData.get('issuingAuthority') as string || '',
+                      address: formData.get('address') as string || '',
+                    };
+
+                    if (bidderData.name && bidderData.nric) {
+                      handleAddBidder(bidderData);
+                      e.currentTarget.reset();
+                    }
+                  }}>
+                    <div className="row g-3 align-items-end">
+                      <div className="col-md-2">
+                        <label className="form-label">Mã Số</label>
+                        <input
+                          type="text"
+                          name="id"
+                          className="form-control"
+                          placeholder="Tự động nếu để trống"
+                        />
+                      </div>
+                      <div className="col-md-2">
+                        <label className="form-label">Tên</label>
+                        <input
+                          type="text"
+                          name="name"
+                          className="form-control"
+                          required
+                        />
+                      </div>
+                      <div className="col-md-2">
+                        <label className="form-label">CMND/CCCD</label>
+                        <input
+                          type="text"
+                          name="nric"
+                          className="form-control"
+                          required
+                        />
+                      </div>
+                      <div className="col-md-2">
+                        <label className="form-label">Nơi Cấp</label>
+                        <input
+                          type="text"
+                          name="issuingAuthority"
+                          className="form-control"
+                          required
+                        />
+                      </div>
+                      <div className="col-md-2">
+                        <label className="form-label">Địa Chỉ</label>
+                        <input
+                          type="text"
+                          name="address"
+                          className="form-control"
+                          required
+                        />
+                      </div>
+                      <div className="col-md-2 d-flex gap-2">
+                        <button type="submit" className="btn btn-primary px-3" style={{ aspectRatio: '1' }}>
+                          <i className="bi bi-plus-lg"></i>
+                        </button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          className="d-none"
+                          accept=".xlsx,.xls"
+                          onChange={handleFileChange}
+                        />
+                        <button
+                          type="button"
+                          className="btn excel-import-btn flex-grow-1"
+                          onClick={handleImportClick}
+                          disabled={importing}
+                        >
+                          <i className="bi bi-file-earmark-excel me-2"></i>
+                          Excel
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+
+                <div className="table-responsive">
+                  <table className="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Mã Số</th>
+                        <th>Tên</th>
+                        <th>CMND/CCCD</th>
+                        <th>Nơi Cấp</th>
+                        <th>Địa Chỉ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bidders.length > 0 ? (
+                        bidders.map((bidder) => (
+                          <tr key={bidder.id}>
+                            <td>{bidder.id}</td>
+                            <td>{bidder.name}</td>
+                            <td>{bidder.nric}</td>
+                            <td>{bidder.issuingAuthority}</td>
+                            <td>{bidder.address}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={5} className="text-center py-3">
+                            Chưa có người tham gia. Thêm người tham gia bằng biểu mẫu ở trên hoặc nhập từ Excel.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Start Auction Button */}
       <div className="start-auction-container">
         <div className="container">
           <button
             className="btn btn-success btn-lg w-100"
             onClick={handleConfirmAuction}
-            disabled={bidders.length === 0 || isStartingAuction}
+            disabled={isStartingAuction}
           >
             {isStartingAuction ? (
               <>
                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Đang Bắt Đầu Đấu Giá...
+                Đang Bắt Đầu...
               </>
             ) : (
               'Bắt Đầu Đấu Giá'
@@ -370,39 +593,26 @@ export default function SetupPage() {
         </div>
       </div>
 
-      {/* Confirmation Modal using React Bootstrap */}
-      <Modal show={showConfirmation} onHide={handleCloseModal} centered backdrop="static" keyboard={false}>
+      {/* Confirmation Modal */}
+      <Modal show={showConfirmation} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Xác Nhận Bắt Đầu Đấu Giá</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Bạn có chắc chắn muốn bắt đầu đấu giá với các thông tin sau?</p>
+          <p>Bạn có chắc chắn muốn bắt đầu phiên đấu giá với thông tin sau?</p>
+
           <ListGroup className="mb-3">
-            <ListGroup.Item className="d-flex justify-content-between">
-              <span>Tiêu đề:</span>
-              <strong>{auctionDetails.title}</strong>
-            </ListGroup.Item>
-            <ListGroup.Item className="d-flex justify-content-between">
-              <span>Giá khởi điểm:</span>
-              <strong>{auctionDetails.startingPrice.toLocaleString('vi-VN')} VND</strong>
-            </ListGroup.Item>
-            <ListGroup.Item className="d-flex justify-content-between">
-              <span>Bước giá:</span>
-              <strong>{auctionDetails.bidStep.toLocaleString('vi-VN')} VND</strong>
-            </ListGroup.Item>
-            <ListGroup.Item className="d-flex justify-content-between">
-              <span>Thời gian:</span>
-              <strong>{auctionDetails.bidDuration} giây</strong>
-            </ListGroup.Item>
-            <ListGroup.Item className="d-flex justify-content-between">
-              <span>Số người tham gia:</span>
-              <strong>{bidders.length}</strong>
-            </ListGroup.Item>
+            <ListGroup.Item><strong>Tiêu đề:</strong> {auctionDetails.title}</ListGroup.Item>
+            <ListGroup.Item><strong>Giá khởi điểm:</strong> {auctionDetails.startingPrice.toLocaleString('vi-VN')} VND</ListGroup.Item>
+            <ListGroup.Item><strong>Bước giá:</strong> {auctionDetails.bidStep.toLocaleString('vi-VN')} VND</ListGroup.Item>
+            <ListGroup.Item><strong>Thời gian:</strong> {auctionDetails.bidDuration} giây</ListGroup.Item>
+            <ListGroup.Item><strong>Người tham gia:</strong> {bidders.length}</ListGroup.Item>
           </ListGroup>
-          <p className="text-muted small">Sau khi bắt đầu, đấu giá không thể được chỉnh sửa.</p>
+
+          <p className="mb-0 text-danger">Lưu ý: Sau khi bắt đầu, bạn không thể chỉnh sửa thông tin đấu giá!</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal} disabled={isStartingAuction}>
+          <Button variant="secondary" onClick={handleCloseModal}>
             Hủy
           </Button>
           <Button
@@ -413,7 +623,7 @@ export default function SetupPage() {
             {isStartingAuction ? (
               <>
                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Đang bắt đầu...
+                Đang Bắt Đầu...
               </>
             ) : (
               'Bắt Đầu Đấu Giá'
@@ -421,6 +631,9 @@ export default function SetupPage() {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* Toast Container */}
+      <ToastContainer />
     </div>
   );
 }
