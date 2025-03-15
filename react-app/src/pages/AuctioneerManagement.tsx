@@ -2,22 +2,17 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuctioneers } from '../hooks/useAuctioneers';
 import { Auctioneer } from '../types';
-import { Modal, Button } from 'react-bootstrap';
 import './AuctioneerManagement.css';
 
 const AuctioneerManagement: React.FC = () => {
   const navigate = useNavigate();
-  const { auctioneers, loading, error, createAuctioneer, updateAuctioneer, deleteAuctioneer, loadAuctioneers } = useAuctioneers();
+  const { auctioneers, loading, error, createAuctioneer, updateAuctioneer, deleteAuctioneer } = useAuctioneers();
 
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentAuctioneer, setCurrentAuctioneer] = useState<Auctioneer | null>(null);
   const [newName, setNewName] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
-
-  // State for delete confirmation modal
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [auctioneerToDelete, setAuctioneerToDelete] = useState<string | null>(null);
 
   // Handle adding new auctioneer
   const handleAddClick = () => {
@@ -58,9 +53,6 @@ const AuctioneerManagement: React.FC = () => {
         setCurrentAuctioneer(null);
       }
 
-      // Reload all auctioneers to ensure we have the latest data without duplicates
-      await loadAuctioneers();
-
       setNewName('');
       setFormError(null);
     } catch (err) {
@@ -77,32 +69,15 @@ const AuctioneerManagement: React.FC = () => {
     setFormError(null);
   };
 
-  // Handle showing delete confirmation modal
-  const handleShowDeleteModal = (id: string) => {
-    setAuctioneerToDelete(id);
-    setShowDeleteModal(true);
-  };
-
-  // Handle hiding delete confirmation modal
-  const handleCloseDeleteModal = () => {
-    setShowDeleteModal(false);
-    setAuctioneerToDelete(null);
-  };
-
-  // Handle confirming deletion in modal
-  const handleConfirmDelete = async () => {
-    if (!auctioneerToDelete) return;
-
-    try {
-      await deleteAuctioneer(auctioneerToDelete);
-      // Reload auctioneers after deletion
-      await loadAuctioneers();
-      handleCloseDeleteModal();
-    } catch (err) {
-      console.error('Error deleting auctioneer:', err);
-      handleCloseDeleteModal();
-      // Show error in formError instead of an alert
-      setFormError('Không thể xóa đấu giá viên. Vui lòng thử lại sau.');
+  // Handle deleting an auctioneer
+  const handleDeleteClick = async (id: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa đấu giá viên này?')) {
+      try {
+        await deleteAuctioneer(id);
+      } catch (err) {
+        console.error('Error deleting auctioneer:', err);
+        alert('Không thể xóa đấu giá viên. Vui lòng thử lại sau.');
+      }
     }
   };
 
@@ -153,13 +128,6 @@ const AuctioneerManagement: React.FC = () => {
             <div className="alert alert-danger" role="alert">
               <i className="bi bi-exclamation-triangle-fill me-2"></i>
               {error}
-            </div>
-          )}
-
-          {formError && !isAdding && !isEditing && (
-            <div className="alert alert-danger" role="alert">
-              <i className="bi bi-exclamation-triangle-fill me-2"></i>
-              {formError}
             </div>
           )}
 
@@ -260,7 +228,7 @@ const AuctioneerManagement: React.FC = () => {
                         </button>
                         <button
                           className="btn btn-sm btn-outline-danger"
-                          onClick={() => handleShowDeleteModal(auctioneer.id)}
+                          onClick={() => handleDeleteClick(auctioneer.id)}
                           disabled={isAdding || isEditing}
                           title="Xóa"
                         >
@@ -275,25 +243,6 @@ const AuctioneerManagement: React.FC = () => {
           )}
         </div>
       </div>
-
-      {/* Delete Confirmation Modal */}
-      <Modal show={showDeleteModal} onHide={handleCloseDeleteModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Xác Nhận Xóa</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Bạn có chắc chắn muốn xóa đấu giá viên này?</p>
-          <p className="text-danger"><small>Hành động này không thể hoàn tác.</small></p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseDeleteModal}>
-            <i className="bi bi-x-circle me-2"></i>Hủy
-          </Button>
-          <Button variant="danger" onClick={handleConfirmDelete}>
-            <i className="bi bi-trash me-2"></i>Xóa
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };

@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { auctioneerService } from '../services/auctioneerService';
+import React from 'react';
 import './AuctionHeader.css';
 
 interface AuctionHeaderProps {
@@ -8,8 +7,7 @@ interface AuctionHeaderProps {
   onEndAuction: () => void;
   totalBids: number;
   isAuctionEnded?: boolean;
-  auctioneer?: string;  // This will now be the auctioneer ID
-  auctioneerName?: string; // New prop for directly passing auctioneer name
+  auctioneer?: string;  // This now contains the auctioneer name directly
 }
 
 /**
@@ -21,44 +19,8 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
   onEndAuction,
   totalBids,
   isAuctionEnded = false,
-  auctioneer = '',
-  auctioneerName: propAuctioneerName // Rename to avoid conflict with state
+  auctioneer = 'Không có thông tin'
 }) => {
-  const [auctioneerName, setAuctioneerName] = useState<string>(propAuctioneerName || 'Không có thông tin');
-  const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    // If auctioneerName is provided in props, use it directly
-    if (propAuctioneerName) {
-      setAuctioneerName(propAuctioneerName);
-      return;
-    }
-
-    const fetchAuctioneerDetails = async () => {
-      if (!auctioneer) {
-        setAuctioneerName('Không có thông tin');
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const auctioneerData = await auctioneerService.getAuctioneerById(auctioneer);
-        if (auctioneerData) {
-          setAuctioneerName(auctioneerData.name);
-        } else {
-          setAuctioneerName('Không tìm thấy đấu giá viên');
-        }
-      } catch (err) {
-        console.error('Error fetching auctioneer details:', err);
-        setAuctioneerName('Lỗi tải thông tin');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAuctioneerDetails();
-  }, [auctioneer, propAuctioneerName]);
-
   return (
     <div className="auction-header-container">
       <div className="auction-header-info">
@@ -69,9 +31,7 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
             <i className="bi bi-person-badge me-2"></i>
             <span className="auction-metadata-label">Đấu Giá Viên:</span>
             <span className="auction-metadata-value">
-              {loading ? (
-                <small><i className="bi bi-hourglass-split me-1"></i>Đang tải...</small>
-              ) : auctioneerName}
+              {auctioneer}
             </span>
           </div>
         </div>

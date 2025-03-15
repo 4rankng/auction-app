@@ -35,6 +35,7 @@ export default function SetupPage() {
     bidStep: DEFAULT_BID_STEP,
     bidDuration: DEFAULT_BID_DURATION,
     auctioneer: "",
+    auctioneerId: "",
     bidRound: "1" // Default bid round
   }
   // State variables
@@ -77,6 +78,7 @@ export default function SetupPage() {
             bidStep: setupAuction.settings.bidStep || DEFAULT_BID_STEP,
             bidDuration: setupAuction.settings.bidDuration || DEFAULT_BID_DURATION,
             auctioneer: setupAuction.settings.auctioneer || "",
+            auctioneerId: setupAuction.settings.auctioneerId || "",
             bidRound: setupAuction.settings.bidRound || "1"
           }));
         } else {
@@ -97,6 +99,10 @@ export default function SetupPage() {
           setBidders([]);
         }
       } catch (error) {
+        // Show toast message directly
+        toastService.error('Không thể tải danh sách người tham gia');
+
+        // Still log via error service but don't rely on it for UI
         errorService.handleError(
           'Không thể tải danh sách người tham gia',
           ErrorType.DATABASE,
@@ -106,7 +112,7 @@ export default function SetupPage() {
     };
 
     loadBidders();
-  }, []);  // Empty dependency array is now valid as we use ref values
+  }, []);
 
   const handleImportClick = () => {
     setImporting(true);
@@ -161,6 +167,10 @@ export default function SetupPage() {
       toastService.success(`Đã nhập thành công ${bidderData.length} người tham gia`);
     } catch (error) {
       console.error('Error importing bidders:', error);
+      // Show toast message directly
+      toastService.error(errorService.formatErrorMessage(error) || 'Không thể nhập người tham gia');
+
+      // Still log via error service but don't rely on it for UI
       errorService.handleError(
         errorService.formatErrorMessage(error) || 'Không thể nhập người tham gia',
         ErrorType.DATABASE,
@@ -247,8 +257,14 @@ export default function SetupPage() {
     const validation = validateAuctionSetup();
 
     if (!validation.isValid) {
-      // Show only one toast message with the validation error
-      toastService.error(validation.errorMessage || 'Thiết lập đấu giá không hợp lệ', 5000);
+      // Show validation error as toast message
+      toastService.warning(validation.errorMessage || 'Thiết lập đấu giá không hợp lệ');
+
+      // Still log the error through the error service
+      errorService.handleError(
+        validation.errorMessage || 'Thiết lập đấu giá không hợp lệ',
+        ErrorType.VALIDATION
+      );
       return;
     }
 
@@ -261,7 +277,10 @@ export default function SetupPage() {
 
   const handleStartAuction = async () => {
     if (!setupAuctionId) {
-      toastService.error('Không tìm thấy phiên đấu giá để bắt đầu', 5000);
+      // Show toast message directly for this error
+      toastService.error('Không tìm thấy phiên đấu giá để bắt đầu');
+
+      errorService.handleError('Không tìm thấy phiên đấu giá để bắt đầu', ErrorType.DATABASE);
       setShowConfirmation(false);
       return;
     }
@@ -271,15 +290,22 @@ export default function SetupPage() {
 
       const validation = validateAuctionSetup();
       if (!validation.isValid) {
-        // Show only one toast message with the validation error
-        toastService.error(validation.errorMessage || 'Thiết lập đấu giá không hợp lệ', 5000);
+        // Show toast message directly for validation errors
+        toastService.warning(validation.errorMessage || 'Thiết lập đấu giá không hợp lệ');
+
+        errorService.handleError(
+          validation.errorMessage || 'Thiết lập đấu giá không hợp lệ',
+          ErrorType.VALIDATION
+        );
         setIsStartingAuction(false);
+        setShowConfirmation(false);
         return;
       }
 
       // Get the setup auction and update it
       const setupAuction = await databaseService.getAuctionById(setupAuctionId);
       if (!setupAuction) {
+        toastService.error('Không tìm thấy phiên đấu giá để bắt đầu');
         throw new Error('Không tìm thấy phiên đấu giá để bắt đầu');
       }
 
@@ -296,6 +322,7 @@ export default function SetupPage() {
           bidStep: auctionDetails.bidStep,
           bidDuration: auctionDetails.bidDuration,
           auctioneer: auctionDetails.auctioneer,
+          auctioneerId: auctionDetails.auctioneerId,
           bidRound: auctionDetails.bidRound // Add bidRound to settings
         },
         startTime: Date.now()
@@ -309,9 +336,16 @@ export default function SetupPage() {
       navigate(`/bid?id=${setupAuctionId}`);
     } catch (error) {
       console.error('Error starting auction:', error);
-      toastService.error(
-        errorService.formatErrorMessage(error) || 'Không thể bắt đầu đấu giá. Vui lòng thử lại.',
-        5000
+
+      // Show explicit toast error message
+      const errorMessage = errorService.formatErrorMessage(error) || 'Không thể bắt đầu đấu giá. Vui lòng thử lại.';
+      toastService.error(errorMessage);
+
+      // Still log via error service
+      errorService.handleError(
+        errorMessage,
+        ErrorType.DATABASE,
+        error
       );
       setShowConfirmation(false);
     } finally {
@@ -351,10 +385,11 @@ export default function SetupPage() {
     }));
   };
 
-  const handleAuctioneerChange = (value: string) => {
+  const handleAuctioneerChange = (id: string, name: string) => {
     setAuctionDetails(prev => ({
       ...prev,
-      auctioneer: value
+      auctioneer: name,
+      auctioneerId: id
     }));
   };
 
@@ -467,7 +502,7 @@ export default function SetupPage() {
                   <div className="col-md-12">
                     <label className="form-label">Đấu Giá Viên</label>
                     <AuctioneerSelector
-                      value={auctionDetails.auctioneer}
+                      value={auctionDetails.auctioneerId}
                       onChange={handleAuctioneerChange}
                     />
                   </div>
@@ -645,6 +680,7 @@ export default function SetupPage() {
             <ListGroup.Item><strong>Bước giá:</strong> {auctionDetails.bidStep.toLocaleString('vi-VN')} VND</ListGroup.Item>
             <ListGroup.Item><strong>Thời gian:</strong> {auctionDetails.bidDuration} giây</ListGroup.Item>
             <ListGroup.Item><strong>Vòng Đấu Giá:</strong> {auctionDetails.bidRound}</ListGroup.Item>
+            <ListGroup.Item><strong>Đấu Giá Viên:</strong> {auctionDetails.auctioneer || 'Chưa chọn'}</ListGroup.Item>
             <ListGroup.Item><strong>Người tham gia:</strong> {bidders.length}</ListGroup.Item>
           </ListGroup>
 

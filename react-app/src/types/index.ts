@@ -55,6 +55,7 @@ export interface AuctionSettings {
   startingPrice: number;
   bidDuration: number;
   auctioneer: string;
+  auctioneerId?: string;
   bidRound?: string;
 }
 

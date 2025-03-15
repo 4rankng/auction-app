@@ -359,20 +359,7 @@ export class DatabaseService {
     if (!this.database.auctioneers) {
       this.database.auctioneers = [];
     }
-
-    // Ensure uniqueness by ID while preserving the original order
-    const seen = new Set<string>();
-    const deduplicated = this.database.auctioneers.filter((auctioneer: Auctioneer) => {
-      const duplicate = seen.has(auctioneer.id);
-      seen.add(auctioneer.id);
-      return !duplicate;
-    });
-
-    // Update the database with deduplicated auctioneers without changing the order
-    this.database.auctioneers = deduplicated;
-    this.saveDatabase();
-
-    return this.database.auctioneers;
+    return this.database.auctioneers || [];
   };
 
   public getAuctioneerById = (id: string): Auctioneer | undefined => {
@@ -387,21 +374,20 @@ export class DatabaseService {
       this.database.auctioneers = [];
     }
 
-    // Before creating, check if an auctioneer with the same name already exists
-    const existingAuctioneer = this.database.auctioneers.find(
-      (a: Auctioneer) => a.name.toLowerCase() === name.toLowerCase()
-    );
-
-    if (existingAuctioneer) {
-      console.log("Auctioneer with this name already exists, returning existing one");
-      return existingAuctioneer;
+    // Find the highest existing ID and increment by 1
+    let highestId = 0;
+    if (this.database.auctioneers.length > 0) {
+      // Parse all existing IDs to numbers and find the highest
+      const numericIds = this.database.auctioneers.map((a: Auctioneer) => parseInt(a.id, 10)).filter((id: number) => !isNaN(id));
+      highestId = numericIds.length > 0 ? Math.max(...numericIds) : 0;
     }
 
-    // Create new auctioneer with a unique ID using timestamp + random string
-    const uniqueId = Date.now().toString() + '-' + Math.random().toString(36).substring(2, 7);
+    // Increment for the new ID
+    const nextId = (highestId + 1).toString();
 
+    // Create new auctioneer
     const newAuctioneer: Auctioneer = {
-      id: uniqueId,
+      id: nextId, // Use string representation of the incremented number
       name,
       createdAt: Date.now(),
       updatedAt: Date.now()

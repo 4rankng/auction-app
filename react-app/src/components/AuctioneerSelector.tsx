@@ -5,13 +5,14 @@ import { auctioneerService } from '../services/auctioneerService';
 
 interface AuctioneerSelectorProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (id: string, name: string) => void;
 }
 
 const AuctioneerSelector: React.FC<AuctioneerSelectorProps> = ({ value, onChange }) => {
   const navigate = useNavigate();
   const [auctioneers, setAuctioneers] = useState<Auctioneer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [selectedId, setSelectedId] = useState<string>(value || "");
 
   useEffect(() => {
     const loadAuctioneers = async () => {
@@ -33,13 +34,33 @@ const AuctioneerSelector: React.FC<AuctioneerSelectorProps> = ({ value, onChange
     navigate('/auctioneers');
   };
 
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    setSelectedId(selectedId);
+
+    if (!selectedId) {
+      // Handle empty selection
+      onChange("", "");
+      return;
+    }
+
+    // Find the selected auctioneer to get their name
+    const selectedAuctioneer = auctioneers.find(a => a.id === selectedId);
+    if (selectedAuctioneer) {
+      onChange(selectedId, selectedAuctioneer.name);
+    } else {
+      console.error(`Auctioneer with ID ${selectedId} not found`);
+      onChange(selectedId, "Unknown");
+    }
+  };
+
   return (
     <div className="auctioneer-selector">
       <div className="input-group">
         <select
           className="form-select"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          value={selectedId}
+          onChange={handleSelectChange}
           disabled={loading}
         >
           <option value="">-- Chọn đấu giá viên --</option>

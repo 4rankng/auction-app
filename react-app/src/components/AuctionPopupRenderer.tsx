@@ -18,7 +18,6 @@ interface AuctionPopupRendererProps {
   onClose: () => void;
   // New props for auction results
   winnerId?: string;
-  winnerName?: string;
   finalPrice?: string;
   totalBids?: number;
   auctionDuration?: string;
@@ -350,7 +349,6 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
     isAuctionEnded,
     onClose,
     winnerId,
-    winnerName,
     finalPrice,
     totalBids,
     auctionDuration
@@ -469,7 +467,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
           <div className="winner-section">
             <div className="winner-label">Người Trúng Đấu Giá</div>
             <div className="winner-name">
-              {winnerId || highestBidderId || "Không có thông tin"}
+              {winnerId || highestBidderId || "Không có ID"}
             </div>
 
             <div className="price-label">Giá Trúng</div>
