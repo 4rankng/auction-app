@@ -58,6 +58,9 @@ export const BidPage: React.FC = () => {
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0); // Add refresh trigger state
   const [isAuctionEnded, setIsAuctionEnded] = useState<boolean>(false);
 
+  // Add state to control timer value sent to popup (separate from bidderTimeLeft)
+  const [popupTimerValue, setPopupTimerValue] = useState<number>(0);
+
   // Add a ref to track if we've already loaded the auction
   const auctionLoadedRef = useRef<boolean>(false);
 
@@ -227,6 +230,7 @@ export const BidPage: React.FC = () => {
     finalPrice: string;
     totalBids: number;
     auctionDuration: string;
+    _updateTimestamp?: number; // Add this field to the interface
   } | null>(null);
 
   // Greatly simplify the dependency tracking to avoid multiple renders
@@ -364,7 +368,9 @@ export const BidPage: React.FC = () => {
         winnerId: highestBidderId || '',
         finalPrice: formatCurrency(highestBid),
         totalBids: bids ? bids.length : 0,
-        auctionDuration: formattedDuration
+        auctionDuration: formattedDuration,
+        // Add a timestamp to ensure React detects a state change
+        _updateTimestamp: Date.now()
       });
       console.log("📊 Auction results set for popup");
 
@@ -399,6 +405,29 @@ export const BidPage: React.FC = () => {
       if (!shouldShowPopup && popupInitializedRef.current) {
         console.log("🪟 Making popup visible");
         setShouldShowPopup(true);
+      } else if (shouldShowPopup) {
+        // If popup is already visible, ensure it stays visible by setting a flag
+        console.log("🪟 Keeping existing popup open with auction results");
+
+        // Instead of closing and reopening, force a re-render by updating auction results state
+        // This will trigger the component to re-render with the new data
+        setAuctionResults({
+          winnerName: winnerInfo ? winnerInfo.name : '',
+          winnerId: highestBidderId || '',
+          finalPrice: formatCurrency(highestBid),
+          totalBids: bids ? bids.length : 0,
+          auctionDuration: formattedDuration,
+          // Add a timestamp to ensure React detects a state change
+          _updateTimestamp: Date.now()
+        });
+
+        // Force a reapplication of styles in the popup by triggering an event
+        if (popupInitializedRef.current) {
+          // Dispatch a custom event that the popup can listen for
+          const event = new CustomEvent('auctionEnded', { detail: { timestamp: Date.now() } });
+          window.dispatchEvent(event);
+          console.log("🔄 Dispatched auctionEnded event to force style refresh");
+        }
       }
 
     } catch (error) {
@@ -543,6 +572,8 @@ export const BidPage: React.FC = () => {
     if (bidderId === selectedBidder) {
       setSelectedBidder(null);
       stopBidderTimer();
+      // Update popup timer to 0 when deselecting
+      setPopupTimerValue(0);
       return;
     }
 
@@ -551,12 +582,17 @@ export const BidPage: React.FC = () => {
     // If this is the last bidder, set timer to 0
     if (bidderId === lastBidderId) {
       resetBidderTimer(0);
+      // Update popup timer to 0 for last bidder
+      setPopupTimerValue(0);
       return;
     }
 
     // Otherwise, reset timer to the auction's bidDuration setting and start it
-    resetBidderTimer(auction?.settings?.bidDuration || 60);
+    const newTimerValue = auction?.settings?.bidDuration || 60;
+    resetBidderTimer(newTimerValue);
     startBidderTimer();
+    // Update popup timer with the new value
+    setPopupTimerValue(newTimerValue);
   }, [isAuctionEnded, selectedBidder, lastBidderId, auction?.settings?.bidDuration, showToast, stopBidderTimer, resetBidderTimer, startBidderTimer]);
 
   const handlePlaceBid = async (directBidAmount?: string) => {
@@ -624,6 +660,11 @@ export const BidPage: React.FC = () => {
 
       // Reset and restart bidder timer
       startBidderTimer();
+
+      // Reset the timer in the popup as well when a bid is placed
+      if (bidderTimeLeft > 0) {
+        setPopupTimerValue(bidderTimeLeft);
+      }
 
       // Create a new bid history entry and add it to the current bid history
       const newBidHistoryEntry: BidHistoryDisplay = {
@@ -1007,6 +1048,14 @@ export const BidPage: React.FC = () => {
     }
   };
 
+  // Add a useEffect to reset popup timer when auction ends
+  useEffect(() => {
+    if (isAuctionEnded) {
+      // Reset popup timer to 0 when auction ends
+      setPopupTimerValue(0);
+    }
+  }, [isAuctionEnded]);
+
   if (loading) {
     return (
       <div className="container py-4 text-center">
@@ -1149,6 +1198,7 @@ export const BidPage: React.FC = () => {
           auctionTitle={auctionTitle}
           highestBidAmount={formatCurrency(bids && bids.length > 0 ? bids[0].amount : (auction.settings?.startingPrice || 0))}
           isAuctionEnded={isAuctionEnded}
+          timerValue={popupTimerValue}
           onClose={() => {
             console.log('Popup closed by user');
             closePopup();
