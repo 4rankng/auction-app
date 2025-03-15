@@ -428,3 +428,26 @@ The auction app now uses a continuous bidding system instead of round-based bidd
 5. The UI now focuses on "Lượt Trả Giá" (Number of Bids) instead of auction rounds
 
 For backward compatibility with existing systems, bids are still assigned a round value of 1 internally.
+
+
+
+Currently, the bid page and setup page are used by admin only. When bid page is opened, I want you to open a browser pop up page with the design like attached photo
+
+you should show
+1. Auction Company (default value)
+2. Dau Gia Vien (pass auctioneer value)
+3. Gia Khoi Diem (pass startingPrice)
+4. Buoc Gia (pass bidStep)
+5. Lan Tra Gia (pass bidNumber)
+6. Phien Dau Gia Tai San (pass bidRound, this value is configured at setupPage and part of auction setting, should be saved in database)
+7. Nguoi Tra Gia Cao Nhat (bidder ID of the highest bidder)
+8. Thoi Gian Tra Con Lai (the number here should be in sync with the bid timer in bid control)
+
+In popup page should have a button on the top right to close the popup page, this is the only way popup page is close. currently I see the popup page is auto close
+
+When user click "Ket Thuc Dau Gia", the popup page should show
+- Auction company name
+- auction title
+- Dau Gia Vien: Auctioneer name
+- Nguoi tra gia cao nhat: bidder ID
+- Gia Tra Cao Nhat: winning price
