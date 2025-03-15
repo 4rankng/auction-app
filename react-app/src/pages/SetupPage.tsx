@@ -93,6 +93,21 @@ export default function SetupPage() {
   const handleImportClick = () => {
     setImporting(true);
     fileInputRef.current?.click();
+
+    // Add a window focus event to detect when the file dialog is closed without selection
+    const handleFocus = () => {
+      // Set a short timeout to allow the file change event to trigger first if a file was selected
+      setTimeout(() => {
+        // If no file was selected, reset the importing state
+        setImporting(false);
+      }, 300);
+
+      // Remove the event listener after it's been triggered
+      window.removeEventListener('focus', handleFocus);
+    };
+
+    // Add the focus event listener to the window
+    window.addEventListener('focus', handleFocus);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

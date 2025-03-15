@@ -89,7 +89,16 @@ export const BidPage: React.FC = () => {
   const calculateElapsedTime = useCallback(() => {
     if (!auction?.startTime) return "00:00:00";
 
-    // Calculate seconds difference between now and auction start time
+    // For ended auctions, use the stored duration from result
+    if (isAuctionEnded && auction.result?.duration) {
+      const durationSeconds = auction.result.duration;
+      const hours = Math.floor(durationSeconds / 3600);
+      const minutes = Math.floor((durationSeconds % 3600) / 60);
+      const seconds = durationSeconds % 60;
+      return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    // For ongoing auctions, calculate from startTime to now
     const elapsedSeconds = Math.floor((Date.now() - auction.startTime) / 1000);
 
     // Format to HH:MM:SS
@@ -98,7 +107,7 @@ export const BidPage: React.FC = () => {
     const seconds = elapsedSeconds % 60;
 
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  }, [auction?.startTime]);
+  }, [auction?.startTime, auction?.result?.duration, isAuctionEnded]);
 
   // Add state to track elapsed time with manual updates
   const [elapsedTime, setElapsedTime] = useState<string>("00:00:00");
@@ -118,7 +127,12 @@ export const BidPage: React.FC = () => {
 
     // Set up interval to update every second
     const intervalId = setInterval(() => {
-      setElapsedTime(calculateElapsedTime());
+      // Use functional update to avoid capturing state in closure
+      setElapsedTime((prevElapsedTime) => {
+        const newElapsedTime = calculateElapsedTime();
+        // Only update if time has actually changed
+        return newElapsedTime !== prevElapsedTime ? newElapsedTime : prevElapsedTime;
+      });
     }, 1000);
 
     // Clean up on unmount or when auction ends
@@ -155,16 +169,27 @@ export const BidPage: React.FC = () => {
     if (!auction) return;
 
     try {
+      console.log("Starting auction end process...");
+
+      // Calculate auction duration in seconds
+      const startTimeMs = auction.startTime || Date.now();
+      const endTimeMs = Date.now();
+      const durationSeconds = Math.floor((endTimeMs - startTimeMs) / 1000);
+
       // Update auction status to ENDED and set endTime to current time
       const updatedAuction = {
         ...auction,
         status: 'ENDED' as const,
-        endTime: Date.now(), // Set the end time to the current timestamp
+        endTime: endTimeMs,
         result: {
-          ...auction.result,
-          endTime: Date.now(),
-          finalPrice: auction.currentPrice,
-          totalBids: bids.length
+          startTime: startTimeMs,
+          endTime: endTimeMs,
+          startingPrice: auction.settings?.startingPrice || 0,
+          finalPrice: auction.currentPrice || 0,
+          duration: durationSeconds,
+          totalBids: bids.length,
+          winnerId: '',
+          winnerName: ''
         }
       };
 
@@ -189,22 +214,37 @@ export const BidPage: React.FC = () => {
         console.log('Auction ended with no bids.');
       }
 
-      // Save the updated auction
+      // Log the updated auction before saving
+      console.log("Saving auction with result:", JSON.stringify(updatedAuction.result, null, 2));
+
+      // Save the updated auction with complete result object to the database
       await updateAuction(updatedAuction);
+
+      // Fetch the updated auction to make sure we have the latest data
+      if (auctionId) {
+        await getAuctionById(auctionId);
+        console.log("Fetched updated auction after ending");
+      }
 
       // Update local state to reflect auction ended
       setIsAuctionEnded(true);
+      console.log("isAuctionEnded set to true");
 
-      // Take a final snapshot of the elapsed time
+      // Take a final snapshot of the elapsed time to display
+      // This will be formatted as HH:MM:SS for UI display
       const finalElapsedTime = calculateElapsedTime();
       setElapsedTime(finalElapsedTime);
+      console.log("Final elapsed time set to:", finalElapsedTime);
+
+      // The timer will automatically stop updating because isAuctionEnded is now true
+      // This is handled in the useEffect with the interval
 
       showToast('Đấu giá kết thúc thành công', 'success', 'top-center');
     } catch (error) {
       console.error('Error ending auction:', error);
       showToast(error instanceof Error ? error.message : 'Không thể kết thúc đấu giá', 'error', 'top-center');
     }
-  }, [auction, bids, bidders, updateAuction, showToast, calculateElapsedTime]);
+  }, [auction, bids, bidders, updateAuction, getAuctionById, auctionId, showToast, calculateElapsedTime]);
 
   // Use the bidder timer hook with improved functionality
   const {
@@ -280,6 +320,19 @@ export const BidPage: React.FC = () => {
       // Check if auction is ended
       setIsAuctionEnded(auction.status === 'ENDED');
 
+      // Initialize elapsed time immediately based on auction status
+      if (auction.status === 'ENDED' && auction.result?.duration) {
+        // For ended auctions, set elapsed time from the saved duration
+        const durationSeconds = auction.result.duration;
+        const hours = Math.floor(durationSeconds / 3600);
+        const minutes = Math.floor((durationSeconds % 3600) / 60);
+        const seconds = durationSeconds % 60;
+        setElapsedTime(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+      } else if (auction.startTime) {
+        // For ongoing auctions, calculate from start time
+        setElapsedTime(calculateElapsedTime());
+      }
+
       // Set last bidder if there are bids
       if (auctionBids.length > 0) {
         setLastBidderId(auctionBids[0].bidderId);
@@ -307,10 +360,10 @@ export const BidPage: React.FC = () => {
       showToast("Error loading auction data: " + (error instanceof Error ? error.message : "Unknown error"), 'error', 'top-center');
       setLoading(false);
     }
-  }, [auction, bidders, bids, dataLoading, dataError, auctionId, navigate, convertBidsToDisplayFormat, formatCurrency, showToast]);
+  }, [auction, bidders, bids, dataLoading, dataError, auctionId, navigate, convertBidsToDisplayFormat, formatCurrency, showToast, calculateElapsedTime]);
 
   // Handle bidder selection and start timer
-  const handleBidderSelect = (bidderId: string) => {
+  const handleBidderSelect = useCallback((bidderId: string) => {
     // Prevent selection if auction is ended
     if (isAuctionEnded) {
       showToast('Không thể chọn người tham gia khi đấu giá đã kết thúc', 'error', 'bottom-center');
@@ -335,7 +388,7 @@ export const BidPage: React.FC = () => {
     // Otherwise, reset timer to the auction's bidDuration setting and start it
     resetBidderTimer(auction?.settings?.bidDuration || 60);
     startBidderTimer();
-  };
+  }, [isAuctionEnded, selectedBidder, lastBidderId, auction?.settings?.bidDuration, showToast, stopBidderTimer, resetBidderTimer, startBidderTimer]);
 
   const handlePlaceBid = async (directBidAmount?: string) => {
     console.log('handlePlaceBid called with bidAmount:', bidAmount, 'directBidAmount:', directBidAmount);
@@ -722,7 +775,7 @@ export const BidPage: React.FC = () => {
   };
 
   // Update the canBidderPlaceBid function
-  const canBidderPlaceBid = (bidderId: string) => {
+  const canBidderPlaceBid = useCallback((bidderId: string) => {
     // Can't bid if this was the last bidder
     if (bidderId === lastBidderId) return false;
 
@@ -733,10 +786,10 @@ export const BidPage: React.FC = () => {
     if (selectedBidder === bidderId && bidderTimeLeft <= 0) return false;
 
     return true;
-  };
+  }, [lastBidderId, isAuctionEnded, selectedBidder, bidderTimeLeft]);
 
   // Check if cancel bid should be disabled
-  const isCancelBidDisabled = () => {
+  const isCancelBidDisabled = useCallback(() => {
     // Can't cancel if there are no bids
     if (bidHistory.length === 0) return true;
 
@@ -744,10 +797,10 @@ export const BidPage: React.FC = () => {
     if (!selectedBidder && !lastBidderId) return true;
 
     return false;
-  };
+  }, [bidHistory.length, selectedBidder, lastBidderId]);
 
   // Get disabled bidders based on current action
-  const getDisabledBidders = () => {
+  const getDisabledBidders = useCallback(() => {
     // If the auction is ended, disable all bidders
     if (isAuctionEnded) {
       return bidders.map(bidder => bidder.id);
@@ -756,7 +809,7 @@ export const BidPage: React.FC = () => {
     // Otherwise, we don't disable any bidders from being selected
     // The bid button will be disabled based on canBidderPlaceBid
     return [];
-  };
+  }, [isAuctionEnded, bidders]);
 
   // Create a wrapper for setBidAmount to add logging
   const handleBidAmountChange = (amount: string) => {
@@ -920,14 +973,12 @@ export const BidPage: React.FC = () => {
 
         <div className="card-body py-2">
           {isAuctionEnded ? (
-            <AuctionResult
-              title={auctionTitle}
-              winnerName={lastBidderId ? bidders.find(b => b.id === lastBidderId)?.name || '' : ''}
-              winningPrice={parseInt(currentPrice.replace(/[^\d]/g, ''))}
-              startTime={auction.startTime || Date.now()}
-              endTime={auction.endTime || Date.now()}
-              totalBids={bidHistory.length}
-            />
+            <>
+              <AuctionResult
+                result={auction.result}
+                totalBids={bidHistory.length}
+              />
+            </>
           ) : (
             <>
               {/* Auction Summary Component */}
@@ -949,23 +1000,21 @@ export const BidPage: React.FC = () => {
                 isTimerEnded={isAuctionEnded}
               />
 
-              {/* Bid Controls Component - Only show when auction is not ended */}
-              {!isAuctionEnded && (
-                <BidControls
-                  bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
-                  bidAmount={bidAmount}
-                  currentPrice={currentPrice.replace(' VND', '')}
-                  bidIncrement={bidIncrement.replace(' VND', '')}
-                  onBidAmountChange={handleBidAmountChange}
-                  onPlaceBid={handlePlaceBid}
-                  onCancelBid={handleCancelBid}
-                  isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
-                  isCancelBidDisabled={isCancelBidDisabled()}
-                  bidHistoryEmpty={bidHistory.length === 0}
-                  bidderTimeLeft={bidderTimeLeft}
-                  isLastBidder={selectedBidder === lastBidderId}
-                />
-              )}
+              {/* Bid Controls Component */}
+              <BidControls
+                bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
+                bidAmount={bidAmount}
+                currentPrice={currentPrice.replace(' VND', '')}
+                bidIncrement={bidIncrement.replace(' VND', '')}
+                onBidAmountChange={handleBidAmountChange}
+                onPlaceBid={handlePlaceBid}
+                onCancelBid={handleCancelBid}
+                isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
+                isCancelBidDisabled={isCancelBidDisabled()}
+                bidHistoryEmpty={bidHistory.length === 0}
+                bidderTimeLeft={bidderTimeLeft}
+                isLastBidder={selectedBidder === lastBidderId}
+              />
             </>
           )}
         </div>

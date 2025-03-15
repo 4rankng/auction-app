@@ -1,5 +1,20 @@
 import React, { useState, useEffect } from 'react';
 
+// Add keyframes animation for the bid button
+const bidButtonAnimation = `
+@keyframes pulse-button {
+  0% {
+    box-shadow: 0 4px 6px rgba(40, 167, 69, 0.25);
+  }
+  50% {
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.5);
+  }
+  100% {
+    box-shadow: 0 4px 6px rgba(40, 167, 69, 0.25);
+  }
+}
+`;
+
 interface BidControlsProps {
   bidderName: string;
   bidAmount: string;
@@ -180,12 +195,17 @@ const BidControls: React.FC<BidControlsProps> = ({
 
   // Handle custom bid amount change with formatting
   const handleCustomBidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove non-numeric characters
-    const numericValue = e.target.value.replace(/\D/g, '');
+    // Get the raw value directly from the input
+    const inputValue = e.target.value;
 
-    // Format with thousand separators
+    // Remove non-numeric characters to get only the digits
+    const numericValue = inputValue.replace(/\D/g, '');
+
+    // Format with thousand separators without using parseInt
+    // This preserves the exact digits and their order
     if (numericValue) {
-      const formattedValue = parseInt(numericValue).toLocaleString('vi-VN');
+      // Use a number formatter to add thousand separators
+      const formattedValue = new Intl.NumberFormat('vi-VN').format(Number(numericValue));
       setCustomBidAmount(formattedValue);
 
       // Update parent's bid amount if we're in custom price mode
@@ -228,6 +248,9 @@ const BidControls: React.FC<BidControlsProps> = ({
       backgroundColor: 'transparent',
       borderTop: '1px solid rgba(0,0,0,0.125)'
     }}>
+      {/* Add style element for animation */}
+      <style>{bidButtonAnimation}</style>
+
       {/* Countdown Timer */}
       <div
         className="position-absolute"
@@ -428,15 +451,37 @@ const BidControls: React.FC<BidControlsProps> = ({
               className="btn fw-bold me-2"
               style={{
                 minWidth: '120px',
-                backgroundColor: '#4a86f7',
+                backgroundColor: isBidButtonDisabled() ? '#adb5bd' : '#28a745',
                 color: 'white',
                 borderRadius: '4px',
-                padding: '8px 15px'
+                padding: '10px 20px',
+                fontSize: '1.1rem',
+                boxShadow: isBidButtonDisabled() ? 'none' : '0 4px 6px rgba(40, 167, 69, 0.25)',
+                border: 'none',
+                transition: 'all 0.3s ease',
+                transform: isBidButtonDisabled() ? 'none' : 'translateY(-2px)',
+                animation: isBidButtonDisabled() ? 'none' : 'pulse-button 2s infinite'
               }}
               onClick={handleSubmit}
               disabled={isBidButtonDisabled()}
+              onMouseEnter={(e) => {
+                if (!isBidButtonDisabled()) {
+                  e.currentTarget.style.backgroundColor = '#218838';
+                  e.currentTarget.style.boxShadow = '0 6px 8px rgba(40, 167, 69, 0.35)';
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.animation = 'none'; // Pause animation on hover
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isBidButtonDisabled()) {
+                  e.currentTarget.style.backgroundColor = '#28a745';
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(40, 167, 69, 0.25)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.animation = 'pulse-button 2s infinite'; // Resume animation
+                }
+              }}
             >
-              <i className="bi bi-check-circle me-1"></i> Đấu Giá
+              <i className="bi bi-check-circle me-2"></i> Đấu Giá
             </button>
             <button
               className="btn fw-bold"
@@ -446,7 +491,8 @@ const BidControls: React.FC<BidControlsProps> = ({
                 backgroundColor: 'white',
                 border: '1px solid #dc3545',
                 borderRadius: '4px',
-                padding: '8px 15px'
+                padding: '8px 15px',
+                transition: 'all 0.2s ease'
               }}
               onClick={onCancelBid}
               disabled={isCancelBidDisabled}
@@ -460,4 +506,4 @@ const BidControls: React.FC<BidControlsProps> = ({
   );
 };
 
-export default BidControls;
+export default React.memo(BidControls);

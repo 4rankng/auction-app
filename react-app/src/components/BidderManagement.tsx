@@ -162,17 +162,8 @@ const BidderManagement: React.FC<BidderManagementProps> = React.memo(({
                   onClick={onImportClick}
                   disabled={importing}
                 >
-                  {importing ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                      Đang Nhập...
-                    </>
-                  ) : (
-                    <>
-                      <i className="bi bi-file-earmark-excel me-2"></i>
-                      Excel
-                    </>
-                  )}
+                  <i className="bi bi-file-earmark-excel me-2"></i>
+                  Excel
                 </button>
               </div>
             </div>
