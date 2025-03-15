@@ -451,3 +451,13 @@ When user click "Ket Thuc Dau Gia", the popup page should show
 - Dau Gia Vien: Auctioneer name
 - Nguoi tra gia cao nhat: bidder ID
 - Gia Tra Cao Nhat: winning price
+
+
+to sync the timer in the auction popup window and the timer in the bid page I have a solution.
+
+1. bid page pass timer value to auction popup
+2. the auction popup will keep count down starting from the timer value passed by bidpage
+3. only when user select different bidder in the bid page, then bid page will resend the timer value to auction popup
+4. whenever auction popup receive new timer value, it will start count down from that value
+
+with this solution, the implement will be simple, we dont need to re-render the auction popup every tick
