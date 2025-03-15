@@ -31,7 +31,10 @@ export const useAuctioneers = () => {
       setLoading(true);
       setError(null);
       const newAuctioneer = await auctioneerService.createAuctioneer(name);
-      setAuctioneers(prev => [...prev, newAuctioneer]);
+
+      // Reload the full list of auctioneers to ensure proper deduplication
+      await loadAuctioneers();
+
       return newAuctioneer;
     } catch (err) {
       console.error('Error creating auctioneer:', err);
@@ -40,7 +43,7 @@ export const useAuctioneers = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [loadAuctioneers]);
 
   // Update an existing auctioneer
   const updateAuctioneer = useCallback(async (auctioneer: Auctioneer) => {
@@ -48,9 +51,10 @@ export const useAuctioneers = () => {
       setLoading(true);
       setError(null);
       const updatedAuctioneer = await auctioneerService.updateAuctioneer(auctioneer);
-      setAuctioneers(prev =>
-        prev.map(item => item.id === updatedAuctioneer.id ? updatedAuctioneer : item)
-      );
+
+      // Reload the full list of auctioneers to ensure proper state
+      await loadAuctioneers();
+
       return updatedAuctioneer;
     } catch (err) {
       console.error('Error updating auctioneer:', err);
@@ -59,7 +63,7 @@ export const useAuctioneers = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [loadAuctioneers]);
 
   // Delete an auctioneer
   const deleteAuctioneer = useCallback(async (id: string) => {
@@ -68,7 +72,8 @@ export const useAuctioneers = () => {
       setError(null);
       const success = await auctioneerService.deleteAuctioneer(id);
       if (success) {
-        setAuctioneers(prev => prev.filter(auctioneer => auctioneer.id !== id));
+        // Reload the full list of auctioneers to ensure proper state
+        await loadAuctioneers();
       }
       return success;
     } catch (err) {
@@ -78,7 +83,7 @@ export const useAuctioneers = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [loadAuctioneers]);
 
   // Load auctioneers when the component mounts
   useEffect(() => {

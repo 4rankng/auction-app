@@ -359,7 +359,20 @@ export class DatabaseService {
     if (!this.database.auctioneers) {
       this.database.auctioneers = [];
     }
-    return this.database.auctioneers || [];
+
+    // Deduplicate auctioneers based on ID
+    const seen = new Set<string>();
+    const uniqueAuctioneers = this.database.auctioneers.filter((auctioneer: Auctioneer) => {
+      const isDuplicate = seen.has(auctioneer.id);
+      seen.add(auctioneer.id);
+      return !isDuplicate;
+    });
+
+    // Update the database with deduplicated list
+    this.database.auctioneers = uniqueAuctioneers;
+    this.saveDatabase();
+
+    return uniqueAuctioneers;
   };
 
   public getAuctioneerById = (id: string): Auctioneer | undefined => {
@@ -372,6 +385,17 @@ export class DatabaseService {
   public createAuctioneer = (name: string): Auctioneer => {
     if (!this.database.auctioneers) {
       this.database.auctioneers = [];
+    }
+
+    // First check if an auctioneer with the same name already exists
+    const trimmedName = name.trim();
+    const existingAuctioneer = this.database.auctioneers.find(
+      (a: Auctioneer) => a.name.toLowerCase() === trimmedName.toLowerCase()
+    );
+
+    if (existingAuctioneer) {
+      console.log(`Auctioneer with name "${trimmedName}" already exists, returning existing record`);
+      return existingAuctioneer;
     }
 
     // Find the highest existing ID and increment by 1
@@ -388,7 +412,7 @@ export class DatabaseService {
     // Create new auctioneer
     const newAuctioneer: Auctioneer = {
       id: nextId, // Use string representation of the incremented number
-      name,
+      name: trimmedName,
       createdAt: Date.now(),
       updatedAt: Date.now()
     };
