@@ -23,18 +23,6 @@
   background-color: rgba(255, 255, 255, 0.95);
 }
 
-.excel-import-btn:hover:not(:disabled) {
-  background-color: #217346 !important;
-  color: white !important;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(33, 115, 70, 0.2);
-}
-
-.excel-import-btn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: none;
-}
-
 .card {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border: none;
@@ -105,10 +93,6 @@
   100% {
     transform: scale(1);
   }
-}
-
-.excel-import-btn:hover {
-  animation: pulse 1.5s infinite;
 }
 
 /* Responsive adjustments */

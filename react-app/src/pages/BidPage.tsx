@@ -10,6 +10,7 @@ import { useAuction } from '../hooks/useAuction';
 import { useBidderTimer } from '../hooks/useBidderTimer';
 import { Bid } from '../types';
 import * as XLSX from 'xlsx';
+import './BidPage.css';
 
 // Interface for the bid history display format
 interface BidHistoryDisplay {
