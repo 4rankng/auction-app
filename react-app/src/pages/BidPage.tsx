@@ -89,19 +89,30 @@ export const BidPage: React.FC = () => {
 
   // Calculate elapsed time in HH:MM:SS format
   const calculateElapsedTime = useCallback(() => {
-    if (!auction?.startTime) return "00:00:00";
+    if (!auction) return "00:00:00";
 
-    // For ended auctions, use the stored duration from result
+    // For ended auctions, always use the stored duration from result
     if (isAuctionEnded && auction.result?.duration) {
-      const durationSeconds = auction.result.duration;
-      const hours = Math.floor(durationSeconds / 3600);
-      const minutes = Math.floor((durationSeconds % 3600) / 60);
-      const seconds = durationSeconds % 60;
+      console.log("calculateElapsedTime: Using duration from auction result:", auction.result.duration);
+      const durationMs = auction.result.duration;
+      const durationSec = Math.floor(durationMs / 1000);
+      const hours = Math.floor(durationSec / 3600);
+      const minutes = Math.floor((durationSec % 3600) / 60);
+      const seconds = durationSec % 60;
       return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
 
     // For ongoing auctions, calculate from startTime to now
-    const elapsedSeconds = Math.floor((Date.now() - auction.startTime) / 1000);
+    const startTime = auction.startTime;
+    if (!startTime) return "00:00:00";
+
+    const elapsedMs = Date.now() - startTime;
+    if (elapsedMs < 0) {
+      console.warn("Calculated negative elapsed time, using 00:00:00 instead");
+      return "00:00:00";
+    }
+
+    const elapsedSeconds = Math.floor(elapsedMs / 1000);
 
     // Format to HH:MM:SS
     const hours = Math.floor(elapsedSeconds / 3600);
@@ -109,7 +120,7 @@ export const BidPage: React.FC = () => {
     const seconds = elapsedSeconds % 60;
 
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  }, [auction?.startTime, auction?.result?.duration, isAuctionEnded]);
+  }, [auction, isAuctionEnded]);
 
   // Add state to track elapsed time with manual updates
   const [elapsedTime, setElapsedTime] = useState<string>("00:00:00");
@@ -118,28 +129,34 @@ export const BidPage: React.FC = () => {
   useEffect(() => {
     if (!auction?.startTime) return;
 
-    // Don't update if auction has ended
-    if (isAuctionEnded) {
-      // We already have the final snapshot in state, so just return
-      return;
+    // For ended auctions, use the stored duration and don't start a timer
+    if (isAuctionEnded && auction.result?.duration) {
+      console.log("Auction is ended, setting final elapsed time from result");
+      const durationMs = auction.result.duration;
+      const durationSec = Math.floor(durationMs / 1000);
+      const hours = Math.floor(durationSec / 3600);
+      const minutes = Math.floor((durationSec % 3600) / 60);
+      const seconds = durationSec % 60;
+      const finalTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      console.log("Final elapsed time set to:", finalTime);
+      setElapsedTime(finalTime);
+      return; // Don't set up timer for ended auctions
     }
 
-    // Initial update
+    // Initial update for active auctions
     setElapsedTime(calculateElapsedTime());
 
-    // Set up interval to update every second
+    // Set up interval to update every second for active auctions
     const intervalId = setInterval(() => {
-      // Use functional update to avoid capturing state in closure
       setElapsedTime((prevElapsedTime) => {
         const newElapsedTime = calculateElapsedTime();
-        // Only update if time has actually changed
         return newElapsedTime !== prevElapsedTime ? newElapsedTime : prevElapsedTime;
       });
     }, 1000);
 
     // Clean up on unmount or when auction ends
     return () => clearInterval(intervalId);
-  }, [auction?.startTime, calculateElapsedTime, isAuctionEnded]);
+  }, [auction?.startTime, auction?.result?.duration, calculateElapsedTime, isAuctionEnded]);
 
   // Convert bids from database to display format
   const convertBidsToDisplayFormat = useCallback((bids: Bid[]): BidHistoryDisplay[] => {
@@ -225,7 +242,7 @@ export const BidPage: React.FC = () => {
       setShouldShowPopup(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, auction]); // Removed unnecessary dependencies
+  }, [isOpen, auction, isAuctionEnded]); // Added isAuctionEnded to dependencies
 
   // Ensure proper cleanup on unmount
   useEffect(() => {
@@ -246,72 +263,143 @@ export const BidPage: React.FC = () => {
 
   // Function to handle ending the auction
   const handleEndAuction = async () => {
-    if (!auction || !auction.id) return;
+    console.log("🔄 End Auction button clicked");
+
+    if (!auction || !auction.id) {
+      console.error("❌ No auction or auction ID found:", auction);
+      return;
+    }
 
     try {
       setLoading(true);
+      console.log("🔍 Starting auction end process for auction ID:", auction.id);
 
-      // Calculate auction duration
-      const startTime = new Date(auction.startTime || Date.now());
-      const endTime = new Date();
-      const durationMs = endTime.getTime() - startTime.getTime();
+      // Calculate auction duration - Using database startTime for consistency
+      console.log("🕒 Original auction.startTime:", auction.startTime);
+
+      // Use the database startTime to ensure consistent time calculation across page reloads
+      const endTime = Date.now();
+      const startTime = auction.startTime || endTime - 1000; // Fallback if startTime is missing
+      const durationMs = endTime - startTime;
+
+      // Ensure we have a positive duration
+      const correctedDurationMs = Math.max(1000, durationMs); // At least 1 second
+
+      console.log("⏱️ Auction duration calculated:", correctedDurationMs, "ms");
+      console.log("⏱️ Start time:", new Date(startTime).toISOString());
+      console.log("⏱️ End time:", new Date(endTime).toISOString());
 
       // Format duration as HH:MM:SS
-      const durationSec = Math.floor(durationMs / 1000);
+      const durationSec = Math.floor(correctedDurationMs / 1000);
       const hours = Math.floor(durationSec / 3600);
       const minutes = Math.floor((durationSec % 3600) / 60);
       const seconds = durationSec % 60;
       const formattedDuration =
-        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+      console.log("⏱️ Final formatted duration:", formattedDuration);
+
+      // Set final elapsed time immediately
+      setElapsedTime(formattedDuration);
 
       // Get the winner (highest bidder) info for the result object
       const winnerInfo = highestBidderId && bidders ?
         bidders.find(b => b.id === highestBidderId) : null;
+      console.log("🏆 Winner info:", winnerInfo);
 
       // Calculate final price
       const highestBid = bids && bids.length > 0 ?
         bids[0].amount : (auction.settings?.startingPrice || 0);
-
-      // Set auction results for display in popup
-      setAuctionResults({
-        winnerName: '', // Set empty string for bidder name
-        winnerId: highestBidderId || '',
-        finalPrice: formatCurrency(highestBid),
-        totalBids: bids ? bids.length : 0,
-        auctionDuration: formattedDuration
-      });
+      console.log("💰 Final price:", highestBid);
 
       // Create a proper auction result object that matches the Auction interface
       const auctionResult = {
-        startTime: startTime.getTime(),
-        endTime: endTime.getTime(),
+        startTime: startTime, // Use database startTime for consistency
+        endTime: endTime,
         startingPrice: auction.settings?.startingPrice || 0,
         finalPrice: highestBid,
-        duration: durationMs,
+        duration: correctedDurationMs,
         winnerId: highestBidderId || '',
         winnerName: winnerInfo ? winnerInfo.name : '',
         totalBids: bids ? bids.length : 0
+      };
+      console.log("📝 Created auction result object:", auctionResult);
+
+      // Define an enum for AuctionStatus if it doesn't exist
+      const AUCTION_STATUS = {
+        SETUP: 'SETUP',
+        ACTIVE: 'ACTIVE',
+        ENDED: 'ENDED',
+        COMPLETED: 'COMPLETED'
       };
 
       // Update auction status
       const updatedAuction = {
         ...auction,
-        status: 'ENDED' as AuctionStatus,
-        endTime: endTime.getTime(), // Use number instead of string
+        status: AUCTION_STATUS.ENDED as AuctionStatus, // Cast to AuctionStatus type
+        endTime: endTime, // Use number instead of string
         result: auctionResult // Add proper result object
       };
+      console.log("🔄 Prepared updated auction object:", updatedAuction);
 
-      // Save to database
-      await updateAuction(updatedAuction);
-
-      // Set auction as ended locally
+      // First set the auction as ended locally - do this BEFORE the database update
+      console.log("🏁 Setting auction as ended locally");
       setIsAuctionEnded(true);
 
+      // Set auction results for display in popup
+      setAuctionResults({
+        winnerName: winnerInfo ? winnerInfo.name : '',
+        winnerId: highestBidderId || '',
+        finalPrice: formatCurrency(highestBid),
+        totalBids: bids ? bids.length : 0,
+        auctionDuration: formattedDuration
+      });
+      console.log("📊 Auction results set for popup");
+
+      // Save to database
+      console.log("💾 Calling updateAuction...");
+      await updateAuction(updatedAuction);
+      console.log("✅ Database update successful");
+
+      // Verify that the updated auction now has the correct duration stored
+      console.log("Verifying updated auction result data...");
+      if (auctionId) {
+        // Force a refresh of the auction data to get the updated status
+        console.log("🔄 Refreshing auction data from database");
+        await getAuctionById(auctionId);
+
+        // Log the refreshed auction data to verify duration
+        if (auction && auction.result) {
+          console.log("Refreshed auction result duration:", auction.result.duration);
+          console.log("Expected duration:", correctedDurationMs);
+        }
+      }
+
       // Show success message
+      console.log("✉️ Showing success toast");
       showToast('Phiên đấu giá đã kết thúc thành công!', 'success');
 
+      // Close any existing popups and reset state
+      console.log("🚪 Closing any existing popups");
+      closePopup();
+      popupService.closeAllPopups(true);
+
+      // Reset popup flags to ensure we create a fresh popup
+      popupInitializedRef.current = false;
+      popupCreationInProgressRef.current = false;
+      setShouldShowPopup(false);
+
+      // Wait a moment before showing the popup with results
+      console.log("⏱️ Waiting before showing popup with results");
+      setTimeout(() => {
+        console.log("🪟 Creating new popup with auction results");
+        popupInitializedRef.current = true;
+        openPopup();
+        setShouldShowPopup(true);
+      }, 500);
+
     } catch (error) {
-      console.error('Error ending auction:', error);
+      console.error('❌ Error ending auction:', error);
       showToast('Không thể kết thúc phiên đấu giá', 'error');
     } finally {
       setLoading(false);
@@ -395,14 +483,20 @@ export const BidPage: React.FC = () => {
       // Initialize elapsed time immediately based on auction status
       if (auction.status === 'ENDED' && auction.result?.duration) {
         // For ended auctions, set elapsed time from the saved duration
-        const durationSeconds = auction.result.duration;
-        const hours = Math.floor(durationSeconds / 3600);
-        const minutes = Math.floor((durationSeconds % 3600) / 60);
-        const seconds = durationSeconds % 60;
-        setElapsedTime(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+        console.log("Setting elapsed time from auction result duration:", auction.result.duration);
+        const durationMs = auction.result.duration;
+        const durationSec = Math.floor(durationMs / 1000);
+        const hours = Math.floor(durationSec / 3600);
+        const minutes = Math.floor((durationSec % 3600) / 60);
+        const seconds = durationSec % 60;
+        const formattedDuration = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        console.log("Setting initial elapsed time for ended auction:", formattedDuration);
+        setElapsedTime(formattedDuration);
       } else if (auction.startTime) {
         // For ongoing auctions, calculate from start time
-        setElapsedTime(calculateElapsedTime());
+        const initialTime = calculateElapsedTime();
+        console.log("Setting initial elapsed time for active auction:", initialTime);
+        setElapsedTime(initialTime);
       }
 
       // Set last bidder if there are bids
