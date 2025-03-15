@@ -259,14 +259,6 @@ export const BidPage: React.FC = () => {
       return;
     }
 
-    // Check if this is the auction we're looking for
-    if (auctionId && auction.id !== auctionId) {
-      showToast(`Phiên đấu giá với ID ${auctionId} không tồn tại`, 'error', 'top-center');
-      // Don't navigate away, just show the error
-      setLoading(false);
-      return;
-    }
-
     try {
       // Update auction details with safe access to properties
       setAuctionTitle(auction.title || 'Phiên Đấu Giá');

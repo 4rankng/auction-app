@@ -124,7 +124,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
       console.log(`Refreshing bid history due to trigger change: ${refreshTrigger}`);
       fetchBidHistory();
     }
-  }, [auctionId, refreshTrigger]); // Deliberately exclude fetchBidHistory to prevent loops
+  }, [auctionId, refreshTrigger, fetchBidHistory]); // Include fetchBidHistory as it's memoized with useCallback
 
   // Update bid history when initialData changes
   useEffect(() => {
