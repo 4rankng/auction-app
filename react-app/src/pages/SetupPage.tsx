@@ -605,6 +605,12 @@ export default function SetupPage() {
                         </button>
                       </div>
                     </div>
+                    <div className="text-end mt-2">
+                      <a href="/samples/danhsach.xlsx" download className="text-decoration-none small text-secondary">
+                        <i className="bi bi-download me-1"></i>
+                        Tải mẫu Excel
+                      </a>
+                    </div>
                   </form>
                 </div>
 
