@@ -7,6 +7,7 @@ interface AuctionHeaderProps {
   onEndAuction: () => void;
   totalBids: number;
   isAuctionEnded?: boolean;
+  auctioneer?: string;
 }
 
 /**
@@ -17,17 +18,33 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
   elapsedTime,
   onEndAuction,
   totalBids,
-  isAuctionEnded = false
+  isAuctionEnded = false,
+  auctioneer = 'Không có thông tin'
 }) => {
   return (
-    <div className="card-header d-flex justify-content-between align-items-center py-3">
-      <div className="d-flex align-items-center">
-        <h3 className="mb-0 me-2 fw-bold auction-title">{title}</h3>
-      </div>
-      <div className="d-flex align-items-center">
-        <div className="text-center me-3 d-flex flex-column align-items-center">
-          <h2 className="mb-0 text-success auction-elapsed-time">{elapsedTime}</h2>
+    <div className="auction-header-container">
+      <div className="auction-header-info">
+        <h3 className="auction-title">{title}</h3>
+
+        <div className="auction-metadata">
+          {auctioneer && (
+            <div className="auction-metadata-item">
+              <i className="bi bi-person-badge me-2"></i>
+              <span className="auction-metadata-label">Người Đấu Giá:</span>
+              <span className="auction-metadata-value">{auctioneer}</span>
+            </div>
+          )}
+
+
         </div>
+      </div>
+
+      <div className="auction-header-actions">
+        <div className="auction-elapsed-time-container">
+          <i className="bi bi-stopwatch auction-elapsed-time-icon"></i>
+          <span className="auction-elapsed-time">{elapsedTime}</span>
+        </div>
+
         {isAuctionEnded ? (
           <div className="auction-ended-badge">
             <i className="bi bi-stopwatch-fill"></i> Đã Kết Thúc

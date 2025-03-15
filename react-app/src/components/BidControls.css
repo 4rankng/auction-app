@@ -1,0 +1,210 @@
+/* BidControls Component Styles */
+.bid-controls-container {
+  margin-top: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+}
+
+/* Bid Amount Selection and Display */
+.bid-amount-display {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.bid-amount-value {
+  color: #28a745;
+  margin-left: 0.5rem;
+  font-weight: 700;
+}
+
+/* Countdown Timer - Enhanced & Prominent */
+.bidder-countdown-container {
+  position: relative;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.bidder-countdown-normal {
+  background-color: rgba(40, 167, 69, 0.12);
+  border-color: rgba(40, 167, 69, 0.2);
+}
+
+.bidder-countdown-warning {
+  background-color: rgba(255, 193, 7, 0.15);
+  border-color: rgba(255, 193, 7, 0.3);
+  animation: pulse-soft 2s infinite;
+}
+
+.bidder-countdown-urgent {
+  background-color: rgba(220, 53, 69, 0.12);
+  border-color: rgba(220, 53, 69, 0.25);
+  animation: pulse-soft 1s infinite;
+}
+
+.bidder-countdown-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 1rem;
+  color: #495057;
+}
+
+.bidder-countdown-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  transition: color 0.3s ease;
+  min-width: 80px;
+  text-align: center;
+}
+
+.bidder-countdown-normal .bidder-countdown-value {
+  color: #28a745;
+}
+
+.bidder-countdown-warning .bidder-countdown-value {
+  color: #ffc107;
+}
+
+.bidder-countdown-urgent .bidder-countdown-value {
+  color: #dc3545;
+}
+
+.bidder-countdown-icon {
+  margin-right: 0.75rem;
+  font-size: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+.bidder-countdown-normal .bidder-countdown-icon {
+  color: #28a745;
+}
+
+.bidder-countdown-warning .bidder-countdown-icon {
+  color: #ffc107;
+}
+
+.bidder-countdown-urgent .bidder-countdown-icon {
+  color: #dc3545;
+}
+
+@keyframes pulse-soft {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Bid Button Styles */
+.bid-submit-button {
+  min-width: 120px;
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 0.35rem;
+}
+
+.bid-submit-button:not(:disabled) {
+  animation: pulse-button 2s infinite;
+}
+
+.bid-submit-button:not(:disabled):hover {
+  transform: translateY(-4px);
+  animation: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.bid-submit-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+  animation: none;
+}
+
+/* Cancel Bid Button */
+.cancel-bid-button {
+  min-width: 180px;
+  padding: 8px 15px;
+  font-weight: 700;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 0.35rem;
+  transition: all 0.2s ease;
+}
+
+.cancel-bid-button:not(:disabled):hover {
+  background-color: #c82333;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.cancel-bid-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Bid Options Container */
+.bid-options-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Custom Bid Input Container */
+.custom-bid-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 0.35rem;
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+}
+
+/* Animations */
+@keyframes pulse-button {
+  0% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+  }
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+  .bid-options-container {
+    flex-direction: column;
+  }
+
+  .bid-submit-button,
+  .cancel-bid-button {
+    width: 100%;
+    margin-top: 1rem;
+  }
+}

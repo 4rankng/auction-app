@@ -808,6 +808,7 @@ export const BidPage: React.FC = () => {
           onEndAuction={handleEndAuction}
           totalBids={bidHistory.length}
           isAuctionEnded={isAuctionEnded}
+          auctioneer={auction?.settings?.auctioneer || 'Admin'}
         />
 
         <div className="card-body py-2">
