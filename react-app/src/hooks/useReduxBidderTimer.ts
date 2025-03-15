@@ -10,6 +10,8 @@ export const useReduxBidderTimer = () => {
   const selectedBidderId = useAppSelector(state => state.auction.selectedBidderId);
   const lastBidderId = useAppSelector(state => state.auction.lastBidderId);
   const status = useAppSelector(state => state.auction.status);
+  // Get the auction for the timeLeft value
+  const auction = useAppSelector(state => state.auction.auction);
 
   // Start the bidder timer
   useEffect(() => {
@@ -23,9 +25,11 @@ export const useReduxBidderTimer = () => {
   }, [dispatch, selectedBidderId, lastBidderId, status]);
 
   // Reset the bidder timer
-  const resetBidderTimer = useCallback((seconds: number = 60) => {
-    dispatch(bidderTimerReset(seconds));
-  }, [dispatch]);
+  const resetBidderTimer = useCallback((seconds?: number) => {
+    // Use provided seconds, or fall back to auction timeLeft, or default to 60
+    const timerValue = seconds !== undefined ? seconds : (auction?.timeLeft || 60);
+    dispatch(bidderTimerReset(timerValue));
+  }, [dispatch, auction]);
 
   // Check if the bidder can place a bid
   const canBidderPlaceBid = useCallback(() => {

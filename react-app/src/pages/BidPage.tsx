@@ -193,7 +193,7 @@ export const BidPage: React.FC = () => {
     startTimer: startBidderTimer,
     stopTimer: stopBidderTimer,
     resetTimer: resetBidderTimer
-  } = useBidderTimer({ initialTime: 60 });
+  } = useBidderTimer({ initialTime: auction?.timeLeft || 60 });
 
   // Get auction ID from URL
   useEffect(() => {
@@ -287,7 +287,7 @@ export const BidPage: React.FC = () => {
     setLoading(false);
   }, [auction, bidders, bids, dataLoading, dataError, auctionId, navigate, convertBidsToDisplayFormat, formatCurrency, showToast]);
 
-  // Handle bidder selection and start 60-second timer
+  // Handle bidder selection and start timer
   const handleBidderSelect = (bidderId: string) => {
     // Prevent selection if auction is ended
     if (isAuctionEnded) {
@@ -310,7 +310,8 @@ export const BidPage: React.FC = () => {
       return;
     }
 
-    // Otherwise, reset timer to 60 seconds and start it
+    // Otherwise, reset timer to the auction's timeLeft value and start it
+    resetBidderTimer(auction?.timeLeft || 60);
     startBidderTimer();
   };
 

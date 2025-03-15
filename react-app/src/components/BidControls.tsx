@@ -30,7 +30,7 @@ const BidControls: React.FC<BidControlsProps> = ({
   isPlaceBidDisabled,
   isCancelBidDisabled = false, // Default to enabled
   bidHistoryEmpty = true, // Default to true if not provided
-  bidderTimeLeft = 60, // Default to 60 seconds if not provided
+  bidderTimeLeft, // No default, should be passed from parent
   isLastBidder = false // Default to false if not provided
 }) => {
   // State for bid method selection - default to stepPrice if bid history is not empty
@@ -180,8 +180,9 @@ const BidControls: React.FC<BidControlsProps> = ({
 
   // Get color for countdown timer based on time left
   const getTimerColor = () => {
-    if (bidderTimeLeft <= 10) return '#dc3545'; // red for last 10 seconds
-    if (bidderTimeLeft <= 30) return '#ffc107'; // yellow for 30-10 seconds
+    const timeLeft = bidderTimeLeft || 0; // Default to 0 if undefined
+    if (timeLeft <= 10) return '#dc3545'; // red for last 10 seconds
+    if (timeLeft <= 30) return '#ffc107'; // yellow for 30-10 seconds
     return '#28a745'; // green for > 30 seconds
   };
 
@@ -189,7 +190,7 @@ const BidControls: React.FC<BidControlsProps> = ({
   const isBidButtonDisabled = () => {
     if (isPlaceBidDisabled) return true;
     if (!bidderName) return true;
-    if (bidderTimeLeft <= 0) return true;
+    if ((bidderTimeLeft || 0) <= 0) return true; // Default to 0 if undefined
     if (bidMethod === 'customPrice' && !customBidAmount) return true;
     if (isLastBidder) return true; // Disable if this is the last bidder
     return false;
@@ -220,7 +221,7 @@ const BidControls: React.FC<BidControlsProps> = ({
         }}
       >
         <i className="bi bi-clock me-1"></i>
-        <span className="countdown-timer">{bidderTimeLeft}s</span>
+        <span className="countdown-timer">{bidderTimeLeft || 0}s</span>
       </div>
 
       <div>

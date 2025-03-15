@@ -26,7 +26,7 @@ const initialState: AuctionState = {
   selectedBidderId: null,
   lastBidderId: null,
   highestBidderId: null,
-  bidderTimeLeft: 60
+  bidderTimeLeft: 0
 };
 
 const auctionSlice = createSlice({
@@ -43,6 +43,9 @@ const auctionSlice = createSlice({
       state.bids = action.payload.bids;
       state.endTime = action.payload.auction.endTime || null;
       state.status = 'active';
+
+      // Set bidderTimeLeft from auction's timeLeft
+      state.bidderTimeLeft = action.payload.auction.timeLeft;
 
       // Set last bidder if there are bids
       if (action.payload.bids.length > 0) {
@@ -66,8 +69,8 @@ const auctionSlice = createSlice({
       const highestBid = [...state.bids].sort((a, b) => b.amount - a.amount)[0];
       state.highestBidderId = highestBid.bidderId;
 
-      // Reset bidder timer
-      state.bidderTimeLeft = 60;
+      // Reset bidder timer using the auction's timeLeft value
+      state.bidderTimeLeft = state.auction?.timeLeft || 60;
     },
     bidCancelled: (state, action: PayloadAction<string>) => {
       // Remove the bid with the given ID
@@ -94,7 +97,8 @@ const auctionSlice = createSlice({
 
       // Reset bidder timer if a new bidder is selected
       if (action.payload && action.payload !== state.lastBidderId) {
-        state.bidderTimeLeft = 60;
+        // Use the auction's timeLeft value if available, otherwise fall back to 60 seconds
+        state.bidderTimeLeft = state.auction?.timeLeft || 60;
       } else if (action.payload === state.lastBidderId) {
         state.bidderTimeLeft = 0;
       }
