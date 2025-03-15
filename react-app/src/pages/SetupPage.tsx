@@ -12,7 +12,8 @@ import { databaseService } from '../services/databaseService';
 import { errorService, ErrorType } from '../services/errorService';
 import { toastService } from '../services/toastService';
 import ToastContainer from '../components/ToastContainer';
-import { AUCTION_STATUS, DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE, DEFAULT_AUCTION_TITLE, DEFAULT_AUCTION_DESCRIPTION, DEFAULT_AUCTIONEER_OPTIONS } from '../utils/constants';
+import { AUCTION_STATUS, DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE, DEFAULT_AUCTION_TITLE, DEFAULT_AUCTION_DESCRIPTION } from '../utils/constants';
+import AuctioneerSelector from '../components/AuctioneerSelector';
 
 // Define the form input types to match BidderManagement
 type BidderFormInputs = {
@@ -332,10 +333,10 @@ export default function SetupPage() {
     }));
   };
 
-  const handleAuctioneerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleAuctioneerChange = (value: string) => {
     setAuctionDetails(prev => ({
       ...prev,
-      auctioneer: e.target.value
+      auctioneer: value
     }));
   };
 
@@ -447,15 +448,10 @@ export default function SetupPage() {
                 <div className="row mb-3">
                   <div className="col-md-12">
                     <label className="form-label">Đấu Giá Viên</label>
-                    <select
-                      className="form-select"
+                    <AuctioneerSelector
                       value={auctionDetails.auctioneer}
                       onChange={handleAuctioneerChange}
-                    >
-                      {DEFAULT_AUCTIONEER_OPTIONS.map((auctioneer, index) => (
-                        <option key={index} value={auctioneer}>{auctioneer}</option>
-                      ))}
-                    </select>
+                    />
                   </div>
                 </div>
               </div>

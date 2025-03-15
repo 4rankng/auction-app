@@ -1,0 +1,48 @@
+/* AuctioneerManagement.css */
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table th, .table td {
+  vertical-align: middle;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+}
+
+.btn-icon {
+  padding: 0.25rem 0.5rem;
+}
+
+/* Increase spacing between rows */
+.table tr {
+  height: 3rem;
+}
+
+/* Add hover effect on rows */
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Style for the alert when there are no auctioneers */
+.alert-info {
+  background-color: #e8f4f8;
+  border-color: #bee5eb;
+}
+
+/* Style for form inputs */
+.form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Animation for loading spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner-border {
+  animation: spin 1s linear infinite;
+}

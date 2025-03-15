@@ -68,6 +68,7 @@ export interface UISettings {
 export interface Database {
   auctions: Record<string, Auction>;
   settings: UISettings;
+  auctioneers?: Auctioneer[];
 }
 
 export interface AuctionFormData {
@@ -95,4 +96,11 @@ export interface BidFormData {
 export interface AuctionFilter {
   status?: AuctionStatus;
   auctioneer?: string;
+}
+
+export interface Auctioneer {
+  id: string;
+  name: string;
+  createdAt?: number;
+  updatedAt?: number;
 }

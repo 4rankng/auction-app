@@ -6,7 +6,8 @@ import {
   AuctionSettings,
   UISettings,
   AuctionStatus,
-  AuctionResult
+  AuctionResult,
+  Auctioneer
 } from '../types';
 
 const STORAGE_KEY = 'auction_app_db';
@@ -352,6 +353,85 @@ export class DatabaseService {
     };
     this.saveDatabase();
   }
+
+  // Auctioneer management functions
+  public getAuctioneers = (): Auctioneer[] => {
+    const db = this.loadDatabase();
+    return db.auctioneers || [];
+  };
+
+  public getAuctioneerById = (id: string): Auctioneer | undefined => {
+    const db = this.loadDatabase();
+    return db.auctioneers?.find((auctioneer: Auctioneer) => auctioneer.id === id);
+  };
+
+  public createAuctioneer = (name: string): Auctioneer => {
+    const db = this.loadDatabase();
+
+    // Initialize auctioneers array if it doesn't exist
+    if (!db.auctioneers) {
+      db.auctioneers = [];
+    }
+
+    // Create new auctioneer
+    const newAuctioneer: Auctioneer = {
+      id: Date.now().toString(),
+      name,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    // Add to array
+    db.auctioneers.push(newAuctioneer);
+
+    // Save changes
+    this.saveDatabase();
+
+    return newAuctioneer;
+  };
+
+  public updateAuctioneer = (auctioneer: Auctioneer): Auctioneer => {
+    const db = this.loadDatabase();
+
+    // Find the auctioneer index
+    const index = db.auctioneers?.findIndex((a: Auctioneer) => a.id === auctioneer.id) ?? -1;
+
+    // If auctioneer exists, update it
+    if (index !== -1 && db.auctioneers) {
+      const updatedAuctioneer = {
+        ...auctioneer,
+        updatedAt: Date.now()
+      };
+
+      db.auctioneers[index] = updatedAuctioneer;
+      this.saveDatabase();
+
+      return updatedAuctioneer;
+    }
+
+    throw new Error(`Auctioneer with ID ${auctioneer.id} not found`);
+  };
+
+  public deleteAuctioneer = (id: string): boolean => {
+    const db = this.loadDatabase();
+
+    // Check if auctioneers array exists
+    if (!db.auctioneers) {
+      return false;
+    }
+
+    // Find the auctioneer index
+    const index = db.auctioneers.findIndex((a: Auctioneer) => a.id === id);
+
+    // If auctioneer exists, remove it
+    if (index !== -1) {
+      db.auctioneers.splice(index, 1);
+      this.saveDatabase();
+      return true;
+    }
+
+    return false;
+  };
 }
 
 export const databaseService = new DatabaseService();
