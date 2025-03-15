@@ -13,6 +13,35 @@ export interface TimerOptions {
   tickInterval?: number; // in milliseconds
 }
 
+// Simple Observable implementation for timer updates
+type Observer = (value: number) => void;
+
+class TimerObservable {
+  private observers: Observer[] = [];
+  private currentValue: number = 0;
+
+  subscribe(observer: Observer) {
+    this.observers.push(observer);
+    // Immediately notify new observer of current value
+    observer(this.currentValue);
+
+    // Return unsubscribe function
+    return {
+      unsubscribe: () => {
+        this.observers = this.observers.filter(obs => obs !== observer);
+      }
+    };
+  }
+
+  next(value: number) {
+    this.currentValue = value;
+    this.observers.forEach(observer => observer(value));
+  }
+}
+
+// Create a singleton instance of the observable
+const timerObservable = new TimerObservable();
+
 // Timer storage to track active timers
 const timers = new Map<string, {
   id: NodeJS.Timeout | null;
@@ -113,6 +142,9 @@ export const startTimer = (timerId: string, autoStart = false): boolean => {
     if (currentTimer.options.onTick) {
       currentTimer.options.onTick(remainingSeconds);
     }
+
+    // Update the observable for subscribers
+    timerObservable.next(remainingSeconds);
 
     // Check if timer has completed
     if (remaining <= 0) {
@@ -360,4 +392,12 @@ export const syncTimerWithServer = (timerId: string, serverEndTime: number): boo
   }
 
   return true;
+};
+
+/**
+ * Gets an observable for the timer updates
+ * @returns Observable for timer updates
+ */
+export const getTimerObservable = () => {
+  return timerObservable;
 };

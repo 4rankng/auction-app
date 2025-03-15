@@ -23,6 +23,7 @@ export interface Auction {
   settings: AuctionSettings;
   bidders: Record<string, Bidder>;
   bids: Record<string, Bid>;
+  auctionRound: number;
   startTime?: number;
   endTime?: number;
 }
@@ -54,6 +55,7 @@ export interface AuctionSettings {
   startingPrice: number;
   bidDuration: number;
   auctioneer: string;
+  bidRound?: string;
 }
 
 

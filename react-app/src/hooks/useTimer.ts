@@ -167,8 +167,11 @@ export const useTimer = (options: TimerOptions): [TimerState, TimerControls] => 
 
   // Initialize the timer on mount
   useEffect(() => {
+    // Store ref value in a variable to prevent issues in cleanup
+    const timerId = timerIdRef.current;
+
     // Create the timer using our service
-    timerService.createTimer(timerIdRef.current, initialTime, {
+    timerService.createTimer(timerId, initialTime, {
       onTick: timerCallback,
       onComplete: handleComplete,
       tickInterval,
@@ -176,13 +179,13 @@ export const useTimer = (options: TimerOptions): [TimerState, TimerControls] => 
 
     // Automatically start if requested
     if (autoStart) {
-      timerService.startTimer(timerIdRef.current);
+      timerService.startTimer(timerId);
       setIsRunning(true);
     }
 
     // Clean up on unmount
     return () => {
-      timerService.stopTimer(timerIdRef.current);
+      timerService.stopTimer(timerId);
     };
   }, [initialTime, autoStart, tickInterval, timerCallback, handleComplete]);
 

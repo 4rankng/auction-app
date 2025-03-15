@@ -33,7 +33,8 @@ export default function SetupPage() {
     startingPrice: DEFAULT_STARTING_PRICE,
     bidStep: DEFAULT_BID_STEP,
     bidDuration: DEFAULT_BID_DURATION,
-    auctioneer: ""
+    auctioneer: "",
+    bidRound: "1" // Default bid round
   }
   // State variables
   const [bidders, setBidders] = useState<Bidder[]>([]);
@@ -274,7 +275,8 @@ export default function SetupPage() {
           startingPrice: auctionDetails.startingPrice,
           bidStep: auctionDetails.bidStep,
           bidDuration: auctionDetails.bidDuration,
-          auctioneer: auctionDetails.auctioneer
+          auctioneer: auctionDetails.auctioneer,
+          bidRound: auctionDetails.bidRound // Add bidRound to settings
         },
         startTime: Date.now()
       };
@@ -334,6 +336,14 @@ export default function SetupPage() {
     setAuctionDetails(prev => ({
       ...prev,
       auctioneer: e.target.value
+    }));
+  };
+
+  // Add a handler for bidRound changes
+  const handleBidRoundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAuctionDetails(prev => ({
+      ...prev,
+      bidRound: e.target.value
     }));
   };
 
@@ -409,9 +419,9 @@ export default function SetupPage() {
                   </div>
                 </div>
 
-                {/* Second row: Thời Gian and Nhân viên đấu giá */}
+                {/* Second row: Thời Gian and Vòng Đấu Giá */}
                 <div className="row mb-3">
-          <div className="col-md-6">
+                  <div className="col-md-6">
                     <label className="form-label">Thời Gian (giây)</label>
                     <input
                       type="number"
@@ -419,9 +429,23 @@ export default function SetupPage() {
                       value={auctionDetails.bidDuration}
                       onChange={handleDurationChange}
                       min="60"
-            />
-          </div>
-          <div className="col-md-6">
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Vòng Đấu Giá</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={auctionDetails.bidRound}
+                      onChange={handleBidRoundChange}
+                      placeholder="Nhập số vòng đấu giá"
+                    />
+                  </div>
+                </div>
+
+                {/* Third row: Đấu Giá Viên */}
+                <div className="row mb-3">
+                  <div className="col-md-12">
                     <label className="form-label">Đấu Giá Viên</label>
                     <select
                       className="form-select"
@@ -606,6 +630,7 @@ export default function SetupPage() {
             <ListGroup.Item><strong>Giá khởi điểm:</strong> {auctionDetails.startingPrice.toLocaleString('vi-VN')} VND</ListGroup.Item>
             <ListGroup.Item><strong>Bước giá:</strong> {auctionDetails.bidStep.toLocaleString('vi-VN')} VND</ListGroup.Item>
             <ListGroup.Item><strong>Thời gian:</strong> {auctionDetails.bidDuration} giây</ListGroup.Item>
+            <ListGroup.Item><strong>Vòng Đấu Giá:</strong> {auctionDetails.bidRound}</ListGroup.Item>
             <ListGroup.Item><strong>Người tham gia:</strong> {bidders.length}</ListGroup.Item>
           </ListGroup>
 

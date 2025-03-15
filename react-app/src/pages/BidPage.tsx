@@ -6,12 +6,16 @@ import BidControls from '../components/BidControls';
 import AuctionSummary from '../components/AuctionSummary';
 import AuctionHeader from '../components/AuctionHeader';
 import AuctionResult from '../components/AuctionResult';
+import AuctionPopupPage from '../components/AuctionPopupPage';
 import { useAuction } from '../hooks/useAuction';
 import { useBidderTimer } from '../hooks/useBidderTimer';
+import useAuctionPopup from '../hooks/useAuctionPopup';
+import { renderInPopup } from '../utils/popupRenderer';
 import { Bid } from '../types';
 import * as XLSX from 'xlsx';
 import './BidPage.css';
 import { bidService } from '../services/bidService';
+import * as popupService from '../services/popupService';
 
 // Interface for the bid history display format
 interface BidHistoryDisplay {
@@ -60,6 +64,12 @@ export const BidPage: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Add popup management
+  const { isOpen, popupWindow, openPopup, closePopup } = useAuctionPopup({
+    onClose: () => console.log('Auction popup closed')
+  });
+  const popupInitializedRef = useRef(false);
 
   const showToast = useCallback((
     message: string,
@@ -752,6 +762,172 @@ export const BidPage: React.FC = () => {
       fetchLatestBidHistory(auctionId);
     }
   };
+
+  // Initial popup creation
+  useEffect(() => {
+    if (
+      auction &&
+      !popupInitializedRef.current &&
+      !dataLoading &&
+      !isOpen
+    ) {
+      console.log("BidPage: Initial popup creation");
+      popupInitializedRef.current = true;
+
+      // Slight delay to ensure all state is settled
+      const initTimer = setTimeout(() => {
+        const popup = openPopup();
+
+        if (popup) {
+          console.log("BidPage: Popup opened successfully, will initialize content");
+
+          // Allow the popup DOM to initialize before rendering content
+          setTimeout(() => {
+            console.log("BidPage: Initializing popup content");
+            renderInPopup(
+              popup,
+              AuctionPopupPage,
+              {
+                auctioneer: auction.settings?.auctioneer || 'NA',
+                startingPrice: formatCurrency(auction.settings?.startingPrice || 0),
+                bidStep: formatCurrency(auction.settings?.bidStep || 0),
+                bidNumber: bids.length,
+                bidRound: auction.settings?.bidRound || '1',
+                highestBidder: highestBidderId
+                  ? bidders.find(b => b.id === highestBidderId)?.name || 'Chưa có'
+                  : 'Chưa có',
+                companyName: 'CÔNG TY ĐẤU GIÁ HỢP DANH HP.AUSERCO',
+                auctionTitle: auction.title || 'Phiên Đấu Giá',
+                highestBidAmount: formatCurrency(
+                  bids.length > 0
+                    ? Math.max(...bids.map(bid => bid.amount))
+                    : 0
+                ),
+                isAuctionEnded: isAuctionEnded
+              },
+              {
+                onRender: () => console.log('BidPage: Auction popup rendered successfully')
+              }
+            );
+          }, 500);
+        }
+      }, 200);
+
+      // Clean up timer if effect re-runs
+      return () => clearTimeout(initTimer);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auction, dataLoading, isOpen, openPopup]); // Reduced dependencies to minimum essentials
+
+  // Update the popup data update effect with debouncing and condition check
+  const updatePopupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastUpdateTimeRef = useRef<number>(0);
+
+  useEffect(() => {
+    // Only update content if popup is definitely open and initialized
+    if (
+      popupWindow &&
+      !popupWindow.closed &&
+      auction &&
+      popupInitializedRef.current &&
+      isOpen
+    ) {
+      // Throttle updates - no more than once every 500ms
+      const now = Date.now();
+      if (now - lastUpdateTimeRef.current < 500) {
+        // Too soon since last update, cancel any pending update and schedule a new one
+        if (updatePopupTimeoutRef.current) {
+          clearTimeout(updatePopupTimeoutRef.current);
+        }
+
+        updatePopupTimeoutRef.current = setTimeout(() => {
+          lastUpdateTimeRef.current = Date.now();
+          updatePopupContent();
+        }, 500);
+
+        return;
+      }
+
+      // Update content immediately
+      lastUpdateTimeRef.current = now;
+      updatePopupContent();
+    }
+
+    // Cleanup timeout on unmount or dependency changes
+    return () => {
+      if (updatePopupTimeoutRef.current) {
+        clearTimeout(updatePopupTimeoutRef.current);
+      }
+    };
+
+    // Extract the update content function to reduce duplication
+    function updatePopupContent() {
+      // Guard clause to ensure auction exists
+      if (!auction) {
+        console.error("Cannot update popup: auction is null");
+        return;
+      }
+
+      console.log("BidPage: Updating popup content");
+      renderInPopup(
+        popupWindow!,
+        AuctionPopupPage,
+        {
+          auctioneer: auction.settings?.auctioneer || 'NA',
+          startingPrice: formatCurrency(auction.settings?.startingPrice || 0),
+          bidStep: formatCurrency(auction.settings?.bidStep || 0),
+          bidNumber: bids.length,
+          bidRound: auction.settings?.bidRound || '1',
+          highestBidder: highestBidderId
+            ? bidders.find(b => b.id === highestBidderId)?.name || 'Chưa có'
+            : 'Chưa có',
+          companyName: 'CÔNG TY ĐẤU GIÁ HỢP DANH HP.AUSERCO',
+          auctionTitle: auction.title || 'Phiên Đấu Giá',
+          highestBidAmount: formatCurrency(
+            bids.length > 0
+              ? Math.max(...bids.map(bid => bid.amount))
+              : 0
+          ),
+          isAuctionEnded: isAuctionEnded
+        }
+      );
+    }
+  }, [
+    popupWindow,
+    auction,
+    bids,
+    highestBidderId,
+    isOpen,
+    isAuctionEnded,
+    bidders,
+    formatCurrency
+  ]);
+
+  // Clean up effect - only runs on unmount with empty dependency array
+  useEffect(() => {
+    return () => {
+      console.log("BidPage: Component unmounting, cleanup");
+      popupInitializedRef.current = false;
+
+      // Handle any popup closing on unmount
+      if (popupWindow && !popupWindow.closed) {
+        try {
+          console.log("BidPage: Closing popup during unmount");
+          // First try our hook's closePopup
+          closePopup();
+
+          // Also try direct service call as backup
+          popupService.closePopup('auction_display');
+
+          // Force close all popups as a last resort
+          popupService.closeAllPopups(true);
+        } catch (error) {
+          console.error("Error closing popup during unmount", error);
+        }
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array - only runs on unmount
 
   if (loading) {
     return (
