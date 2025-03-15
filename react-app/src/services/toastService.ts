@@ -28,6 +28,9 @@ class ToastService {
     type: ToastType = 'info',
     duration: number = 3000
   ): Toast {
+    // Clear any existing toasts of the same type to prevent duplicates
+    this.clearToastsByType(type);
+
     const id = String(++this.idCounter);
 
     const toast: Toast = {
@@ -58,6 +61,14 @@ class ToastService {
    */
   public removeToast(id: string): void {
     this.toasts = this.toasts.filter(toast => toast.id !== id);
+    this.notifyListeners();
+  }
+
+  /**
+   * Clear all toasts of a specific type
+   */
+  public clearToastsByType(type: ToastType): void {
+    this.toasts = this.toasts.filter(toast => toast.type !== type);
     this.notifyListeners();
   }
 

@@ -247,10 +247,8 @@ export default function SetupPage() {
     const validation = validateAuctionSetup();
 
     if (!validation.isValid) {
-      errorService.handleError(
-        validation.errorMessage || 'Thiết lập đấu giá không hợp lệ',
-        ErrorType.VALIDATION
-      );
+      // Show only one toast message with the validation error
+      toastService.error(validation.errorMessage || 'Thiết lập đấu giá không hợp lệ', 5000);
       return;
     }
 
@@ -263,7 +261,7 @@ export default function SetupPage() {
 
   const handleStartAuction = async () => {
     if (!setupAuctionId) {
-      errorService.handleError('Không tìm thấy phiên đấu giá để bắt đầu', ErrorType.DATABASE);
+      toastService.error('Không tìm thấy phiên đấu giá để bắt đầu', 5000);
       setShowConfirmation(false);
       return;
     }
@@ -273,10 +271,8 @@ export default function SetupPage() {
 
       const validation = validateAuctionSetup();
       if (!validation.isValid) {
-        errorService.handleError(
-          validation.errorMessage || 'Thiết lập đấu giá không hợp lệ',
-          ErrorType.VALIDATION
-        );
+        // Show only one toast message with the validation error
+        toastService.error(validation.errorMessage || 'Thiết lập đấu giá không hợp lệ', 5000);
         setIsStartingAuction(false);
         return;
       }
@@ -313,10 +309,9 @@ export default function SetupPage() {
       navigate(`/bid?id=${setupAuctionId}`);
     } catch (error) {
       console.error('Error starting auction:', error);
-      errorService.handleError(
+      toastService.error(
         errorService.formatErrorMessage(error) || 'Không thể bắt đầu đấu giá. Vui lòng thử lại.',
-        ErrorType.DATABASE,
-        error
+        5000
       );
       setShowConfirmation(false);
     } finally {

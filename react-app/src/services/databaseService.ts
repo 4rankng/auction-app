@@ -359,7 +359,20 @@ export class DatabaseService {
     if (!this.database.auctioneers) {
       this.database.auctioneers = [];
     }
-    return this.database.auctioneers || [];
+
+    // Ensure uniqueness by ID while preserving the original order
+    const seen = new Set<string>();
+    const deduplicated = this.database.auctioneers.filter((auctioneer: Auctioneer) => {
+      const duplicate = seen.has(auctioneer.id);
+      seen.add(auctioneer.id);
+      return !duplicate;
+    });
+
+    // Update the database with deduplicated auctioneers without changing the order
+    this.database.auctioneers = deduplicated;
+    this.saveDatabase();
+
+    return this.database.auctioneers;
   };
 
   public getAuctioneerById = (id: string): Auctioneer | undefined => {
@@ -374,9 +387,21 @@ export class DatabaseService {
       this.database.auctioneers = [];
     }
 
-    // Create new auctioneer
+    // Before creating, check if an auctioneer with the same name already exists
+    const existingAuctioneer = this.database.auctioneers.find(
+      (a: Auctioneer) => a.name.toLowerCase() === name.toLowerCase()
+    );
+
+    if (existingAuctioneer) {
+      console.log("Auctioneer with this name already exists, returning existing one");
+      return existingAuctioneer;
+    }
+
+    // Create new auctioneer with a unique ID using timestamp + random string
+    const uniqueId = Date.now().toString() + '-' + Math.random().toString(36).substring(2, 7);
+
     const newAuctioneer: Auctioneer = {
-      id: Date.now().toString(),
+      id: uniqueId,
       name,
       createdAt: Date.now(),
       updatedAt: Date.now()

@@ -15,6 +15,7 @@ import * as XLSX from 'xlsx';
 import './BidPage.css';
 import { bidService } from '../services/bidService';
 import * as popupService from '../services/popupService';
+import { auctioneerService } from '../services/auctioneerService';
 
 // Interface for the bid history display format
 interface BidHistoryDisplay {
@@ -72,6 +73,8 @@ export const BidPage: React.FC = () => {
 
   // Add a flag to track popup creation to prevent duplicates
   const popupCreationInProgressRef = useRef(false);
+
+  const [auctioneerName, setAuctioneerName] = useState<string>('');
 
   const showToast = useCallback((
     message: string,
@@ -952,6 +955,29 @@ export const BidPage: React.FC = () => {
     }
   };
 
+  // Add effect to load auctioneer name
+  useEffect(() => {
+    const fetchAuctioneerName = async () => {
+      if (auction?.settings?.auctioneer) {
+        try {
+          const auctioneerData = await auctioneerService.getAuctioneerById(auction.settings.auctioneer);
+          if (auctioneerData) {
+            setAuctioneerName(auctioneerData.name);
+          } else {
+            setAuctioneerName('Không tìm thấy đấu giá viên');
+          }
+        } catch (err) {
+          console.error('Error fetching auctioneer details:', err);
+          setAuctioneerName('');
+        }
+      }
+    };
+
+    if (auction) {
+      fetchAuctioneerName();
+    }
+  }, [auction?.settings?.auctioneer]);
+
   if (loading) {
     return (
       <div className="container py-4 text-center">
@@ -1007,7 +1033,8 @@ export const BidPage: React.FC = () => {
           onEndAuction={handleEndAuction}
           totalBids={bidHistory.length}
           isAuctionEnded={isAuctionEnded}
-          auctioneer={auction?.settings?.auctioneer || 'NA'}
+          auctioneer={auction?.settings?.auctioneer || ''}
+          auctioneerName={auctioneerName}
         />
 
         <div className="card-body py-2">
@@ -1084,7 +1111,7 @@ export const BidPage: React.FC = () => {
       {/* Render the auction popup when needed */}
       {shouldShowPopup && auction && (
         <AuctionPopupRenderer
-          auctioneer={auction.settings?.auctioneer || 'N/A'}
+          auctioneer={auctioneerName || 'N/A'}
           startingPrice={formatCurrency(auction.settings?.startingPrice || 0)}
           bidStep={formatCurrency(auction.settings?.bidStep || 0)}
           bidNumber={bids ? bids.length : 0}

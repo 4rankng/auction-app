@@ -9,6 +9,7 @@ interface AuctionHeaderProps {
   totalBids: number;
   isAuctionEnded?: boolean;
   auctioneer?: string;  // This will now be the auctioneer ID
+  auctioneerName?: string; // New prop for directly passing auctioneer name
 }
 
 /**
@@ -20,12 +21,19 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
   onEndAuction,
   totalBids,
   isAuctionEnded = false,
-  auctioneer = ''
+  auctioneer = '',
+  auctioneerName: propAuctioneerName // Rename to avoid conflict with state
 }) => {
-  const [auctioneerName, setAuctioneerName] = useState<string>('Không có thông tin');
+  const [auctioneerName, setAuctioneerName] = useState<string>(propAuctioneerName || 'Không có thông tin');
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
+    // If auctioneerName is provided in props, use it directly
+    if (propAuctioneerName) {
+      setAuctioneerName(propAuctioneerName);
+      return;
+    }
+
     const fetchAuctioneerDetails = async () => {
       if (!auctioneer) {
         setAuctioneerName('Không có thông tin');
@@ -49,7 +57,7 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
     };
 
     fetchAuctioneerDetails();
-  }, [auctioneer]);
+  }, [auctioneer, propAuctioneerName]);
 
   return (
     <div className="auction-header-container">
