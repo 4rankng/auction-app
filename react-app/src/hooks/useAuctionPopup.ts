@@ -59,8 +59,8 @@ export const useAuctionPopup = (options: UseAuctionPopupOptions = {}) => {
 
     // We're using a blank popup that we'll fill with our content
     const popup = popupService.openPopup('about:blank', 'auction_display', {
-      width: 800,
-      height: 700,
+      width: 750,
+      height: 600,
       resizable: true,
       preventAutoClose: true
     });

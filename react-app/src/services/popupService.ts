@@ -26,6 +26,12 @@ let activePopups: Record<string, { window: Window | null, preventAutoClose?: boo
  * @returns Reference to the opened window or null if unsuccessful
  */
 export const openPopup = (url: string, name: string, config: PopupConfig = {}): Window | null => {
+  // First check if a popup with this name already exists and is open
+  if (isPopupOpen(name)) {
+    console.log(`Popup '${name}' already exists and is open. Returning existing reference.`);
+    return activePopups[name].window;
+  }
+
   // Default configuration values
   const {
     width = 800,
@@ -57,35 +63,50 @@ export const openPopup = (url: string, name: string, config: PopupConfig = {}): 
 
   // Open the new popup
   try {
+    console.log(`Opening popup window '${name}'`);
     const popupWindow = window.open(url, name, features);
 
+    // Check if popup was successfully created
+    if (!popupWindow) {
+      console.warn(`Failed to open popup '${name}'. It may have been blocked by the browser.`);
+      return null;
+    }
+
+    // Try to focus the window to bring it to the front
+    try {
+      popupWindow.focus();
+    } catch (e) {
+      console.warn(`Could not focus popup window:`, e);
+    }
+
     // Store reference to the popup with its configuration
-    if (popupWindow) {
-      // Store the popup reference
-      activePopups[name] = {
-        window: popupWindow,
-        preventAutoClose
-      };
+    activePopups[name] = {
+      window: popupWindow,
+      preventAutoClose
+    };
 
-      // Only set up auto-close detection if preventAutoClose is false
-      if (!preventAutoClose) {
-        // Set up event listener for popup close
-        const checkClosed = setInterval(() => {
-          if (!popupWindow || popupWindow.closed) {
-            clearInterval(checkClosed);
-            delete activePopups[name];
-            console.log(`Popup '${name}' was closed by user`);
-          }
-        }, 500);
+    // Only set up auto-close detection if preventAutoClose is false
+    if (!preventAutoClose) {
+      // Set up event listener for popup close
+      const checkClosed = setInterval(() => {
+        if (!popupWindow || popupWindow.closed) {
+          clearInterval(checkClosed);
+          delete activePopups[name];
+          console.log(`Popup '${name}' was closed by user`);
+        }
+      }, 500);
 
-        // Attach the interval ID to the popupWindow for cleanup
+      // Attach the interval ID to the popupWindow for cleanup
+      try {
         (popupWindow as any).__checkClosedInterval = checkClosed;
+      } catch (e) {
+        console.warn(`Could not attach interval ID to popup:`, e);
       }
     }
 
     return popupWindow;
   } catch (error) {
-    console.error('Failed to open popup window:', error);
+    console.error(`Failed to open popup window '${name}':`, error);
     return null;
   }
 };

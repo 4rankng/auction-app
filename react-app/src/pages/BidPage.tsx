@@ -6,12 +6,11 @@ import BidControls from '../components/BidControls';
 import AuctionSummary from '../components/AuctionSummary';
 import AuctionHeader from '../components/AuctionHeader';
 import AuctionResult from '../components/AuctionResult';
-import AuctionPopupPage from '../components/AuctionPopupPage';
+import AuctionPopupRenderer from '../components/AuctionPopupRenderer';
 import { useAuction } from '../hooks/useAuction';
 import { useBidderTimer } from '../hooks/useBidderTimer';
 import useAuctionPopup from '../hooks/useAuctionPopup';
-import { renderInPopup } from '../utils/popupRenderer';
-import { Bid } from '../types';
+import { Bid, AuctionStatus } from '../types';
 import * as XLSX from 'xlsx';
 import './BidPage.css';
 import { bidService } from '../services/bidService';
@@ -66,10 +65,13 @@ export const BidPage: React.FC = () => {
   const location = useLocation();
 
   // Add popup management
-  const { isOpen, popupWindow, openPopup, closePopup } = useAuctionPopup({
+  const { isOpen, openPopup, closePopup } = useAuctionPopup({
     onClose: () => console.log('Auction popup closed')
   });
   const popupInitializedRef = useRef(false);
+
+  // Add a flag to track popup creation to prevent duplicates
+  const popupCreationInProgressRef = useRef(false);
 
   const showToast = useCallback((
     message: string,
@@ -144,87 +146,177 @@ export const BidPage: React.FC = () => {
     return bidService.formatBidsForDisplay(bids, bidders) as BidHistoryDisplay[];
   }, [bidders]);
 
-  // Define handleEndAuction function with useCallback
-  const handleEndAuction = useCallback(async () => {
-    if (!auction) return;
+  // Update the popup initialization logic to prevent multiple popups
+  useEffect(() => {
+    // Only initialize if we have auction data, not loading, popup isn't initialized,
+    // and we're not already in the process of creating a popup
+    if (auction &&
+        !dataLoading &&
+        !popupInitializedRef.current &&
+        !popupCreationInProgressRef.current) {
+
+      // Set flag to prevent multiple initialization attempts during the same cycle
+      popupCreationInProgressRef.current = true;
+
+      console.log("BidPage: Checking existing popups");
+
+      // Check if any popups are already open with our name
+      const isAlreadyOpen = popupService.isPopupOpen('auction_display');
+      if (isAlreadyOpen) {
+        console.log("BidPage: Popup already exists, will reuse existing window");
+        popupInitializedRef.current = true;
+        setShouldShowPopup(true);
+        popupCreationInProgressRef.current = false;
+        return;
+      }
+
+      console.log("BidPage: Closing any existing popups before creating a new one");
+      // Close ALL popups to ensure clean slate
+      popupService.closeAllPopups(true);
+
+      // Reset popup state
+      setShouldShowPopup(false);
+
+      // Set a longer delay before opening a new popup to ensure previous ones are fully closed
+      // and prevent potential race conditions
+      setTimeout(() => {
+        try {
+          console.log("BidPage: Creating new popup window");
+          popupInitializedRef.current = true;
+
+          // Open the popup window with a unique name to prevent duplicates
+          openPopup();
+
+          console.log("BidPage: Popup should now be open");
+        } catch (error) {
+          console.error("Error creating popup:", error);
+          popupInitializedRef.current = false;
+        } finally {
+          // Reset creation flag when done
+          popupCreationInProgressRef.current = false;
+        }
+      }, 300);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auction, dataLoading]); // Minimal dependencies to avoid re-running
+
+  // Replace the popup update effect with a simpler state variable
+  const [shouldShowPopup, setShouldShowPopup] = useState(false);
+
+  // Add state for auction results to pass to the popup
+  const [auctionResults, setAuctionResults] = useState<{
+    winnerName: string;
+    winnerId: string;
+    finalPrice: string;
+    totalBids: number;
+    auctionDuration: string;
+  } | null>(null);
+
+  // Greatly simplify the dependency tracking to avoid multiple renders
+  useEffect(() => {
+    // Only show popup if it's initialized, open, and we have auction data
+    if (popupInitializedRef.current && isOpen && auction) {
+      if (!shouldShowPopup) {
+        console.log("BidPage: Setting shouldShowPopup to true");
+        setShouldShowPopup(true);
+      }
+    } else if (shouldShowPopup) {
+      console.log("BidPage: Setting shouldShowPopup to false");
+      setShouldShowPopup(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, auction]); // Removed unnecessary dependencies
+
+  // Ensure proper cleanup on unmount
+  useEffect(() => {
+    return () => {
+      console.log("BidPage: Component unmounting, cleanup");
+
+      // Reset all flags
+      popupInitializedRef.current = false;
+      popupCreationInProgressRef.current = false;
+
+      // Make sure all popups are closed
+      console.log("BidPage: Closing popups during unmount");
+      closePopup();
+      popupService.closeAllPopups(true);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array - only runs on unmount
+
+  // Function to handle ending the auction
+  const handleEndAuction = async () => {
+    if (!auction || !auction.id) return;
 
     try {
-      console.log("Starting auction end process...");
+      setLoading(true);
 
-      // Calculate auction duration in seconds
-      const startTimeMs = auction.startTime || Date.now();
-      const endTimeMs = Date.now();
-      const durationSeconds = Math.floor((endTimeMs - startTimeMs) / 1000);
+      // Calculate auction duration
+      const startTime = new Date(auction.startTime || Date.now());
+      const endTime = new Date();
+      const durationMs = endTime.getTime() - startTime.getTime();
 
-      // Update auction status to ENDED and set endTime to current time
-      const updatedAuction = {
-        ...auction,
-        status: 'ENDED' as const,
-        endTime: endTimeMs,
-        result: {
-          startTime: startTimeMs,
-          endTime: endTimeMs,
-          startingPrice: auction.settings?.startingPrice || 0,
-          finalPrice: auction.currentPrice || 0,
-          duration: durationSeconds,
-          totalBids: bids.length,
-          winnerId: '',
-          winnerName: ''
-        }
+      // Format duration as HH:MM:SS
+      const durationSec = Math.floor(durationMs / 1000);
+      const hours = Math.floor(durationSec / 3600);
+      const minutes = Math.floor((durationSec % 3600) / 60);
+      const seconds = durationSec % 60;
+      const formattedDuration =
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+      // Get the winner (highest bidder) info for the result object
+      const winnerInfo = highestBidderId && bidders ?
+        bidders.find(b => b.id === highestBidderId) : null;
+
+      // Calculate final price
+      const highestBid = bids && bids.length > 0 ?
+        bids[0].amount : (auction.settings?.startingPrice || 0);
+
+      // Set auction results for display in popup
+      setAuctionResults({
+        winnerName: '', // Set empty string for bidder name
+        winnerId: highestBidderId || '',
+        finalPrice: formatCurrency(highestBid),
+        totalBids: bids ? bids.length : 0,
+        auctionDuration: formattedDuration
+      });
+
+      // Create a proper auction result object that matches the Auction interface
+      const auctionResult = {
+        startTime: startTime.getTime(),
+        endTime: endTime.getTime(),
+        startingPrice: auction.settings?.startingPrice || 0,
+        finalPrice: highestBid,
+        duration: durationMs,
+        winnerId: highestBidderId || '',
+        winnerName: winnerInfo ? winnerInfo.name : '',
+        totalBids: bids ? bids.length : 0
       };
 
-      // Find the highest bid to set as the winner
-      const highestBid = bids
-        .sort((a, b) => b.amount - a.amount)[0];
+      // Update auction status
+      const updatedAuction = {
+        ...auction,
+        status: 'ENDED' as AuctionStatus,
+        endTime: endTime.getTime(), // Use number instead of string
+        result: auctionResult // Add proper result object
+      };
 
-      if (highestBid) {
-        const winningBidder = bidders.find(bidder => bidder.id === highestBid.bidderId);
-        if (winningBidder) {
-          // Update result with winner information
-          updatedAuction.result = {
-            ...updatedAuction.result,
-            winnerId: winningBidder.id,
-            winnerName: winningBidder.name,
-            finalPrice: highestBid.amount
-          };
-
-          console.log(`Auction ended. Winner: ${winningBidder.name} with final bid: ${highestBid.amount.toLocaleString('vi-VN')} VND`);
-        }
-      } else {
-        console.log('Auction ended with no bids.');
-      }
-
-      // Log the updated auction before saving
-      console.log("Saving auction with result:", JSON.stringify(updatedAuction.result, null, 2));
-
-      // Save the updated auction with complete result object to the database
+      // Save to database
       await updateAuction(updatedAuction);
 
-      // Fetch the updated auction to make sure we have the latest data
-      if (auctionId) {
-        await getAuctionById(auctionId);
-        console.log("Fetched updated auction after ending");
-      }
-
-      // Update local state to reflect auction ended
+      // Set auction as ended locally
       setIsAuctionEnded(true);
-      console.log("isAuctionEnded set to true");
 
-      // Take a final snapshot of the elapsed time to display
-      // This will be formatted as HH:MM:SS for UI display
-      const finalElapsedTime = calculateElapsedTime();
-      setElapsedTime(finalElapsedTime);
-      console.log("Final elapsed time set to:", finalElapsedTime);
+      // Show success message
+      showToast('Phiên đấu giá đã kết thúc thành công!', 'success');
 
-      // The timer will automatically stop updating because isAuctionEnded is now true
-      // This is handled in the useEffect with the interval
-
-      showToast('Đấu giá kết thúc thành công', 'success', 'top-center');
     } catch (error) {
       console.error('Error ending auction:', error);
-      showToast(error instanceof Error ? error.message : 'Không thể kết thúc đấu giá', 'error', 'top-center');
+      showToast('Không thể kết thúc phiên đấu giá', 'error');
+    } finally {
+      setLoading(false);
     }
-  }, [auction, bids, bidders, updateAuction, getAuctionById, auctionId, showToast, calculateElapsedTime]);
+  };
 
   // Use the bidder timer hook with improved functionality
   const {
@@ -678,7 +770,7 @@ export const BidPage: React.FC = () => {
       const auctionInfoData = [
         ['Thông tin đấu giá', 'Giá trị'],
         ['Tên phiên đấu giá', auctionTitle],
-        ['Người tổ chức', auction.settings.auctioneer || 'NA'],
+        ['Người tổ chức', auction.settings?.auctioneer || 'NA'],
         ['Người thắng cuộc', lastBidderId ? bidders.find(b => b.id === lastBidderId)?.name || 'Không có người thắng' : 'Không có người thắng'],
         ['Giá thắng cuộc', bidService.formatCurrency(parseInt(currentPrice.replace(/[^\d]/g, '')))],
         ['Thời gian bắt đầu', auction.startTime ? bidService.formatTimestamp(auction.startTime) : bidService.formatTimestamp(Date.now())],
@@ -762,172 +854,6 @@ export const BidPage: React.FC = () => {
       fetchLatestBidHistory(auctionId);
     }
   };
-
-  // Initial popup creation
-  useEffect(() => {
-    if (
-      auction &&
-      !popupInitializedRef.current &&
-      !dataLoading &&
-      !isOpen
-    ) {
-      console.log("BidPage: Initial popup creation");
-      popupInitializedRef.current = true;
-
-      // Slight delay to ensure all state is settled
-      const initTimer = setTimeout(() => {
-        const popup = openPopup();
-
-        if (popup) {
-          console.log("BidPage: Popup opened successfully, will initialize content");
-
-          // Allow the popup DOM to initialize before rendering content
-          setTimeout(() => {
-            console.log("BidPage: Initializing popup content");
-            renderInPopup(
-              popup,
-              AuctionPopupPage,
-              {
-                auctioneer: auction.settings?.auctioneer || 'NA',
-                startingPrice: formatCurrency(auction.settings?.startingPrice || 0),
-                bidStep: formatCurrency(auction.settings?.bidStep || 0),
-                bidNumber: bids.length,
-                bidRound: auction.settings?.bidRound || '1',
-                highestBidder: highestBidderId
-                  ? bidders.find(b => b.id === highestBidderId)?.name || 'Chưa có'
-                  : 'Chưa có',
-                companyName: 'CÔNG TY ĐẤU GIÁ HỢP DANH HP.AUSERCO',
-                auctionTitle: auction.title || 'Phiên Đấu Giá',
-                highestBidAmount: formatCurrency(
-                  bids.length > 0
-                    ? Math.max(...bids.map(bid => bid.amount))
-                    : 0
-                ),
-                isAuctionEnded: isAuctionEnded
-              },
-              {
-                onRender: () => console.log('BidPage: Auction popup rendered successfully')
-              }
-            );
-          }, 500);
-        }
-      }, 200);
-
-      // Clean up timer if effect re-runs
-      return () => clearTimeout(initTimer);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auction, dataLoading, isOpen, openPopup]); // Reduced dependencies to minimum essentials
-
-  // Update the popup data update effect with debouncing and condition check
-  const updatePopupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastUpdateTimeRef = useRef<number>(0);
-
-  useEffect(() => {
-    // Only update content if popup is definitely open and initialized
-    if (
-      popupWindow &&
-      !popupWindow.closed &&
-      auction &&
-      popupInitializedRef.current &&
-      isOpen
-    ) {
-      // Throttle updates - no more than once every 500ms
-      const now = Date.now();
-      if (now - lastUpdateTimeRef.current < 500) {
-        // Too soon since last update, cancel any pending update and schedule a new one
-        if (updatePopupTimeoutRef.current) {
-          clearTimeout(updatePopupTimeoutRef.current);
-        }
-
-        updatePopupTimeoutRef.current = setTimeout(() => {
-          lastUpdateTimeRef.current = Date.now();
-          updatePopupContent();
-        }, 500);
-
-        return;
-      }
-
-      // Update content immediately
-      lastUpdateTimeRef.current = now;
-      updatePopupContent();
-    }
-
-    // Cleanup timeout on unmount or dependency changes
-    return () => {
-      if (updatePopupTimeoutRef.current) {
-        clearTimeout(updatePopupTimeoutRef.current);
-      }
-    };
-
-    // Extract the update content function to reduce duplication
-    function updatePopupContent() {
-      // Guard clause to ensure auction exists
-      if (!auction) {
-        console.error("Cannot update popup: auction is null");
-        return;
-      }
-
-      console.log("BidPage: Updating popup content");
-      renderInPopup(
-        popupWindow!,
-        AuctionPopupPage,
-        {
-          auctioneer: auction.settings?.auctioneer || 'NA',
-          startingPrice: formatCurrency(auction.settings?.startingPrice || 0),
-          bidStep: formatCurrency(auction.settings?.bidStep || 0),
-          bidNumber: bids.length,
-          bidRound: auction.settings?.bidRound || '1',
-          highestBidder: highestBidderId
-            ? bidders.find(b => b.id === highestBidderId)?.name || 'Chưa có'
-            : 'Chưa có',
-          companyName: 'CÔNG TY ĐẤU GIÁ HỢP DANH HP.AUSERCO',
-          auctionTitle: auction.title || 'Phiên Đấu Giá',
-          highestBidAmount: formatCurrency(
-            bids.length > 0
-              ? Math.max(...bids.map(bid => bid.amount))
-              : 0
-          ),
-          isAuctionEnded: isAuctionEnded
-        }
-      );
-    }
-  }, [
-    popupWindow,
-    auction,
-    bids,
-    highestBidderId,
-    isOpen,
-    isAuctionEnded,
-    bidders,
-    formatCurrency
-  ]);
-
-  // Clean up effect - only runs on unmount with empty dependency array
-  useEffect(() => {
-    return () => {
-      console.log("BidPage: Component unmounting, cleanup");
-      popupInitializedRef.current = false;
-
-      // Handle any popup closing on unmount
-      if (popupWindow && !popupWindow.closed) {
-        try {
-          console.log("BidPage: Closing popup during unmount");
-          // First try our hook's closePopup
-          closePopup();
-
-          // Also try direct service call as backup
-          popupService.closePopup('auction_display');
-
-          // Force close all popups as a last resort
-          popupService.closeAllPopups(true);
-        } catch (error) {
-          console.error("Error closing popup during unmount", error);
-        }
-      }
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array - only runs on unmount
 
   if (loading) {
     return (
@@ -1057,6 +983,33 @@ export const BidPage: React.FC = () => {
           Xuất Excel
         </button>
       )}
+
+      {/* Render the auction popup when needed */}
+      {shouldShowPopup && auction && (
+        <AuctionPopupRenderer
+          auctioneer={auction.settings?.auctioneer || 'N/A'}
+          startingPrice={formatCurrency(auction.settings?.startingPrice || 0)}
+          bidStep={formatCurrency(auction.settings?.bidStep || 0)}
+          bidNumber={bids ? bids.length : 0}
+          bidRound={auction.settings?.bidRound || "1"}
+          highestBidderId={highestBidderId || ''}
+          companyName="Công Ty Đấu Giá HP.AUSERCO"
+          auctionTitle={auctionTitle}
+          highestBidAmount={formatCurrency(bids && bids.length > 0 ? bids[0].amount : (auction.settings?.startingPrice || 0))}
+          isAuctionEnded={isAuctionEnded}
+          onClose={() => {
+            console.log('Popup closed by user');
+            closePopup();
+          }}
+          // Pass auction result data if available
+          winnerId={auctionResults?.winnerId}
+          finalPrice={auctionResults?.finalPrice}
+          totalBids={auctionResults?.totalBids}
+          auctionDuration={auctionResults?.auctionDuration}
+        />
+      )}
     </div>
   );
 };
+
+export default BidPage;
