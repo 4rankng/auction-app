@@ -132,16 +132,6 @@
   margin-bottom: 1rem;
 }
 
-.end-auction-btn {
-  width: 100%;
-  background: #e53e3e;
-  color: white;
-}
-
-.end-auction-btn:hover {
-  background: #c53030;
-}
-
 .bid-history {
   grid-column: 1 / -1;
   background: white;
