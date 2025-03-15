@@ -867,16 +867,16 @@ export const BidPage: React.FC = () => {
         onRefresh={handleRefreshBidHistory}
       />}
 
-      {/* Floating Back Button - Always visible */}
+      {/* Floating Back Button */}
       <button className="floating-back-btn" onClick={handleGoBack}>
-        <i className="bi bi-arrow-left"></i>
+        <i className="bi bi-arrow-left me-2"></i>
         Quay Lại Thiết Lập
       </button>
 
       {/* Floating Export Button - Only visible when auction ends */}
       {isAuctionEnded && (
         <button className="floating-export-btn" onClick={handleExportData}>
-          <i className="bi bi-file-earmark-excel"></i>
+          <i className="bi bi-file-earmark-excel me-2"></i>
           Xuất Excel
         </button>
       )}

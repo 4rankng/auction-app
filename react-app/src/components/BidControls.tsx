@@ -4,13 +4,13 @@ import React, { useState, useEffect } from 'react';
 const bidButtonAnimation = `
 @keyframes pulse-button {
   0% {
-    box-shadow: 0 4px 6px rgba(40, 167, 69, 0.25);
+    outline: 0px solid rgba(40, 167, 69, 0);
   }
   50% {
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.5);
+    outline: 3px solid rgba(40, 167, 69, 0.3);
   }
   100% {
-    box-shadow: 0 4px 6px rgba(40, 167, 69, 0.25);
+    outline: 0px solid rgba(40, 167, 69, 0);
   }
 }
 `;
@@ -303,7 +303,8 @@ const BidControls: React.FC<BidControlsProps> = ({
                   style={{
                     minWidth: '140px',
                     fontWeight: bidMethod === 'basePrice' ? 'bold' : 'normal',
-                    boxShadow: bidMethod === 'basePrice' ? '0 0 0 0.2rem rgba(0,123,255,.25)' : 'none'
+                    boxShadow: 'none',
+                    outline: bidMethod === 'basePrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none'
                   }}
                 >
                   <i className={`bi ${bidMethod === 'basePrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
@@ -322,7 +323,8 @@ const BidControls: React.FC<BidControlsProps> = ({
                 style={{
                   minWidth: '140px',
                   fontWeight: bidMethod === 'stepPrice' ? 'bold' : 'normal',
-                  boxShadow: bidMethod === 'stepPrice' ? '0 0 0 0.2rem rgba(0,123,255,.25)' : 'none'
+                  boxShadow: 'none',
+                  outline: bidMethod === 'stepPrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none'
                 }}
               >
                 <i className={`bi ${bidMethod === 'stepPrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
@@ -341,7 +343,8 @@ const BidControls: React.FC<BidControlsProps> = ({
                 style={{
                   minWidth: '140px',
                   fontWeight: bidMethod === 'customPrice' ? 'bold' : 'normal',
-                  boxShadow: bidMethod === 'customPrice' ? '0 0 0 0.2rem rgba(0,123,255,.25)' : 'none'
+                  boxShadow: 'none',
+                  outline: bidMethod === 'customPrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none'
                 }}
               >
                 <i className={`bi ${bidMethod === 'customPrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
@@ -448,34 +451,24 @@ const BidControls: React.FC<BidControlsProps> = ({
 
           <div className="col d-flex justify-content-end">
             <button
-              className="btn fw-bold me-2"
+              className="btn fw-bold me-2 app-btn app-btn-success"
               style={{
                 minWidth: '120px',
-                backgroundColor: isBidButtonDisabled() ? '#adb5bd' : '#28a745',
-                color: 'white',
-                borderRadius: '4px',
                 padding: '10px 20px',
                 fontSize: '1.1rem',
-                boxShadow: isBidButtonDisabled() ? 'none' : '0 4px 6px rgba(40, 167, 69, 0.25)',
-                border: 'none',
-                transition: 'all 0.3s ease',
                 transform: isBidButtonDisabled() ? 'none' : 'translateY(-2px)',
-                animation: isBidButtonDisabled() ? 'none' : 'pulse-button 2s infinite'
+                animation: isBidButtonDisabled() ? 'none' : 'pulse-button 2s infinite',
               }}
               onClick={handleSubmit}
               disabled={isBidButtonDisabled()}
               onMouseEnter={(e) => {
                 if (!isBidButtonDisabled()) {
-                  e.currentTarget.style.backgroundColor = '#218838';
-                  e.currentTarget.style.boxShadow = '0 6px 8px rgba(40, 167, 69, 0.35)';
                   e.currentTarget.style.transform = 'translateY(-4px)';
                   e.currentTarget.style.animation = 'none'; // Pause animation on hover
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isBidButtonDisabled()) {
-                  e.currentTarget.style.backgroundColor = '#28a745';
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(40, 167, 69, 0.25)';
                   e.currentTarget.style.transform = 'translateY(-2px)';
                   e.currentTarget.style.animation = 'pulse-button 2s infinite'; // Resume animation
                 }
@@ -484,15 +477,10 @@ const BidControls: React.FC<BidControlsProps> = ({
               <i className="bi bi-check-circle me-2"></i> Đấu Giá
             </button>
             <button
-              className="btn fw-bold"
+              className="btn fw-bold app-btn app-btn-danger"
               style={{
                 minWidth: '180px',
-                color: '#dc3545',
-                backgroundColor: 'white',
-                border: '1px solid #dc3545',
-                borderRadius: '4px',
                 padding: '8px 15px',
-                transition: 'all 0.2s ease'
               }}
               onClick={onCancelBid}
               disabled={isCancelBidDisabled}

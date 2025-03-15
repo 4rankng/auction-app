@@ -54,3 +54,101 @@
   padding-left: 0.25rem;
   font-weight: 500;
 }
+
+/* Global styles for consistent UI across app */
+
+/* Card styling */
+.app-card {
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background-color: #ffffff;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.app-card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 1rem 1.25rem;
+  font-weight: 500;
+}
+
+.app-card-title {
+  color: #212529;
+  font-weight: 600;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.app-card-body {
+  padding: 1.25rem;
+}
+
+/* Button styling */
+.app-btn {
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  padding: 0.375rem 0.75rem;
+}
+
+.app-btn:focus {
+  box-shadow: none;
+  outline: 1px solid rgba(13, 110, 253, 0.25);
+}
+
+.app-btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+.app-btn-success:hover:not(:disabled) {
+  background-color: #218838;
+  border-color: #1e7e34;
+  outline: 2px solid rgba(40, 167, 69, 0.25);
+  transform: translateY(-2px);
+}
+
+.app-btn-success:active:not(:disabled) {
+  transform: translateY(0);
+  outline: 1px solid rgba(40, 167, 69, 0.4);
+}
+
+.app-btn-success:disabled {
+  background-color: #adb5bd;
+  border-color: #adb5bd;
+  color: white;
+  transform: none;
+}
+
+.app-btn-danger {
+  color: #dc3545;
+  background-color: white;
+  border: 1px solid #dc3545;
+}
+
+.app-btn-danger:hover:not(:disabled) {
+  background-color: rgba(220, 53, 69, 0.05);
+  border-color: #dc3545;
+  outline: 2px solid rgba(220, 53, 69, 0.25);
+  transform: translateY(-2px);
+}
+
+.app-btn-danger:active:not(:disabled) {
+  transform: translateY(0);
+  outline: 1px solid rgba(220, 53, 69, 0.4);
+}
+
+/* Animation keyframes */
+@keyframes pulse-button {
+  0% {
+    outline: 0px solid rgba(40, 167, 69, 0);
+  }
+  50% {
+    outline: 3px solid rgba(40, 167, 69, 0.3);
+  }
+  100% {
+    outline: 0px solid rgba(40, 167, 69, 0);
+  }
+}

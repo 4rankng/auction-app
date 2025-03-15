@@ -10,9 +10,10 @@
 .auction-info {
   grid-column: 1 / -1;
   background: white;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
+  box-shadow: none;
 }
 
 .auction-info h1 {
@@ -82,9 +83,10 @@
 
 .bidding-section {
   background: white;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
+  box-shadow: none;
 }
 
 .bidder-grid {
@@ -96,7 +98,7 @@
 
 .bidder-button {
   padding: 1rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dee2e6;
   border-radius: 4px;
   background: white;
   cursor: pointer;
@@ -104,14 +106,14 @@
 }
 
 .bidder-button:hover:not(.disabled) {
-  background: #f7fafc;
-  border-color: #cbd5e0;
+  background: #f8f9fa;
+  border-color: #ced4da;
 }
 
 .bidder-button.selected {
-  background: #ebf8ff;
-  border-color: #4299e1;
-  color: #2b6cb0;
+  background: #e9f0ff;
+  border-color: #80bdff;
+  color: #0d6efd;
 }
 
 .bidder-button.disabled {
@@ -143,9 +145,10 @@
 .bid-history {
   grid-column: 1 / -1;
   background: white;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
+  box-shadow: none;
 }
 
 .table-container {
@@ -177,8 +180,9 @@ th {
   text-align: center;
   padding: 2rem;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  box-shadow: none;
 }
 
 .error {
@@ -337,7 +341,7 @@ th {
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
   z-index: 9999;
   margin: 0;
   backdrop-filter: blur(4px);
@@ -348,13 +352,13 @@ th {
   border-color: rgba(108, 117, 125, 0.9);
   color: rgba(108, 117, 125, 1);
   transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  outline: 2px solid rgba(108, 117, 125, 0.2);
 }
 
 .floating-back-btn:active {
   transform: translateY(-1px);
   background-color: rgba(108, 117, 125, 0.1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  outline: 1px solid rgba(108, 117, 125, 0.3);
 }
 
 .floating-back-btn i {
@@ -423,22 +427,22 @@ th {
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
   z-index: 9999;
   margin: 0;
   backdrop-filter: blur(4px);
-  animation: pulse-subtle 2s infinite;
+  animation: pulse-outline 2s infinite;
 }
 
-@keyframes pulse-subtle {
+@keyframes pulse-outline {
   0% {
-    box-shadow: 0 0 0 0 rgba(33, 136, 56, 0.2);
+    outline: 0px solid rgba(33, 136, 56, 0);
   }
   70% {
-    box-shadow: 0 0 0 6px rgba(33, 136, 56, 0);
+    outline: 4px solid rgba(33, 136, 56, 0.2);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(33, 136, 56, 0);
+    outline: 0px solid rgba(33, 136, 56, 0);
   }
 }
 
@@ -447,14 +451,14 @@ th {
   border-color: rgba(33, 136, 56, 0.9);
   color: rgba(33, 136, 56, 1);
   transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  outline: 2px solid rgba(33, 136, 56, 0.3);
   animation: none;
 }
 
 .floating-export-btn:active {
   transform: translateY(-1px);
   background-color: rgba(33, 136, 56, 0.1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  outline: 1px solid rgba(33, 136, 56, 0.4);
 }
 
 .floating-export-btn i {
