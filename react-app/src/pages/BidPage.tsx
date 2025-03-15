@@ -668,7 +668,7 @@ export const BidPage: React.FC = () => {
       const auctionInfoData = [
         ['Thông tin đấu giá', 'Giá trị'],
         ['Tên phiên đấu giá', auctionTitle],
-        ['Người tổ chức', auction.settings.auctioneer || 'Admin'],
+        ['Người tổ chức', auction.settings.auctioneer || 'NA'],
         ['Người thắng cuộc', lastBidderId ? bidders.find(b => b.id === lastBidderId)?.name || 'Không có người thắng' : 'Không có người thắng'],
         ['Giá thắng cuộc', bidService.formatCurrency(parseInt(currentPrice.replace(/[^\d]/g, '')))],
         ['Thời gian bắt đầu', auction.startTime ? bidService.formatTimestamp(auction.startTime) : bidService.formatTimestamp(Date.now())],
@@ -808,7 +808,7 @@ export const BidPage: React.FC = () => {
           onEndAuction={handleEndAuction}
           totalBids={bidHistory.length}
           isAuctionEnded={isAuctionEnded}
-          auctioneer={auction?.settings?.auctioneer || 'Admin'}
+          auctioneer={auction?.settings?.auctioneer || 'NA'}
         />
 
         <div className="card-body py-2">

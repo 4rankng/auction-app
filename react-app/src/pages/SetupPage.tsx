@@ -12,7 +12,7 @@ import { databaseService } from '../services/databaseService';
 import { errorService, ErrorType } from '../services/errorService';
 import { toastService } from '../services/toastService';
 import ToastContainer from '../components/ToastContainer';
-import { AUCTION_STATUS, DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE, DEFAULT_AUCTIONEER, DEFAULT_AUCTION_TITLE, DEFAULT_AUCTION_DESCRIPTION, DEFAULT_AUCTIONEER_OPTIONS } from '../utils/constants';
+import { AUCTION_STATUS, DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE, DEFAULT_AUCTION_TITLE, DEFAULT_AUCTION_DESCRIPTION, DEFAULT_AUCTIONEER_OPTIONS } from '../utils/constants';
 
 // Define the form input types to match BidderManagement
 type BidderFormInputs = {
@@ -33,7 +33,7 @@ export default function SetupPage() {
     startingPrice: DEFAULT_STARTING_PRICE,
     bidStep: DEFAULT_BID_STEP,
     bidDuration: DEFAULT_BID_DURATION,
-    auctioneer: DEFAULT_AUCTIONEER
+    auctioneer: ""
   }
   // State variables
   const [bidders, setBidders] = useState<Bidder[]>([]);
@@ -422,7 +422,7 @@ export default function SetupPage() {
             />
           </div>
           <div className="col-md-6">
-                    <label className="form-label">Nhân viên đấu giá</label>
+                    <label className="form-label">Đấu Giá Viên</label>
                     <select
                       className="form-select"
                       value={auctionDetails.auctioneer}

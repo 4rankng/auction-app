@@ -30,12 +30,10 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
           {auctioneer && (
             <div className="auction-metadata-item">
               <i className="bi bi-person-badge me-2"></i>
-              <span className="auction-metadata-label">Người Đấu Giá:</span>
+              <span className="auction-metadata-label">Đấu Giá Viên:</span>
               <span className="auction-metadata-value">{auctioneer}</span>
             </div>
           )}
-
-
         </div>
       </div>
 
