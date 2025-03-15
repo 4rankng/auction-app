@@ -1,68 +1,96 @@
 export interface Bidder {
   id: string;
   name: string;
-  idNumber: string;
+  nirc: string;
   issuingAuthority: string;
   address: string;
-  avatar?: string;
   phone?: string;
   email?: string;
 }
 
-export interface Bid {
-  id: string;
-  auctionId: string;
-  bidderId: string;
-  bidderName: string;
-  amount: number;
-  timestamp: number;
-}
+
+
+export type AuctionStatus = 'SETUP' | 'IN_PROGRESS' | 'ENDED';
+
 
 export interface Auction {
   id: string;
   title: string;
   description: string;
-  status: 'SETUP' | 'IN_PROGRESS' | 'ENDED';
-  startingPrice: number;
+  status: AuctionStatus;
   currentPrice: number;
-  bidStep: number;
-  auctionItem: string;
-  auctioneer: string;
-  winner?: {
-    id: string;
-    name: string;
-    finalBid: number;
-  };
-  timeLeft?: number;
+  result: AuctionResult;
+  settings: AuctionSettings;
+  bidders: Record<string, Bidder>;
+  bids: Record<string, Bid>;
   startTime?: number;
   endTime?: number;
-  finalPrice?: number;
 }
 
+
 export interface AuctionResult {
-  auctionId: string;
+  startTime: number;
   endTime: number;
   startingPrice: number;
   finalPrice: number;
-  winner: {
-    id: string;
-    name: string;
-    finalBid: number;
-  };
+  duration: number;
+  winnerId: string;
+  winnerName: string;
   totalBids: number;
-  status: 'SUCCESS' | 'NO_BIDS';
 }
 
-export interface Settings {
-  initialPrice: number;
-  priceIncrement: number;
-  auctionDuration: number;
+
+
+
+export interface Bid {
+  id: string;
+  bidderId: string;
+  amount: number;
+  timestamp: number;
+}
+
+export interface AuctionSettings {
+  bidStep: number;
+  startingPrice: number;
+  bidDuration: number;
+  auctioneer: string;
+}
+
+
+export interface UISettings {
+  theme: string;
+  language: string;
+  locale: string;
 }
 
 export interface Database {
   auctions: Record<string, Auction>;
-  bidders: Record<string, Bidder>;
-  bids: Record<string, Bid>;
-  settings: Settings;
-  currentAuctionId?: string;
+  settings: UISettings;
+}
+
+export interface AuctionFormData {
+  title: string;
+  description: string;
+  startingPrice: number;
+  bidStep: number;
+  bidDuration: number;
+  auctioneer: string;
+}
+
+export interface BidderFormData {
+  bidderID: string;
+  name: string;
+  nirc: string;
+  issuingAuthority: string;
+  address: string;
+}
+
+export interface BidFormData {
+  bidderId: string;
+  amount: number;
+}
+
+export interface AuctionFilter {
+  status?: AuctionStatus;
+  auctioneer?: string;
 }
