@@ -28,6 +28,9 @@ export default function SetupPage() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Add state for screen size
+  const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+
   const DEFAULT_AUCTION_DETAILS = {
     title: DEFAULT_AUCTION_TITLE,
     description: DEFAULT_AUCTION_DESCRIPTION,
@@ -52,6 +55,22 @@ export default function SetupPage() {
     bidDuration: DEFAULT_BID_DURATION,
     auctioneer: ""
   });
+
+  // Check screen size on mount and when window is resized
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkScreenSize();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkScreenSize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   // Load bidders on component mount
   useEffect(() => {
@@ -388,6 +407,11 @@ export default function SetupPage() {
     }));
   };
 
+  // Function to get button text based on screen size
+  const getButtonText = (text: string): JSX.Element | string => {
+    return isSmallScreen ? '' : text;
+  };
+
   return (
     <div className="setup-page-container">
       <h1 className="mt-4 mb-4 text-center">Thiết Lập Đấu Giá</h1>
@@ -609,20 +633,38 @@ export default function SetupPage() {
       {/* Start Auction Button */}
       <div className="start-auction-container">
         <div className="container">
-          <button
-            className="btn btn-success btn-lg w-100"
-            onClick={handleConfirmAuction}
-            disabled={isStartingAuction}
-          >
-            {isStartingAuction ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Đang Bắt Đầu...
-              </>
-            ) : (
-              'Bắt Đầu'
-            )}
-          </button>
+          <div className="row">
+            <div className="col-6 pe-1">
+              <button
+                className="btn btn-success btn-lg w-100"
+                onClick={handleConfirmAuction}
+                disabled={isStartingAuction}
+                style={{ height: "60px" }}
+              >
+                {isStartingAuction ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    {getButtonText('Đang Bắt Đầu...')}
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-shop me-2" style={{ color: 'white' }}></i>
+                    {getButtonText('Bắt Đầu')}
+                  </>
+                )}
+              </button>
+            </div>
+            <div className="col-6 ps-1">
+              <button
+                className="btn btn-primary btn-lg w-100"
+                onClick={() => navigate('/history')}
+                style={{ height: "60px" }}
+              >
+                <i className="bi bi-database me-2"></i>
+                {getButtonText('Lịch Sử')}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
