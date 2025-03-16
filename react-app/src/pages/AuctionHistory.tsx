@@ -24,8 +24,11 @@ const AuctionHistory: React.FC = () => {
       setLoading(true);
       const auctionList = await databaseService.getAuctions();
 
+      // Filter to only show completed auctions
+      const completedAuctions = auctionList.filter(auction => auction.status === 'ENDED');
+
       // Sort auctions by start time (newest first)
-      const sortedAuctions = auctionList.sort((a, b) => {
+      const sortedAuctions = completedAuctions.sort((a, b) => {
         const aStartTime = a.startTime || 0;
         const bStartTime = b.startTime || 0;
         return bStartTime - aStartTime;
@@ -43,6 +46,13 @@ const AuctionHistory: React.FC = () => {
 
   const handleViewAuction = (auctionId: string) => {
     navigate(`/bid?id=${auctionId}`);
+  };
+
+  const handleExportAuction = (auction: Auction) => {
+    // Handle export logic here
+    console.log('Exporting auction:', auction.id);
+    // This would be where you'd implement export functionality
+    alert(`Xuất phiên đấu giá: ${auction.title}`);
   };
 
   const getStatusBadgeClass = (status: string) => {
@@ -154,12 +164,12 @@ const AuctionHistory: React.FC = () => {
       ) : error ? (
         <Alert variant="danger">{error}</Alert>
       ) : auctions.length === 0 ? (
-        <Alert variant="info">Không có phiên đấu giá nào</Alert>
+        <Alert variant="info">Không có phiên đấu giá đã kết thúc</Alert>
       ) : (
         <>
           <Card className="shadow-sm mb-4">
             <Card.Header className="bg-light py-3">
-              <h2 className="mb-0">Lịch sử đấu giá</h2>
+              <h2 className="mb-0">Lịch sử đấu giá đã kết thúc</h2>
             </Card.Header>
             <Card.Body className="p-0">
               <div className="table-responsive">
@@ -189,14 +199,24 @@ const AuctionHistory: React.FC = () => {
                           </span>
                         </td>
                         <td className="text-center align-middle">
-                          <Button
-                            variant="outline-primary"
-                            size="sm"
-                            onClick={() => handleViewAuction(auction.id)}
-                            className="px-3"
-                          >
-                            <i className="bi bi-eye me-1"></i> Xem
-                          </Button>
+                          <div className="d-flex justify-content-center gap-2">
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
+                              onClick={() => handleViewAuction(auction.id)}
+                              className="px-3"
+                            >
+                              <i className="bi bi-eye me-1"></i>
+                            </Button>
+                            <Button
+                              variant="outline-success"
+                              size="sm"
+                              onClick={() => handleExportAuction(auction)}
+                              className="px-3"
+                            >
+                              <i className="bi bi-file-earmark-excel me-1"></i>
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
