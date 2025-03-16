@@ -701,3 +701,10 @@ Improving the maintainability and readability of the BidPage component can be ac
   Perform code reviews to ensure that the new structure improves readability and that no functionality has been lost in the refactor.
 
 Following these steps will reduce the complexity of the BidPage component, enhance code modularity, and significantly improve both maintainability and readability.
+
+
+Looking at the current layout in AuctionPopupRenderer.tsx, I need to reorganize the display by putting specific information on the same lines. Let me analyze what needs to be changed:
+"Dau Gia Vien" (auctioneer) should be on the same line as "Phien Dau Gia Tai San" - this means I need to move it from the detail rows to the auction title area.
+"Gia Khoi Diem" (starting price) and "Buoc Gia" (bid step) should be on the same line - these are already in the detail rows but need to be reorganized.
+"Nguoi Tra Gia Cao Nhat" (highest bidder) should be on its own line - this is in the detail rows and needs to be reorganized.
+"Lan Tra Gia" (bid round) and "Nguoi Tra Gia" (current bidder) should be on the same line - these need to be reorganized in the detail rows.
