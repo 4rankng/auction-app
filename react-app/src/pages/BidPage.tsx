@@ -470,7 +470,8 @@ export const BidPage: React.FC = () => {
     timeLeft: bidderTimeLeft,
     startTimer: startBidderTimer,
     stopTimer: stopBidderTimer,
-    resetTimer: resetBidderTimer
+    resetTimer: resetBidderTimer,
+    isRunning: isTimerActive
   } = useBidderTimer({ initialTime: auction?.settings?.bidDuration || 60 });
 
   // Get auction ID from URL
@@ -1218,6 +1219,10 @@ export const BidPage: React.FC = () => {
                   bidHistoryEmpty={bidHistory.length === 0}
                   bidderTimeLeft={bidderTimeLeft}
                   isLastBidder={selectedBidder === lastBidderId}
+                  onStartBid={startBidderTimer}
+                  isCountdownActive={isTimerActive}
+                  isStartBidDisabled={isAuctionEnded}
+                  bidDuration={auction?.settings?.bidDuration || 60}
                 />
             </>
           )}

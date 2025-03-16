@@ -29,6 +29,9 @@ interface BidControlsProps {
   bidderTimeLeft?: number; // New prop for bidder countdown timer
   isLastBidder?: boolean; // New prop to check if the selected bidder is the last bidder
   onStartBid?: () => void; // New prop for start bid button action
+  isCountdownActive?: boolean; // New prop to control whether the countdown is active
+  isStartBidDisabled?: boolean; // New prop to control whether the start bid button is disabled
+  bidDuration?: number; // New prop for the initial bid duration
 }
 
 /**
@@ -48,7 +51,10 @@ const BidControls: React.FC<BidControlsProps> = ({
   bidHistoryEmpty = true, // Default to true if not provided
   bidderTimeLeft, // No default, should be passed from parent
   isLastBidder = false, // Default to false if not provided
-  onStartBid = () => {} // Default to empty function if not provided
+  onStartBid = () => {}, // Default to empty function if not provided
+  isCountdownActive = false, // Default to inactive
+  isStartBidDisabled = false, // Default to enabled
+  bidDuration = 0 // Default to 0
 }) => {
   // State for bid method selection - default to stepPrice if bid history is not empty
   const [bidMethod, setBidMethod] = useState<'basePrice' | 'stepPrice' | 'customPrice'>(
@@ -242,6 +248,9 @@ const BidControls: React.FC<BidControlsProps> = ({
     return false;
   };
 
+  // Use bidDuration if timer is not active yet
+  const displayTime = isCountdownActive ? (bidderTimeLeft || 0) : (bidDuration || 30); // Default to 30 seconds if bidDuration is not provided
+
   // Format timer to mm:ss format
   const formatTimeLeft = (seconds: number): string => {
     if (seconds === undefined || seconds === null) return '00:00';
@@ -254,14 +263,14 @@ const BidControls: React.FC<BidControlsProps> = ({
   const BidderTimer = () => (
     <div
       style={{
-        backgroundColor: 'rgba(240, 240, 240, 0.9)',
+        backgroundColor: isCountdownActive ? 'rgba(240, 240, 240, 0.9)' : 'rgba(245, 245, 245, 0.9)',
         borderRadius: '6px',
         padding: '0.25rem 0.5rem',
         display: 'flex',
         alignItems: 'center',
         gap: '0.4rem',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        animation: 'time-shimmer 2s infinite',
+        animation: isCountdownActive ? 'time-shimmer 2s infinite' : 'none',
         border: '1px solid rgba(60, 60, 60, 0.2)',
         minWidth: '90px',
         justifyContent: 'center',
@@ -270,9 +279,15 @@ const BidControls: React.FC<BidControlsProps> = ({
         fontWeight: 'bold'
       }}
     >
-      <i className="bi bi-clock" style={{ color: getTimerColor(), fontSize: '1rem' }}></i>
-      <span style={{ fontWeight: 'bold', color: getTimerColor() }}>
-        {formatTimeLeft(bidderTimeLeft || 0)}
+      <i className="bi bi-clock" style={{
+        color: isCountdownActive ? getTimerColor() : '#6c757d',
+        fontSize: '1rem'
+      }}></i>
+      <span style={{
+        fontWeight: 'bold',
+        color: isCountdownActive ? getTimerColor() : '#6c757d'
+      }}>
+        {formatTimeLeft(displayTime)}
       </span>
     </div>
   );
@@ -302,18 +317,20 @@ const BidControls: React.FC<BidControlsProps> = ({
             minWidth: '120px',
             padding: '4px 14px',
             fontSize: '0.95rem',
-            backgroundColor: '#f8f9fa',
-            color: '#28a745',
-            border: '1px solid #28a745',
+            backgroundColor: isCountdownActive || isStartBidDisabled ? '#e9ecef' : '#f8f9fa',
+            color: isCountdownActive || isStartBidDisabled ? '#6c757d' : '#28a745',
+            border: '1px solid ' + (isCountdownActive || isStartBidDisabled ? '#ced4da' : '#28a745'),
             borderRadius: '0.35rem',
             boxShadow: 'none',
             fontWeight: 'bold',
             height: '31px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            opacity: isCountdownActive || isStartBidDisabled ? 0.7 : 1
           }}
           onClick={onStartBid}
+          disabled={isStartBidDisabled || isCountdownActive}
         >
            Bắt Đầu
         </button>
@@ -460,16 +477,24 @@ const BidControls: React.FC<BidControlsProps> = ({
                       <label className="form-label mb-1">Số Bước Giá</label>
                       <div className="input-group input-group-sm">
                         <button
-                          className="btn btn-outline-secondary btn-sm"
+                          className="btn btn-outline-secondary"
                           type="button"
                           onClick={handleStepDecrement}
-                          style={{ height: '31px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          style={{
+                            height: '31px',
+                            width: '31px',
+                            padding: '0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: '0.25rem 0 0 0.25rem'
+                          }}
                         >
                           <i className="bi bi-caret-down-fill"></i>
                         </button>
                         <input
                           type="text"
-                          className="form-control form-control-sm text-center"
+                          className="form-control text-center"
                           value={steps}
                           onChange={(e) => {
                             const newSteps = parseInt(e.target.value) || 1;
@@ -481,13 +506,27 @@ const BidControls: React.FC<BidControlsProps> = ({
                               onBidAmountChange(stepPrice.toLocaleString('vi-VN'));
                             }
                           }}
-                          style={{ maxWidth: '35px', height: '31px' }}
+                          style={{
+                            maxWidth: '35px',
+                            height: '31px',
+                            padding: '0.25rem',
+                            borderRadius: '0',
+                            boxSizing: 'border-box'
+                          }}
                         />
                         <button
-                          className="btn btn-outline-secondary btn-sm"
+                          className="btn btn-outline-secondary"
                           type="button"
                           onClick={handleStepIncrement}
-                          style={{ height: '31px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          style={{
+                            height: '31px',
+                            width: '31px',
+                            padding: '0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: '0 0.25rem 0.25rem 0'
+                          }}
                         >
                           <i className="bi bi-caret-up-fill"></i>
                         </button>
