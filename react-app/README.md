@@ -510,6 +510,13 @@ The timer in bidControl card should be styled with a larger font size, a distinc
 
 ### Bid Logic Implementation
 
+- When the bid page first load, the startBid button is enabled, the timer is set to the initial `bidDuration` value, and the countdown does not start.
+- If the startBid button is clicked, the countdown starts, and the current timer value is transmitted to the auction popup.
+- During the countdown, the startBid button is disabled with a gray color scheme.
+- When the timer reaches zero, the startBid button is re-enabled, the timer value is reset to `bidDuration`, and the timer value is not transmitted to the auction popup.
+- When the placeBid (Dau Gia) button is clicked, bidPage sends timer value 0 to the auction popup to reset the timer, enables the startBid button, and sets the timer value to `bidDuration`.
+
+
 #### On Bidder Selection
 - When a bidder is selected or deselected:
   - Set the timer to the initial `bidDuration` value **without** starting the countdown.
