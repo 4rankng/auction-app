@@ -469,7 +469,7 @@ export default function SetupPage() {
                       className="form-control"
                       value={auctionDetails.bidDuration}
                       onChange={handleDurationChange}
-                      min="60"
+                      min="1"
                     />
                   </div>
                 </div>
