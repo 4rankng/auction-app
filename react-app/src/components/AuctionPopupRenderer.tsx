@@ -795,10 +795,22 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
         // Force reapplication of styles
         stylesAppliedRef.current = false;
 
-        // Directly inject styles again
-        const styleTag = popupDocument.createElement('style');
-        styleTag.textContent = globalStyles;
-        popupDocument.head.appendChild(styleTag);
+        // Create a unique ID for the style tag
+        const styleId = 'auction-popup-global-styles';
+
+        // Check if a style tag with this ID already exists
+        let styleTag = popupDocument.getElementById(styleId) as HTMLStyleElement;
+
+        // If style tag exists, update content instead of creating a new one
+        if (styleTag) {
+          styleTag.textContent = globalStyles;
+        } else {
+          // Create a new style tag
+          styleTag = popupDocument.createElement('style');
+          styleTag.id = styleId;
+          styleTag.textContent = globalStyles;
+          popupDocument.head.appendChild(styleTag);
+        }
 
         // Add class to body for auction-ended state if not already present
         if (!popupDocument.body.classList.contains('auction-ended')) {
@@ -899,10 +911,22 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
         if (!stylesAppliedRef.current || isAuctionEnded) {
           console.log("AuctionPopupRenderer: Reapplying styles after props change");
 
-          // Add a style tag with the global styles
-          const styleTag = popupDocument.createElement('style');
-          styleTag.textContent = globalStyles;
-          popupDocument.head.appendChild(styleTag);
+          // Create a unique ID for the style tag to avoid duplicates
+          const styleId = 'auction-popup-global-styles';
+
+          // Check if a style tag with this ID already exists
+          let styleTag = popupDocument.getElementById(styleId) as HTMLStyleElement;
+
+          // If style tag exists, update content instead of creating a new one
+          if (styleTag) {
+            styleTag.textContent = globalStyles;
+          } else {
+            // Create a new style tag
+            styleTag = popupDocument.createElement('style');
+            styleTag.id = styleId;
+            styleTag.textContent = globalStyles;
+            popupDocument.head.appendChild(styleTag);
+          }
 
           // Mark styles as applied
           stylesAppliedRef.current = true;

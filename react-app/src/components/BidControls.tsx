@@ -280,6 +280,7 @@ const BidControls: React.FC<BidControlsProps> = ({
 
   // Check if the bid button should be disabled
   const isBidButtonDisabled = () => {
+    if (!isTimerRunning) return true; // Disable if timer is not running (Bat Dau is enabled)
     if (isPlaceBidDisabled) return true;
     if (!bidderName) return true;
     if (isLastBidder) return true; // Disable if this is the last bidder
