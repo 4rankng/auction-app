@@ -5,6 +5,7 @@ import { store } from '@store';
 import SetupPage from '@pages/SetupPage';
 import { BidPage } from '@pages/BidPage';
 import AuctioneerManagement from '@pages/AuctioneerManagement';
+import AuctionHistory from '@pages/AuctionHistory';
 import ErrorBoundary from '@components/ErrorBoundary';
 
 // Import ManageAuctioneer if it exists, otherwise comment it out
@@ -20,6 +21,7 @@ function App() {
             <Route path="/setup" element={<SetupPage />} />
             <Route path="/bid" element={<BidPage />} />
             <Route path="/auctioneers" element={<AuctioneerManagement />} />
+            <Route path="/history" element={<AuctionHistory />} />
           </Routes>
         </BrowserRouter>
       </ErrorBoundary>

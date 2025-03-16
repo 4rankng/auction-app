@@ -659,6 +659,7 @@ export default function SetupPage() {
                 className="btn btn-primary btn-lg w-100"
                 onClick={() => navigate('/history')}
                 style={{ height: "60px" }}
+                id="historyButton"
               >
                 <i className="bi bi-database me-2"></i>
                 {getButtonText('Lịch Sử')}

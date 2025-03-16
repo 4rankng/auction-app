@@ -1,0 +1,133 @@
+.auction-history-container {
+  padding: 20px;
+  margin-top: 20px;
+  padding-bottom: 80px; /* Space for the fixed button */
+  position: relative;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.back-button {
+  min-width: 100px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.auction-table {
+  margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.auction-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+/* Cleaner status badges using Bootstrap colors */
+.status-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.status-badge.setup {
+  background-color: #f8f9fa;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.status-badge.in-progress {
+  background-color: #cff4fc;
+  color: #055160;
+  border: 1px solid #b6effb;
+}
+
+.status-badge.ended {
+  background-color: #d1e7dd;
+  color: #0f5132;
+  border: 1px solid #badbcc;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Pagination styles */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* Bottom action container styles */
+.bottom-action-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
+  padding: 15px 0;
+  border-top: 1px solid #dee2e6;
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+}
+
+.bottom-action-container .btn-primary {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 12px 20px;
+  font-size: 1.1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .back-button {
+    margin-top: 10px;
+  }
+
+  .auction-table th,
+  .auction-table td {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .pagination-container .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .auction-history-container {
+    padding-bottom: 100px; /* More space on mobile */
+  }
+
+  .bottom-action-container {
+    padding: 10px;
+  }
+
+  /* Better table display on mobile */
+  .table-responsive {
+    margin-bottom: 0;
+  }
+}
