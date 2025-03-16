@@ -13,7 +13,8 @@
 
 .auction-header-info {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
   flex: 1;
 }
 
@@ -27,6 +28,22 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.auction-auctioneer {
+  margin-top: 0.3rem;
+  padding-left: 16px;
+  font-size: 0.95rem;
+  color: #6c757d;
+}
+
+.auctioneer-label {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.auctioneer-name {
+  font-weight: 500;
 }
 
 .auction-metadata {
