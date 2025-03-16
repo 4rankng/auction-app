@@ -6,6 +6,8 @@ import { Auction } from '@types';
 import { Button, Table, Container, Spinner, Alert, Pagination, Card, Toast } from 'react-bootstrap';
 import './AuctionHistory.css';
 
+const HISTORY_PAGE_KEY = 'auction_history_current_page';
+
 const AuctionHistory: React.FC = () => {
   const navigate = useNavigate();
   const [auctions, setAuctions] = useState<Auction[]>([]);
@@ -21,13 +23,21 @@ const AuctionHistory: React.FC = () => {
     type: 'success'
   });
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
+  // Pagination state - retrieve from localStorage if available
+  const [currentPage, setCurrentPage] = useState(() => {
+    const savedPage = localStorage.getItem(HISTORY_PAGE_KEY);
+    return savedPage ? parseInt(savedPage, 10) : 1;
+  });
   const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchAuctions();
   }, []);
+
+  // Save current page to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem(HISTORY_PAGE_KEY, currentPage.toString());
+  }, [currentPage]);
 
   // Function to show toast messages
   const showToast = (message: string, type: 'success' | 'error') => {

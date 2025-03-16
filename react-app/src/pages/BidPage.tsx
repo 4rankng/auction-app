@@ -31,6 +31,10 @@ interface BidHistoryDisplay {
 export const BidPage: React.FC = () => {
   // Get auction data from useAuction hook - removed placeBid and removeBid
   const { auction, bidders, bids, loading: dataLoading, error: dataError, updateAuction, getAuctionById } = useAuction();
+  const location = useLocation();
+
+  // Check if the page was accessed from the AuctionHistory page
+  const [isFromHistory, setIsFromHistory] = useState<boolean>(false);
 
   const [currentPrice, setCurrentPrice] = useState<string>('0 VND');
   const [bidIncrement, setBidIncrement] = useState<string>('0 VND');
@@ -279,7 +283,6 @@ export const BidPage: React.FC = () => {
   const auctionLoadedRef = useRef<boolean>(false);
 
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Add popup management
   const { isOpen, openPopup, closePopup, popupWindow } = useAuctionPopup({
@@ -1224,6 +1227,13 @@ export const BidPage: React.FC = () => {
     navigate('/history');
   };
 
+  // Check if page was accessed from history when component mounts
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const fromParam = searchParams.get('from');
+    setIsFromHistory(fromParam === 'history');
+  }, [location.search]);
+
   if (loading) {
     return (
       <div className="container py-4 text-center">
@@ -1421,14 +1431,16 @@ export const BidPage: React.FC = () => {
               Quay Lại Thiết Lập
             </button>
 
-            {/* New button to go to auction history */}
-            <button
-              className="btn btn-info"
-              onClick={handleGoToHistory}
-            >
-              <i className="bi bi-database me-2"></i>
-              Lịch Sử Đấu Giá
-            </button>
+            {/* Only show the history button if coming from history page */}
+            {isFromHistory && (
+              <button
+                className="btn btn-info"
+                onClick={handleGoToHistory}
+              >
+                <i className="bi bi-database me-2"></i>
+                Lịch Sử Đấu Giá
+              </button>
+            )}
 
             {isAuctionEnded && (
               <button
