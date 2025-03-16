@@ -1,9 +1,11 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@store/hooks';
 import { bidderTimerTick, bidderTimerReset } from '@store/auctionSlice';
 
 export const useReduxBidderTimer = () => {
   const dispatch = useAppDispatch();
+  // Add a state to control when the timer should be running
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   // Get bidder timer state from Redux store
   const bidderTimeLeft = useAppSelector(state => state.auction.bidderTimeLeft);
@@ -13,16 +15,17 @@ export const useReduxBidderTimer = () => {
   // Get the auction for the timeLeft value
   const auction = useAppSelector(state => state.auction.auction);
 
-  // Start the bidder timer
+  // Start the bidder timer only when isTimerRunning is true
+  // This prevents the timer from starting automatically when a bidder is selected
   useEffect(() => {
-    if (selectedBidderId && status === 'active' && selectedBidderId !== lastBidderId) {
+    if (isTimerRunning && selectedBidderId && status === 'active' && selectedBidderId !== lastBidderId && bidderTimeLeft > 0) {
       const timer = setInterval(() => {
         dispatch(bidderTimerTick());
       }, 1000);
 
       return () => clearInterval(timer);
     }
-  }, [dispatch, selectedBidderId, lastBidderId, status]);
+  }, [dispatch, selectedBidderId, lastBidderId, status, isTimerRunning, bidderTimeLeft]);
 
   // Reset the bidder timer
   const resetBidderTimer = useCallback((seconds?: number) => {
@@ -32,6 +35,16 @@ export const useReduxBidderTimer = () => {
       : (auction?.settings?.bidDuration || 60);
     dispatch(bidderTimerReset(timerValue));
   }, [dispatch, auction]);
+
+  // Start the timer
+  const startBidderTimer = useCallback(() => {
+    setIsTimerRunning(true);
+  }, []);
+
+  // Stop the timer
+  const stopBidderTimer = useCallback(() => {
+    setIsTimerRunning(false);
+  }, []);
 
   // Check if the bidder can place a bid
   const canBidderPlaceBid = useCallback(() => {
@@ -53,7 +66,9 @@ export const useReduxBidderTimer = () => {
   return {
     bidderTimeLeft,
     resetBidderTimer,
+    startBidderTimer,
+    stopBidderTimer,
     canBidderPlaceBid,
-    isBidderTimerRunning: selectedBidderId !== null && selectedBidderId !== lastBidderId && status === 'active'
+    isBidderTimerRunning: isTimerRunning && selectedBidderId !== null && selectedBidderId !== lastBidderId && status === 'active' && bidderTimeLeft > 0
   };
 };

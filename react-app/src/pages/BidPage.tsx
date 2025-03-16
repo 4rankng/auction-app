@@ -65,6 +65,50 @@ export const BidPage: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const bidTimerInitialTime = auction?.settings?.bidDuration || 30; // Default to 30 seconds if not specified
   const timerIdRef = useRef<string>(`bidder_timer_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
+  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
+
+  // Add localStorage keys for persisting timer state
+  const timerStoragePrefix = auction?.id ? `auction_timer_${auction.id}` : 'auction_timer';
+  const timerValueKey = `${timerStoragePrefix}_value`;
+  const timerRunningKey = `${timerStoragePrefix}_running`;
+  const timerStartTimeKey = `${timerStoragePrefix}_start_time`;
+
+  // Add a ref to track if the timer has been initialized
+  const timerInitializedRef = useRef<boolean>(false);
+
+  // Initialize timer state from localStorage on component mount
+  useEffect(() => {
+    if (!auction?.id) return;
+
+    // Read persisted timer state
+    const savedTimeLeft = localStorage.getItem(timerValueKey);
+    const savedIsRunning = localStorage.getItem(timerRunningKey);
+    const savedStartTime = localStorage.getItem(timerStartTimeKey);
+
+    if (savedTimeLeft && savedIsRunning && savedStartTime) {
+      const startTime = parseInt(savedStartTime, 10);
+      const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+      const remainingTime = Math.max(0, parseInt(savedTimeLeft, 10) - elapsedSeconds);
+
+      console.log(`Restored timer state from localStorage: ${remainingTime}s remaining, running: ${savedIsRunning}`);
+
+      if (remainingTime > 0) {
+        setTimeLeft(remainingTime);
+        // The actual timer service will be started in the timer initialization effect
+        if (savedIsRunning === 'true') {
+          setIsTimerRunning(true);
+        }
+      } else {
+        // Timer expired while page was closed
+        setTimeLeft(0);
+        setIsTimerRunning(false);
+        // Clean up localStorage
+        localStorage.removeItem(timerValueKey);
+        localStorage.removeItem(timerRunningKey);
+        localStorage.removeItem(timerStartTimeKey);
+      }
+    }
+  }, [auction?.id, timerValueKey, timerRunningKey, timerStartTimeKey]);
 
   // Always keep popupTimerValue in sync with bidDuration
   useEffect(() => {
@@ -81,9 +125,6 @@ export const BidPage: React.FC = () => {
     }
   }, [auction?.id]);
 
-  // Add a ref to track if the timer has been initialized
-  const timerInitializedRef = useRef<boolean>(false);
-
   // Initialize timer
   useEffect(() => {
     const timerId = timerIdRef.current;
@@ -91,43 +132,133 @@ export const BidPage: React.FC = () => {
     // Always make sure to clean up any existing timer first
     timerService.stopTimer(timerId);
 
-    console.log(`Creating new timer with ID: ${timerId}, duration: ${bidTimerInitialTime}`);
+    // Get initial time - use localStorage value if available
+    const savedTimeLeft = localStorage.getItem(timerValueKey);
+    const savedIsRunning = localStorage.getItem(timerRunningKey);
+
+    // Use saved time or default to the auction's bidDuration setting
+    const initialTime = savedTimeLeft && parseInt(savedTimeLeft, 10) > 0
+      ? parseInt(savedTimeLeft, 10)
+      : bidTimerInitialTime;
+
+    console.log(`Creating new timer with ID: ${timerId}, duration: ${initialTime}s`);
 
     // Create the timer in the service
-    timerService.createTimer(timerId, bidTimerInitialTime, {
+    timerService.createTimer(timerId, initialTime, {
       onTick: (remainingTime) => {
-        console.log(`Timer tick: ${remainingTime}`);
+        console.log(`BidPage: Timer tick received: ${remainingTime}s remaining`);
         setTimeLeft(remainingTime);
       },
       onComplete: () => {
-        console.log('Timer completed');
+        console.log('BidPage: Timer completed');
+        setIsTimerRunning(false);
+        // Clear localStorage when timer completes
+        localStorage.removeItem(timerValueKey);
+        localStorage.removeItem(timerRunningKey);
+        localStorage.removeItem(timerStartTimeKey);
       },
       tickInterval: 1000
     });
 
     timerInitializedRef.current = true;
 
+    // Start the timer if it was previously running
+    if (savedIsRunning === 'true' && parseInt(savedTimeLeft || '0', 10) > 0) {
+      console.log('Resuming timer from previous state');
+      timerService.startTimer(timerId);
+      setIsTimerRunning(true);
+    }
+
     // Clean up on unmount
     return () => {
       console.log(`Cleaning up timer with ID: ${timerId}`);
       timerService.stopTimer(timerId);
       timerInitializedRef.current = false;
+      setIsTimerRunning(false);
     };
-  }, [bidTimerInitialTime]);
+  }, [bidTimerInitialTime, timerValueKey, timerRunningKey, timerStartTimeKey]);
 
   // Define timer control functions
   const startTimer = useCallback(() => {
-    timerService.startTimer(timerIdRef.current);
-  }, []);
+    console.log(`BidPage: startTimer called for timer ${timerIdRef.current}`);
+    const result = timerService.startTimer(timerIdRef.current);
+    console.log(`BidPage: startTimer result: ${result ? 'success' : 'failed'}`);
+    setIsTimerRunning(true);
+
+    // Save timer state to localStorage
+    localStorage.setItem(timerRunningKey, 'true');
+    localStorage.setItem(timerStartTimeKey, Date.now().toString());
+    localStorage.setItem(timerValueKey, timeLeft.toString());
+  }, [timeLeft, timerRunningKey, timerStartTimeKey, timerValueKey]);
 
   const stopTimer = useCallback(() => {
-    timerService.pauseTimer(timerIdRef.current);
-  }, []);
+    console.log(`BidPage: stopTimer called for timer ${timerIdRef.current}`);
+    const result = timerService.pauseTimer(timerIdRef.current);
+    console.log(`BidPage: stopTimer result: ${result ? 'success' : 'failed'}`);
+    setIsTimerRunning(false);
+
+    // Update localStorage
+    localStorage.setItem(timerRunningKey, 'false');
+  }, [timerRunningKey]);
 
   const resetTimer = useCallback((newTime = bidTimerInitialTime) => {
+    console.log(`BidPage: resetTimer called for timer ${timerIdRef.current} with new time ${newTime}s`);
     setTimeLeft(newTime);
-    timerService.resetTimer(timerIdRef.current, newTime, false);
-  }, [bidTimerInitialTime]);
+    const result = timerService.resetTimer(timerIdRef.current, newTime, false);
+    console.log(`BidPage: resetTimer result: ${result ? 'success' : 'failed'}`);
+
+    // Update localStorage
+    localStorage.setItem(timerValueKey, newTime.toString());
+  }, [bidTimerInitialTime, timerValueKey]);
+
+  // Update localStorage whenever timer ticks
+  useEffect(() => {
+    if (isTimerRunning) {
+      localStorage.setItem(timerValueKey, timeLeft.toString());
+    }
+  }, [timeLeft, isTimerRunning, timerValueKey]);
+
+  // Clean up localStorage when auction ends
+  useEffect(() => {
+    if (isAuctionEnded) {
+      localStorage.removeItem(timerValueKey);
+      localStorage.removeItem(timerRunningKey);
+      localStorage.removeItem(timerStartTimeKey);
+    }
+  }, [isAuctionEnded, timerValueKey, timerRunningKey, timerStartTimeKey]);
+
+  // Save timer state on window unload/navigation
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (isTimerRunning && timeLeft > 0) {
+        console.log('Saving timer state before page unload');
+        localStorage.setItem(timerValueKey, timeLeft.toString());
+        localStorage.setItem(timerRunningKey, isTimerRunning.toString());
+        localStorage.setItem(timerStartTimeKey, Date.now().toString());
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isTimerRunning, timeLeft, timerValueKey, timerRunningKey, timerStartTimeKey]);
+
+  // Clean up localStorage on component unmount
+  useEffect(() => {
+    return () => {
+      // Only clear timer-related localStorage items when unmounting
+      if (!isAuctionEnded) {
+        console.log('Saving final timer state on component unmount');
+        if (isTimerRunning && timeLeft > 0) {
+          localStorage.setItem(timerValueKey, timeLeft.toString());
+          localStorage.setItem(timerRunningKey, isTimerRunning.toString());
+          localStorage.setItem(timerStartTimeKey, Date.now().toString());
+        }
+      }
+    };
+  }, [isAuctionEnded, isTimerRunning, timeLeft, timerValueKey, timerRunningKey, timerStartTimeKey]);
 
   // Add a ref to track if we've already loaded the auction
   const auctionLoadedRef = useRef<boolean>(false);
@@ -687,13 +818,18 @@ export const BidPage: React.FC = () => {
       return;
     }
 
-    // Otherwise, reset timer to the auction's bidDuration setting and start it
+    // Stop any running timer
+    stopTimer();
+
+    // Reset timer to the auction's bidDuration setting but don't start it
     const newTimerValue = auction?.settings?.bidDuration || 60;
     resetTimer(newTimerValue);
-    startTimer();
+
     // Update popup timer with the new value immediately
     setPopupTimerValue(newTimerValue);
-  }, [isAuctionEnded, selectedBidder, lastBidderId, auction?.settings?.bidDuration, showToast, stopTimer, resetTimer, startTimer]);
+
+    // The Bat Dau button will now be enabled since isTimerRunning is false after stopping the timer
+  }, [isAuctionEnded, selectedBidder, lastBidderId, auction?.settings?.bidDuration, showToast, stopTimer, resetTimer]);
 
   // Add a useEffect to update the popup timer whenever bidderTimeLeft changes
   useEffect(() => {
@@ -1276,24 +1412,31 @@ export const BidPage: React.FC = () => {
                 onPlaceBid={handlePlaceBid}
                 onCancelBid={handleCancelBid}
                 onStartBid={() => {
-                  if (selectedBidder) {
-                    const newTimerValue = auction?.settings?.bidDuration || 60;
-                    resetTimer(newTimerValue);
-                    startTimer();
-                  }
+                  console.log('Bat Dau button clicked');
+                  // Allow timer to start even without a selected bidder
+                  const newTimerValue = auction?.settings?.bidDuration || 60;
+                  console.log('Setting timer value to:', newTimerValue);
+                  resetTimer(newTimerValue);
+                  console.log('Starting timer...');
+                  startTimer();
+                  console.log('Is timer running state:', isTimerRunning);
                 }}
                 onResetTimer={() => {
+                  console.log('Reset Timer button clicked');
                   const newTimerValue = auction?.settings?.bidDuration || 60;
+                  console.log('Resetting timer to:', newTimerValue);
                   resetTimer(newTimerValue);
-                  if (selectedBidder && selectedBidder !== lastBidderId) {
-                    startTimer();
-                  }
+                  // Stop the timer after resetting it
+                  stopTimer();
+                  console.log('Is timer running state after reset:', isTimerRunning);
                 }}
                 bidDuration={auction?.settings?.bidDuration || 60}
                 isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
                 isCancelBidDisabled={isCancelBidDisabled()}
                 bidHistoryEmpty={bidHistory.length === 0}
                 isLastBidder={selectedBidder === lastBidderId}
+                isTimerRunning={isTimerRunning}
+                bidderTimeLeft={timeLeft}
               />
             </>
           )}

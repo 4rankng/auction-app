@@ -119,7 +119,7 @@ export const startTimer = (timerId: string, autoStart = false): boolean => {
     return false;
   }
 
-  console.log(`timerService: Starting timer ${timerId}`);
+  console.log(`timerService: Starting timer ${timerId} with remaining time ${timer.remaining}ms`);
 
   // Clear any existing interval first to prevent duplicates
   if (timer.id) {
@@ -138,11 +138,19 @@ export const startTimer = (timerId: string, autoStart = false): boolean => {
   // Calculate the initial seconds value (this should be the exact duration in seconds)
   const initialSeconds = Math.floor(initialDurationMs / 1000);
 
-  console.log(`timerService: Initial timer value: ${initialSeconds}s`);
+  console.log(`timerService: Initial timer value: ${initialSeconds}s, timer state:`, {
+    isRunning: timer.isRunning,
+    isPaused: timer.isPaused,
+    duration: timer.duration,
+    remaining: timer.remaining
+  });
 
   // Call onTick immediately with the starting value
   if (timer.options.onTick) {
+    console.log(`timerService: Calling onTick with ${initialSeconds}s`);
     timer.options.onTick(initialSeconds);
+  } else {
+    console.log(`timerService: No onTick callback defined for timer ${timerId}`);
   }
 
   // Update the observable for subscribers
@@ -151,8 +159,11 @@ export const startTimer = (timerId: string, autoStart = false): boolean => {
   // Create a recursive tick function that uses setTimeout for more precise timing
   const createTickFunction = (secondsRemaining: number) => {
     if (!timer.isRunning || secondsRemaining <= 0) {
+      console.log(`timerService: Skip creating tick for timer ${timerId} - running: ${timer.isRunning}, seconds: ${secondsRemaining}`);
       return;
     }
+
+    console.log(`timerService: Setting up next tick for timer ${timerId}, seconds remaining: ${secondsRemaining}`);
 
     // Calculate the next tick time
     const nextTickTime = 1000;
@@ -160,7 +171,13 @@ export const startTimer = (timerId: string, autoStart = false): boolean => {
     timer.id = setTimeout(() => {
       // Make sure the timer is still valid
       const currentTimer = timers.get(timerId);
-      if (!currentTimer || !currentTimer.isRunning) {
+      if (!currentTimer) {
+        console.log(`timerService: Timer ${timerId} no longer exists`);
+        return;
+      }
+
+      if (!currentTimer.isRunning) {
+        console.log(`timerService: Timer ${timerId} is no longer running`);
         return;
       }
 
@@ -171,7 +188,11 @@ export const startTimer = (timerId: string, autoStart = false): boolean => {
 
       // Call onTick callback
       if (currentTimer.options.onTick) {
-        currentTimer.options.onTick(newSecondsRemaining);
+        try {
+          currentTimer.options.onTick(newSecondsRemaining);
+        } catch (error) {
+          console.error(`timerService: Error in onTick callback for timer ${timerId}:`, error);
+        }
       }
 
       // Update the observable for subscribers
@@ -188,7 +209,11 @@ export const startTimer = (timerId: string, autoStart = false): boolean => {
 
         // Call onComplete callback
         if (currentTimer.options.onComplete) {
-          currentTimer.options.onComplete();
+          try {
+            currentTimer.options.onComplete();
+          } catch (error) {
+            console.error(`timerService: Error in onComplete callback for timer ${timerId}:`, error);
+          }
         }
       } else {
         // Schedule the next tick
@@ -224,9 +249,13 @@ export const pauseTimer = (timerId: string): boolean => {
     return false;
   }
 
+  console.log(`timerService: Pausing timer ${timerId}`);
+
   // Calculate remaining time at pause
   const elapsed = Date.now() - timer.startTime;
   timer.remaining = Math.max(0, timer.duration - elapsed);
+
+  console.log(`timerService: Timer ${timerId} paused with ${Math.floor(timer.remaining/1000)}s remaining`);
 
   // Clear the interval
   if (timer.id) {
@@ -282,8 +311,11 @@ export const resetTimer = (timerId: string, duration?: number, autoStart = false
     return false;
   }
 
+  console.log(`timerService: Resetting timer ${timerId}, new duration: ${duration !== undefined ? duration : 'using original'}, autoStart: ${autoStart}`);
+
   // Stop the current timer if running
   if (timer.isRunning && timer.id) {
+    console.log(`timerService: Clearing existing interval before reset`);
     clearInterval(timer.id);
     timer.id = null;
   }
@@ -298,15 +330,28 @@ export const resetTimer = (timerId: string, duration?: number, autoStart = false
   timer.startTime = Date.now();
   timer.isRunning = false;
   timer.isPaused = false;
+
+  const resetSeconds = Math.floor(timer.duration / 1000);
+  console.log(`timerService: Timer ${timerId} reset to ${resetSeconds}s, timer state:`, {
+    isRunning: timer.isRunning,
+    isPaused: timer.isPaused,
+    duration: timer.duration,
+    remaining: timer.remaining
+  });
+
   timers.set(timerId, timer);
 
   // Notify of reset state
   if (timer.options.onTick) {
-    timer.options.onTick(Math.floor(timer.duration / 1000));
+    console.log(`timerService: Calling onTick with reset value: ${resetSeconds}s`);
+    timer.options.onTick(resetSeconds);
+  } else {
+    console.log(`timerService: No onTick callback defined for timer ${timerId}`);
   }
 
   // Auto-start if requested
   if (autoStart) {
+    console.log(`timerService: Auto-starting timer after reset`);
     return startTimer(timerId);
   }
 

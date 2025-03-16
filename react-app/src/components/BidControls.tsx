@@ -43,6 +43,7 @@ interface BidControlsProps {
   bidHistoryEmpty?: boolean; // New prop to check if bid history is empty
   bidderTimeLeft?: number; // No longer needed, but keeping for backward compatibility
   isLastBidder?: boolean; // New prop to check if the selected bidder is the last bidder
+  isTimerRunning?: boolean; // New prop to check if the timer is running
 }
 
 /**
@@ -64,7 +65,8 @@ const BidControls: React.FC<BidControlsProps> = ({
   isCancelBidDisabled = false, // Default to enabled
   bidHistoryEmpty = true, // Default to true if not provided
   bidderTimeLeft, // Kept for backward compatibility
-  isLastBidder = false // Default to false if not provided
+  isLastBidder = false, // Default to false if not provided
+  isTimerRunning = false // Default to false if not provided
 }) => {
   // State for bid method selection - default to stepPrice if bid history is not empty
   const [bidMethod, setBidMethod] = useState<'basePrice' | 'stepPrice' | 'customPrice'>(
@@ -308,6 +310,7 @@ const BidControls: React.FC<BidControlsProps> = ({
             boxSizing: 'border-box'
           }}
           onClick={onStartBid}
+          disabled={isTimerRunning}
         >
           <i className="bi bi-play-circle me-1"></i>
           {getButtonText('Bắt Đầu')}
@@ -335,7 +338,7 @@ const BidControls: React.FC<BidControlsProps> = ({
             fontSize: '1.2rem',
             color: '#6C6C6C',
           }}>
-            {formatTime(bidDuration)}
+            {formatTime(bidderTimeLeft !== undefined && isTimerRunning ? bidderTimeLeft : bidDuration)}
           </span>
         </div>
 
