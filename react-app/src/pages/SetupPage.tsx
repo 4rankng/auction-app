@@ -620,7 +620,7 @@ export default function SetupPage() {
                 Đang Bắt Đầu...
               </>
             ) : (
-              'Bắt Đầu Đấu Giá'
+              'Bắt Đầu'
             )}
           </button>
         </div>
@@ -660,7 +660,7 @@ export default function SetupPage() {
                 Đang Bắt Đầu...
               </>
             ) : (
-              'Bắt Đầu Đấu Giá'
+              'Bắt Đầu'
             )}
           </Button>
         </Modal.Footer>
