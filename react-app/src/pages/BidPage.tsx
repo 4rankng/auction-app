@@ -8,13 +8,13 @@ import AuctionHeader from '@components/AuctionHeader';
 import AuctionResult from '@components/AuctionResult';
 import AuctionPopupRenderer from '@components/AuctionPopupRenderer';
 import { useAuction } from '@hooks/useAuction';
-import { useBidderTimer } from '@hooks/useBidderTimer';
 import useAuctionPopup from '@hooks/useAuctionPopup';
 import { Bid, AuctionStatus } from '@types';
 import * as XLSX from 'xlsx';
 import './BidPage.css';
 import { bidService } from '@services/bidService';
 import * as popupService from '@services/popupService';
+import * as timerService from '@services/timerService';
 
 // Interface for the bid history display format
 interface BidHistoryDisplay {
@@ -60,6 +60,67 @@ export const BidPage: React.FC = () => {
 
   // Add state to control timer value sent to popup (separate from bidderTimeLeft)
   const [popupTimerValue, setPopupTimerValue] = useState<number>(0);
+
+  // Replace useBidderTimer hook with direct timerService usage
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+  const bidTimerInitialTime = auction?.settings?.bidDuration || 30; // Default to 30 seconds if not specified
+  const timerIdRef = useRef<string>(`bidder_timer_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
+
+  // Fix the timer ID to be tied to the auction ID for stability
+  useEffect(() => {
+    if (auction?.id) {
+      timerIdRef.current = `bidder_timer_${auction.id}`;
+      console.log(`Set stable timer ID: ${timerIdRef.current}`);
+    }
+  }, [auction?.id]);
+
+  // Add a ref to track if the timer has been initialized
+  const timerInitializedRef = useRef<boolean>(false);
+
+  // Initialize timer
+  useEffect(() => {
+    const timerId = timerIdRef.current;
+
+    // Always make sure to clean up any existing timer first
+    timerService.stopTimer(timerId);
+
+    console.log(`Creating new timer with ID: ${timerId}, duration: ${bidTimerInitialTime}`);
+
+    // Create the timer in the service
+    timerService.createTimer(timerId, bidTimerInitialTime, {
+      onTick: (remainingTime) => {
+        console.log(`Timer tick: ${remainingTime}`);
+        setTimeLeft(remainingTime);
+      },
+      onComplete: () => {
+        console.log('Timer completed');
+      },
+      tickInterval: 1000
+    });
+
+    timerInitializedRef.current = true;
+
+    // Clean up on unmount
+    return () => {
+      console.log(`Cleaning up timer with ID: ${timerId}`);
+      timerService.stopTimer(timerId);
+      timerInitializedRef.current = false;
+    };
+  }, [bidTimerInitialTime]);
+
+  // Define timer control functions
+  const startTimer = useCallback(() => {
+    timerService.startTimer(timerIdRef.current);
+  }, []);
+
+  const stopTimer = useCallback(() => {
+    timerService.pauseTimer(timerIdRef.current);
+  }, []);
+
+  const resetTimer = useCallback((newTime = bidTimerInitialTime) => {
+    setTimeLeft(newTime);
+    timerService.resetTimer(timerIdRef.current, newTime, false);
+  }, [bidTimerInitialTime]);
 
   // Add a ref to track if we've already loaded the auction
   const auctionLoadedRef = useRef<boolean>(false);
@@ -465,14 +526,6 @@ export const BidPage: React.FC = () => {
     }
   };
 
-  // Use the bidder timer hook with improved functionality
-  const {
-    timeLeft: bidderTimeLeft,
-    startTimer: startBidderTimer,
-    stopTimer: stopBidderTimer,
-    resetTimer: resetBidderTimer
-  } = useBidderTimer({ initialTime: auction?.settings?.bidDuration || 60 });
-
   // Get auction ID from URL
   useEffect(() => {
     // Get auction ID from URL query parameters
@@ -611,7 +664,7 @@ export const BidPage: React.FC = () => {
     // Toggle selection if clicking the same bidder
     if (bidderId === selectedBidder) {
       setSelectedBidder(null);
-      stopBidderTimer();
+      stopTimer();
       // Update popup timer to 0 when deselecting
       setPopupTimerValue(0);
       return;
@@ -621,7 +674,7 @@ export const BidPage: React.FC = () => {
 
     // If this is the last bidder, set timer to 0
     if (bidderId === lastBidderId) {
-      resetBidderTimer(0);
+      resetTimer(0);
       // Update popup timer to 0 for last bidder
       setPopupTimerValue(0);
       return;
@@ -629,19 +682,19 @@ export const BidPage: React.FC = () => {
 
     // Otherwise, reset timer to the auction's bidDuration setting and start it
     const newTimerValue = auction?.settings?.bidDuration || 60;
-    resetBidderTimer(newTimerValue);
-    startBidderTimer();
+    resetTimer(newTimerValue);
+    startTimer();
     // Update popup timer with the new value immediately
     setPopupTimerValue(newTimerValue);
-  }, [isAuctionEnded, selectedBidder, lastBidderId, auction?.settings?.bidDuration, showToast, stopBidderTimer, resetBidderTimer, startBidderTimer]);
+  }, [isAuctionEnded, selectedBidder, lastBidderId, auction?.settings?.bidDuration, showToast, stopTimer, resetTimer, startTimer]);
 
   // Add a useEffect to update the popup timer whenever bidderTimeLeft changes
   useEffect(() => {
     // Only update popup timer if bidder is selected and auction is not ended
     if (selectedBidder && !isAuctionEnded) {
-      setPopupTimerValue(bidderTimeLeft);
+      setPopupTimerValue(timeLeft);
     }
-  }, [bidderTimeLeft, selectedBidder, isAuctionEnded]);
+  }, [timeLeft, selectedBidder, isAuctionEnded]);
 
   const handlePlaceBid = async (directBidAmount?: string) => {
     console.log('handlePlaceBid called with bidAmount:', bidAmount, 'directBidAmount:', directBidAmount);
@@ -677,7 +730,7 @@ export const BidPage: React.FC = () => {
     }
 
     // Check if bidder timer has expired
-    if (bidderTimeLeft <= 0) {
+    if (timeLeft <= 0) {
       showToast('Thời gian đấu giá đã hết', 'error', 'bottom-center');
       return;
     }
@@ -707,11 +760,11 @@ export const BidPage: React.FC = () => {
       setCurrentPrice(bidService.formatCurrency(numericAmount));
 
       // Reset and restart bidder timer
-      startBidderTimer();
+      startTimer();
 
       // Reset the timer in the popup as well when a bid is placed
-      if (bidderTimeLeft > 0) {
-        setPopupTimerValue(bidderTimeLeft);
+      if (timeLeft > 0) {
+        setPopupTimerValue(timeLeft);
       }
 
       // Create a new bid history entry and add it to the current bid history
@@ -910,10 +963,10 @@ export const BidPage: React.FC = () => {
     if (isAuctionEnded) return false;
 
     // Can't bid if bidder timer expired
-    if (selectedBidder === bidderId && bidderTimeLeft <= 0) return false;
+    if (selectedBidder === bidderId && timeLeft <= 0) return false;
 
     return true;
-  }, [lastBidderId, isAuctionEnded, selectedBidder, bidderTimeLeft]);
+  }, [lastBidderId, isAuctionEnded, selectedBidder, timeLeft]);
 
   // Check if cancel bid should be disabled
   const isCancelBidDisabled = useCallback(() => {
@@ -1205,20 +1258,20 @@ export const BidPage: React.FC = () => {
               />
 
               {/* Bid Controls Component */}
-                <BidControls
-                  bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
-                  bidAmount={bidAmount}
-                  currentPrice={currentPrice.replace(' VND', '')}
-                  bidIncrement={bidIncrement.replace(' VND', '')}
-                  onBidAmountChange={handleBidAmountChange}
-                  onPlaceBid={handlePlaceBid}
-                  onCancelBid={handleCancelBid}
-                  isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
-                  isCancelBidDisabled={isCancelBidDisabled()}
-                  bidHistoryEmpty={bidHistory.length === 0}
-                  bidderTimeLeft={bidderTimeLeft}
-                  isLastBidder={selectedBidder === lastBidderId}
-                />
+              <BidControls
+                bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
+                bidAmount={bidAmount}
+                currentPrice={currentPrice}
+                bidIncrement={bidIncrement}
+                onBidAmountChange={handleBidAmountChange}
+                onPlaceBid={handlePlaceBid}
+                onCancelBid={handleCancelBid}
+                isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
+                isCancelBidDisabled={isCancelBidDisabled()}
+                bidHistoryEmpty={bidHistory.length === 0}
+                bidderTimeLeft={timeLeft}
+                isLastBidder={selectedBidder === lastBidderId}
+              />
             </>
           )}
         </div>

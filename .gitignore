@@ -7,3 +7,4 @@ node_modules*
 frontend/.env.production
 ./build
 src/build
+*build*
