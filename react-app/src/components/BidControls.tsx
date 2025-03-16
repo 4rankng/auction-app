@@ -500,8 +500,11 @@ const BidControls: React.FC<BidControlsProps> = ({
               </div>
             </div>
           )}
+        </div>
 
-          <div className="col d-flex justify-content-end">
+        {/* Buttons moved to a new row below Giá Trả */}
+        <div className="row mt-3">
+          <div className="col d-flex justify-content-start">
             <button
               className="btn fw-bold me-2 app-btn app-btn-success"
               style={{
