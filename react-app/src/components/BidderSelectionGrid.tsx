@@ -1,4 +1,5 @@
 import React from 'react';
+import './BidderSelectionGrid.css'
 
 interface Bidder {
   id: string;
@@ -46,7 +47,7 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
 
   return (
     <div className="bidder-selection-container mb-3">
-      <h6 className="mb-2">Chọn người tham gia</h6>
+      <h6 className="mb-2 selectBidderLabel">Chọn người tham gia</h6>
 
       {isTimerEnded && (
         <div className="alert alert-warning mb-3">

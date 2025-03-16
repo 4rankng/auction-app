@@ -24,7 +24,7 @@
   font-weight: 700;
 }
 
-/* Countdown Timer - Enhanced & Prominent */
+/* Countdown Timer - Enhanced & More Prominent */
 .bidder-countdown-container {
   position: relative;
   padding: 0.75rem 1.25rem;
@@ -35,6 +35,7 @@
   margin-bottom: 1.5rem;
   transition: all 0.3s ease;
   border: 2px solid transparent;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
 .bidder-countdown-normal {
@@ -64,11 +65,14 @@
 }
 
 .bidder-countdown-value {
-  font-size: 1.75rem;
+  font-size: 1.8rem;
   font-weight: 700;
-  transition: color 0.3s ease;
-  min-width: 80px;
-  text-align: center;
+  font-family: monospace;
+  line-height: 1;
+  padding: 0.25rem 0;
+  margin-left: 0.5rem;
+  display: inline-block;
+  transition: all 0.3s ease;
 }
 
 .bidder-countdown-normal .bidder-countdown-value {
@@ -196,6 +200,19 @@
   }
 }
 
+/* Time Shimmer Animation for Timer */
+@keyframes time-shimmer {
+  0% {
+    background-color: rgba(141, 141, 141, 0.1);
+  }
+  50% {
+    background-color: rgba(141, 141, 141, 0.2);
+  }
+  100% {
+    background-color: rgba(141, 141, 141, 0.1);
+  }
+}
+
 /* Responsive Styling */
 @media (max-width: 768px) {
   .bid-options-container {
@@ -207,4 +224,49 @@
     width: 100%;
     margin-top: 1rem;
   }
+}
+
+/* Start Bid Button - Less Prominent */
+.start-bid-button {
+  min-width: 120px;
+  padding: 6px 14px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  background-color: #f8f9fa;
+  color: #28a745;
+  border: 1px solid #28a745;
+  border-radius: 0.35rem;
+  margin-bottom: 10px;
+  box-shadow: none;
+  transition: all 0.2s ease;
+}
+
+.start-bid-button:hover {
+  background-color: #e9ecef;
+  transform: translateY(-1px);
+}
+
+.start-bid-button:active {
+  transform: translateY(0);
+}
+
+/* Enhanced Countdown Timer Container */
+.enhanced-countdown-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  min-width: 120px;
+  text-align: center;
+  box-shadow: none;
+}
+
+.enhanced-countdown-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  font-family: monospace;
+  transition: color 0.3s ease;
 }

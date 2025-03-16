@@ -515,7 +515,11 @@ The timer in bidControl card should be styled with a larger font size, a distinc
 - During the countdown, the startBid button is disabled with a gray color scheme.
 - When the timer reaches zero, the startBid button is re-enabled, the timer value is reset to `bidDuration`, and the timer value is not transmitted to the auction popup.
 - When the placeBid (Dau Gia) button is clicked, bidPage sends timer value 0 to the auction popup to reset the timer, enables the startBid button, and sets the timer value to `bidDuration`.
-
+g
+The user is pointing out issues with responsive design in their auction app UI. Based on the image, they've identified several problems:
+The height of step increment/decrement buttons and the steps input field are not in sync
+The "Đấu Giá" and "Hủy Đấu Giá Cuối" buttons overlap with inputs above
+The "startBid" button and "bidderTimer" need repositioning
 
 #### On Bidder Selection
 - When a bidder is selected or deselected:
