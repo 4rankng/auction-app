@@ -546,7 +546,7 @@ export default function SetupPage() {
                         />
                       </div>
                       <div className="col-12 col-md-4">
-                        <label className="form-label">CMND/CCCD</label>
+                        <label className="form-label">CCCD/DKKD</label>
                         <input
                           type="text"
                           name="nric"
@@ -598,7 +598,7 @@ export default function SetupPage() {
                       <tr>
                         <th style={{ width: '20%' }}>Mã Số</th>
                         <th style={{ width: '45%' }}>Tên</th>
-                        <th style={{ width: '35%' }}>CMND/CCCD</th>
+                        <th style={{ width: '35%' }}>CCCD/DKKD</th>
                       </tr>
                     </thead>
                     <tbody>

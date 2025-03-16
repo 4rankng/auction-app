@@ -332,6 +332,14 @@ const StyledContainer = styled.div`
     .stat-item {
       width: 100%;
     }
+
+    .highest-bid-label {
+      font-size: 14px;
+    }
+
+    .highest-bid-amount {
+      font-size: 20px;
+    }
   }
 
   /* Additional styles */
@@ -474,6 +482,32 @@ const globalStyles = `
     0% { opacity: 0.8; }
     50% { opacity: 0.9; }
     100% { opacity: 1; }
+  }
+
+  /* Highest Bid Banner Styles */
+  .highest-bid-banner {
+    background-color: #f8d7da; /* Light red background */
+    border-left: 4px solid #dc3545; /* Red accent */
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .highest-bid-label {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #721c24; /* Dark red text */
+  }
+
+  .highest-bid-amount {
+    font-size: 24px;
+    font-weight: 700;
+    color: #dc3545; /* Red text */
   }
 `;
 
@@ -791,7 +825,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
           <div className="detail-row">
             <div className="detail-label">Đấu Giá Viên:</div>
             <div className="detail-value">{auctioneer}</div>
-            <div className="detail-label right-column">Vòng Đấu Giá:</div>
+            <div className="detail-label right-column">Phiên Đấu Giá Tài Sản:</div>
             <div className="detail-value">{bidRound}</div>
           </div>
 
@@ -939,6 +973,12 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
                 <div className={`auction-content ${isAuctionEnded ? 'auction-ended-content' : ''}`}>
                   <div className="auction-title">
                     {auctionTitle || "Thông Tin Đấu Giá"}
+                  </div>
+
+                  {/* Add prominent highest bid display box that appears in both auction states */}
+                  <div className="highest-bid-banner">
+                    <div className="highest-bid-label">Giá Trả Cao Nhất</div>
+                    <div className="highest-bid-amount">{isAuctionEnded ? (finalPrice || highestBidAmount) : highestBidAmount}</div>
                   </div>
 
                   {renderAuctionContent()}
