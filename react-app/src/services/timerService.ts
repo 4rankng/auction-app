@@ -489,3 +489,12 @@ export const syncTimerWithServer = (timerId: string, serverEndTime: number): boo
 export const getTimerObservable = () => {
   return timerObservable;
 };
+
+/**
+ * Checks if a timer with the given ID exists
+ * @param timerId The timer ID to check
+ * @returns Boolean indicating if the timer exists
+ */
+export const timerExists = (timerId: string): boolean => {
+  return timers.has(timerId);
+};

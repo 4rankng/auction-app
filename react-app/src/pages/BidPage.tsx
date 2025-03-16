@@ -198,7 +198,14 @@ export const BidPage: React.FC = () => {
 
   const stopTimer = useCallback(() => {
     console.log(`BidPage: stopTimer called for timer ${timerIdRef.current}`);
-    const result = timerService.pauseTimer(timerIdRef.current);
+
+    if (!timerService.timerExists(timerIdRef.current)) {
+      console.log(`Timer ${timerIdRef.current} doesn't exist, nothing to stop`);
+      setIsTimerRunning(false);
+      return;
+    }
+
+    const result = timerService.stopTimer(timerIdRef.current);
     console.log(`BidPage: stopTimer result: ${result ? 'success' : 'failed'}`);
     setIsTimerRunning(false);
 
@@ -1435,6 +1442,28 @@ export const BidPage: React.FC = () => {
                   // Allow timer to start even without a selected bidder
                   const newTimerValue = auction?.settings?.bidDuration || 60;
                   console.log('Setting timer value to:', newTimerValue);
+
+                  // Check if timer exists, if not create it
+                  if (!timerService.timerExists(timerIdRef.current)) {
+                    console.log(`Timer ${timerIdRef.current} doesn't exist, creating it first`);
+                    timerService.createTimer(timerIdRef.current, newTimerValue, {
+                      onTick: (remainingTime) => {
+                        console.log(`BidPage: Timer tick received: ${remainingTime}s remaining`);
+                        setTimeLeft(remainingTime);
+                        setPopupTimerValue(remainingTime);
+                      },
+                      onComplete: () => {
+                        console.log('BidPage: Timer completed');
+                        setIsTimerRunning(false);
+                        setPopupTimerValue(0);
+                        localStorage.removeItem(timerValueKey);
+                        localStorage.removeItem(timerRunningKey);
+                        localStorage.removeItem(timerStartTimeKey);
+                      },
+                      tickInterval: 1000
+                    });
+                  }
+
                   resetTimer(newTimerValue);
                   console.log('Starting timer...');
                   startTimer();
@@ -1446,6 +1475,28 @@ export const BidPage: React.FC = () => {
                   console.log('Reset Timer button clicked');
                   const newTimerValue = auction?.settings?.bidDuration || 60;
                   console.log('Resetting timer to:', newTimerValue);
+
+                  // If timer doesn't exist, create it before resetting
+                  if (!timerService.timerExists(timerIdRef.current)) {
+                    console.log(`Timer ${timerIdRef.current} doesn't exist, creating it before reset`);
+                    timerService.createTimer(timerIdRef.current, newTimerValue, {
+                      onTick: (remainingTime) => {
+                        console.log(`BidPage: Timer tick received: ${remainingTime}s remaining`);
+                        setTimeLeft(remainingTime);
+                        setPopupTimerValue(remainingTime);
+                      },
+                      onComplete: () => {
+                        console.log('BidPage: Timer completed');
+                        setIsTimerRunning(false);
+                        setPopupTimerValue(0);
+                        localStorage.removeItem(timerValueKey);
+                        localStorage.removeItem(timerRunningKey);
+                        localStorage.removeItem(timerStartTimeKey);
+                      },
+                      tickInterval: 1000
+                    });
+                  }
+
                   resetTimer(newTimerValue);
                   // Stop the timer after resetting it
                   stopTimer();

@@ -208,6 +208,10 @@ const BidControls: React.FC<BidControlsProps> = ({
     console.log('Calling onPlaceBid with amount:', numericAmount);
     onPlaceBid(numericAmount);
 
+    // Reset the timer to its initial value and stop it
+    console.log('Resetting and stopping timer after Dau Gia button click');
+    onResetTimer();
+
     // Reset the form after successful submission
     if (bidMethod === 'customPrice') {
       setCustomBidAmount('');
