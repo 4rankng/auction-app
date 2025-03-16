@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheetManager } from 'styled-components';
 import NewWindow from 'react-new-window';
 import styled from 'styled-components';
-import * as timerService from '../services/timerService';
 
 interface AuctionPopupRendererProps {
   auctioneer: string;
@@ -504,7 +503,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
   const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   // Add a ref to track if we've already created a popup window
   const popupCreatedRef = useRef<boolean>(false);
-  // Add ref to track previous timer value
+  // Add ref to track previous timer value to detect real changes
   const prevTimerValueRef = useRef<number>(timerValue || 0);
 
   // Track the previous auction end state to detect changes
@@ -516,18 +515,64 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
   // Add a ref to track if we've handled auction end
   const endHandledRef = useRef<boolean>(false);
 
-  // Timer subscription
+  // Simplified timer handling - only reset when timerValue actually changes
+  useEffect(() => {
+    // For ended auctions, ensure timer is stopped and shows 0
+    if (isAuctionEnded) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = undefined;
+      }
+      setRemainingTime(0);
+      return;
+    }
+
+    // Check if timerValue has changed - this is the key optimization
+    if (timerValue !== undefined && timerValue !== prevTimerValueRef.current) {
+      console.log("AuctionPopupRenderer: New timer value received:", timerValue);
+
+      // Update the state and ref with new value
+      setRemainingTime(timerValue);
+      prevTimerValueRef.current = timerValue;
+
+      // Clear existing timer
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = undefined;
+      }
+
+      // Start a new countdown if value is > 0
+      if (timerValue > 0) {
+        console.log("AuctionPopupRenderer: Starting new countdown");
+        timerRef.current = setInterval(() => {
+          setRemainingTime(prev => {
+            const newValue = Math.max(0, prev - 1);
+            if (newValue === 0 && timerRef.current) {
+              clearInterval(timerRef.current);
+              timerRef.current = undefined;
+            }
+            return newValue;
+          });
+        }, 1000);
+      }
+    }
+
+    // Clean up on unmount
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = undefined;
+      }
+    };
+  }, [timerValue, isAuctionEnded]);
+
+  // Remove the timer subscription which is causing conflicts
   useEffect(() => {
     // This effect should only run once when the component mounts
     console.log("AuctionPopupRenderer: Component mounted");
 
     // Set a flag to track that we're rendering a popup to prevent duplicates
     popupCreatedRef.current = true;
-
-    // Subscribe to timer updates
-    const subscription = timerService.getTimerObservable().subscribe((timeLeft: number) => {
-      setRemainingTime(timeLeft);
-    });
 
     // Add resize event listener to ensure proper layout after window resize
     const handleResize = () => {
@@ -550,12 +595,26 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
     // Clean up subscription and event listeners on unmount
     return () => {
       console.log("AuctionPopupRenderer: Component unmounting, cleanup");
-      subscription.unsubscribe();
+
+      // Clear any running timer
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = undefined;
+      }
+
       window.removeEventListener('resize', handleResize);
       // Reset the flag
       popupCreatedRef.current = false;
     };
   }, []);
+
+  // Format time for display (show minutes:seconds format)
+  const formatTime = (seconds: number): string => {
+    // Format as MM:SS
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   // Enhanced font and style loading with delay to ensure DOM is ready
   useEffect(() => {
@@ -649,67 +708,6 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
       }
     }
   }, [isAuctionEnded]);
-
-  // Add timer synchronization effect with improved logic
-  useEffect(() => {
-    // Only sync when timerValue changes and if it's not an ended auction
-    if (timerValue !== undefined && !isAuctionEnded) {
-      // Get previous timer value from ref
-      const prevTimerValue = prevTimerValueRef.current;
-
-      // Only update timer if there's a significant change
-      // This could be:
-      // 1. The difference is more than 2 seconds (to avoid regular countdown updates)
-      // 2. The timer increased (bidder selection changed)
-      // 3. The timer was reset to 0
-      if (Math.abs(prevTimerValue - timerValue) > 2 ||
-          timerValue > prevTimerValue ||
-          timerValue === 0) {
-
-        console.log("AuctionPopupRenderer: Syncing timer with parent", timerValue);
-        setRemainingTime(timerValue);
-
-        // Clear existing timer if any
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-        }
-
-        // Start local countdown if time is greater than 0
-        if (timerValue > 0) {
-          timerRef.current = setInterval(() => {
-            setRemainingTime(prev => {
-              const newValue = Math.max(prev - 1, 0);
-              return newValue;
-            });
-          }, 1000);
-        }
-      }
-
-      // Update the ref with current value
-      prevTimerValueRef.current = timerValue;
-    }
-
-    // Clean up timer on unmount or when auction ends
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [timerValue, isAuctionEnded]);
-
-  // Additional cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, []);
-
-  // Format time for display
-  const formatTime = (seconds: number): string => {
-    return seconds.toString().padStart(2, '0');
-  };
 
   // Add an effect to listen for the custom auctionEnded event
   useEffect(() => {

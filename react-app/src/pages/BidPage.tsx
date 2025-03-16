@@ -612,9 +612,17 @@ export const BidPage: React.FC = () => {
     const newTimerValue = auction?.settings?.bidDuration || 60;
     resetBidderTimer(newTimerValue);
     startBidderTimer();
-    // Update popup timer with the new value
+    // Update popup timer with the new value immediately
     setPopupTimerValue(newTimerValue);
   }, [isAuctionEnded, selectedBidder, lastBidderId, auction?.settings?.bidDuration, showToast, stopBidderTimer, resetBidderTimer, startBidderTimer]);
+
+  // Add a useEffect to update the popup timer whenever bidderTimeLeft changes
+  useEffect(() => {
+    // Only update popup timer if bidder is selected and auction is not ended
+    if (selectedBidder && !isAuctionEnded) {
+      setPopupTimerValue(bidderTimeLeft);
+    }
+  }, [bidderTimeLeft, selectedBidder, isAuctionEnded]);
 
   const handlePlaceBid = async (directBidAmount?: string) => {
     console.log('handlePlaceBid called with bidAmount:', bidAmount, 'directBidAmount:', directBidAmount);
