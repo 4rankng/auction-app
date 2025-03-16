@@ -8,7 +8,7 @@ import {
   bidCancelled,
   auctionEnded
 } from '@store/auctionSlice';
-import { Auction, Bid, Bidder } from '@types';
+import { Auction } from '@types';
 import { AUCTION_STATUS } from '@utils/constants';
 import { RootState } from '@store/index';
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { databaseService } from '@services/databaseService';
+import { exportExcelService } from '@services/exportExcelService';
 import { Auction } from '@types';
-import { Button, Table, Container, Spinner, Alert, Pagination, Card } from 'react-bootstrap';
+import { Button, Table, Container, Spinner, Alert, Pagination, Card, Toast } from 'react-bootstrap';
 import './AuctionHistory.css';
 
 const AuctionHistory: React.FC = () => {
@@ -10,6 +11,15 @@ const AuctionHistory: React.FC = () => {
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error';
+  }>({
+    show: false,
+    message: '',
+    type: 'success'
+  });
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,6 +28,20 @@ const AuctionHistory: React.FC = () => {
   useEffect(() => {
     fetchAuctions();
   }, []);
+
+  // Function to show toast messages
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({
+      show: true,
+      message,
+      type
+    });
+
+    // Auto-hide the toast after 3 seconds
+    setTimeout(() => {
+      setToast(prev => ({ ...prev, show: false }));
+    }, 3000);
+  };
 
   const fetchAuctions = async () => {
     try {
@@ -48,23 +72,23 @@ const AuctionHistory: React.FC = () => {
     navigate(`/bid?id=${auctionId}&from=history`);
   };
 
-  const handleExportAuction = (auction: Auction) => {
-    // Handle export logic here
-    console.log('Exporting auction:', auction.id);
-    // This would be where you'd implement export functionality
-    alert(`Xuất phiên đấu giá: ${auction.title}`);
-  };
+  const handleExportAuction = async (auction: Auction) => {
+    try {
+      // Fetch all bidders and bids for this auction
+      const bidders = await databaseService.getBidders(auction.id);
+      const bids = await databaseService.getBids(auction.id);
 
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'SETUP':
-        return 'status-badge setup';
-      case 'IN_PROGRESS':
-        return 'status-badge in-progress';
-      case 'ENDED':
-        return 'status-badge ended';
-      default:
-        return 'status-badge';
+      // Use the exportExcelService to handle the export
+      const success = await exportExcelService.exportAuctionToExcel(auction, bidders, bids);
+
+      if (success) {
+        showToast('Dữ liệu đấu giá đã được xuất thành công', 'success');
+      } else {
+        throw new Error('Export failed');
+      }
+    } catch (error) {
+      console.error('Error exporting data to Excel:', error);
+      showToast('Không thể xuất dữ liệu Excel. Vui lòng thử lại.', 'error');
     }
   };
 
@@ -128,19 +152,6 @@ const AuctionHistory: React.FC = () => {
     }
   };
 
-  const getStatusText = (status?: string) => {
-    switch (status) {
-      case 'SETUP':
-        return 'Chuẩn bị';
-      case 'IN_PROGRESS':
-        return 'Đang diễn ra';
-      case 'ENDED':
-        return 'Đã kết thúc';
-      default:
-        return 'Không xác định';
-    }
-  };
-
   // Get number of bids for an auction
   const getBidCount = (auction: Auction) => {
     if (!auction || !auction.bids) return 0;
@@ -179,6 +190,19 @@ const AuctionHistory: React.FC = () => {
 
   return (
     <Container className="auction-history-container">
+      {/* Toast container */}
+      <div className="toast-container position-fixed top-0 end-0 p-3">
+        <Toast
+          onClose={() => setToast(prev => ({ ...prev, show: false }))}
+          show={toast.show}
+          delay={3000}
+          autohide
+          bg={toast.type === 'success' ? 'success' : 'danger'}
+          className="text-white"
+        >
+          <Toast.Body>{toast.message}</Toast.Body>
+        </Toast>
+      </div>
 
       {loading ? (
         <div className="loading-container">

@@ -10,9 +10,9 @@ import AuctionPopupRenderer from '@components/AuctionPopupRenderer';
 import { useAuction } from '@hooks/useAuction';
 import useAuctionPopup from '@hooks/useAuctionPopup';
 import { Bid, AuctionStatus } from '@types';
-import * as XLSX from 'xlsx';
 import './BidPage.css';
 import { bidService } from '@services/bidService';
+import { exportExcelService } from '@services/exportExcelService';
 import * as popupService from '@services/popupService';
 import * as timerService from '@services/timerService';
 import { Modal, Button } from 'react-bootstrap';
@@ -28,19 +28,9 @@ interface BidHistoryDisplay {
   bidNumber?: number; // Use bidNumber instead of round for continuous bidding
 }
 
-// Use URLSearchParams to check if page was reached from history
-function isFromAuctionHistory(): boolean {
-  // Check current URL for referrer parameter or other indicator
-  const searchParams = new URLSearchParams(window.location.search);
-  return searchParams.get('from') === 'history' || document.referrer.includes('/history');
-}
-
 export const BidPage: React.FC = () => {
   // Get auction data from useAuction hook - removed placeBid and removeBid
   const { auction, bidders, bids, loading: dataLoading, error: dataError, updateAuction, getAuctionById } = useAuction();
-
-  // Track whether the page was accessed from AuctionHistory
-  const [fromAuctionHistory, setFromAuctionHistory] = useState<boolean>(isFromAuctionHistory());
 
   const [currentPrice, setCurrentPrice] = useState<string>('0 VND');
   const [bidIncrement, setBidIncrement] = useState<string>('0 VND');
@@ -1177,143 +1167,22 @@ export const BidPage: React.FC = () => {
   };
 
   // Handle exporting auction data
-  const handleExportData = () => {
+  const handleExportData = async () => {
     if (!auction) return;
 
     try {
-      // Create workbook
-      const wb = XLSX.utils.book_new();
+      // Use the exportExcelService for a cleaner implementation
+      const success = await exportExcelService.exportAuctionToExcel(
+        auction,
+        bidders,
+        bids
+      );
 
-      // ===== SHEET 1: AUCTION INFORMATION =====
-      // Create auction info data with more comprehensive details
-      const auctionInfoData = [
-        ['Thông tin đấu giá', 'Giá trị'],
-        ['ID phiên đấu giá', auction.id || ''],
-        ['Tên phiên đấu giá', auctionTitle],
-        ['Mô tả', auction.description || ''],
-        ['Đấu giá viên', auction.settings?.auctioneer || 'N/A'],
-        ['Trạng thái', isAuctionEnded ? 'Đã kết thúc' : 'Đang diễn ra'],
-        ['Vòng đấu giá', auction.settings?.bidRound || '1'],
-        ['Giá khởi điểm', bidService.formatCurrency(auction.settings?.startingPrice || 0)],
-        ['Bước giá', bidService.formatCurrency(auction.settings?.bidStep || 0)],
-        ['Thời gian đấu giá (giây)', auction.settings?.bidDuration?.toString() || ''],
-        ['Người thắng cuộc', highestBidderId || 'Không có người thắng'],
-        ['Giá thắng cuộc', bidService.formatCurrency(bids && bids.length > 0 ? bids[0].amount : (auction.settings?.startingPrice || 0))],
-        ['Thời gian bắt đầu', auction.startTime ? new Date(auction.startTime).toLocaleString('vi-VN') : 'N/A'],
-        ['Thời gian kết thúc', auction.endTime ? new Date(auction.endTime).toLocaleString('vi-VN') : 'N/A'],
-        ['Thời gian diễn ra', elapsedTime],
-        ['Tổng số lượt đặt giá', bidHistory.length],
-        ['Số người tham gia', bidders.length]
-      ];
-
-      // Create auction info worksheet
-      const wsInfo = XLSX.utils.aoa_to_sheet(auctionInfoData);
-
-      // Set column widths for info sheet
-      wsInfo['!cols'] = [
-        { wch: 25 }, // Column A width
-        { wch: 50 }  // Column B width
-      ];
-
-      // Add the info worksheet to the workbook
-      XLSX.utils.book_append_sheet(wb, wsInfo, "Thông tin đấu giá");
-
-      // ===== SHEET 2: BIDDERS LIST =====
-      // Format bidders data
-      const biddersHeaders = ['ID', 'Tên', 'CMND/CCCD', 'Nơi Cấp', 'Địa Chỉ', 'Lượt Đặt Giá'];
-
-      // Count bids per bidder
-      const bidCounts: { [key: string]: number } = {};
-      bids.forEach(bid => {
-        bidCounts[bid.bidderId] = (bidCounts[bid.bidderId] || 0) + 1;
-      });
-
-      const biddersData = bidders.map(bidder => [
-        bidder.id,
-        bidder.name,
-        bidder.nric || '',
-        bidder.issuingAuthority || '',
-        bidder.address || '',
-        bidCounts[bidder.id] || 0
-      ]);
-
-      // Add headers to bidders data
-      biddersData.unshift(biddersHeaders);
-
-      // Create bidders worksheet
-      const wsBidders = XLSX.utils.aoa_to_sheet(biddersData);
-
-      // Set column widths for bidders sheet
-      wsBidders['!cols'] = [
-        { wch: 10 },  // ID
-        { wch: 30 },  // Name
-        { wch: 20 },  // NRIC
-        { wch: 20 },  // Issuing Authority
-        { wch: 30 },  // Address
-        { wch: 15 }   // Bid Count
-      ];
-
-      // Add the bidders worksheet to the workbook
-      XLSX.utils.book_append_sheet(wb, wsBidders, "Người tham gia");
-
-      // ===== SHEET 3: BID HISTORY =====
-      // Enhanced bid history data with more details
-      const bidHistoryHeaders = ['STT', 'ID Người Đặt', 'Tên Người Đặt', 'Số Tiền', 'Thời Gian'];
-
-      const bidHistoryData = bids
-        .sort((a, b) => b.timestamp - a.timestamp) // Sort by timestamp (newest first)
-        .map((bid, index) => {
-          // Get bidder name from bidders array
-          const bidder = bidders.find(b => b.id === bid.bidderId);
-          return [
-            bids.length - index, // Bid number (counts down)
-            bid.bidderId,
-            bidder ? bidder.name : 'N/A',
-            bidService.formatCurrency(bid.amount),
-            new Date(bid.timestamp).toLocaleString('vi-VN')
-          ];
-        });
-
-      // Add headers to bid history data
-      bidHistoryData.unshift(bidHistoryHeaders);
-
-      // Create bid history worksheet
-      const wsBids = XLSX.utils.aoa_to_sheet(bidHistoryData);
-
-      // Set column widths for bid history sheet
-      wsBids['!cols'] = [
-        { wch: 6 },   // STT
-        { wch: 15 },  // ID Người Đặt
-        { wch: 30 },  // Tên Người Đặt
-        { wch: 20 },  // Số Tiền
-        { wch: 25 }   // Thời Gian
-      ];
-
-      // Add the bid history worksheet to the workbook
-      XLSX.utils.book_append_sheet(wb, wsBids, "Lịch sử đấu giá");
-
-      // Generate Excel file
-      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-
-      // Create a Blob from the buffer
-      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-      // Create a formatted timestamp for the filename
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
-
-      // Create download link and trigger click
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `auction-data-${auction.id}-${timestamp}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-
-      // Clean up
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      showToast('Dữ liệu đấu giá đã được xuất thành công dưới dạng Excel', 'success');
+      if (success) {
+        showToast('Dữ liệu đấu giá đã được xuất thành công dưới dạng Excel', 'success');
+      } else {
+        throw new Error('Export failed');
+      }
     } catch (error) {
       console.error('Error exporting data to Excel:', error);
       showToast('Không thể xuất dữ liệu Excel. Vui lòng thử lại.', 'error');
