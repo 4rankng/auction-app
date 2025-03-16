@@ -634,7 +634,7 @@ export default function SetupPage() {
       <div className="start-auction-container">
         <div className="container">
           <div className="row">
-            <div className="col-6 pe-1">
+            <div className="col-8 pe-1">
               <button
                 className="btn btn-success btn-lg w-100"
                 onClick={handleConfirmAuction}
@@ -654,7 +654,7 @@ export default function SetupPage() {
                 )}
               </button>
             </div>
-            <div className="col-6 ps-1">
+            <div className="col-4 ps-1">
               <button
                 className="btn btn-primary btn-lg w-100"
                 onClick={() => navigate('/history')}
