@@ -490,6 +490,8 @@ The auction app now employs a continuous bidding system instead of round-based b
 
 ### UI Elements
 
+The timer in bidControl card should be styled with a larger font size, a distinct background color, and a border to improve visibility. The timer should be formatted as `mm:ss` (e.g., `04:35`).
+
 #### Add "Bắt Đầu" Button
 - Insert a "Bắt Đầu" (startBid) button above the timer.
 

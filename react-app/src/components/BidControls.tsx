@@ -28,6 +28,7 @@ interface BidControlsProps {
   bidHistoryEmpty?: boolean; // New prop to check if bid history is empty
   bidderTimeLeft?: number; // New prop for bidder countdown timer
   isLastBidder?: boolean; // New prop to check if the selected bidder is the last bidder
+  onStartBid?: () => void; // New prop for start bid button action
 }
 
 /**
@@ -46,7 +47,8 @@ const BidControls: React.FC<BidControlsProps> = ({
   isCancelBidDisabled = false, // Default to enabled
   bidHistoryEmpty = true, // Default to true if not provided
   bidderTimeLeft, // No default, should be passed from parent
-  isLastBidder = false // Default to false if not provided
+  isLastBidder = false, // Default to false if not provided
+  onStartBid = () => {} // Default to empty function if not provided
 }) => {
   // State for bid method selection - default to stepPrice if bid history is not empty
   const [bidMethod, setBidMethod] = useState<'basePrice' | 'stepPrice' | 'customPrice'>(
@@ -227,7 +229,7 @@ const BidControls: React.FC<BidControlsProps> = ({
     const timeLeft = bidderTimeLeft || 0; // Default to 0 if undefined
     if (timeLeft <= 10) return '#dc3545'; // red for last 10 seconds
     if (timeLeft <= 30) return '#ffc107'; // yellow for 30-10 seconds
-    return '#28a745'; // green for > 30 seconds
+    return '#212529'; // dark gray/black to match auction header (default color)
   };
 
   // Check if the bid button should be disabled
@@ -238,6 +240,14 @@ const BidControls: React.FC<BidControlsProps> = ({
     if (bidMethod === 'customPrice' && !customBidAmount) return true;
     if (isLastBidder) return true; // Disable if this is the last bidder
     return false;
+  };
+
+  // Format timer to mm:ss format
+  const formatTimeLeft = (seconds: number): string => {
+    if (seconds === undefined || seconds === null) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -251,24 +261,71 @@ const BidControls: React.FC<BidControlsProps> = ({
       {/* Add style element for animation */}
       <style>{bidButtonAnimation}</style>
 
-      {/* Countdown Timer */}
+      {/* Start Bid Button and Timer Section in top-right corner */}
       <div
-        className="position-absolute"
+        className="position-absolute d-flex flex-column align-items-end"
         style={{
           top: '15px',
           right: '20px',
           zIndex: 10,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: 'bold',
-          fontSize: '1.2rem',
-          color: getTimerColor(),
-          transition: 'color 0.5s ease'
         }}
       >
-        <i className="bi bi-clock me-1"></i>
-        <span className="countdown-timer">{bidderTimeLeft || 0}s</span>
+        {/* Start Bid Button - Styled like "Đấu Giá" button */}
+        <button
+          className="btn fw-bold me-2 app-btn app-btn-success"
+          style={{
+            minWidth: '120px',
+            padding: '8px 16px',
+            fontSize: '1.1rem',
+            fontWeight: 'bold',
+            transform: 'translateY(-2px)',
+            animation: 'pulse-button 2s infinite',
+            backgroundColor: '#28a745',
+            color: 'white',
+            border: 'none',
+            borderRadius: '0.35rem',
+            marginBottom: '8px',
+            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)'
+          }}
+          onClick={onStartBid}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.animation = 'none'; // Pause animation on hover
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.animation = 'pulse-button 2s infinite'; // Resume animation
+          }}
+        >
+          <i className="bi bi-play-fill me-2"></i> Bắt Đầu
+        </button>
+
+        {/* Enhanced Countdown Timer - removed clock icon, updated color */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '2px 8px',
+            border: '1px solid #dee2e6',
+            borderRadius: '4px',
+            backgroundColor: '#f8f9fa',
+            minWidth: '100px',
+            textAlign: 'center',
+          }}
+        >
+          <span
+            className="countdown-timer"
+            style={{
+              color: getTimerColor(),
+              fontSize: '1.4rem',
+              fontWeight: 'bold',
+              fontFamily: 'monospace'
+            }}
+          >
+            {formatTimeLeft(bidderTimeLeft || 0)}
+          </span>
+        </div>
       </div>
 
       <div>
