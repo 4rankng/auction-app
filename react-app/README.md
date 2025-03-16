@@ -708,3 +708,10 @@ Looking at the current layout in AuctionPopupRenderer.tsx, I need to reorganize 
 "Gia Khoi Diem" (starting price) and "Buoc Gia" (bid step) should be on the same line - these are already in the detail rows but need to be reorganized.
 "Nguoi Tra Gia Cao Nhat" (highest bidder) should be on its own line - this is in the detail rows and needs to be reorganized.
 "Lan Tra Gia" (bid round) and "Nguoi Tra Gia" (current bidder) should be on the same line - these need to be reorganized in the detail rows.
+
+
+Based on my research, I understand how the auction popup works and what changes I need to make. Now I'll add a button at the top center of the page to display the auction popup when clicked.
+Here's the plan:
+Add a button at the top center of the BidPage
+Make sure the auction popup doesn't automatically open when BidPage loads
+Set up the button to open the popup when clicked
