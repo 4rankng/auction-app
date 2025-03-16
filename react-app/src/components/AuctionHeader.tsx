@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './AuctionHeader.css';
 
 interface AuctionHeaderProps {
@@ -21,6 +21,25 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
   isAuctionEnded = false,
   auctioneer = 'Không có thông tin'
 }) => {
+  // Add state for modal visibility
+  const [showModal, setShowModal] = useState(false);
+
+  // Function to handle opening the modal
+  const handleOpenModal = () => {
+    setShowModal(true);
+  };
+
+  // Function to handle closing the modal
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  // Function to handle confirmation and end auction
+  const handleConfirmEndAuction = () => {
+    onEndAuction();
+    setShowModal(false);
+  };
+
   return (
     <div className="auction-header-container">
       <div className="auction-header-info">
@@ -50,12 +69,46 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
         ) : (
           <button
             className="btn end-auction-btn"
-            onClick={onEndAuction}
+            onClick={handleOpenModal}
           >
             <i className="bi bi-stop-circle"></i> Kết Thúc Đấu Giá
           </button>
         )}
       </div>
+
+      {/* Confirmation Modal */}
+      {showModal && (
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex={-1} aria-modal="true" role="dialog">
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header bg-danger text-white">
+                <h5 className="modal-title">
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  Xác nhận kết thúc đấu giá
+                </h5>
+                <button type="button" className="btn-close btn-close-white" onClick={handleCloseModal} aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                <p>Bạn có chắc chắn muốn kết thúc phiên đấu giá này?</p>
+                <p className="mb-0 fw-bold">Lưu ý: Hành động này không thể hoàn tác và sẽ xác định người trúng đấu giá.</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                  <i className="bi bi-x-circle me-1"></i> Hủy
+                </button>
+                <button type="button" className="btn btn-danger" onClick={handleConfirmEndAuction}>
+                  <i className="bi bi-stop-circle me-1"></i> Xác nhận kết thúc
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add backdrop when modal is open */}
+      {showModal && (
+        <div className="modal-backdrop fade show" style={{ zIndex: 1040 }}></div>
+      )}
     </div>
   );
 };
