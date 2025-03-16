@@ -454,8 +454,8 @@ const BidControls: React.FC<BidControlsProps> = ({
           {bidMethod === 'stepPrice' && (
             <>
               <div className="col-md-8">
-                <div className="d-flex align-items-end flex-wrap">
-                  <div className="me-3 mb-2" style={{ minWidth: '120px' }}>
+                <div className="d-flex flex-column flex-md-row align-items-start align-items-md-end flex-wrap">
+                  <div className="me-md-3 mb-2" style={{ minWidth: '120px' }}>
                     <div className="form-group mb-0">
                       <label className="form-label mb-1">Số Bước Giá</label>
                       <div className="input-group input-group-sm">
