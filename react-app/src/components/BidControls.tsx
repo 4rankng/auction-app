@@ -13,6 +13,18 @@ const bidButtonAnimation = `
     outline: 0px solid rgba(40, 167, 69, 0);
   }
 }
+
+@keyframes time-shimmer {
+  0% {
+    background-color: rgba(141, 141, 141, 0.1);
+  }
+  50% {
+    background-color: rgba(141, 141, 141, 0.2);
+  }
+  100% {
+    background-color: rgba(141, 141, 141, 0.1);
+  }
+}
 `;
 
 interface BidControlsProps {
@@ -23,6 +35,7 @@ interface BidControlsProps {
   onBidAmountChange: (amount: string) => void;
   onPlaceBid: (amount: string) => void;
   onCancelBid: () => void;
+  onStartBid?: () => void; // New prop for handling Start Bid button click
   isPlaceBidDisabled: boolean;
   isCancelBidDisabled?: boolean; // New prop to control when cancel button is disabled
   bidHistoryEmpty?: boolean; // New prop to check if bid history is empty
@@ -42,6 +55,7 @@ const BidControls: React.FC<BidControlsProps> = ({
   onBidAmountChange,
   onPlaceBid,
   onCancelBid,
+  onStartBid = () => {}, // Default empty function if not provided
   isPlaceBidDisabled,
   isCancelBidDisabled = false, // Default to enabled
   bidHistoryEmpty = true, // Default to true if not provided
@@ -222,6 +236,13 @@ const BidControls: React.FC<BidControlsProps> = ({
     }
   };
 
+  // Format the timer in mm:ss format
+  const formatTime = (seconds: number = 0): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   // Get color for countdown timer based on time left
   const getTimerColor = () => {
     const timeLeft = bidderTimeLeft || 0; // Default to 0 if undefined
@@ -251,24 +272,46 @@ const BidControls: React.FC<BidControlsProps> = ({
       {/* Add style element for animation */}
       <style>{bidButtonAnimation}</style>
 
-      {/* Countdown Timer */}
-      <div
-        className="position-absolute"
-        style={{
-          top: '15px',
-          right: '20px',
-          zIndex: 10,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: 'bold',
-          fontSize: '1.2rem',
-          color: getTimerColor(),
-          transition: 'color 0.5s ease'
-        }}
-      >
-        <i className="bi bi-clock me-1"></i>
-        <span className="countdown-timer">{bidderTimeLeft || 0}s</span>
+      {/* Timer moved above Ma So / Ten as requested */}
+      <div className="mb-3 d-flex justify-content-start align-items-center">
+        {/* Start Bid Button - moved to the left of timer */}
+        <button
+          className="btn fw-bold app-btn app-btn-success me-3"
+          style={{
+            minWidth: '120px',
+            padding: '0.35rem 0.75rem',
+            height: '38px'
+          }}
+          onClick={onStartBid}
+        >
+          <i className="bi bi-play-circle me-1"></i> Bắt Đầu
+        </button>
+
+        {/* Countdown Timer */}
+        <div
+          style={{
+            zIndex: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(141, 141, 141, 0.1)',
+            borderRadius: '6px',
+            padding: '0.35rem 0.75rem',
+            border: '1px solid rgba(141, 141, 141, 0.2)',
+            animation: 'time-shimmer 2s infinite',
+            minWidth: '120px',
+            height: '38px'
+          }}
+        >
+          <i className="bi bi-clock me-1" style={{ color: '#6C6C6C' }}></i>
+          <span style={{
+            fontWeight: 'bold',
+            fontSize: '1.2rem',
+            color: '#6C6C6C',
+          }}>
+            {formatTime(bidderTimeLeft)}
+          </span>
+        </div>
       </div>
 
       <div>
