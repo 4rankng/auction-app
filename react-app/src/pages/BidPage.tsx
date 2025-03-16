@@ -15,6 +15,7 @@ import './BidPage.css';
 import { bidService } from '@services/bidService';
 import * as popupService from '@services/popupService';
 import * as timerService from '@services/timerService';
+import { Modal, Button } from 'react-bootstrap';
 
 // Interface for the bid history display format
 interface BidHistoryDisplay {
@@ -1103,7 +1104,16 @@ export const BidPage: React.FC = () => {
   };
 
   const handleGoBack = () => {
+    setShowGoBackModal(true);
+  };
+
+  const confirmGoBack = () => {
+    setShowGoBackModal(false);
     navigate('/');
+  };
+
+  const closeGoBackModal = () => {
+    setShowGoBackModal(false);
   };
 
   // Update the canBidderPlaceBid function
@@ -1321,6 +1331,8 @@ export const BidPage: React.FC = () => {
     setShouldShowPopup(true);
   };
 
+  const [showGoBackModal, setShowGoBackModal] = useState(false);
+
   if (loading) {
     return (
       <div className="container py-4 text-center">
@@ -1512,6 +1524,24 @@ export const BidPage: React.FC = () => {
           auctionDuration={isAuctionEnded ? (auctionResults?.auctionDuration || elapsedTime) : undefined}
         />
       )}
+
+      {/* Confirmation Modal */}
+      <Modal show={showGoBackModal} onHide={closeGoBackModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Xác Nhận</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Bạn có chắc chắn muốn quay lại trang thiết lập không?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeGoBackModal}>
+            Hủy Bỏ
+          </Button>
+          <Button variant="primary" onClick={confirmGoBack}>
+            Xác Nhận
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
