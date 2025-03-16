@@ -1353,7 +1353,7 @@ export const BidPage: React.FC = () => {
   }
 
   return (
-    <div className="container py-3">
+    <div className="container py-3 bid-page-container">
       {/* Toast Container */}
       <div className={`toast-container position-fixed p-3 ${
         toast.position === 'top-right' ? 'top-0 end-0' :
@@ -1462,19 +1462,30 @@ export const BidPage: React.FC = () => {
         onRefresh={handleRefreshBidHistory}
       />}
 
-      {/* Floating Back Button */}
-      <button className="floating-back-btn" onClick={handleGoBack}>
-        <i className="bi bi-arrow-left me-2"></i>
-        Quay Lại Thiết Lập
-      </button>
+      {/* Fixed bottom buttons container (replacing floating buttons) */}
+      <div className="action-buttons-container">
+        <div className="container">
+          <div className="d-flex justify-content-between">
+            <button
+              className="btn btn-primary"
+              onClick={handleGoBack}
+            >
+              <i className="bi bi-arrow-left me-2"></i>
+              Quay Lại Thiết Lập
+            </button>
 
-      {/* Floating Export Button - Only visible when auction ends */}
-      {isAuctionEnded && (
-        <button className="floating-export-btn" onClick={handleExportData}>
-          <i className="bi bi-file-earmark-excel me-2"></i>
-          Xuất Excel
-        </button>
-      )}
+            {isAuctionEnded && (
+              <button
+                className="btn btn-success"
+                onClick={handleExportData}
+              >
+                <i className="bi bi-file-earmark-excel me-2"></i>
+                Xuất Excel
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Render the auction popup when needed */}
       {shouldShowPopup && auction && (
