@@ -1282,6 +1282,13 @@ export const BidPage: React.FC = () => {
                     startTimer();
                   }
                 }}
+                onResetTimer={() => {
+                  const newTimerValue = auction?.settings?.bidDuration || 60;
+                  resetTimer(newTimerValue);
+                  if (selectedBidder && selectedBidder !== lastBidderId) {
+                    startTimer();
+                  }
+                }}
                 bidDuration={auction?.settings?.bidDuration || 60}
                 isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
                 isCancelBidDisabled={isCancelBidDisabled()}

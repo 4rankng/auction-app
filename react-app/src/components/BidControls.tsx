@@ -36,6 +36,7 @@ interface BidControlsProps {
   onPlaceBid: (amount: string) => void;
   onCancelBid: () => void;
   onStartBid?: () => void; // New prop for handling Start Bid button click
+  onResetTimer?: () => void; // New prop for handling Reset Timer button click
   bidDuration?: number; // New prop for static bid duration time
   isPlaceBidDisabled: boolean;
   isCancelBidDisabled?: boolean; // New prop to control when cancel button is disabled
@@ -57,6 +58,7 @@ const BidControls: React.FC<BidControlsProps> = ({
   onPlaceBid,
   onCancelBid,
   onStartBid = () => {}, // Default empty function if not provided
+  onResetTimer = () => {}, // Default empty function if not provided
   bidDuration = 60, // Default to 60 seconds if not provided
   isPlaceBidDisabled,
   isCancelBidDisabled = false, // Default to enabled
@@ -336,6 +338,21 @@ const BidControls: React.FC<BidControlsProps> = ({
             {formatTime(bidDuration)}
           </span>
         </div>
+
+        {/* Reset Timer Button */}
+        <button
+          className="btn fw-bold app-btn app-btn-danger ms-3 d-flex align-items-center justify-content-center"
+          style={{
+            minWidth: getButtonWidth('120px'),
+            padding: '0.35rem 0.75rem',
+            height: '38px',
+            boxSizing: 'border-box'
+          }}
+          onClick={onResetTimer}
+        >
+          <i className="bi bi-arrow-clockwise me-1"></i>
+          {getButtonText('Đặt Lại')}
+        </button>
       </div>
 
       <div>
