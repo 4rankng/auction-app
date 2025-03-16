@@ -137,7 +137,7 @@ const AuctionHistory: React.FC = () => {
   };
 
   const handleBackClick = () => {
-    navigate(-1);
+    navigate('/setup');
   };
 
   const getDisplayPrice = (auction: Auction) => {
@@ -297,7 +297,7 @@ const AuctionHistory: React.FC = () => {
                 style={{ height: "60px" }}
               >
                 <i className="bi bi-arrow-left me-2"></i>
-                Quay lại
+                Quay Lại Thiết Lập
               </Button>
             </div>
           </div>
