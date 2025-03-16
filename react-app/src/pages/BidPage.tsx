@@ -510,15 +510,15 @@ export const BidPage: React.FC = () => {
         setBidIncrement("0 VND");
       }
 
-      // Log the bidders loaded from the database
-      console.log(`Loaded ${bidders.length} bidders from database:`, bidders);
-      setParticipantsCount(bidders.length);
+    // Log the bidders loaded from the database
+    console.log(`Loaded ${bidders.length} bidders from database:`, bidders);
+    setParticipantsCount(bidders.length);
 
-      // Filter bids for this auction and sort by timestamp (newest first)
+    // Filter bids for this auction and sort by timestamp (newest first)
       const auctionBids = bids.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-      // Check if auction is ended
-      setIsAuctionEnded(auction.status === 'ENDED');
+    // Check if auction is ended
+    setIsAuctionEnded(auction.status === 'ENDED');
 
       // Initialize elapsed time immediately based on auction status
       if (auction.status === 'ENDED' && auction.result?.duration) {
@@ -1221,7 +1221,6 @@ export const BidPage: React.FC = () => {
           startingPrice={formatCurrency(auction.settings?.startingPrice || 0)}
           bidStep={formatCurrency(auction.settings?.bidStep || 0)}
           bidNumber={bids ? bids.length : 0}
-          bidRound={auction.settings?.bidRound || "1"}
           highestBidderId={highestBidderId || ''}
           companyName="Công Ty Đấu Giá HP.AUSERCO"
           auctionTitle={auctionTitle}

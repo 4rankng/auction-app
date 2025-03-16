@@ -35,8 +35,7 @@ export default function SetupPage() {
     bidStep: DEFAULT_BID_STEP,
     bidDuration: DEFAULT_BID_DURATION,
     auctioneer: "",
-    auctioneerId: "",
-    bidRound: "1" // Default bid round
+    auctioneerId: ""
   }
   // State variables
   const [bidders, setBidders] = useState<Bidder[]>([]);
@@ -51,8 +50,7 @@ export default function SetupPage() {
     startingPrice: DEFAULT_STARTING_PRICE,
     bidStep: DEFAULT_BID_STEP,
     bidDuration: DEFAULT_BID_DURATION,
-    auctioneer: "",
-    bidRound: "1"
+    auctioneer: ""
   });
 
   // Load bidders on component mount
@@ -78,8 +76,7 @@ export default function SetupPage() {
             bidStep: setupAuction.settings.bidStep || DEFAULT_BID_STEP,
             bidDuration: setupAuction.settings.bidDuration || DEFAULT_BID_DURATION,
             auctioneer: setupAuction.settings.auctioneer || "",
-            auctioneerId: setupAuction.settings.auctioneerId || "",
-            bidRound: setupAuction.settings.bidRound || "1"
+            auctioneerId: setupAuction.settings.auctioneerId || ""
           }));
         } else {
           // Create a temporary auction for setup using default values from ref
@@ -91,8 +88,7 @@ export default function SetupPage() {
               startingPrice: defaults.startingPrice,
               bidStep: defaults.bidStep,
               bidDuration: defaults.bidDuration,
-              auctioneer: defaults.auctioneer,
-              bidRound: defaults.bidRound
+              auctioneer: defaults.auctioneer
             }
           );
           setSetupAuctionId(newAuction.id);
@@ -322,8 +318,7 @@ export default function SetupPage() {
           bidStep: auctionDetails.bidStep,
           bidDuration: auctionDetails.bidDuration,
           auctioneer: auctionDetails.auctioneer,
-          auctioneerId: auctionDetails.auctioneerId,
-          bidRound: auctionDetails.bidRound // Add bidRound to settings
+          auctioneerId: auctionDetails.auctioneerId
         },
         startTime: Date.now()
       };
@@ -390,14 +385,6 @@ export default function SetupPage() {
       ...prev,
       auctioneer: name,
       auctioneerId: id
-    }));
-  };
-
-  // Add a handler for bidRound changes
-  const handleBidRoundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAuctionDetails(prev => ({
-      ...prev,
-      bidRound: e.target.value
     }));
   };
 
@@ -473,9 +460,9 @@ export default function SetupPage() {
                   </div>
                 </div>
 
-                {/* Second row: Thời Gian and Vòng Đấu Giá */}
+                {/* Second row: Thời Gian only - remove Vòng Đấu Giá */}
                 <div className="row mb-3">
-                  <div className="col-12 col-sm-6 mb-3 mb-sm-0">
+                  <div className="col-12">
                     <label className="form-label">Thời Gian (giây)</label>
                     <input
                       type="number"
@@ -483,16 +470,6 @@ export default function SetupPage() {
                       value={auctionDetails.bidDuration}
                       onChange={handleDurationChange}
                       min="60"
-                    />
-                  </div>
-                  <div className="col-12 col-sm-6">
-                    <label className="form-label">Vòng Đấu Giá</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={auctionDetails.bidRound}
-                      onChange={handleBidRoundChange}
-                      placeholder="Nhập số vòng đấu giá"
                     />
                   </div>
                 </div>
@@ -662,7 +639,6 @@ export default function SetupPage() {
             <ListGroup.Item><strong>Giá khởi điểm:</strong> {auctionDetails.startingPrice.toLocaleString('vi-VN')} VND</ListGroup.Item>
             <ListGroup.Item><strong>Bước giá:</strong> {auctionDetails.bidStep.toLocaleString('vi-VN')} VND</ListGroup.Item>
             <ListGroup.Item><strong>Thời gian:</strong> {auctionDetails.bidDuration} giây</ListGroup.Item>
-            <ListGroup.Item><strong>Vòng Đấu Giá:</strong> {auctionDetails.bidRound}</ListGroup.Item>
             <ListGroup.Item><strong>Đấu Giá Viên:</strong> {auctionDetails.auctioneer || 'Chưa chọn'}</ListGroup.Item>
             <ListGroup.Item><strong>Người tham gia:</strong> {bidders.length}</ListGroup.Item>
           </ListGroup>

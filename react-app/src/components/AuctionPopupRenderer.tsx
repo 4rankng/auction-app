@@ -8,7 +8,6 @@ interface AuctionPopupRendererProps {
   startingPrice: string;
   bidStep: string;
   bidNumber: number;
-  bidRound: string;
   highestBidderId?: string;
   companyName: string;
   auctionTitle: string;
@@ -108,12 +107,26 @@ const StyledContainer = styled.div`
   .auction-title {
     background-color: #f8f9fa;
     padding: clamp(10px, 2vh, 20px) clamp(15px, 3vw, 25px);
-    font-size: clamp(16px, 3vw, 20px);
-    font-weight: bold;
-    color: #007bff;
     border-bottom: 2px solid #e9ecef;
     border-left: 4px solid #007bff;
     margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sub-title {
+    font-size: clamp(13px, 2vw, 14px);
+    color: #6c757d;
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+
+  .main-title {
+    font-size: clamp(16px, 3vw, 20px);
+    color: #007bff;
+    font-weight: 700;
+    line-height: 1.3;
   }
 
   /* Auction details section */
@@ -340,6 +353,14 @@ const StyledContainer = styled.div`
     .highest-bid-amount {
       font-size: 20px;
     }
+
+    .sub-title {
+      font-size: 12px;
+    }
+
+    .main-title {
+      font-size: 18px;
+    }
   }
 
   /* Additional styles */
@@ -509,6 +530,31 @@ const globalStyles = `
     font-weight: 700;
     color: #dc3545; /* Red text */
   }
+
+  /* Auction title styles in global styles string */
+  .auction-title {
+    background-color: #f8f9fa;
+    padding: 15px 20px;
+    border-bottom: 2px solid #e9ecef;
+    border-left: 4px solid #007bff;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sub-title {
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+
+  .main-title {
+    font-size: 20px;
+    color: #007bff;
+    font-weight: 700;
+    line-height: 1.3;
+  }
 `;
 
 const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
@@ -518,7 +564,6 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
     startingPrice,
     bidStep,
     bidNumber,
-    bidRound,
     highestBidderId,
     auctionTitle,
     highestBidAmount,
@@ -825,21 +870,19 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
           <div className="detail-row">
             <div className="detail-label">Đấu Giá Viên:</div>
             <div className="detail-value">{auctioneer}</div>
-            <div className="detail-label right-column">Phiên Đấu Giá Tài Sản:</div>
-            <div className="detail-value">{bidRound}</div>
-          </div>
-
-          <div className="detail-row">
-            <div className="detail-label">Giá Khởi Điểm:</div>
-            <div className="detail-value green">{startingPrice}</div>
             <div className="detail-label right-column">Lần Trả Giá:</div>
             <div className="detail-value">{bidNumber}</div>
           </div>
 
           <div className="detail-row">
-            <div className="detail-label">Bước Giá:</div>
+            <div className="detail-label">Giá Khởi Điểm:</div>
+            <div className="detail-value green">{startingPrice}</div>
+            <div className="detail-label right-column">Bước Giá:</div>
             <div className="detail-value">{bidStep}</div>
-            <div className="detail-label right-column">Người Trả Giá Cao Nhất:</div>
+          </div>
+
+          <div className="detail-row">
+            <div className="detail-label">Người Trả Giá Cao Nhất:</div>
             <div className="detail-value italic">
               {highestBidderId || "Chưa có"}
             </div>
@@ -861,12 +904,12 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
           <div className="result-header">Đấu Giá Kết Thúc</div>
 
           <div className="winner-section">
-            <div className="winner-label">Người Trúng Đấu Giá</div>
+            <div className="winner-label">Người Trả Giá Cao Nhất</div>
             <div className="winner-name">
               {winnerId || highestBidderId || "Không có ID"}
             </div>
 
-            <div className="price-label">Giá Trúng</div>
+            <div className="price-label">Giá Trả Cao Nhất</div>
             <div className="final-price">{finalPrice || highestBidAmount || startingPrice}</div>
           </div>
 
@@ -972,14 +1015,15 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
                 <div className={`auction-content ${isAuctionEnded ? 'auction-ended-content' : ''}`}>
                   <div className="auction-title">
-                    {auctionTitle || "Thông Tin Đấu Giá"}
+                    <div className="sub-title">Phiên Đấu Giá Tài Sản</div>
+                    <div className="main-title">{auctionTitle || "Thông Tin Đấu Giá"}</div>
                   </div>
 
-                  {/* Add prominent highest bid display box that appears in both auction states */}
+                  {!isAuctionEnded && (
                   <div className="highest-bid-banner">
                     <div className="highest-bid-label">Giá Trả Cao Nhất</div>
-                    <div className="highest-bid-amount">{isAuctionEnded ? (finalPrice || highestBidAmount) : highestBidAmount}</div>
-                  </div>
+                    <div className="highest-bid-amount">{highestBidAmount}</div>
+                  </div>)}
 
                   {renderAuctionContent()}
                 </div>
