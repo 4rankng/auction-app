@@ -505,6 +505,7 @@ th {
   padding: 10px 20px;
   font-size: 1rem;
   transition: transform 0.2s ease;
+  margin: 0 5px;
 }
 
 .action-buttons-container .btn:hover {
@@ -513,6 +514,11 @@ th {
 
 .action-buttons-container .btn:active {
   transform: translateY(0);
+}
+
+.action-buttons-container .d-flex {
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 768px) {
@@ -527,10 +533,15 @@ th {
   .action-buttons-container .btn {
     padding: 8px 12px;
     font-size: 0.9rem;
+    margin: 0 2px;
+  }
+
+  .action-buttons-container .d-flex {
+    justify-content: center !important;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 576px) {
   .action-buttons-container .d-flex {
     flex-direction: column;
     gap: 10px;
@@ -538,5 +549,10 @@ th {
 
   .action-buttons-container .btn {
     width: 100%;
+    margin: 0;
+  }
+
+  .bid-page-container {
+    padding-bottom: 160px; /* Increase padding for 3 stacked buttons */
   }
 }

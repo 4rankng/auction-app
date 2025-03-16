@@ -28,9 +28,19 @@ interface BidHistoryDisplay {
   bidNumber?: number; // Use bidNumber instead of round for continuous bidding
 }
 
+// Use URLSearchParams to check if page was reached from history
+function isFromAuctionHistory(): boolean {
+  // Check current URL for referrer parameter or other indicator
+  const searchParams = new URLSearchParams(window.location.search);
+  return searchParams.get('from') === 'history' || document.referrer.includes('/history');
+}
+
 export const BidPage: React.FC = () => {
   // Get auction data from useAuction hook - removed placeBid and removeBid
   const { auction, bidders, bids, loading: dataLoading, error: dataError, updateAuction, getAuctionById } = useAuction();
+
+  // Track whether the page was accessed from AuctionHistory
+  const [fromAuctionHistory, setFromAuctionHistory] = useState<boolean>(isFromAuctionHistory());
 
   const [currentPrice, setCurrentPrice] = useState<string>('0 VND');
   const [bidIncrement, setBidIncrement] = useState<string>('0 VND');
@@ -1340,6 +1350,11 @@ export const BidPage: React.FC = () => {
 
   const [showGoBackModal, setShowGoBackModal] = useState(false);
 
+  // New function to navigate to auction history
+  const handleGoToHistory = () => {
+    navigate('/history');
+  };
+
   if (loading) {
     return (
       <div className="container py-4 text-center">
@@ -1535,6 +1550,15 @@ export const BidPage: React.FC = () => {
             >
               <i className="bi bi-arrow-left me-2"></i>
               Quay Lại Thiết Lập
+            </button>
+
+            {/* New button to go to auction history */}
+            <button
+              className="btn btn-info"
+              onClick={handleGoToHistory}
+            >
+              <i className="bi bi-database me-2"></i>
+              Lịch Sử Đấu Giá
             </button>
 
             {isAuctionEnded && (

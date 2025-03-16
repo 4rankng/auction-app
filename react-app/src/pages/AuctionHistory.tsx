@@ -45,7 +45,7 @@ const AuctionHistory: React.FC = () => {
   };
 
   const handleViewAuction = (auctionId: string) => {
-    navigate(`/bid?id=${auctionId}`);
+    navigate(`/bid?id=${auctionId}&from=history`);
   };
 
   const handleExportAuction = (auction: Auction) => {
@@ -85,6 +85,31 @@ const AuctionHistory: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const formatDuration = (auction: Auction) => {
+    // For ended auctions, calculate duration from result
+    if (auction.status === 'ENDED' && auction.result) {
+      const startTime = auction.result.startTime || auction.startTime;
+      const endTime = auction.result.endTime || auction.endTime;
+
+      if (!startTime || !endTime) return '---';
+
+      // Calculate duration in milliseconds
+      const durationMs = endTime - startTime;
+
+      // Convert to minutes and seconds
+      const minutes = Math.floor(durationMs / 60000);
+      const seconds = Math.floor((durationMs % 60000) / 1000);
+
+      if (minutes > 0) {
+        return `${minutes} phút ${seconds} giây`;
+      } else {
+        return `${seconds} giây`;
+      }
+    }
+
+    return '---';
   };
 
   const handleBackClick = () => {
@@ -169,7 +194,7 @@ const AuctionHistory: React.FC = () => {
         <>
           <Card className="shadow-sm mb-4">
             <Card.Header className="bg-light py-3">
-              <h2 className="mb-0">Lịch sử đấu giá đã kết thúc</h2>
+              <h2 className="mb-0">Lịch sử đấu giá</h2>
             </Card.Header>
             <Card.Body className="p-0">
               <div className="table-responsive">
@@ -179,9 +204,9 @@ const AuctionHistory: React.FC = () => {
                       <th className="text-center" style={{ width: '5%' }}>#</th>
                       <th style={{ width: '25%' }}>Tài Sản</th>
                       <th className="text-end" style={{ width: '15%' }}>Giá thắng</th>
-                      <th className="text-center" style={{ width: '20%' }}>Thời gian bắt đầu</th>
+                      <th className="text-center" style={{ width: '15%' }}>Thời gian bắt đầu</th>
                       <th className="text-center" style={{ width: '10%' }}>Lượt đấu giá</th>
-                      <th className="text-center" style={{ width: '10%' }}>Trạng thái</th>
+                      <th className="text-center" style={{ width: '15%' }}>Thời gian diễn ra</th>
                       <th className="text-center" style={{ width: '15%' }}>Thao tác</th>
                     </tr>
                   </thead>
@@ -193,11 +218,7 @@ const AuctionHistory: React.FC = () => {
                         <td className="text-end align-middle fw-bold">{getDisplayPrice(auction)}</td>
                         <td className="text-center align-middle">{formatDateTime(auction.startTime)}</td>
                         <td className="text-center align-middle fw-semibold">{getBidCount(auction)}</td>
-                        <td className="text-center align-middle">
-                          <span className={getStatusBadgeClass(auction.status)}>
-                            {getStatusText(auction.status)}
-                          </span>
-                        </td>
+                        <td className="text-center align-middle">{formatDuration(auction)}</td>
                         <td className="text-center align-middle">
                           <div className="d-flex justify-content-center gap-2">
                             <Button
@@ -206,7 +227,7 @@ const AuctionHistory: React.FC = () => {
                               onClick={() => handleViewAuction(auction.id)}
                               className="px-3"
                             >
-                              <i className="bi bi-eye me-1"></i>
+                              <i className="bi bi-eye me-1"></i> Xem
                             </Button>
                             <Button
                               variant="outline-success"
@@ -214,7 +235,7 @@ const AuctionHistory: React.FC = () => {
                               onClick={() => handleExportAuction(auction)}
                               className="px-3"
                             >
-                              <i className="bi bi-file-earmark-excel me-1"></i>
+                              <i className="bi bi-file-earmark-excel me-1"></i> Xuất
                             </Button>
                           </div>
                         </td>
