@@ -173,7 +173,7 @@ export const BidPage: React.FC = () => {
     return bidService.formatBidsForDisplay(bids, bidders) as BidHistoryDisplay[];
   }, [bidders]);
 
-  // Update the popup initialization logic to prevent multiple popups
+  // Update the popup initialization logic to prevent automatic opening
   useEffect(() => {
     // Only initialize if we have auction data, not loading, popup isn't initialized,
     // and we're not already in the process of creating a popup
@@ -192,7 +192,7 @@ export const BidPage: React.FC = () => {
       if (isAlreadyOpen) {
         console.log("BidPage: Popup already exists, will reuse existing window");
         popupInitializedRef.current = true;
-        setShouldShowPopup(true);
+        // Do not automatically set shouldShowPopup to true
         popupCreationInProgressRef.current = false;
         return;
       }
@@ -204,19 +204,14 @@ export const BidPage: React.FC = () => {
       // Reset popup state
       setShouldShowPopup(false);
 
-      // Set a longer delay before opening a new popup to ensure previous ones are fully closed
-      // and prevent potential race conditions
+      // Initialize popup without opening
       setTimeout(() => {
         try {
-          console.log("BidPage: Creating new popup window");
+          console.log("BidPage: Initializing popup system without opening");
           popupInitializedRef.current = true;
-
-          // Open the popup window with a unique name to prevent duplicates
-          openPopup();
-
-          console.log("BidPage: Popup should now be open");
+          // Don't automatically open the popup
         } catch (error) {
-          console.error("Error creating popup:", error);
+          console.error("Error initializing popup:", error);
           popupInitializedRef.current = false;
         } finally {
           // Reset creation flag when done
@@ -1085,6 +1080,18 @@ export const BidPage: React.FC = () => {
     }
   }, [isAuctionEnded]);
 
+  // New function to handle showing the popup manually
+  const handleShowPopup = () => {
+    if (!popupInitializedRef.current) {
+      console.log("Popup system not initialized yet");
+      return;
+    }
+
+    console.log("Opening auction popup manually");
+    openPopup();
+    setShouldShowPopup(true);
+  };
+
   if (loading) {
     return (
       <div className="container py-4 text-center">
@@ -1141,6 +1148,7 @@ export const BidPage: React.FC = () => {
           totalBids={bidHistory.length}
           isAuctionEnded={isAuctionEnded}
           auctioneer={auction?.settings?.auctioneer || 'NA'}
+          onShowPopup={handleShowPopup}
         />
 
         <div className="card-body py-2">

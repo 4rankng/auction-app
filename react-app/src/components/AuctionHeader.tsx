@@ -8,6 +8,7 @@ interface AuctionHeaderProps {
   totalBids: number;
   isAuctionEnded?: boolean;
   auctioneer?: string;  // This now contains the auctioneer name directly
+  onShowPopup?: () => void; // Add this prop for the popup button
 }
 
 /**
@@ -19,7 +20,8 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
   onEndAuction,
   totalBids,
   isAuctionEnded = false,
-  auctioneer = 'Không có thông tin'
+  auctioneer = 'Không có thông tin',
+  onShowPopup // Add this prop to the function parameters
 }) => {
   // Add state for modal visibility
   const [showModal, setShowModal] = useState(false);
@@ -44,23 +46,24 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
     <div className="auction-header-container">
       <div className="auction-header-info">
         <h3 className="auction-title">{title}</h3>
+      </div>
 
-        <div className="auction-metadata">
-          <div className="auction-metadata-item">
-            <i className="bi bi-person-badge me-2"></i>
-            <span className="auction-metadata-label">Đấu Giá Viên:</span>
-            <span className="auction-metadata-value">
-              {auctioneer}
-            </span>
-          </div>
-        </div>
+      {/* Timer */}
+      <div className="auction-elapsed-time-container">
+        <i className="bi bi-stopwatch auction-elapsed-time-icon"></i>
+        <span className="auction-elapsed-time">{elapsedTime}</span>
       </div>
 
       <div className="auction-header-actions">
-        <div className="auction-elapsed-time-container">
-          <i className="bi bi-stopwatch auction-elapsed-time-icon"></i>
-          <span className="auction-elapsed-time">{elapsedTime}</span>
-        </div>
+        {/* Add button to show popup */}
+        {onShowPopup && (
+          <button
+            className="btn btn-primary show-popup-btn"
+            onClick={onShowPopup}
+          >
+            <i className="bi bi-display me-1"></i>Màn Hình Phụ
+          </button>
+        )}
 
         {isAuctionEnded ? (
           <div className="auction-ended-badge">
@@ -71,7 +74,7 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
             className="btn end-auction-btn"
             onClick={handleOpenModal}
           >
-            <i className="bi bi-stop-circle"></i> Kết Thúc Đấu Giá
+            <i className="bi bi-stop-circle"></i> Kết Thúc
           </button>
         )}
       </div>
