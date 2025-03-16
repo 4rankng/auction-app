@@ -102,7 +102,11 @@ export const BidPage: React.FC = () => {
       const hours = Math.floor(durationSec / 3600);
       const minutes = Math.floor((durationSec % 3600) / 60);
       const seconds = durationSec % 60;
-      return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+      const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      console.log("Formatted elapsed time for ended auction:", formattedTime,
+                  "hours:", hours, "minutes:", minutes, "seconds:", seconds);
+      return formattedTime;
     }
 
     // For ongoing auctions, calculate from startTime to now
@@ -122,7 +126,8 @@ export const BidPage: React.FC = () => {
     const minutes = Math.floor((elapsedSeconds % 3600) / 60);
     const seconds = elapsedSeconds % 60;
 
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    return formattedTime;
   }, [auction, isAuctionEnded]);
 
   // Add state to track elapsed time with manual updates
@@ -141,7 +146,9 @@ export const BidPage: React.FC = () => {
       const minutes = Math.floor((durationSec % 3600) / 60);
       const seconds = durationSec % 60;
       const finalTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-      console.log("Final elapsed time set to:", finalTime);
+      console.log("Final elapsed time set to:", finalTime,
+                  "hours:", hours, "minutes:", minutes, "seconds:", seconds,
+                  "from duration (ms):", durationMs);
       setElapsedTime(finalTime);
       return; // Don't set up timer for ended auctions
     }
@@ -305,7 +312,7 @@ export const BidPage: React.FC = () => {
       console.log("⏱️ Start time:", new Date(startTime).toISOString());
       console.log("⏱️ End time:", new Date(endTime).toISOString());
 
-      // Format duration as HH:MM:SS
+      // Format duration as HH:MM:SS - Fix the calculation to avoid timezone issues
       const durationSec = Math.floor(correctedDurationMs / 1000);
       const hours = Math.floor(durationSec / 3600);
       const minutes = Math.floor((durationSec % 3600) / 60);
@@ -314,6 +321,7 @@ export const BidPage: React.FC = () => {
         `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
       console.log("⏱️ Final formatted duration:", formattedDuration);
+      console.log("⏱️ Calculated hours:", hours, "minutes:", minutes, "seconds:", seconds);
 
       // Set final elapsed time immediately
       setElapsedTime(formattedDuration);
@@ -502,15 +510,15 @@ export const BidPage: React.FC = () => {
         setBidIncrement("0 VND");
       }
 
-    // Log the bidders loaded from the database
-    console.log(`Loaded ${bidders.length} bidders from database:`, bidders);
-    setParticipantsCount(bidders.length);
+      // Log the bidders loaded from the database
+      console.log(`Loaded ${bidders.length} bidders from database:`, bidders);
+      setParticipantsCount(bidders.length);
 
-    // Filter bids for this auction and sort by timestamp (newest first)
+      // Filter bids for this auction and sort by timestamp (newest first)
       const auctionBids = bids.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-    // Check if auction is ended
-    setIsAuctionEnded(auction.status === 'ENDED');
+      // Check if auction is ended
+      setIsAuctionEnded(auction.status === 'ENDED');
 
       // Initialize elapsed time immediately based on auction status
       if (auction.status === 'ENDED' && auction.result?.duration) {
@@ -522,8 +530,21 @@ export const BidPage: React.FC = () => {
         const minutes = Math.floor((durationSec % 3600) / 60);
         const seconds = durationSec % 60;
         const formattedDuration = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        console.log("Setting initial elapsed time for ended auction:", formattedDuration);
+        console.log("Setting initial elapsed time for ended auction:", formattedDuration,
+                    "hours:", hours, "minutes:", minutes, "seconds:", seconds,
+                    "from duration (ms):", durationMs);
         setElapsedTime(formattedDuration);
+
+        // Also set auction results for consistent display
+        if (auction.result) {
+          setAuctionResults({
+            winnerName: auction.result.winnerName || '',
+            winnerId: auction.result.winnerId || '',
+            finalPrice: formatCurrency(auction.result.finalPrice || 0),
+            totalBids: auction.result.totalBids || auctionBids.length,
+            auctionDuration: formattedDuration
+          });
+        }
       } else if (auction.startTime) {
         // For ongoing auctions, calculate from start time
         const initialTime = calculateElapsedTime();
