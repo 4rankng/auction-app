@@ -1,11 +1,6 @@
 # Auction App Product Specification
 
-The Auction App is a single-page application (SPA) built with **React.js** and styled exclusively with **Bootstrap**. Data persistence is managed via **local storage**. The application consists of three core pages:
-- **Setup Page**
-- **Bid Page**
-- **Auctioneer Management Page**
-
-> **Note:** Only implement the features specified below. No additional functionalities are permitted.
+The Auction App is a robust single-page application built with **React.js** and styled exclusively using **Bootstrap**. Data is persistently stored in local storage, and the app strictly adheres to the features outlined below—no extraneous functionality will be implemented.
 
 ---
 
@@ -34,49 +29,48 @@ The Auction App is a single-page application (SPA) built with **React.js** and s
 
 ## 1. Setup Page
 
-The Setup Page is used for auction configuration and bidder management.
+The Setup Page is the command center for auction configuration and bidder management.
 
 ### 1.1 Import Bidders
 
 - **Functionality:**
-  - Provide a button to import a list of bidders from an Excel file.
+  A dedicated button imports a list of bidders from an Excel file.
 
 - **Design & Behavior:**
-  - Button displays an Excel icon with the text **"Import"**.
+  The button features an Excel icon with the label **"Import"**.
   - **Styling:**
-    - **Border Color:** Excel green
-    - **Background Color:** White
-    - **Hover Effect:** Noticeable animation
+    - **Border:** Excel green
+    - **Background:** White
+    - **Hover Effect:** Smooth and noticeable animation
   - **Layout:**
-    - Position the Import button to the right of the Add New Bidder button.
-    - Align all buttons and input fields horizontally across the full page width.
+    The Import button is positioned to the right of the Add New Bidder button, with all buttons and input fields aligned horizontally across the page.
 
 - **Excel Import Requirements:**
-  - **Table Location:** Read from the sheet named **"Đủ ĐK"**.
-  - **Table Structure (in order):**
-    1. **STT** (Serial Number)
-    2. **ID**
-    3. **Name**
-    4. **Address**
-    5. **NRIC** (National Registration Identity Card)
-    6. **Phone Number**
-  - **Data Extraction Process:**
-    1. Locate the header cell containing **"STT"** (e.g., `A10`).
-    2. Validate that the subsequent cells contain:
-       - `B10`: **"Họ tên"**
-       - `C10`: **"Địa chỉ"**
-       - `D10`: **"Giấy CMND/CCCD/ĐKDN"**
-       - `E10`: **"Số điện thoại"**
-    3. Extract rows immediately below the header until an empty cell is encountered.
-    4. Replace any existing bidder data in both the database and the displayed list with the new data.
+  Data is read from the sheet named **"Đủ ĐK"** in the following column order:
+  1. **STT** (Serial Number)
+  2. **ID**
+  3. **Name**
+  4. **Address**
+  5. **NRIC** (National Registration Identity Card)
+  6. **Phone Number**
 
-- **Example Table:**
+  **Data Extraction Process:**
+  - Locate the header cell containing **"STT"** (e.g., `A10`).
+  - Validate that the following cells contain:
+    - `B10`: **"Họ tên"**
+    - `C10`: **"Địa chỉ"**
+    - `D10`: **"Giấy CMND/CCCD/ĐKDN"**
+    - `E10`: **"Số điện thoại"**
+  - Extract rows immediately following the header until an empty cell is encountered.
+  - Replace any existing bidder data in the database and on screen with the newly imported data.
 
-  | STT | Họ tên            | Địa chỉ                                      | Giấy CMND/CCCD/ĐKDN | Số điện thoại |
-  |-----|-------------------|----------------------------------------------|---------------------|---------------|
-  | 1   | Nguyễn Ngọc Mai   | 476 Trần Hưng Đạo, Ngọc Châu, TP. Hải Dương   | 030183002000        | 0966592838    |
-  | 2   | Đinh Thị Hường    | 23B/182 Phương Lưu, Vạn Mỹ, Ngô Quyền, Hải Phòng | 031166017315      | 0912052234    |
-  | 3   | Hoàng Thị Chi     | TDP Đông Hải Sơn, Đồ Sơn, Hải Phòng            | 031163007523        | 0906032859    |
+**Example Table:**
+
+| STT | Họ tên            | Địa chỉ                                      | Giấy CMND/CCCD/ĐKDN | Số điện thoại |
+|-----|-------------------|----------------------------------------------|---------------------|---------------|
+| 1   | Nguyễn Ngọc Mai   | 476 Trần Hưng Đạo, Ngọc Châu, TP. Hải Dương   | 030183002000        | 0966592838    |
+| 2   | Đinh Thị Hường    | 23B/182 Phương Lưu, Vạn Mỹ, Ngô Quyền, Hải Phòng | 031166017315      | 0912052234    |
+| 3   | Hoàng Thị Chi     | TDP Đông Hải Sơn, Đồ Sơn, Hải Phòng            | 031163007523        | 0906032859    |
 
 ---
 
@@ -87,114 +81,102 @@ The Setup Page is used for auction configuration and bidder management.
   - **Auction Description:** Optional
 
 - **Pricing and Duration Card:**
-  - **Starting Price:** Mandatory; numeric with thousand separators; default is 0.
-  - **Minimum Bid Increment:** Mandatory; positive number; default is 0.
-  - **Auction Duration:** Mandatory; positive number; default is 0.
+  - **Starting Price:** Mandatory; must be numeric with thousand separators; default is 0.
+  - **Minimum Bid Increment:** Mandatory; must be a positive number; default is 0.
+  - **Auction Duration:** Mandatory; must be a positive number; default is 0.
 
 - **Layout:**
-  - Auction Details appear on the left side.
-  - Pricing and Duration appear on the right side.
-  - Both cards span the full width of the page.
+  The Auction Details appear on the left side, while the Pricing and Duration card is positioned on the right. Both span the full width of the page.
 
 ---
 
 ### 1.3 Bidder Management
 
-- **Display Existing Bidders:**
-  - Retrieve bidder data from the database.
-  - Display the data in a table with the following columns:
-    - **ID** (unique identifier)
-    - **Name**
-    - **NRIC**
-    - **Issuing Authority**
-    - **Address**
+- **Displaying Existing Bidders:**
+  Retrieve bidder data from the database and display it in a table with the following columns:
+  - **ID** (unique identifier)
+  - **Name**
+  - **NRIC**
+  - **Issuing Authority**
+  - **Address**
 
 - **Add New Bidder Section:**
   - **Add Button:**
-    - A square button with a plus icon (no text).
-    - On click, save the new bidder’s details to the database and update the list.
+    A square button with a plus icon (no text). On click, it saves the new bidder’s details to the database and updates the list.
   - **Input Fields:**
-    - **ID:** User-entered; if blank, auto-assign the next sequential number.
+    - **ID:** Entered by the user; if blank, auto-assign the next sequential number.
     - **Name**
     - **NRIC**
     - **Issuing Authority**
     - **Address**
 
 - **Page Layout:**
-  - The Bidder Management section occupies the bottom of the page (full width).
-  - The **Start Auction** button is fixed at the bottom and always visible (full width).
+  The Bidder Management section occupies the full width at the bottom of the page. The **Start Auction** button is fixed at the bottom and always visible.
 
 ---
 
 ### 1.4 Start Auction
 
 - **Validation Criteria:**
-  - **Auction Title:** Must be provided.
-  - **Starting Price:** Must be provided and positive.
-  - **Minimum Bid Increment:** Must be provided and positive.
-  - **Auction Duration:** Must be provided and positive.
-  - **Bidder List:** Must contain at least two bidders.
+  - **Auction Title:** Cannot be empty.
+  - **Starting Price:** Must be provided and be positive.
+  - **Minimum Bid Increment:** Must be provided and be positive.
+  - **Auction Duration:** Must be provided and be positive.
+  - **Bidder List:** Must include at least two bidders.
 
 - **User Feedback:**
-  - If validation fails, display a toast message indicating the specific error.
+  If any validation fails, a toast message will inform the user of the specific error.
 
 - **Action:**
-  - Upon successful validation:
-    - Save the auction details to the database.
-    - Obtain the auction ID.
-    - Transition to the **Bid Page** with:
-      - List of bidders
-      - Starting price
-      - Minimum bid increment
-      - Auction title
-      - Auction description
+  On successful validation, the auction details are saved to the database, the auction ID is obtained, and the app transitions to the **Bid Page** with the following data:
+  - List of bidders
+  - Starting price
+  - Minimum bid increment
+  - Auction title
+  - Auction description
 
 ---
 
 ## 2. Bid Page
 
-The Bid Page handles live bidding and real-time auction updates.
+The Bid Page drives live bidding and real-time updates with a meticulously designed layout.
 
 ### 2.1 Overall Layout
 
 - **Header (Single Row):**
   - **Left:**
-    - Title: **"Phiên Đấu Giá"** (Auction Session)
-    - Status pill: **"Đang diễn ra"** (green background)
+    - **Title:** **"Phiên Đấu Giá"** (Auction Session)
+    - **Status Pill:** **"Đang diễn ra"** (green background)
   - **Center:**
-    - Countdown Timer (e.g., `04:35`) in large, bold green text.
+    - **Countdown Timer:** Large, bold green text (e.g., `04:35`)
   - **Right:**
-    - Red button labeled **"Kết Thúc Đấu Giá"** (End Auction)
+    - **Button:** Red, labeled **"Kết Thúc Đấu Giá"** (End Auction)
 
 - **Auction Information Panel:**
-  - Four equally sized columns displaying:
-    1. **"Vòng đấu giá"** (Auction round) – e.g., `6`
-    2. **"Giá hiện tại"** (Current price) – e.g., `1,500,000 VND`
-    3. **"Bước giá"** (Bid increment) – e.g., `100,000 VND`
-    4. **"Người tham gia"** (Participants) – e.g., `20`
+  Four equally sized columns display:
+  1. **"Vòng đấu giá"** (Auction round) – e.g., `6`
+  2. **"Giá hiện tại"** (Current price) – e.g., `1,500,000 VND`
+  3. **"Bước giá"** (Bid increment) – e.g., `100,000 VND`
+  4. **"Người tham gia"** (Participants) – e.g., `20`
 
 - **Participant Selection Grid:**
-  - Title: **"Chọn người tham gia"** (Select participant)
-  - Grid: 5 rows with up to 3 buttons per row (15 total).
-  - Each button:
-    - Square (approx. 32px x 32px)
-    - Bordered (1px) with a 4px radius
-    - Labeled with a participant number
+  - **Title:** **"Chọn người tham gia"** (Select Participant)
+  - **Grid:** 5 rows with up to 3 buttons per row (15 in total). Each button is a 32px x 32px square with a 1px border, 4px border radius, and displays a participant number.
 
 - **Bidding Form:**
-  - **Name Field:** 100% width.
-  - **Price Field:** Approximately 40% width.
+  - **Input Fields:**
+    - **Name Field:** 100% width
+    - **Price Field:** Approximately 40% width
   - **Action Buttons:**
-    - Blue button with white text: **"Đấu Giá"** (Bid)
-    - White button with red text: **"Hủy Đấu Giá Cuối"** (Cancel Last Bid)
+    - **"Đấu Giá"** (Bid) – Blue button with white text
+    - **"Hủy Đấu Giá Cuối"** (Cancel Last Bid) – White button with red text
 
 - **Auction History Table:**
-  - Section title: **"Lịch Sử Đấu Giá"** (Auction History)
-  - Columns: **"Vòng"** (Round), **"Người tham gia"** (Participant), **"Số tiền"** (Amount), **"Thời gian"** (Time)
-  - Alternating row backgrounds (light gray and white).
+  Title: **"Lịch Sử Đấu Giá"** (Auction History)
+  Columns include **"Vòng"** (Round), **"Người tham gia"** (Participant), **"Số tiền"** (Amount), **"Thời gian"** (Time) with alternating row colors.
 
 - **Footer:**
-  - Right-aligned button: **"← Quay Lại Thiết Lập"** (Return to Setup)
+  A right-aligned button: **"← Quay Lại Thiết Lập"** (Return to Setup)
 
 ---
 
@@ -205,7 +187,7 @@ The Bid Page handles live bidding and real-time auction updates.
 - **Primary Button:** Blue (`#0D6EFD`)
 - **Secondary Button:** White with red text (`#FFFFFF` / `#DC3545`)
 - **Action Button:** Red (`#DC3545`)
-- **Status Indicator & Timer Text:** Green (`#198754`)
+- **Status Indicator & Timer:** Green (`#198754`)
 - **Borders:** Light gray (`#DEE2E6`)
 - **Text:** Dark gray/black (`#212529`)
 
@@ -214,42 +196,58 @@ The Bid Page handles live bidding and real-time auction updates.
 ### 2.3 Component Specifications
 
 1. **Status Pill:**
-   - Rounded rectangle (4px radius), green background (`#198754`), white text, padding: 4px 8px.
+   A rounded rectangle (4px radius) with a green background (`#198754`), white text, and 4px by 8px padding.
 
 2. **Buttons:**
-   - Border radius: 4px, padding: 6px 12px, font size: 14px, with consistent vertical spacing.
+   Uniform styling with a 4px border radius, 6px by 12px padding, and 14px font size.
 
 3. **Participant Selection Buttons:**
-   - Dimensions: 32px x 32px, 1px border (`#DEE2E6`), 4px border radius, labeled with numbers.
+   Fixed at 32px by 32px with a 1px light gray border, 4px radius, and display participant numbers.
 
 4. **Input Fields:**
-   - Height: 38px, 1px solid light gray border (`#DEE2E6`), 4px border radius, padding: 6px 12px.
-   - Name field: 100% width; Price field: approximately 40% width.
+   - Height: 38px
+   - Border: 1px solid light gray (`#DEE2E6`)
+   - Border Radius: 4px
+   - Padding: 6px by 12px
+   The name field occupies 100% width while the price field is about 40% wide.
 
 5. **Table:**
-   - Full width, 8px cell padding, thin borders (`#DEE2E6`), header with a slightly darker background, alternating row colors.
+   Full width with 8px cell padding, thin borders (`#DEE2E6`), a header with a slightly darker background, and alternating row colors.
 
 ---
 
 ### 2.4 Text Content
 
 - **Header:**
-  - **"Phiên Đấu Giá"**, **"Đang diễn ra"**, **"Kết Thúc Đấu Giá"**.
+  - **"Phiên Đấu Giá"**
+  - **"Đang diễn ra"**
+  - **"Kết Thúc Đấu Giá"**
 
 - **Auction Information:**
-  - **"Vòng đấu giá"**, **"Giá hiện tại"**, **"Bước giá"**, **"Người tham gia"**.
+  - **"Vòng đấu giá"**
+  - **"Giá hiện tại"**
+  - **"Bước giá"**
+  - **"Người tham gia"**
 
 - **Countdown Timer:**
-  - Label: **"Thời gian còn lại"** (e.g., `04:35`).
+  Labeled **"Thời gian còn lại"** (e.g., `04:35`).
 
 - **Form Elements:**
-  - **"Chọn người tham gia"**, **"Name"**, **"Price"**, **"Đấu Giá"**, **"Hủy Đấu Giá Cuối"**.
+  - **"Chọn người tham gia"**
+  - **"Name"**
+  - **"Price"**
+  - **"Đấu Giá"**
+  - **"Hủy Đấu Giá Cuối"**
 
 - **Auction History Table:**
-  - **"Lịch Sử Đấu Giá"**, **"Vòng"**, **"Người tham gia"**, **"Số tiền"**, **"Thời gian"**.
+  - **"Lịch Sử Đấu Giá"**
+  - **"Vòng"**
+  - **"Người tham gia"**
+  - **"Số tiền"**
+  - **"Thời gian"**
 
 - **Footer:**
-  - **"← Quay Lại Thiết Lập"**.
+  - **"← Quay Lại Thiết Lập"**
 
 ---
 
@@ -273,42 +271,30 @@ The Bid Page handles live bidding and real-time auction updates.
 
 ### 2.6 Responsive Behavior
 
-- **For screens ≥768px:**
-  Maintain the described layout.
+- **For Screens ≥768px:**
+  The layout remains as specified.
 
-- **For smaller screens:**
-  - Stack auction information columns vertically if necessary.
-  - Adjust the participant grid for easier tapping.
-  - Ensure the timer and **"Kết Thúc Đấu Giá"** button remain visible.
+- **For Smaller Screens:**
+  - Auction information columns stack vertically if needed.
+  - The participant grid adjusts for easier tapping.
+  - The timer and **"Kết Thúc Đấu Giá"** button remain clearly visible.
 
 ---
 
 ### 2.7 Auction Bidding Logic
 
 - **Initial State:**
-  - Auction starts at a predefined round (e.g., `6`).
-  - Current Price: `1,500,000 VND`
-  - Bid Increment: `100,000 VND`
-  - Countdown Timer: `04:35`
+  The auction starts at a predefined round (e.g., `6`), with the current price set at `1,500,000 VND`, a bid increment of `100,000 VND`, and a countdown timer of `04:35`.
 
 - **Placing a Bid:**
-  - User selects a participant and enters Name and Price.
-  - Clicking **"Đấu Giá"** validates:
-    - **If bid history exists:** Price must be greater than the current price.
-    - **If bid history is empty and round is 1:** Price must be at least equal to the current price.
-  - On a valid bid:
-    - Increment the round number.
-    - Update the current price.
-    - Log the bid with a timestamp in the auction history.
-    - Persist the bid (including bidder ID) to the database.
-  - Disable the **"Đấu Giá"** button for the current bidder until another bid is placed.
+  When a bidder is selected and the Name and Price are entered, clicking **"Đấu Giá"**:
+  - Validates that if there is bid history, the new bid exceeds the current price.
+  - For an initial bid (round 1), the price must be at least equal to the current price.
+  - On a valid bid, increments the round number, updates the current price, logs the bid with a timestamp, and saves the bid (including bidder ID) to the database.
+  - The **"Đấu Giá"** button is then disabled for that bidder until a subsequent bid is made.
 
 - **Cancel Last Bid:**
-  - Clicking **"Hủy Đấu Giá Cuối"**:
-    - Reverts to the previous round.
-    - Resets the current price to its previous value.
-    - Removes the last bid from the auction history.
-    - Disables the cancel button for that bidder until a new bid is placed.
+  Clicking **"Hủy Đấu Giá Cuối"** reverts to the previous round, resets the current price, removes the last bid from the history, and disables the cancel option for that bidder until a new bid is placed.
 
 - **Conditional Bid Options:**
   - **If bid history is empty and round is 1:**
@@ -317,172 +303,133 @@ The Bid Page handles live bidding and real-time auction updates.
     Display two options: **Tra Theo Buoc Gia**, **Nhap Gia Tra**.
 
 - **Additional UI Behavior:**
-  - When **Tra Theo Buoc Gia** is selected, use up/down triangle icons to adjust the price by the bid increment.
-  - Load the bidder list from the database and display it in the participant grid.
-  - On selecting a bidder, start a 60-second countdown; once expired, disable the **"Đấu Giá"** button for that bidder.
-  - After placing a bid, retain the selected bidder and display the value in the **Ma So / Ten** textbox (formatted as `{BidderID} - {BidderName}`).
-  - Sort the auction history table by time in descending order (latest bid on top).
+  - When **Tra Theo Buoc Gia** is selected, use up/down icons to adjust the bid price by the bid increment.
+  - Load and display the bidder list in the participant grid.
+  - When a bidder is selected, start a 60-second countdown; once expired, disable the **"Đấu Giá"** button for that bidder.
+  - After placing a bid, retain the selected bidder and format the display as `{BidderID} - {BidderName}`.
+  - Sort the auction history by time in descending order (latest bid on top).
 
 - **Data Persistence:**
-  - Avoid constant database polling.
-  - Load auction data and bid history on page initialization.
-  - Update the database only when bids are placed or cancelled.
+  Auction data and bid history are loaded on page initialization, and the database is updated only when bids are placed or cancelled.
 
 ---
 
 ## 3. Auction Round Instructions
 
 - **Initial Round:**
-  The auction round (**Vòng Đấu Giá**) starts at **1**.
+  The auction round starts at **1**.
 
 - **Timer:**
-  Each round has a timer (e.g., **300 seconds**).
+  Each round features a timer (e.g., **300 seconds**).
 
 - **Transition:**
-  - When the timer reaches **0**:
-    - Bidding stops.
-    - A **"Start Next Round"** button appears.
-    - Clicking the button:
-      - Increments the round number.
-      - Resets the timer to **300 seconds**.
-      - Updates the new round number and timer in the database.
+  When the timer reaches **0**:
+  - Bidding stops.
+  - A **"Start Next Round"** button appears.
+  - Clicking it increments the round number, resets the timer to **300 seconds**, and updates the database.
 
 - **Conclusion:**
-  After **round 6** ends (timer reaches **0**), the auction finishes and no further bids are accepted.
+  After **round 6** ends (timer reaches **0**), the auction finishes—no further bids are accepted.
 
 ---
 
 ## 4. Auctioneer Management
 
 - **Functionality:**
-  - Provide a dedicated page to add, edit, or remove auctioneer information in the database.
+  A dedicated page allows adding, editing, or removing auctioneer information from the database.
 
-- **Integration with Setup Page:**
-  - Include a button labeled **"Quan Ly Dau Gia Vien"** on the Setup Page.
-  - Clicking this button navigates to the Auctioneer Management page.
-  - Auctioneer information becomes part of the auction setup.
-  - When the **"Bat Dau Dau Gia"** button is clicked, include the auctioneer's details in the auction data sent to the database and passed to the Bid Page.
+- **Integration with Setup:**
+  A button labeled **"Quan Ly Dau Gia Vien"** on the Setup Page navigates to the Auctioneer Management page. Auctioneer details are included in the auction setup and passed to the Bid Page when **"Bat Dau Dau Gia"** is clicked.
 
-- **UI Adjustments on Setup Page:**
-  - Rename the **"Gia & Thoi Gian"** card to **"Cai Dat Dau Gia"**.
-  - Display **Gia Khoi Diem** and **Buoc Gia Toi Thieu** on the same line to conserve space.
-  - Provide a dropdown to select the auctioneer.
+- **UI Adjustments:**
+  Rename the **"Gia & Thoi Gian"** card to **"Cai Dat Dau Gia"**. Display **Gia Khoi Diem** and **Buoc Gia Toi Thieu** on the same line to conserve space. Provide a dropdown for auctioneer selection.
 
 ---
 
 ## 5. Popup Auction Info Page
 
-This browser popup displays key auction details.
+This popup window displays key auction details and does not open automatically when the Bid Page loads.
 
 ### Layout Structure
 
 1. **Header:**
-   - Prominently display the company name.
-   - Show the auction session ID (**"Phiên đấu giá tài sản"**) and the auctioneer's name (**"Đấu giá viên"**).
+   - Prominently displays the company name.
+   - Shows the auction session ID and auctioneer’s name on the same line with the auction title.
 
 2. **Auction Details Section:**
-   - Display:
-     - **Starting Price (Giá khởi điểm)**
-     - **Bidding Step (Bước giá)**
-   - Use a simple grid or card layout.
+   - Displays **Starting Price (Giá khởi điểm)** and **Bid Step (Bước giá)** on the same line using a grid or card layout.
 
 3. **Bid Information Section:**
-   - Display:
-     - **Current Bidding Round (Lần trả giá)**
-     - **Highest Bidder (Người trả giá cao nhất):** Display **"Chưa có"** if no bids.
-     - **Highest Bid Amount (Giá trả cao nhất):** Default to **"0 đồng"** if no bids.
-   - Use a table or list format.
+   - Displays **Current Bidding Round (Lần trả giá)**.
+   - **Highest Bidder (Người trả giá cao nhất)** appears on its own line (showing **"Chưa có"** if absent) alongside the highest bid amount (default **"0 đồng"** if no bid).
 
 ### Functional Requirements
 
-- **Dynamic Data Display:**
-  - Fetch auction data from an API or database.
-  - Update bid details in real time.
+- **Dynamic Data:**
+  Auction data is fetched from an API or database and updated in real time.
 
 - **Responsive Design:**
-  - Use Bootstrap’s grid system to ensure proper display on desktop, tablet, and mobile.
+  Leverage Bootstrap’s grid system for optimal display on desktop, tablet, and mobile devices.
 
 - **Styling & Error Handling:**
-  - Utilize Bootstrap typography and spacing classes (e.g., `h1`, `h2`, `text-center`, `mt-3`, `mb-4`).
-  - Display fallback text (**"Chưa có"**) if data is missing.
+  Use Bootstrap typography and spacing classes, and display fallback text (**"Chưa có"**) if data is missing.
 
 - **Export Feature:**
-  - When the auction ends, include a button labeled **"Xuất dữ liệu"** to export details to an Excel file:
-    - Auctioneer's name
-    - Winner's name
-    - Winning price
-    - Start time
-    - End time
-    - Total rounds
-    - Total bids
-    - Bid history
+  When the auction ends, a button labeled **"Xuất dữ liệu"** exports details (auctioneer name, winner, winning price, start time, end time, total rounds, total bids, and bid history) to an Excel file.
 
 ### Suggested Components
 
 1. **Header Component:**
    Contains the company name, session ID, and auctioneer name (center-aligned).
-
 2. **Auction Details Component:**
-   Displays starting price and bidding step in a grid layout.
-
+   Displays starting price and bid step in a grid layout.
 3. **Bid Information Component:**
    Displays current round, highest bidder, and highest bid in a card or table format.
 
 ### User Interaction & Accessibility
 
-- The popup is initially static (no interactive buttons).
-- Future enhancements may include a countdown timer or interactive bid controls.
-- Ensure semantic HTML (proper headings and labels) and high contrast for readability.
+- The popup remains static initially; future enhancements may include interactive elements such as a countdown timer.
+- Ensure semantic HTML with proper headings and high contrast for readability.
 
 ---
 
 ## 6. Continuous Bidding System (June 2023 Update)
 
-The auction app now employs a continuous bidding system instead of round-based bidding.
+The auction now operates on a continuous bidding system that eliminates round-based bidding until manually ended.
 
 - **Key Changes:**
-  1. **Round-Based Logic Removed:**
-     Auctions run continuously until manually ended.
-  2. **Elapsed Time Tracking:**
-     Displays how long the auction has been running.
-  3. **Auction End:**
-     Auctions only end when the **"Kết Thúc Đấu Giá"** button is clicked.
-  4. **Bidding History:**
-     Now shows a simple chronological list of bids.
-  5. **UI Focus:**
-     Emphasizes **"Lượt Trả Giá"** (Number of Bids) instead of auction rounds.
+  1. Round-based logic is removed; the auction runs continuously until the **"Kết Thúc Đấu Giá"** button is clicked.
+  2. Elapsed time is tracked and displayed.
+  3. Bid history is now a simple chronological list.
+  4. The UI emphasizes **"Lượt Trả Giá"** (number of bids) instead of auction rounds.
 
 - **Backward Compatibility:**
-  Bids are still internally assigned a round value of 1.
+  Internally, bids are still assigned a round value of 1.
 
 - **Popup Synchronization:**
-  When the Bid Page is opened (by admin), a browser popup is launched displaying:
-  1. **Auction Company** (default value)
-  2. **Dau Gia Vien** (auctioneer’s name passed from setup)
-  3. **Gia Khoi Diem** (startingPrice)
-  4. **Buoc Gia** (bidStep)
-  5. **Lan Tra Gia** (bidNumber)
-  6. **Phien Dau Gia Tai San** (bidRound from setup and saved in the database)
-  7. **Nguoi Tra Gia Cao Nhat** (bidder ID of the highest bidder)
-  8. **Thoi Gian Tra Con Lai** (timer value synced with the Bid Page)
+  When the Bid Page is opened (by admin), the auction popup displays:
+  - Auction Company (default value)
+  - **Dau Gia Vien:** Auctioneer’s name from the setup
+  - **Gia Khoi Diem:** Starting Price
+  - **Buoc Gia:** Bid Step
+  - **Lan Tra Gia:** Bid Number
+  - **Phien Dau Gia Tai San:** Auction round from setup (saved in the database)
+  - **Nguoi Tra Gia Cao Nhat:** Highest bidder ID
+  - **Thoi Gian Tra Con Lai:** Timer value synced with the Bid Page
 
 - **Popup Close Mechanism:**
-  A button at the top right of the popup is the only way to close it.
-  *Note: The popup should no longer auto-close.*
+  The popup can only be closed via a button at the top right; it does not auto-close.
 
 - **On "Ket Thuc Dau Gia" Click:**
   The popup displays:
   - Auction company name
   - Auction title
   - **Dau Gia Vien:** Auctioneer name
-  - **Nguoi Tra Gia Cao Nhat:** Bidder ID of the highest bidder
+  - **Nguoi Tra Gia Cao Nhat:** Highest bidder ID
   - **Gia Tra Cao Nhat:** Winning price
 
-- **Timer Synchronization Between Bid Page and Popup:**
-  1. The Bid Page passes the timer value to the auction popup.
-  2. The auction popup starts its countdown from the passed timer value.
-  3. If a different bidder is selected on the Bid Page, it resends the timer value.
-  4. Upon receiving a new timer value, the popup restarts the countdown from that value.
+- **Timer Synchronization:**
+  The Bid Page passes the timer value to the popup. When a different bidder is selected, the timer resets accordingly.
 
 ---
 
@@ -490,249 +437,229 @@ The auction app now employs a continuous bidding system instead of round-based b
 
 ### UI Elements
 
-The timer in bidControl card should be styled with a larger font size, a distinct background color, and a border to improve visibility. The timer should be formatted as `mm:ss` (e.g., `04:35`).
+- **Timer Styling:**
+  The timer is displayed with a larger font, distinct background color, and border. It is formatted as `mm:ss` (e.g., `04:35`).
 
-#### Add "Bắt Đầu" Button
-- Insert a "Bắt Đầu" (startBid) button above the timer.
+- **"Bắt Đầu" Button:**
+  A new "Bắt Đầu" (startBid) button is added above the timer in the top-right corner of the BidControls component.
 
-#### Enhance Timer Display
-- Style the timer with:
-  - A larger font size
-  - A distinct background color
-  - A border to improve visibility
-  - Format: `mm:ss` (e.g., `04:35`)
-
-#### Positioning
-- Place both the timer and the "Bắt Đầu" button in the top-right corner of the BidControls component.
-- Retain the original layout while enhancing visual prominence.
-
----
+- **Positioning:**
+  Both the timer and the "Bắt Đầu" button must be prominently positioned without altering the original layout.
 
 ### Bid Logic Implementation
 
-- When the bid page first load, the startBid button is enabled, the timer is set to the initial `bidDuration` value, and the countdown does not start.
-- If the startBid button is clicked, the countdown starts, and the current timer value is transmitted to the auction popup.
-- During the countdown, the startBid button is disabled with a gray color scheme.
-- When the timer reaches zero, the startBid button is re-enabled, the timer value is reset to `bidDuration`, and the timer value is not transmitted to the auction popup.
-- When the placeBid (Dau Gia) button is clicked, bidPage sends timer value 0 to the auction popup to reset the timer, enables the startBid button, and sets the timer value to `bidDuration`.
-g
-The user is pointing out issues with responsive design in their auction app UI. Based on the image, they've identified several problems:
-The height of step increment/decrement buttons and the steps input field are not in sync
-The "Đấu Giá" and "Hủy Đấu Giá Cuối" buttons overlap with inputs above
-The "startBid" button and "bidderTimer" need repositioning
+- **Initial State:**
+  - The startBid button is enabled.
+  - The timer is set to `bidDuration`.
+  - The countdown is not active.
 
-#### On Bidder Selection
-- When a bidder is selected or deselected:
-  - Set the timer to the initial `bidDuration` value **without** starting the countdown.
-  - Ensure the "Bắt Đầu" button is enabled.
+- **On "Bắt Đầu" Button Click:**
+  - The countdown starts.
+  - The current timer value is transmitted to the auction popup.
+  - The startBid button is disabled (displayed in a gray color scheme).
 
-#### On "Bắt Đầu" Button Click
-- Start the countdown.
-- Transmit the current timer value to the auction popup.
-- Disable the "Bắt Đầu" button during the countdown (apply a gray color scheme).
+- **During Countdown:**
+  The startBid button remains disabled.
 
-#### Timer and Button Behavior During Countdown
-- While the timer is active, keep the "Bắt Đầu" button disabled with a gray color scheme.
+- **When Timer Reaches Zero:**
+  - The startBid button is re-enabled.
+  - The timer resets to `bidDuration`.
+  - The timer value is not transmitted to the popup.
 
-#### After Countdown Completion
-- When the timer reaches zero:
-  - Re-enable the "Bắt Đầu" button.
-  - Reset the timer value to `bidDuration`.
-  - Do **not** transmit the timer value to the auction popup.
+- **On "Đấu Giá" Button Click:**
+  - The Bid Page sends a timer value of 0 to the auction popup to reset it.
+  - The startBid button is re-enabled.
+  - The timer resets to `bidDuration`.
 
-#### Additional Button Behaviors
-- Whenever the "Bắt Đầu" button is enabled, automatically reset the timer value to `bidDuration`.
-- When the "Dau Gia" button is clicked:
-  - The Bid Page sends a timer value of 0 to the auction popup to reset the timer.
-  - Enable the "Bắt Đầu" button and set the timer value to `bidDuration`.
+- **Responsive Adjustments:**
+  Address issues such as misaligned step increment/decrement buttons, overlapping bid buttons, and repositioning the startBid button and bidder timer.
 
+#### Additional Behaviors
 
+- **Bidder Selection:**
+  - When a bidder is selected or deselected, reset the timer to `bidDuration` without starting the countdown, and ensure the "Bắt Đầu" button is enabled.
+
+- **"Bắt Đầu" Button:**
+  - Clicking it starts the countdown, transmits the timer value, and disables the button.
+  - When the countdown ends, the button is re-enabled and the timer resets without transmitting.
+
+- **"Đấu Giá" Button:**
+  - Clicking it sends a timer value of 0 to the popup, resets the timer, and re-enables the startBid button.
+
+---
 
 # Component Modularization Strategy
 
+A modular architecture is non-negotiable for maintainability and performance. The following directory structure and refactoring plan will significantly reduce complexity and improve testability.
+
 ## 1. Recommended Directory Structure
 
-Organize the project as follows:
-- **src/**
-  - **components/**
-    - **BidPage/**
-      - *AuctionHeader/*
-      - *BidControls/* (Existing component)
-      - *BidderGrid/*
-      - *HistoryTable/*
-      - *TimerDisplay/* (New component)
-    - **shared/**
-  - **hooks/**
-    - *useAuctionManager.ts* (New)
-    - *useBidActions.ts* (New)
-    - *useTimerLogic.ts* (Enhanced)
-  - **utils/**
-    - *bidFormatters.ts* (New)
-    - *exportService.ts* (New)
 
 ## 2. Key Refactoring Steps
 
-### 2.1 Extract Timer Logic to a Custom Hook
-- Isolate the countdown functionality into a custom hook.
-- The hook should initialize the timer based on a provided duration.
-- It must provide functions to start and reset the timer.
-- An interval should update the timer value every second.
-- Return a formatted time string, an active state indicator, and control functions.
+### 2.1 Extract Timer Logic into a Custom Hook
+- Isolate countdown functionality into a custom hook that:
+  - Initializes the timer based on a provided duration.
+  - Provides start and reset functions.
+  - Updates the timer every second.
+  - Returns a formatted time string, an active state indicator, and control functions.
 
 ### 2.2 Create a Dedicated Bid Management Hook
-- Develop a hook to handle bid-related actions.
-- Include a function for placing a bid with appropriate error handling and user notifications.
-- Include a function for canceling a bid following a similar error management approach.
+- Develop a hook to handle bid-related actions, including:
+  - Placing a bid with rigorous error handling and user notifications.
+  - Canceling a bid with consistent error management.
 
 ### 2.3 Split the UI into Focused Components
-- Break the UI into smaller, dedicated components such as:
-  - **TimerDisplay** for showing the countdown timer.
-  - **BidderGrid** for listing the bidders.
-- Each component should manage a specific section of the UI.
+- Decompose the UI into smaller, dedicated components such as:
+  - **TimerDisplay** for showing the countdown.
+  - **BidderGrid** for listing bidders.
+- Each component should manage its specific section of the UI.
 
 ## 3. State Management Improvements
 
 ### 3.1 Use Context API for Shared State
-- Implement the Context API to manage shared state such as:
-  - The currently selected bidder.
-  - The current auction price.
-- Provide functions within the context to update state values (e.g., updating the selected bidder and formatting the price).
+- Utilize the Context API to manage shared state such as the selected bidder and current auction price.
+- Provide functions within the context to update state values.
 
 ### 3.2 Optimize Effect Dependencies
-- Refactor complex side effects by splitting them into focused useEffect hooks.
-- Ensure that changes in auction status or selected bidder trigger only the necessary effects.
+- Split complex side effects into focused `useEffect` hooks to trigger only necessary updates.
 
 ## 4. Readability Enhancements
 
 ### 4.1 Define TypeScript Interfaces
-- Create interfaces to define the shape of the auction state, including:
-  - Auction ID, status, current price, list of bidders, and bid history.
-- Define interfaces for bid action handlers to clearly specify functions for placing and canceling bids.
+- Create interfaces to define the auction state structure, including auction ID, status, current price, bidder list, and bid history.
+- Define interfaces for bid action handlers.
 
 ### 4.2 Create Utility Functions
-- Develop utility functions to format bid history data.
-- These functions should map raw bid data into a format that includes bidder names, formatted amounts, and localized timestamps.
+- Develop functions to format bid history, currency, and timestamps.
+- This promotes code reuse and clarity.
 
 ## 5. Proposed Component Structure
 
-Outline a refactored structure for the BidPage:
 - **AuctionHeader:** Displays the auction title and current status.
 - **Content Area:**
-  - **BidderGrid:** Shows the list of bidders and handles selection.
+  - **BidderGrid:** Lists bidders and handles selection.
   - **BidControls:** Manages bid initiation and timer display.
-  - **BidHistoryTable:** Presents the auction history with formatted bid data.
+  - **BidHistoryTable:** Displays the auction history.
 - **AuctionPopup:** Displays detailed auction information.
-- Wrap all components within a provider for shared state management.
+- Wrap all components with a context provider for shared state.
 
 ## 6. Key Benefits
 
-| Aspect            | Before            | After                |
-|-------------------|-------------------|----------------------|
-| **Component Size**| 800+ LOC          | 150-300 LOC          |
-| **State Management** | Component State | Context + Hooks      |
-| **Reusability**   | Single Use        | Multi-component      |
-| **Testability**   | Hard to Test      | Isolated Units       |
-| **Maintenance**   | Fragile           | Predictable          |
+| Aspect              | Before         | After            |
+|---------------------|----------------|------------------|
+| **Component Size**  | 800+ LOC       | 150–300 LOC      |
+| **State Management**| Component State| Context + Hooks  |
+| **Reusability**     | Single Use     | Multi-component  |
+| **Testability**     | Hard to Test   | Isolated Units   |
+| **Maintenance**     | Fragile        | Predictable      |
 
 ## 7. Implementation Strategy
 
-- **Phase 1:** Extract individual UI components (e.g., TimerDisplay, BidderGrid).
-- **Phase 2:** Create context providers to manage shared state.
-- **Phase 3:** Refactor business logic into custom hooks.
-- **Phase 4:** Implement TypeScript interfaces to improve type safety.
-- **Phase 5:** Develop Storybook stories for visual testing.
+1. **Phase 1:** Extract individual UI components (e.g., TimerDisplay, BidderGrid).
+2. **Phase 2:** Create context providers to manage shared state.
+3. **Phase 3:** Refactor business logic into custom hooks.
+4. **Phase 4:** Implement TypeScript interfaces for improved type safety.
+5. **Phase 5:** Develop Storybook stories for visual testing.
 
-This modular approach reduces component complexity by 60-70% while maintaining full functionality. Each part can be developed, tested, and maintained independently.
+This modular approach reduces component complexity by 60–70% while maintaining full functionality. Each part can be developed, tested, and maintained independently.
 
-
+---
 
 # Step-by-Step Refactoring Plan for BidPage
 
-Improving the maintainability and readability of the BidPage component can be achieved by breaking down the monolithic code into smaller, focused parts. Below is a step-by-step plan:
+Improving the maintainability and readability of the BidPage component requires breaking it down into smaller, focused parts. Follow this step-by-step plan:
 
 ## 1. Extract Business Logic into Custom Hooks
 - **Auction Data Management:**
-  Refine or further extract logic from the existing auction hook to handle data fetching, updating, and error handling.
+  Refine or extract logic from the existing auction hook for data fetching, updating, and error handling.
 - **Bid Actions:**
-  Create a dedicated hook (e.g., `useBidActions`) to encapsulate functions for placing and canceling bids, along with consistent error handling.
+  Create a dedicated hook (e.g., `useBidActions`) to encapsulate functions for placing and canceling bids with robust error management.
 - **Timer Management:**
-  Enhance or extract the timer functionality into a custom hook (e.g., `useBidderTimer` or `useAuctionTimer`) so that the timer logic is isolated and easily reusable.
+  Enhance or extract timer functionality into a custom hook (e.g., `useBidderTimer` or `useAuctionTimer`).
 
 ## 2. Modularize the Component
 - **Split UI into Smaller Components:**
-  Break the BidPage into several sub-components, such as:
+  Break the BidPage into sub-components:
   - **AuctionHeader:** Displays the auction title, elapsed time, and an end auction button.
   - **AuctionSummary:** Shows current price, bid increment, and participant count.
   - **BidControls:** Manages bidder selection, bid input, and the countdown timer.
-  - **BidHistoryTable:** Presents the bid history in a clean, sortable table.
-  - **AuctionPopup:** Handles the popup display for additional auction details.
+  - **BidHistoryTable:** Presents the bid history.
+  - **AuctionPopup:** Manages the popup display for additional auction details.
 - **Organize Files by Feature:**
-  Place these components in dedicated directories (e.g., `@components/BidPage`) to promote reusability and separation of concerns.
+  Place these components in dedicated directories (e.g., `@components/BidPage`) to improve reusability and separation of concerns.
 
 ## 3. Improve State Management
 - **Centralize Shared State:**
-  Use React’s Context API to manage shared auction data (such as the selected bidder, current price, and bid history). This reduces prop drilling and simplifies state updates across components.
+  Use React’s Context API to manage shared auction data, reducing prop drilling and simplifying state updates.
 - **Optimize Effects:**
-  Split complex `useEffect` hooks into smaller ones that handle individual tasks (e.g., one for updating elapsed time, another for popup management).
+  Split complex `useEffect` hooks into smaller ones for specific tasks.
 
 ## 4. Extract Utility Functions
 - **Currency and Time Formatting:**
-  Move functions that format currency, timestamps, and bid history into separate utility modules (e.g., `bidFormatters.ts`). This promotes code reuse and clarity.
+  Move formatting functions to separate modules (e.g., `bidFormatters.ts`) for code reuse.
 - **Consistent Error Handling:**
-  Centralize toast notifications and error messaging into helper functions to reduce repetitive code.
+  Centralize toast notifications and error messaging into helper functions.
 
 ## 5. Simplify Popup Management
 - **Consolidate Popup Logic:**
-  Extract the logic related to initializing, updating, and closing popups into its own custom hook (e.g., `useAuctionPopup`).
+  Extract logic for managing popups into a custom hook (e.g., `useAuctionPopup`).
 - **Remove Redundant Flags:**
-  Streamline the state variables that track popup status and creation, reducing complexity and potential bugs.
+  Streamline state variables related to popup status.
 
 ## 6. Enhance Readability with TypeScript Interfaces
 - **Define Clear Types:**
-  Create interfaces for Auction, Bid, and BidHistoryDisplay. This ensures that data structures are consistent and improves code self-documentation.
+  Create interfaces for Auction, Bid, and BidHistory to ensure data consistency.
 - **Type All Functions and Components:**
-  Use TypeScript types to annotate functions and component props, which improves clarity and reduces errors.
+  Annotate functions and component props with TypeScript for clarity and reduced errors.
 
 ## 7. Organize Event Handlers and Helper Functions
 - **Group Similar Handlers:**
-  Organize functions like bidder selection, placing bids, and canceling bids together.
-- **Move Helper Functions Out:**
-  When possible, move non-UI-specific helper functions outside the main component to reduce clutter.
+  Organize functions for bidder selection, placing bids, and canceling bids.
+- **Extract Helper Functions:**
+  Move non-UI-specific helper functions outside the main component to reduce clutter.
 
 ## 8. Document and Comment Key Sections
 - **Inline Documentation:**
-  Add comments to explain non-trivial business logic, particularly around auction duration calculations and popup synchronization.
+  Comment non-trivial business logic, particularly around auction duration and popup synchronization.
 - **Component Documentation:**
-  Document the purpose and behavior of each sub-component and custom hook to facilitate future maintenance.
+  Clearly document each sub-component and custom hook for future maintenance.
 
 ## 9. Final Integration and Testing
 - **Combine Sub-Components:**
-  Integrate the refactored sub-components back into a simplified BidPage component that mainly orchestrates the overall layout.
+  Integrate the modular components into a simplified BidPage that orchestrates the overall layout.
 - **Unit and Integration Testing:**
-  Test each custom hook and component independently, then validate that the integrated page behaves as expected.
+  Test each custom hook and component independently before validating the integrated page.
 - **Code Review and Iteration:**
-  Perform code reviews to ensure that the new structure improves readability and that no functionality has been lost in the refactor.
+  Ensure the refactored structure improves readability and preserves functionality.
 
-Following these steps will reduce the complexity of the BidPage component, enhance code modularity, and significantly improve both maintainability and readability.
+---
 
+## Auction Popup Renderer Adjustments
 
-Looking at the current layout in AuctionPopupRenderer.tsx, I need to reorganize the display by putting specific information on the same lines. Let me analyze what needs to be changed:
-"Dau Gia Vien" (auctioneer) should be on the same line as "Phien Dau Gia Tai San" - this means I need to move it from the detail rows to the auction title area.
-"Gia Khoi Diem" (starting price) and "Buoc Gia" (bid step) should be on the same line - these are already in the detail rows but need to be reorganized.
-"Nguoi Tra Gia Cao Nhat" (highest bidder) should be on its own line - this is in the detail rows and needs to be reorganized.
-"Lan Tra Gia" (bid round) and "Nguoi Tra Gia" (current bidder) should be on the same line - these need to be reorganized in the detail rows.
+Reorganize the AuctionPopupRenderer.tsx display with the following changes:
 
+- **"Dau Gia Vien" (Auctioneer):**
+  Place it on the same line as **"Phien Dau Gia Tai San"** by moving it from the detail rows to the auction title area.
+- **"Gia Khoi Diem" (Starting Price) & "Buoc Gia" (Bid Step):**
+  Reorganize these to appear on the same line in the detail rows.
+- **"Nguoi Tra Gia Cao Nhat" (Highest Bidder):**
+  Display on its own line.
+- **"Lan Tra Gia" (Bid Round) & "Nguoi Tra Gia" (Current Bidder):**
+  Organize these to appear on the same line.
 
-Based on my research, I understand how the auction popup works and what changes I need to make. Now I'll add a button at the top center of the page to display the auction popup when clicked.
-Here's the plan:
-Add a button at the top center of the BidPage
-Make sure the auction popup doesn't automatically open when BidPage loads
-Set up the button to open the popup when clicked
+**New Interaction Plan:**
+- Add a button at the top center of the BidPage to manually open the auction popup.
+- Ensure the auction popup does not open automatically when the BidPage loads.
+- Set up the button to trigger the popup when clicked.
 
+### Auction Popup Window During Bidding
 
-# Auction Popup Window during bidding
+1. The auction title area displays the auctioneer and auction title on the same line.
+2. The highest bidder and highest bid price appear on the same line.
+3. The starting price and bid step are shown on the same line.
+4. The current bidder and bid time left are displayed on the same line.
 
-1. Auctioneer and Auctioneer name is on the same line with the auction title
-2. Highest bidder and highest bid price is on the same line
-3. Starting price and bid step is on the same line
-4. Current bidder and bid time left is on the same line
+---
+
+This specification is uncompromising and detailed. Each section is designed to ensure the Auction App is modular, maintainable, and performs flawlessly. There is no room for mediocrity—every component, hook, and UI element must be implemented with precision and clarity.
