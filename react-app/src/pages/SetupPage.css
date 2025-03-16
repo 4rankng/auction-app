@@ -248,3 +248,66 @@
     margin-bottom: 15px;
   }
 }
+
+/* Button styling with subtle colors */
+.btn-outline-primary {
+  border-color: rgba(13, 110, 253, 0.7); /* More subtle blue */
+  color: rgba(13, 110, 253, 0.8);
+  transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover {
+  background-color: rgba(13, 110, 253, 0.1);
+  border-color: rgba(13, 110, 253, 0.9);
+  color: rgba(13, 110, 253, 1);
+}
+
+.btn-outline-success {
+  border-color: rgba(25, 135, 84, 0.7); /* More subtle green */
+  color: rgba(25, 135, 84, 0.8);
+  transition: all 0.2s ease;
+}
+
+.btn-outline-success:hover {
+  background-color: rgba(25, 135, 84, 0.1);
+  border-color: rgba(25, 135, 84, 0.9);
+  color: rgba(25, 135, 84, 1);
+}
+
+.btn-outline-primary:active, .btn-outline-success:active {
+  transform: translateY(1px);
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 767.98px) {
+  .card-body {
+    padding: 1rem;
+  }
+
+  .row.g-3 {
+    row-gap: 0.5rem !important;
+  }
+
+  /* Make sure buttons are large enough for touch on mobile */
+  .btn {
+    min-height: 48px;
+  }
+}
+
+/* Table responsiveness */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Make sure Start Auction button looks good on mobile */
+.start-auction-container {
+  padding: 0 1rem 1rem;
+}
+
+@media (max-width: 575.98px) {
+  .start-auction-container .btn {
+    font-size: 1rem;
+    padding: 0.5rem;
+  }
+}

@@ -17,11 +17,11 @@ import AuctioneerSelector from '../components/AuctioneerSelector';
 
 // Define the form input types to match BidderManagement
 type BidderFormInputs = {
-  id: string;
   name: string;
   nric: string;
-  issuingAuthority: string;
-  address: string;
+  id?: string;
+  issuingAuthority?: string;
+  address?: string;
 };
 
 export default function SetupPage() {
@@ -193,13 +193,13 @@ export default function SetupPage() {
     }
 
     try {
-      // Create bidder object
+      // Create bidder object with empty strings for optional fields
       const bidderToCreate = {
         id: bidderData.id || undefined,
         name: bidderData.name,
-        nric: bidderData.nric, // Use nric property
-        issuingAuthority: bidderData.issuingAuthority,
-        address: bidderData.address
+        nric: bidderData.nric,
+        issuingAuthority: bidderData.issuingAuthority || "", // Empty string if not provided
+        address: bidderData.address || "" // Empty string if not provided
       };
 
       await databaseService.createBidder(setupAuctionId, bidderToCreate);
@@ -408,7 +408,7 @@ export default function SetupPage() {
       <div className="container">
         <div className="row">
           {/* Left column - Thông Tin */}
-          <div className="col-md-6 mb-4">
+          <div className="col-12 col-lg-6 mb-4">
             <div className="card outline-card h-100">
               <div className="card-header">
                 <h5 className="card-title mb-0">Thông Tin</h5>
@@ -439,7 +439,7 @@ export default function SetupPage() {
       </div>
 
           {/* Right column - Cài Đặt */}
-          <div className="col-md-6 mb-4">
+          <div className="col-12 col-lg-6 mb-4">
             <div className="card outline-card h-100">
               <div className="card-header">
                 <h5 className="card-title mb-0">Cài Đặt</h5>
@@ -447,7 +447,7 @@ export default function SetupPage() {
               <div className="card-body">
                 {/* First row: Giá Khởi Điểm and Bước Giá */}
                 <div className="row mb-3">
-                  <div className="col-md-6">
+                  <div className="col-12 col-sm-6 mb-3 mb-sm-0">
                     <label className="form-label">Giá Khởi Điểm</label>
                     <div className="input-group">
                       <input
@@ -459,7 +459,7 @@ export default function SetupPage() {
                       <span className="input-group-text">VND</span>
                     </div>
                   </div>
-                  <div className="col-md-6">
+                  <div className="col-12 col-sm-6">
                     <label className="form-label">Bước Giá</label>
                     <div className="input-group">
                       <input
@@ -475,7 +475,7 @@ export default function SetupPage() {
 
                 {/* Second row: Thời Gian and Vòng Đấu Giá */}
                 <div className="row mb-3">
-          <div className="col-md-6">
+                  <div className="col-12 col-sm-6 mb-3 mb-sm-0">
                     <label className="form-label">Thời Gian (giây)</label>
                     <input
                       type="number"
@@ -483,9 +483,9 @@ export default function SetupPage() {
                       value={auctionDetails.bidDuration}
                       onChange={handleDurationChange}
                       min="60"
-            />
-          </div>
-          <div className="col-md-6">
+                    />
+                  </div>
+                  <div className="col-12 col-sm-6">
                     <label className="form-label">Vòng Đấu Giá</label>
                     <input
                       type="text"
@@ -499,7 +499,7 @@ export default function SetupPage() {
 
                 {/* Third row: Đấu Giá Viên */}
                 <div className="row mb-3">
-                  <div className="col-md-12">
+                  <div className="col-12">
                     <label className="form-label">Đấu Giá Viên</label>
                     <AuctioneerSelector
                       value={auctionDetails.auctioneerId}
@@ -525,11 +525,8 @@ export default function SetupPage() {
                     e.preventDefault();
                     const formData = new FormData(e.currentTarget);
                     const bidderData = {
-                      id: formData.get('id') as string || '',
                       name: formData.get('name') as string || '',
                       nric: formData.get('nric') as string || '',
-                      issuingAuthority: formData.get('issuingAuthority') as string || '',
-                      address: formData.get('address') as string || '',
                     };
 
                     if (bidderData.name && bidderData.nric) {
@@ -538,16 +535,8 @@ export default function SetupPage() {
                     }
                   }}>
                     <div className="row g-3 align-items-end">
-                      <div className="col-md-2">
-                        <label className="form-label">Mã Số</label>
-                        <input
-                          type="text"
-                          name="id"
-                          className="form-control"
-                          placeholder="Tự động nếu để trống"
-                        />
-                      </div>
-                      <div className="col-md-2">
+                      {/* Make fields full width on mobile, 4 columns on larger screens */}
+                      <div className="col-12 col-md-4">
                         <label className="form-label">Tên</label>
                         <input
                           type="text"
@@ -556,7 +545,7 @@ export default function SetupPage() {
                           required
                         />
                       </div>
-                      <div className="col-md-2">
+                      <div className="col-12 col-md-4">
                         <label className="form-label">CMND/CCCD</label>
                         <input
                           type="text"
@@ -565,44 +554,33 @@ export default function SetupPage() {
                           required
                         />
                       </div>
-                      <div className="col-md-2">
-                        <label className="form-label">Nơi Cấp</label>
-                        <input
-                          type="text"
-                          name="issuingAuthority"
-                          className="form-control"
-                          required
-                        />
-                      </div>
-                      <div className="col-md-2">
-                        <label className="form-label">Địa Chỉ</label>
-                        <input
-                          type="text"
-                          name="address"
-                          className="form-control"
-                          required
-                        />
-                      </div>
-                      <div className="col-md-2 d-flex gap-2">
-                        <button type="submit" className="btn btn-primary px-3" style={{ aspectRatio: '1' }}>
-                          <i className="bi bi-plus-lg"></i>
-                        </button>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          className="d-none"
-                          accept=".xlsx,.xls"
-                          onChange={handleFileChange}
-                        />
-                        <button
-                          type="button"
-                          className="btn excel-import-btn flex-grow-1"
-                          onClick={handleImportClick}
-                          disabled={importing}
-                        >
-                          <i className="bi bi-file-earmark-excel me-2"></i>
-                          Excel
-                        </button>
+                      <div className="col-12 col-md-4 d-flex flex-wrap gap-2">
+                        {/* Button group container that correctly handles spacing on mobile */}
+                        <div className="d-flex w-100 gap-2">
+                          <button
+                            type="submit"
+                            className="btn btn-outline-primary w-50 py-2 d-flex align-items-center justify-content-center"
+                          >
+                            <i className="bi bi-plus-lg me-2"></i>
+                            Thêm
+                          </button>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            className="d-none"
+                            accept=".xlsx,.xls"
+                            onChange={handleFileChange}
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-outline-success w-50 py-2 d-flex align-items-center justify-content-center"
+                            onClick={handleImportClick}
+                            disabled={importing}
+                          >
+                            <i className="bi bi-file-earmark-excel me-2"></i>
+                            {importing ? 'Đang tải...' : 'Excel'}
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <div className="text-end mt-2">
@@ -615,31 +593,30 @@ export default function SetupPage() {
                 </div>
 
                 <div className="table-responsive">
-                  <table className="table table-striped">
-                    <thead>
+                  <table className="table table-striped table-hover">
+                    <thead className="table-light">
                       <tr>
-                        <th>Mã Số</th>
-                        <th>Tên</th>
-                        <th>CMND/CCCD</th>
-                        <th>Nơi Cấp</th>
-                        <th>Địa Chỉ</th>
+                        <th style={{ width: '20%' }}>Mã Số</th>
+                        <th style={{ width: '45%' }}>Tên</th>
+                        <th style={{ width: '35%' }}>CMND/CCCD</th>
                       </tr>
                     </thead>
                     <tbody>
                       {bidders.length > 0 ? (
                         bidders.map((bidder) => (
                           <tr key={bidder.id}>
-                            <td>{bidder.id}</td>
+                            <td className="text-nowrap">{bidder.id}</td>
                             <td>{bidder.name}</td>
-                            <td>{bidder.nric}</td>
-                            <td>{bidder.issuingAuthority}</td>
-                            <td>{bidder.address}</td>
+                            <td className="text-nowrap">{bidder.nric}</td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={5} className="text-center py-3">
-                            Chưa có người tham gia. Thêm người tham gia bằng biểu mẫu ở trên hoặc nhập từ Excel.
+                          <td colSpan={3} className="text-center py-3">
+                            <div className="d-flex flex-column align-items-center py-4">
+                              <i className="bi bi-people fs-1 text-muted mb-2"></i>
+                              <p className="mb-0">Chưa có người tham gia. Thêm người tham gia bằng biểu mẫu ở trên hoặc nhập từ Excel.</p>
+                            </div>
                           </td>
                         </tr>
                       )}
