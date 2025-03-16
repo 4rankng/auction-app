@@ -148,10 +148,14 @@ export const BidPage: React.FC = () => {
       onTick: (remainingTime) => {
         console.log(`BidPage: Timer tick received: ${remainingTime}s remaining`);
         setTimeLeft(remainingTime);
+        // Update popup timer in sync with main timer
+        setPopupTimerValue(remainingTime);
       },
       onComplete: () => {
         console.log('BidPage: Timer completed');
         setIsTimerRunning(false);
+        // Reset popup timer when timer completes
+        setPopupTimerValue(0);
         // Clear localStorage when timer completes
         localStorage.removeItem(timerValueKey);
         localStorage.removeItem(timerRunningKey);
@@ -216,6 +220,9 @@ export const BidPage: React.FC = () => {
     if (isTimerRunning) {
       localStorage.setItem(timerValueKey, timeLeft.toString());
     }
+
+    // Keep popup timer value synchronized with the actual timer
+    setPopupTimerValue(timeLeft);
   }, [timeLeft, isTimerRunning, timerValueKey]);
 
   // Clean up localStorage when auction ends
@@ -1419,6 +1426,8 @@ export const BidPage: React.FC = () => {
                   resetTimer(newTimerValue);
                   console.log('Starting timer...');
                   startTimer();
+                  // Ensure popup timer is updated when timer starts
+                  setPopupTimerValue(newTimerValue);
                   console.log('Is timer running state:', isTimerRunning);
                 }}
                 onResetTimer={() => {
@@ -1428,6 +1437,8 @@ export const BidPage: React.FC = () => {
                   resetTimer(newTimerValue);
                   // Stop the timer after resetting it
                   stopTimer();
+                  // Ensure popup timer is updated when timer is reset
+                  setPopupTimerValue(newTimerValue);
                   console.log('Is timer running state after reset:', isTimerRunning);
                 }}
                 bidDuration={auction?.settings?.bidDuration || 60}

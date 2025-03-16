@@ -573,12 +573,8 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
   const [isOpen, setIsOpen] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [remainingTime, setRemainingTime] = useState<number>(timerValue || 0);
-  const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   // Add a ref to track if we've already created a popup window
   const popupCreatedRef = useRef<boolean>(false);
-  // Add ref to track previous timer value to detect real changes
-  const prevTimerValueRef = useRef<number>(timerValue || 0);
 
   // Track the previous auction end state to detect changes
   const prevEndedStateRef = useRef<boolean>(isAuctionEnded);
@@ -589,56 +585,56 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
   // Add a ref to track if we've handled auction end
   const endHandledRef = useRef<boolean>(false);
 
-  // Simplified timer handling - only reset when timerValue actually changes
-  useEffect(() => {
-    // For ended auctions, ensure timer is stopped and shows 0
-    if (isAuctionEnded) {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = undefined;
-      }
-      setRemainingTime(0);
-      return;
-    }
+  // Remove the timer handling effect - we'll just use the prop directly
+  // useEffect(() => {
+  //   // For ended auctions, ensure timer is stopped and shows 0
+  //   if (isAuctionEnded) {
+  //     if (timerRef.current) {
+  //       clearInterval(timerRef.current);
+  //       timerRef.current = undefined;
+  //     }
+  //     setRemainingTime(0);
+  //     return;
+  //   }
 
-    // Check if timerValue has changed - this is the key optimization
-    if (timerValue !== undefined && timerValue !== prevTimerValueRef.current) {
-      console.log("AuctionPopupRenderer: New timer value received:", timerValue);
+  //   // Check if timerValue has changed - this is the key optimization
+  //   if (timerValue !== undefined && timerValue !== prevTimerValueRef.current) {
+  //     console.log("AuctionPopupRenderer: New timer value received:", timerValue);
 
-      // Update the state and ref with new value
-      setRemainingTime(timerValue);
-      prevTimerValueRef.current = timerValue;
+  //     // Update the state and ref with new value
+  //     setRemainingTime(timerValue);
+  //     prevTimerValueRef.current = timerValue;
 
-      // Clear existing timer
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = undefined;
-      }
+  //     // Clear existing timer
+  //     if (timerRef.current) {
+  //       clearInterval(timerRef.current);
+  //       timerRef.current = undefined;
+  //     }
 
-      // Start a new countdown if value is > 0
-      if (timerValue > 0) {
-        console.log("AuctionPopupRenderer: Starting new countdown");
-        timerRef.current = setInterval(() => {
-          setRemainingTime(prev => {
-            const newValue = Math.max(0, prev - 1);
-            if (newValue === 0 && timerRef.current) {
-              clearInterval(timerRef.current);
-              timerRef.current = undefined;
-            }
-            return newValue;
-          });
-        }, 1000);
-      }
-    }
+  //     // Start a new countdown if value is > 0
+  //     if (timerValue > 0) {
+  //       console.log("AuctionPopupRenderer: Starting new countdown");
+  //       timerRef.current = setInterval(() => {
+  //         setRemainingTime(prev => {
+  //           const newValue = Math.max(0, prev - 1);
+  //           if (newValue === 0 && timerRef.current) {
+  //             clearInterval(timerRef.current);
+  //             timerRef.current = undefined;
+  //           }
+  //           return newValue;
+  //         });
+  //       }, 1000);
+  //     }
+  //   }
 
-    // Clean up on unmount
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = undefined;
-      }
-    };
-  }, [timerValue, isAuctionEnded]);
+  //   // Clean up on unmount
+  //   return () => {
+  //     if (timerRef.current) {
+  //       clearInterval(timerRef.current);
+  //       timerRef.current = undefined;
+  //     }
+  //   };
+  // }, [timerValue, isAuctionEnded]);
 
   // Remove the timer subscription which is causing conflicts
   useEffect(() => {
@@ -670,11 +666,11 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
     return () => {
       console.log("AuctionPopupRenderer: Component unmounting, cleanup");
 
-      // Clear any running timer
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = undefined;
-      }
+      // Remove timer cleanup since we're not using an internal timer anymore
+      // if (timerRef.current) {
+      //   clearInterval(timerRef.current);
+      //   timerRef.current = undefined;
+      // }
 
       window.removeEventListener('resize', handleResize);
       // Reset the flag
@@ -863,7 +859,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
     // If the auction has ended, force a content update
     if (isAuctionEnded && containerRef.current?.ownerDocument) {
       // Force any state updates that would cause a re-render
-      setRemainingTime(0);
+      // setRemainingTime(0);
 
       const popupDocument = containerRef.current.ownerDocument;
       const popupWindow = popupDocument.defaultView as Window;
@@ -1025,7 +1021,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
                         Thời Gian Trả Còn Lại
                       </div>
                       <div className="timer-value">
-                        {formatTime(Math.floor(remainingTime)) || "00:00"}
+                        {formatTime(Math.floor(isAuctionEnded ? 0 : (timerValue || 0))) || "00:00"}
                       </div>
                     </div>
                   </div>
