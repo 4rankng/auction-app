@@ -304,7 +304,10 @@ const BidControls: React.FC<BidControlsProps> = ({
                     minWidth: '140px',
                     fontWeight: bidMethod === 'basePrice' ? 'bold' : 'normal',
                     boxShadow: 'none',
-                    outline: bidMethod === 'basePrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none'
+                    outline: bidMethod === 'basePrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none',
+                    backgroundColor: bidMethod === 'basePrice' ? '#C0C0C0' : 'white',
+                    borderColor: bidMethod === 'basePrice' ? '#A9A9A9' : '#6c757d',
+                    color: '#333'
                   }}
                 >
                   <i className={`bi ${bidMethod === 'basePrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
@@ -324,7 +327,10 @@ const BidControls: React.FC<BidControlsProps> = ({
                   minWidth: '140px',
                   fontWeight: bidMethod === 'stepPrice' ? 'bold' : 'normal',
                   boxShadow: 'none',
-                  outline: bidMethod === 'stepPrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none'
+                  outline: bidMethod === 'stepPrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none',
+                  backgroundColor: bidMethod === 'stepPrice' ? '#C0C0C0' : 'white',
+                  borderColor: bidMethod === 'stepPrice' ? '#A9A9A9' : '#6c757d',
+                  color: '#333'
                 }}
               >
                 <i className={`bi ${bidMethod === 'stepPrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
@@ -344,7 +350,10 @@ const BidControls: React.FC<BidControlsProps> = ({
                   minWidth: '140px',
                   fontWeight: bidMethod === 'customPrice' ? 'bold' : 'normal',
                   boxShadow: 'none',
-                  outline: bidMethod === 'customPrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none'
+                  outline: bidMethod === 'customPrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none',
+                  backgroundColor: bidMethod === 'customPrice' ? '#C0C0C0' : 'white',
+                  borderColor: bidMethod === 'customPrice' ? '#A9A9A9' : '#6c757d',
+                  color: '#333'
                 }}
               >
                 <i className={`bi ${bidMethod === 'customPrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>

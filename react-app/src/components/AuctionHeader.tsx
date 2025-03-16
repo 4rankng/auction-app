@@ -90,13 +90,17 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
               </div>
               <div className="modal-body">
                 <p>Bạn có chắc chắn muốn kết thúc phiên đấu giá này?</p>
-                <p className="mb-0 fw-bold">Lưu ý: Hành động này không thể hoàn tác và sẽ xác định người trúng đấu giá.</p>
+
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
                   <i className="bi bi-x-circle me-1"></i> Hủy
                 </button>
-                <button type="button" className="btn btn-danger" onClick={handleConfirmEndAuction}>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={handleConfirmEndAuction}
+                >
                   <i className="bi bi-stop-circle me-1"></i> Xác nhận kết thúc
                 </button>
               </div>
