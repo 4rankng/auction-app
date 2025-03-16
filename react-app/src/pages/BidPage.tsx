@@ -657,23 +657,6 @@ export const BidPage: React.FC = () => {
     setPopupTimerValue(newTimerValue);
   }, [isAuctionEnded, selectedBidder, lastBidderId, auction, showToast, stopBidderTimer, resetBidderTimer, updateAuction]);
 
-  // Add a function to stop the timer and update the auction
-  const handleStopTimer = useCallback(async () => {
-    if (!auction || !auction.id) return;
-
-    // Stop the timer in the UI
-    stopBidderTimer();
-
-    try {
-      // Save timer state to the auction
-      await updateAuction({
-        ...auction,
-        isTimerActive: false
-      });
-    } catch (error) {
-      console.error('Failed to update auction timer state:', error);
-    }
-  }, [auction, stopBidderTimer, updateAuction]);
 
   // Add a useEffect to update the popup timer whenever bidderTimeLeft changes
   useEffect(() => {
