@@ -715,3 +715,11 @@ Here's the plan:
 Add a button at the top center of the BidPage
 Make sure the auction popup doesn't automatically open when BidPage loads
 Set up the button to open the popup when clicked
+
+
+# Auction Popup Window during bidding
+
+1. Auctioneer and Auctioneer name is on the same line with the auction title
+2. Highest bidder and highest bid price is on the same line
+3. Starting price and bid step is on the same line
+4. Current bidder and bid time left is on the same line
