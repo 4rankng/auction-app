@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Bid, Auction, Bidder } from '../types';
-import { AUCTION_STATUS } from '../utils/constants';
+import { Bid, Auction, Bidder } from '@types';
+import { AUCTION_STATUS } from '@utils/constants';
 
 interface AuctionState {
   auction: Auction | null;

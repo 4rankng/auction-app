@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Auctioneer } from '../types';
-import { auctioneerService } from '../services/auctioneerService';
+import { Auctioneer } from '@types';
+import { auctioneerService } from '@services/auctioneerService';
 
 interface AuctioneerSelectorProps {
   value: string;

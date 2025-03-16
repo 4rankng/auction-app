@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { databaseService } from '../services/databaseService';
+import { databaseService } from '@services/databaseService';
 import {
   auctionLoading,
   auctionLoaded,
@@ -7,14 +7,14 @@ import {
   bidPlaced,
   bidCancelled,
   auctionEnded
-} from './auctionSlice';
-import { Auction, Bid, Bidder } from '../types';
-import { AUCTION_STATUS } from '../utils/constants';
-import { RootState } from './index';
+} from '@store/auctionSlice';
+import { Auction, Bid, Bidder } from '@types';
+import { AUCTION_STATUS } from '@utils/constants';
+import { RootState } from '@store/index';
 
 // Fetch auction data
 export const fetchAuctionData = createAsyncThunk(
-  'auction/fetchData',
+  'auction/fetchAuctionData',
   async (auctionId: string, { dispatch }) => {
     try {
       dispatch(auctionLoading());

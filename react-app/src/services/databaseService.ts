@@ -8,7 +8,7 @@ import {
   AuctionStatus,
   AuctionResult,
   Auctioneer
-} from '../types';
+} from '@types';
 
 const STORAGE_KEY = 'auction_app_db';
 

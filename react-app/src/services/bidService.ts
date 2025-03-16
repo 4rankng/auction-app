@@ -1,6 +1,6 @@
-import { databaseService } from './databaseService';
-import { Bid, Auction, AuctionStatus } from '../types';
-import * as formatUtils from '../utils/formatUtils';
+import { databaseService } from '@services/databaseService';
+import { Bid, Auction, AuctionStatus } from '@types';
+import * as formatUtils from '@utils/formatUtils';
 
 // Auction status constants
 const AUCTION_STATUS = {

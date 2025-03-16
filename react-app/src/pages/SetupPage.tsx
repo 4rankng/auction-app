@@ -3,17 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import {
   Bidder,
   Auction
-} from '../types';
+} from '@types';
 import './SetupPage.css';
 
-import { parseBiddersFromExcel } from '../utils/excelParser';
+import { parseBiddersFromExcel } from '@utils/excelParser';
 import { Modal, Button, ListGroup } from 'react-bootstrap';
-import { databaseService } from '../services/databaseService';
-import { errorService, ErrorType } from '../services/errorService';
-import { toastService } from '../services/toastService';
-import ToastContainer from '../components/ToastContainer';
-import { AUCTION_STATUS, DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE, DEFAULT_AUCTION_TITLE, DEFAULT_AUCTION_DESCRIPTION } from '../utils/constants';
-import AuctioneerSelector from '../components/AuctioneerSelector';
+import { databaseService } from '@services/databaseService';
+import { errorService, ErrorType } from '@services/errorService';
+import { toastService } from '@services/toastService';
+import ToastContainer from '@components/ToastContainer';
+import { AUCTION_STATUS, DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE, DEFAULT_AUCTION_TITLE, DEFAULT_AUCTION_DESCRIPTION } from '@utils/constants';
+import AuctioneerSelector from '@components/AuctioneerSelector';
 
 // Define the form input types to match BidderManagement
 type BidderFormInputs = {

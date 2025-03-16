@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import * as timerService from '../services/timerService';
-import { formatElapsedTime, getElapsedTime } from '../utils/timeUtils';
+import * as timerService from '@services/timerService';
+import { formatElapsedTime, getElapsedTime } from '@utils/timeUtils';
 
 export interface ElapsedTimerOptions {
   startTime: number; // timestamp when the auction started

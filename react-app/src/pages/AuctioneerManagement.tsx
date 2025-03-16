@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuctioneers } from '../hooks/useAuctioneers';
-import { Auctioneer } from '../types';
+import { useAuctioneers } from '@hooks/useAuctioneers';
+import { Auctioneer } from '@types';
 import { Modal, Button } from 'react-bootstrap';
 import './AuctioneerManagement.css';
 

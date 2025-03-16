@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { Bidder } from '../types';
+import { Bidder } from '@types';
 
 /**
  * Parses an Excel file to extract bidder data according to the specified format.

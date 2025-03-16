@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import * as timerService from '../services/timerService';
+import * as timerService from '@services/timerService';
 
 interface UseBidderTimerProps {
   initialTime: number;

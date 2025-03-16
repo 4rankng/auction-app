@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import * as timerService from '../services/timerService';
-import { formatCountdown } from '../utils/timeUtils';
+import * as timerService from '@services/timerService';
+import { formatCountdown } from '@utils/timeUtils';
 
 export interface TimerOptions {
   initialTime: number; // in seconds

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Toast as ToastType, toastService } from '../services/toastService';
+import { Toast as ToastType, toastService } from '@services/toastService';
 
 interface ToastContainerProps {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';

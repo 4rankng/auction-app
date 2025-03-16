@@ -1,5 +1,5 @@
-import { Auctioneer } from '../types';
-import { databaseService } from './databaseService';
+import { Auctioneer } from '@types';
+import { databaseService } from '@services/databaseService';
 
 /**
  * Service for managing auctioneers

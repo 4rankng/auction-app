@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import * as popupService from '../services/popupService';
+import * as popupService from '@services/popupService';
 
 // HTML content for the popup window
 const createPopupHtml = () => `

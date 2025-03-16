@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { databaseService } from '../services/databaseService';
-import { Auction, Bidder, Bid, UISettings, AuctionSettings } from '../types';
+import { databaseService } from '@services/databaseService';
+import { Auction, Bidder, Bid, UISettings, AuctionSettings } from '@types';
 
 interface AuctionState {
   auction: Auction | null;

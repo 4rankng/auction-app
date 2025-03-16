@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Auctioneer } from '../types';
-import { auctioneerService } from '../services/auctioneerService';
+import { Auctioneer } from '@types';
+import { auctioneerService } from '@services/auctioneerService';
 
 /**
  * Custom hook for managing auctioneers

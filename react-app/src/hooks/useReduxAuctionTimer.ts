@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { auctionEnded } from '../store/auctionSlice';
+import { useAppSelector, useAppDispatch } from '@store/hooks';
+import { auctionEnded } from '@store/auctionSlice';
 
 export const useReduxAuctionTimer = () => {
   const dispatch = useAppDispatch();

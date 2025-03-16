@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { databaseService } from '../services/databaseService';
-import { bidService } from '../services/bidService';
-import { Auction, Bidder, Bid, AuctionSettings } from '../types';
-import {  DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE } from '../utils/constants';
+import { databaseService } from '@services/databaseService';
+import { bidService } from '@services/bidService';
+import { Auction, Bidder, Bid, AuctionSettings } from '@types';
+import {  DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE } from '@utils/constants';
 
 export function useAuction() {
   const [auction, setAuction] = useState<Auction | null>(null);

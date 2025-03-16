@@ -1,6 +1,6 @@
 import React from 'react';
 import './AuctionResult.css';
-import { AuctionResult as AuctionResultType } from '../types';
+import { AuctionResult as AuctionResultType } from '@types';
 
 interface AuctionResultProps {
   result: AuctionResultType;

@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import BidHistoryTable from '../components/BidHistoryTable';
-import BidderSelectionGrid from '../components/BidderSelectionGrid';
-import BidControls from '../components/BidControls';
-import AuctionSummary from '../components/AuctionSummary';
-import AuctionHeader from '../components/AuctionHeader';
-import AuctionResult from '../components/AuctionResult';
-import AuctionPopupRenderer from '../components/AuctionPopupRenderer';
-import { useAuction } from '../hooks/useAuction';
-import { useBidderTimer } from '../hooks/useBidderTimer';
-import useAuctionPopup from '../hooks/useAuctionPopup';
-import { Bid, AuctionStatus } from '../types';
+import BidHistoryTable from '@components/BidHistoryTable';
+import BidderSelectionGrid from '@components/BidderSelectionGrid';
+import BidControls from '@components/BidControls';
+import AuctionSummary from '@components/AuctionSummary';
+import AuctionHeader from '@components/AuctionHeader';
+import AuctionResult from '@components/AuctionResult';
+import AuctionPopupRenderer from '@components/AuctionPopupRenderer';
+import { useAuction } from '@hooks/useAuction';
+import { useBidderTimer } from '@hooks/useBidderTimer';
+import useAuctionPopup from '@hooks/useAuctionPopup';
+import { Bid, AuctionStatus } from '@types';
 import * as XLSX from 'xlsx';
 import './BidPage.css';
-import { bidService } from '../services/bidService';
-import * as popupService from '../services/popupService';
+import { bidService } from '@services/bidService';
+import * as popupService from '@services/popupService';
 
 // Interface for the bid history display format
 interface BidHistoryDisplay {
