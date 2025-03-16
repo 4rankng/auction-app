@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './AuctionHeader.css';
 
 interface AuctionHeaderProps {
@@ -25,6 +25,34 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
 }) => {
   // Add state for modal visibility
   const [showModal, setShowModal] = useState(false);
+  // Add state to track screen size
+  const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+
+  // Check screen size on mount and when window is resized
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkScreenSize();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkScreenSize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  // Function to get button text based on screen size
+  const getButtonText = (text: string): string => {
+    return isSmallScreen ? '' : text;
+  };
+
+  // Function to get button width based on screen size
+  const getButtonWidth = (defaultWidth: string, iconOnlyWidth: string = '76px'): string => {
+    return isSmallScreen ? iconOnlyWidth : defaultWidth;
+  };
 
   // Function to handle opening the modal
   const handleOpenModal = () => {
@@ -59,21 +87,34 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
           <button
             className="btn btn-primary show-popup-btn"
             onClick={onShowPopup}
+            style={{
+              minWidth: getButtonWidth('120px')
+            }}
           >
-            <i className="bi bi-display me-1"></i>Màn Hình Phụ
+            <i className="bi bi-display me-1"></i>
+            {getButtonText('Màn Hình Phụ')}
           </button>
         )}
 
         {isAuctionEnded ? (
-          <div className="auction-ended-badge">
-            <i className="bi bi-stopwatch-fill"></i> Đã Kết Thúc
+          <div className="auction-ended-badge"
+            style={{
+              minWidth: getButtonWidth('120px')
+            }}
+          >
+            <i className="bi bi-stopwatch-fill"></i>
+            {getButtonText('Đã Kết Thúc')}
           </div>
         ) : (
           <button
             className="btn end-auction-btn"
             onClick={handleOpenModal}
+            style={{
+              minWidth: getButtonWidth('120px')
+            }}
           >
-            <i className="bi bi-stop-circle"></i> Kết Thúc
+            <i className="bi bi-stop-circle"></i>
+            {getButtonText('Kết Thúc')}
           </button>
         )}
       </div>

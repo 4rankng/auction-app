@@ -66,6 +66,13 @@ export const BidPage: React.FC = () => {
   const bidTimerInitialTime = auction?.settings?.bidDuration || 30; // Default to 30 seconds if not specified
   const timerIdRef = useRef<string>(`bidder_timer_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
 
+  // Always keep popupTimerValue in sync with bidDuration
+  useEffect(() => {
+    if (auction?.settings?.bidDuration) {
+      setPopupTimerValue(auction.settings.bidDuration);
+    }
+  }, [auction?.settings?.bidDuration]);
+
   // Fix the timer ID to be tied to the auction ID for stability
   useEffect(() => {
     if (auction?.id) {
@@ -690,11 +697,13 @@ export const BidPage: React.FC = () => {
 
   // Add a useEffect to update the popup timer whenever bidderTimeLeft changes
   useEffect(() => {
-    // Only update popup timer if bidder is selected and auction is not ended
-    if (selectedBidder && !isAuctionEnded) {
-      setPopupTimerValue(timeLeft);
+    // Always use bidDuration for popup timer consistency
+    if (!isAuctionEnded && auction?.settings?.bidDuration) {
+      setPopupTimerValue(auction.settings.bidDuration);
+    } else if (isAuctionEnded) {
+      setPopupTimerValue(0);
     }
-  }, [timeLeft, selectedBidder, isAuctionEnded]);
+  }, [auction?.settings?.bidDuration, isAuctionEnded]);
 
   const handlePlaceBid = async (directBidAmount?: string) => {
     console.log('handlePlaceBid called with bidAmount:', bidAmount, 'directBidAmount:', directBidAmount);
@@ -1266,10 +1275,17 @@ export const BidPage: React.FC = () => {
                 onBidAmountChange={handleBidAmountChange}
                 onPlaceBid={handlePlaceBid}
                 onCancelBid={handleCancelBid}
+                onStartBid={() => {
+                  if (selectedBidder) {
+                    const newTimerValue = auction?.settings?.bidDuration || 60;
+                    resetTimer(newTimerValue);
+                    startTimer();
+                  }
+                }}
+                bidDuration={auction?.settings?.bidDuration || 60}
                 isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
                 isCancelBidDisabled={isCancelBidDisabled()}
                 bidHistoryEmpty={bidHistory.length === 0}
-                bidderTimeLeft={timeLeft}
                 isLastBidder={selectedBidder === lastBidderId}
               />
             </>

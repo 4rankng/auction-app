@@ -36,10 +36,11 @@ interface BidControlsProps {
   onPlaceBid: (amount: string) => void;
   onCancelBid: () => void;
   onStartBid?: () => void; // New prop for handling Start Bid button click
+  bidDuration?: number; // New prop for static bid duration time
   isPlaceBidDisabled: boolean;
   isCancelBidDisabled?: boolean; // New prop to control when cancel button is disabled
   bidHistoryEmpty?: boolean; // New prop to check if bid history is empty
-  bidderTimeLeft?: number; // New prop for bidder countdown timer
+  bidderTimeLeft?: number; // No longer needed, but keeping for backward compatibility
   isLastBidder?: boolean; // New prop to check if the selected bidder is the last bidder
 }
 
@@ -56,10 +57,11 @@ const BidControls: React.FC<BidControlsProps> = ({
   onPlaceBid,
   onCancelBid,
   onStartBid = () => {}, // Default empty function if not provided
+  bidDuration = 60, // Default to 60 seconds if not provided
   isPlaceBidDisabled,
   isCancelBidDisabled = false, // Default to enabled
   bidHistoryEmpty = true, // Default to true if not provided
-  bidderTimeLeft, // No default, should be passed from parent
+  bidderTimeLeft, // Kept for backward compatibility
   isLastBidder = false // Default to false if not provided
 }) => {
   // State for bid method selection - default to stepPrice if bid history is not empty
@@ -79,6 +81,35 @@ const BidControls: React.FC<BidControlsProps> = ({
   // Parse current price and bid increment to numbers for calculations
   const currentPriceValue = parseInt(currentPrice.replace(/\D/g, '')) || 0;
   const bidIncrementValue = parseInt(bidIncrement.replace(/\D/g, '')) || 0;
+
+  // Add state to track screen size
+  const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+
+  // Check screen size on mount and when window is resized
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkScreenSize();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkScreenSize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  // Function to get button text based on screen size
+  const getButtonText = (text: string): string => {
+    return isSmallScreen ? '' : text;
+  };
+
+  // Function to get button width based on screen size
+  const getButtonWidth = (defaultWidth: string, iconOnlyWidth: string = '76px'): string => {
+    return isSmallScreen ? iconOnlyWidth : defaultWidth;
+  };
 
   // Update bid method when bid history changes
   useEffect(() => {
@@ -243,21 +274,12 @@ const BidControls: React.FC<BidControlsProps> = ({
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  // Get color for countdown timer based on time left
-  const getTimerColor = () => {
-    const timeLeft = bidderTimeLeft || 0; // Default to 0 if undefined
-    if (timeLeft <= 10) return '#dc3545'; // red for last 10 seconds
-    if (timeLeft <= 30) return '#ffc107'; // yellow for 30-10 seconds
-    return '#28a745'; // green for > 30 seconds
-  };
-
   // Check if the bid button should be disabled
   const isBidButtonDisabled = () => {
     if (isPlaceBidDisabled) return true;
     if (!bidderName) return true;
-    if ((bidderTimeLeft || 0) <= 0) return true; // Default to 0 if undefined
-    if (bidMethod === 'customPrice' && !customBidAmount) return true;
     if (isLastBidder) return true; // Disable if this is the last bidder
+    if (bidMethod === 'customPrice' && !customBidAmount) return true;
     return false;
   };
 
@@ -274,17 +296,19 @@ const BidControls: React.FC<BidControlsProps> = ({
 
       {/* Timer moved above Ma So / Ten as requested */}
       <div className="mb-3 d-flex justify-content-start align-items-center">
-        {/* Start Bid Button - moved to the left of timer */}
+        {/* Start Bid Button */}
         <button
-          className="btn fw-bold app-btn app-btn-success me-3"
+          className="btn fw-bold app-btn app-btn-success me-3 d-flex align-items-center justify-content-center"
           style={{
-            minWidth: '120px',
+            minWidth: getButtonWidth('120px'),
             padding: '0.35rem 0.75rem',
-            height: '38px'
+            height: '38px',
+            boxSizing: 'border-box'
           }}
           onClick={onStartBid}
         >
-          <i className="bi bi-play-circle me-1"></i> Bắt Đầu
+          <i className="bi bi-play-circle me-1"></i>
+          {getButtonText('Bắt Đầu')}
         </button>
 
         {/* Countdown Timer */}
@@ -309,7 +333,7 @@ const BidControls: React.FC<BidControlsProps> = ({
             fontSize: '1.2rem',
             color: '#6C6C6C',
           }}>
-            {formatTime(bidderTimeLeft)}
+            {formatTime(bidDuration)}
           </span>
         </div>
       </div>
@@ -344,7 +368,7 @@ const BidControls: React.FC<BidControlsProps> = ({
                   }}
                   disabled={!bidHistoryEmpty}
                   style={{
-                    minWidth: '140px',
+                    minWidth: getButtonWidth('140px'),
                     fontWeight: bidMethod === 'basePrice' ? 'bold' : 'normal',
                     boxShadow: 'none',
                     outline: bidMethod === 'basePrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none',
@@ -354,7 +378,8 @@ const BidControls: React.FC<BidControlsProps> = ({
                   }}
                 >
                   <i className={`bi ${bidMethod === 'basePrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
-                  Trả Bằng Giá Ban Đầu
+                  <i className="bi bi-tag-fill me-1"></i>
+                  {getButtonText('Trả Bằng Giá Ban Đầu')}
                 </button>
               )}
               <button
@@ -367,7 +392,7 @@ const BidControls: React.FC<BidControlsProps> = ({
                   onBidAmountChange(stepPrice.toLocaleString('vi-VN'));
                 }}
                 style={{
-                  minWidth: '140px',
+                  minWidth: getButtonWidth('140px'),
                   fontWeight: bidMethod === 'stepPrice' ? 'bold' : 'normal',
                   boxShadow: 'none',
                   outline: bidMethod === 'stepPrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none',
@@ -377,7 +402,8 @@ const BidControls: React.FC<BidControlsProps> = ({
                 }}
               >
                 <i className={`bi ${bidMethod === 'stepPrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
-                Trả Theo Bước Giá
+                <i className="bi bi-graph-up-arrow me-1"></i>
+                {getButtonText('Trả Theo Bước Giá')}
               </button>
               <button
                 type="button"
@@ -390,7 +416,7 @@ const BidControls: React.FC<BidControlsProps> = ({
                   }
                 }}
                 style={{
-                  minWidth: '140px',
+                  minWidth: getButtonWidth('140px'),
                   fontWeight: bidMethod === 'customPrice' ? 'bold' : 'normal',
                   boxShadow: 'none',
                   outline: bidMethod === 'customPrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none',
@@ -400,7 +426,8 @@ const BidControls: React.FC<BidControlsProps> = ({
                 }}
               >
                 <i className={`bi ${bidMethod === 'customPrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
-                Nhập Giá Trả
+                <i className="bi bi-pencil-fill me-1"></i>
+                {getButtonText('Nhập Giá Trả')}
               </button>
             </div>
           </div>
@@ -456,7 +483,7 @@ const BidControls: React.FC<BidControlsProps> = ({
                   className="btn btn-outline-secondary"
                   type="button"
                   onClick={handleStepDecrement}
-                  style={{ height: '38px' }}
+                  style={{ height: '38px', width: '38px' }}
                 >
                   <i className="bi bi-caret-down-fill"></i>
                 </button>
@@ -475,7 +502,7 @@ const BidControls: React.FC<BidControlsProps> = ({
                     }
                   }}
                   style={{
-                    maxWidth: '50px',
+                    width: '50px',
                     height: '38px',
                     padding: '0.25rem 0.5rem',
                     margin: '0 1px'
@@ -485,7 +512,7 @@ const BidControls: React.FC<BidControlsProps> = ({
                   className="btn btn-outline-secondary"
                   type="button"
                   onClick={handleStepIncrement}
-                  style={{ height: '38px' }}
+                  style={{ height: '38px', width: '38px' }}
                 >
                   <i className="bi bi-caret-up-fill"></i>
                 </button>
@@ -496,7 +523,7 @@ const BidControls: React.FC<BidControlsProps> = ({
             <button
               className="btn fw-bold me-2 app-btn app-btn-success"
               style={{
-                minWidth: '120px',
+                minWidth: getButtonWidth('120px'),
                 padding: '8px 15px',
                 fontSize: '1.1rem',
                 transform: isBidButtonDisabled() ? 'none' : 'translateY(-2px)',
@@ -518,19 +545,21 @@ const BidControls: React.FC<BidControlsProps> = ({
                 }
               }}
             >
-              <i className="bi bi-check-circle me-2"></i> Đấu Giá
+              <i className="bi bi-check-circle me-2"></i>
+              {getButtonText('Đấu Giá')}
             </button>
             <button
               className="btn fw-bold app-btn app-btn-danger"
               style={{
-                minWidth: '180px',
+                minWidth: getButtonWidth('120px'),
                 padding: '8px 15px',
                 height: '38px'
               }}
               onClick={onCancelBid}
               disabled={isCancelBidDisabled}
             >
-              <i className="bi bi-x-circle me-1"></i> Hủy Đấu Giá Cuối
+              <i className="bi bi-x-circle me-1"></i>
+              {getButtonText('Hủy Đấu Giá Cuối')}
             </button>
           </div>
         </div>
