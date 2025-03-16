@@ -39,9 +39,9 @@ export const useBidderTimer = ({ initialTime }: UseBidderTimerProps) => {
     // the ref value changing before the cleanup function runs
     const timerId = timerIdRef.current;
 
-    // Create the timer
+    // Create the timer in the service for tracking purposes only
+    // but we won't use its tick callback
     timerService.createTimer(timerId, initialTime, {
-      onTick: tick,
       onComplete: () => {
         setIsRunning(false);
       },
@@ -56,7 +56,7 @@ export const useBidderTimer = ({ initialTime }: UseBidderTimerProps) => {
       }
       timerService.stopTimer(timerId);
     };
-  }, [initialTime, tick]);
+  }, [initialTime]);
 
   // Start the timer
   const startTimer = useCallback(() => {
@@ -68,7 +68,7 @@ export const useBidderTimer = ({ initialTime }: UseBidderTimerProps) => {
     // Start a direct interval for consistent UI updates
     intervalRef.current = setInterval(tick, 1000);
 
-    // Also notify the timer service
+    // Update the timer service state but don't rely on its ticking
     timerService.startTimer(timerIdRef.current);
 
     setIsRunning(true);
