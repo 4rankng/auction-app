@@ -30,6 +30,20 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
   highestBidderId = null,
   isTimerEnded = false
 }) => {
+  const gridStyles = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(48px, 1fr))',
+    gap: '8px',
+    alignItems: 'start',
+    maxWidth: '100%',
+    justifyContent: 'start'
+  };
+
+  const bidderItemStyles = {
+    display: 'flex',
+    justifyContent: 'center'
+  };
+
   return (
     <div className="bidder-selection-container mb-3">
       <h6 className="mb-2">Chọn người tham gia</h6>
@@ -49,7 +63,7 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
 
       {!isTimerEnded && bidders.length >= 0 &&
        (
-        <div className="d-flex flex-wrap justify-content-center">
+        <div style={gridStyles} className="bidder-grid">
           {bidders.map((bidder) => {
             const isDisabled = disabledBidders.includes(bidder.id);
             const isLastBidder = bidder.id === lastBidderId;
@@ -74,8 +88,8 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
             return (
               <div
                 key={bidder.id}
-                className="position-relative"
-                style={{ margin: '3px' }}
+                className="position-relative bidder-item"
+                style={{ ...bidderItemStyles, margin: '4px' }}
               >
                 <button
                   className={`btn ${
@@ -131,7 +145,6 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
           })}
         </div>
       )}
-
     </div>
   );
 };
