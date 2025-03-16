@@ -414,105 +414,94 @@ const BidControls: React.FC<BidControlsProps> = ({
           </div>
         )}
 
-        {/* Bid amount section - changes based on selected method */}
-        <div className="row mb-3 align-items-end">
-          {bidMethod === 'basePrice' && (
-            <div className="col-md-4">
+        {/* Bid amount section - unified for all bid methods */}
+        <div className="row mb-3 align-items-center">
+          <div className="d-flex">
+            {/* Unified Giá Trả component */}
+            <div className="col-md-5">
               <div className="form-group mb-0">
                 <label className="form-label mb-1">Giá Trả</label>
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  value={currentPrice}
-                  readOnly
-                />
-              </div>
-            </div>
-          )}
-
-          {bidMethod === 'stepPrice' && (
-            <>
-              <div className="col-md-3">
-                <div className="form-group mb-0">
-                  <label className="form-label mb-1">Số Bước Giá</label>
-                  <div className="input-group input-group-sm">
-                    <button
-                      className="btn btn-outline-secondary"
-                      type="button"
-                      onClick={handleStepDecrement}
-                    >
-                      <i className="bi bi-caret-down-fill"></i>
-                    </button>
-                    <input
-                      type="text"
-                      className="form-control text-center"
-                      value={steps}
-                      onChange={(e) => {
-                        const newSteps = parseInt(e.target.value) || 1;
-                        setSteps(newSteps);
-
-                        // Update bid amount if stepPrice method is selected
-                        if (bidMethod === 'stepPrice') {
-                          const stepPrice = (currentPriceValue + (bidIncrementValue * newSteps));
-                          onBidAmountChange(stepPrice.toLocaleString('vi-VN'));
-                        }
-                      }}
-                      style={{ maxWidth: '60px' }}
-                    />
-                    <button
-                      className="btn btn-outline-secondary"
-                      type="button"
-                      onClick={handleStepIncrement}
-                    >
-                      <i className="bi bi-caret-up-fill"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="form-group mb-0">
-                  <label className="form-label mb-1">Giá Trả</label>
-                  <input
-                    type="text"
-                    className="form-control form-control-sm"
-                    value={`${(currentPriceValue + (bidIncrementValue * steps)).toLocaleString('vi-VN')} VND`}
-                    readOnly
-                  />
-                </div>
-              </div>
-            </>
-          )}
-
-          {bidMethod === 'customPrice' && (
-            <div className="col-md-4">
-              <div className="form-group mb-0">
-                <label className="form-label mb-1">Nhập Giá Trả</label>
-                <div className="input-group input-group-sm">
+                <div className="input-group">
                   <input
                     type="text"
                     className="form-control"
-                    value={customBidAmount}
-                    onChange={handleCustomBidChange}
-                    placeholder="Nhập số tiền"
+                    style={{
+                      fontWeight: 'bold',
+                      border: '1px solid #ced4da'
+                    }}
+                    value={bidMethod === 'customPrice'
+                      ? customBidAmount
+                      : bidMethod === 'basePrice'
+                        ? currentPrice.replace(' VND', '')
+                        : (currentPriceValue + (bidIncrementValue * steps)).toLocaleString('vi-VN')
+                    }
+                    onChange={bidMethod === 'customPrice' ? handleCustomBidChange : undefined}
+                    placeholder={bidMethod === 'customPrice' ? "Nhập số tiền" : ""}
+                    readOnly={bidMethod !== 'customPrice'}
                   />
                   <span className="input-group-text">VND</span>
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Buttons moved to a new row below Giá Trả */}
-        <div className="row mt-3">
-          <div className="col d-flex justify-content-start">
+        {/* Step controls and action buttons moved to a new row */}
+        <div className="row mb-3">
+          <div className="col d-flex align-items-center">
+            {/* Step buttons */}
+            {bidMethod === 'stepPrice' && (
+              <div className="me-3 d-flex">
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  onClick={handleStepDecrement}
+                  style={{ height: '38px' }}
+                >
+                  <i className="bi bi-caret-down-fill"></i>
+                </button>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  value={steps}
+                  onChange={(e) => {
+                    const newSteps = parseInt(e.target.value) || 1;
+                    setSteps(newSteps);
+
+                    // Update bid amount if stepPrice method is selected
+                    if (bidMethod === 'stepPrice') {
+                      const stepPrice = (currentPriceValue + (bidIncrementValue * newSteps));
+                      onBidAmountChange(stepPrice.toLocaleString('vi-VN'));
+                    }
+                  }}
+                  style={{
+                    maxWidth: '50px',
+                    height: '38px',
+                    padding: '0.25rem 0.5rem',
+                    margin: '0 1px'
+                  }}
+                />
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  onClick={handleStepIncrement}
+                  style={{ height: '38px' }}
+                >
+                  <i className="bi bi-caret-up-fill"></i>
+                </button>
+              </div>
+            )}
+
+            {/* Action buttons */}
             <button
               className="btn fw-bold me-2 app-btn app-btn-success"
               style={{
                 minWidth: '120px',
-                padding: '10px 20px',
+                padding: '8px 15px',
                 fontSize: '1.1rem',
                 transform: isBidButtonDisabled() ? 'none' : 'translateY(-2px)',
                 animation: isBidButtonDisabled() ? 'none' : 'pulse-button 2s infinite',
+                height: '38px'
               }}
               onClick={handleSubmit}
               disabled={isBidButtonDisabled()}
@@ -536,6 +525,7 @@ const BidControls: React.FC<BidControlsProps> = ({
               style={{
                 minWidth: '180px',
                 padding: '8px 15px',
+                height: '38px'
               }}
               onClick={onCancelBid}
               disabled={isCancelBidDisabled}
