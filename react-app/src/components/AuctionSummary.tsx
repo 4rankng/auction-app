@@ -22,7 +22,7 @@ const AuctionSummary: React.FC<AuctionSummaryProps> = ({
         <div className="col-md-3">
           <small className="text-muted">Lượt Trả Giá</small>
           <div className="d-flex align-items-center justify-content-center">
-            <h4 className="mb-0">{totalBids}</h4>
+            <h4 className="mb-0">{totalBids + 1}</h4>
           </div>
         </div>
         <div className="col-md-3">

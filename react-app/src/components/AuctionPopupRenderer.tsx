@@ -1035,7 +1035,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
                       </div>
                       <div className="info-item">
                         <div className="info-label">Lượt Trả Giá:</div>
-                        <div className="info-value">{bidNumber || "4"}</div>
+                        <div className="info-value">{bidNumber + 1}</div>
                       </div>
                     </div>
 
