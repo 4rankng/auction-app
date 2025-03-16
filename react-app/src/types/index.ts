@@ -26,6 +26,8 @@ export interface Auction {
   auctionRound: number;
   startTime?: number;
   endTime?: number;
+  isTimerActive?: boolean;
+  lastTimerStart?: number;
 }
 
 

@@ -13,7 +13,8 @@
 
 .auction-header-info {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
   flex: 1;
 }
 
@@ -27,6 +28,20 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.auctioneer-info {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  margin-left: 16px;
+  color: #6c757d;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.auctioneer-info i {
+  margin-right: 0.25rem;
 }
 
 .auction-metadata {
@@ -183,6 +198,14 @@
   .auction-header-info {
     width: 100%;
     justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .auctioneer-info {
+    margin-left: 0;
+    justify-content: center;
+    margin-top: 0.35rem;
   }
 
   .auction-elapsed-time-container {

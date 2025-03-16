@@ -381,7 +381,8 @@ export const BidPage: React.FC = () => {
         ...auction,
         status: AUCTION_STATUS.ENDED as AuctionStatus, // Cast to AuctionStatus type
         endTime: endTime, // Use number instead of string
-        result: auctionResult // Add proper result object
+        result: auctionResult, // Add proper result object
+        isTimerActive: false // Ensure timer is stopped when auction ends
       };
       console.log("🔄 Prepared updated auction object:", updatedAuction);
 
@@ -470,7 +471,8 @@ export const BidPage: React.FC = () => {
     timeLeft: bidderTimeLeft,
     startTimer: startBidderTimer,
     stopTimer: stopBidderTimer,
-    resetTimer: resetBidderTimer
+    resetTimer: resetBidderTimer,
+    isRunning: isTimerActive
   } = useBidderTimer({ initialTime: auction?.settings?.bidDuration || 60 });
 
   // Get auction ID from URL
@@ -614,6 +616,16 @@ export const BidPage: React.FC = () => {
       stopBidderTimer();
       // Update popup timer to 0 when deselecting
       setPopupTimerValue(0);
+
+      // Also update the auction to reflect timer stopped
+      if (auction && auction.isTimerActive) {
+        updateAuction({
+          ...auction,
+          isTimerActive: false
+        }).catch(error => {
+          console.error('Failed to update auction timer state:', error);
+        });
+      }
       return;
     }
 
@@ -624,16 +636,27 @@ export const BidPage: React.FC = () => {
       resetBidderTimer(0);
       // Update popup timer to 0 for last bidder
       setPopupTimerValue(0);
+
+      // Update auction to reflect timer state
+      if (auction && auction.isTimerActive) {
+        updateAuction({
+          ...auction,
+          isTimerActive: false
+        }).catch(error => {
+          console.error('Failed to update auction timer state:', error);
+        });
+      }
       return;
     }
 
     // Otherwise, reset timer to the auction's bidDuration setting and start it
+    // but don't automatically start the timer - wait for startBid button to be clicked
     const newTimerValue = auction?.settings?.bidDuration || 60;
     resetBidderTimer(newTimerValue);
-    startBidderTimer();
     // Update popup timer with the new value immediately
     setPopupTimerValue(newTimerValue);
-  }, [isAuctionEnded, selectedBidder, lastBidderId, auction?.settings?.bidDuration, showToast, stopBidderTimer, resetBidderTimer, startBidderTimer]);
+  }, [isAuctionEnded, selectedBidder, lastBidderId, auction, showToast, stopBidderTimer, resetBidderTimer, updateAuction]);
+
 
   // Add a useEffect to update the popup timer whenever bidderTimeLeft changes
   useEffect(() => {
@@ -708,6 +731,13 @@ export const BidPage: React.FC = () => {
 
       // Reset and restart bidder timer
       startBidderTimer();
+
+      // Update the auction with timer state
+      await updateAuction({
+        ...auction,
+        isTimerActive: true,
+        lastTimerStart: Date.now()
+      });
 
       // Reset the timer in the popup as well when a bid is placed
       if (bidderTimeLeft > 0) {
@@ -1116,6 +1146,58 @@ export const BidPage: React.FC = () => {
     setShouldShowPopup(true);
   };
 
+  // Add this useEffect to initialize timer state based on auction data
+  useEffect(() => {
+    if (!auction || dataLoading || isAuctionEnded) return;
+
+    // Check if there's an active timer stored in the auction
+    if (auction.isTimerActive && selectedBidder) {
+      // If timer was active, calculate remaining time
+      if (auction.lastTimerStart) {
+        const elapsedMs = Date.now() - auction.lastTimerStart;
+        const elapsedSeconds = Math.floor(elapsedMs / 1000);
+        const bidDuration = auction.settings?.bidDuration || 60;
+        const remainingSeconds = Math.max(0, bidDuration - elapsedSeconds);
+
+        if (remainingSeconds > 0) {
+          // Reset timer to remaining time and start it
+          resetBidderTimer(remainingSeconds);
+          startBidderTimer();
+        } else {
+          // Timer has expired - update auction state
+          updateAuction({
+            ...auction,
+            isTimerActive: false
+          }).catch(error => {
+            console.error('Failed to update expired timer state:', error);
+          });
+        }
+      } else {
+        // If lastTimerStart is missing but timer is active, just start the timer
+        startBidderTimer();
+      }
+    }
+  }, [auction, dataLoading, isAuctionEnded, selectedBidder, resetBidderTimer, startBidderTimer, updateAuction]);
+
+  // Modify startBidderTimer to persist timer state
+  const handleStartBid = useCallback(async () => {
+    if (!auction || !auction.id) return;
+
+    // Start the timer in the UI
+    startBidderTimer();
+
+    try {
+      // Save timer state to the auction
+      await updateAuction({
+        ...auction,
+        isTimerActive: true,
+        lastTimerStart: Date.now()
+      });
+    } catch (error) {
+      console.error('Failed to update auction timer state:', error);
+    }
+  }, [auction, startBidderTimer, updateAuction]);
+
   if (loading) {
     return (
       <div className="container py-4 text-center">
@@ -1218,6 +1300,10 @@ export const BidPage: React.FC = () => {
                   bidHistoryEmpty={bidHistory.length === 0}
                   bidderTimeLeft={bidderTimeLeft}
                   isLastBidder={selectedBidder === lastBidderId}
+                  onStartBid={handleStartBid}
+                  isCountdownActive={isTimerActive || auction?.isTimerActive || false}
+                  isStartBidDisabled={isAuctionEnded || isTimerActive || auction?.isTimerActive || false}
+                  bidDuration={auction?.settings?.bidDuration || 60}
                 />
             </>
           )}

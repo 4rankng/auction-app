@@ -46,6 +46,10 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
     <div className="auction-header-container">
       <div className="auction-header-info">
         <h3 className="auction-title">{title}</h3>
+        <div className="auctioneer-info">
+          <i className="bi bi-person-fill me-1"></i>
+          <span>Đấu Giá Viên: {auctioneer}</span>
+        </div>
       </div>
 
       <div className="auction-elapsed-time-container">
