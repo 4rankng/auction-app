@@ -9,6 +9,7 @@ interface AuctionPopupRendererProps {
   bidStep: string;
   bidNumber: number;
   highestBidderId?: string;
+  selectedBidderId?: string;
   companyName: string;
   auctionTitle: string;
   highestBidAmount: string;
@@ -25,7 +26,6 @@ interface AuctionPopupRendererProps {
 // Define styled components for the popup
 const StyledContainer = styled.div`
   /* Base styles and fonts */
-
   font-family: 'Roboto', sans-serif;
 
   /* Background styling for the entire popup */
@@ -34,7 +34,7 @@ const StyledContainer = styled.div`
     width: 100vw;
     margin: 0;
     padding: 0;
-    background-color: #101010; /* Darker background color for better focus */
+    background-color: #ffffff;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -56,323 +56,314 @@ const StyledContainer = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
+    background-color: #404040;
   }
 
   /* Auction container */
   .auction-container {
+    max-width: 750px;
+    min-width: 750px;
     width: 100%;
-    max-width: 90vw;
-    height: auto;
-    max-height: 95vh;
-    margin: 0;
-    padding: 0;
-    border-radius: 10px;
+    border-radius: 8px;
+    box-shadow: none;
+    border: none;
+    background-color: #ffffff;
     overflow: hidden;
-    background-color: #fff;
-    position: relative;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+    margin: 0 auto;
   }
 
   /* Company header */
   .company-header {
-    text-align: center;
-    padding: clamp(10px, 3vh, 25px);
-    font-size: clamp(18px, 4vw, 24px);
-    font-weight: bold;
-    background-color: #007bff;
+    background-color: #0080ff;
     color: white;
+    padding: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
     border-radius: 8px 8px 0 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
-  /* Content container */
-  .auction-content {
-    border: 1px solid #e9ecef;
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    padding: 0;
-    overflow: auto; /* Change to auto to handle overflow content */
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0; /* Important for flex child to properly scroll */
-  }
-
-  /* Auction title */
-  .auction-title {
+  /* Auction title section */
+  .auction-title-section {
     background-color: #f8f9fa;
-    padding: clamp(10px, 2vh, 20px) clamp(15px, 3vw, 25px);
-    border-bottom: 2px solid #e9ecef;
-    border-left: 4px solid #007bff;
-    margin-bottom: 0;
+    padding: 10px 15px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .title-column {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .sub-title {
-    font-size: clamp(13px, 2vw, 14px);
+  .subtitle {
+    font-size: 14px;
     color: #6c757d;
-    font-weight: 400;
     margin-bottom: 4px;
   }
 
   .main-title {
-    font-size: clamp(16px, 3vw, 20px);
-    color: #007bff;
-    font-weight: 700;
-    line-height: 1.3;
+    font-size: 18px;
+    color: #0275d8;
+    font-weight: 600;
   }
 
-  /* Auction details section */
-  .auction-details {
-    background-color: #fff;
-    padding: clamp(10px, 2vh, 20px);
-    flex: 1;
-    overflow-y: auto; /* Allow scrolling if content is too tall */
-  }
-
-  /* Row for auction details */
-  .detail-row {
-    display: grid;
-    grid-template-columns: 130px 1fr 160px 1fr;
-    border-bottom: 1px solid #e9ecef;
-    padding: clamp(8px, 1.5vh, 15px) 0;
-    margin-bottom: 5px;
+  /* Update auctioneer column alignment */
+  .auctioneer-column {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
     align-items: center;
   }
 
-  /* Label styling */
-  .detail-label {
-    padding: 0 15px;
-    color: #495057;
-    text-align: left;
+  .auctioneer-label {
+    font-size: 14px;
+    color: #6c757d;
     font-weight: 500;
-    font-size: clamp(13px, 2vw, 15px);
+    text-align: center;
   }
 
-  /* Value styling */
-  .detail-value {
-    padding: 0 15px;
+  .auctioneer-name {
+    font-size: 16px;
+    color: #6c757d;
+    font-weight: 600;
     text-align: center;
-    font-weight: 400;
-    font-size: clamp(13px, 2vw, 15px);
   }
 
-  /* Green text for starting price */
-  .detail-value.green {
-    color: #28a745;
+  /* Highest bid section */
+  .highest-bid-section {
+    background-color: #ffd6d9;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     text-align: center;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .highest-bidder-column {
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .highest-bidder-label {
+    font-size: 16px;
+    color: #721c24;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  .highest-bidder-value {
+    font-size: 24px;
+    color: #212529;
     font-weight: 700;
   }
 
-  /* Italic text for highest bidder */
-  .detail-value.italic {
-    font-style: italic;
+  .highest-bid-column {
     text-align: center;
-    font-weight: 700;
-    color: #17a2b8;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
-  /* Right column label */
-  .detail-label.right-column {
-    padding-left: 20px;
+  .highest-bid-label {
+    font-size: 16px;
+    color: #721c24;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  .highest-bid-amount {
+    font-size: 24px;
+    color: #dc3545;
+    font-weight: 700;
+  }
+
+  /* Info sections with simple labeled rows */
+  .info-row {
+    display: flex;
+    padding: 12px 20px;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .info-item {
+    display: flex;
+    flex: 1;
+  }
+
+  .info-label {
+    font-size: 16px;
+    color: #212529;
+    font-weight: 500;
+    margin-right: 8px;
+  }
+
+  .info-value {
+    font-size: 16px;
+    color: #212529;
+    font-weight: 500;
   }
 
   /* Timer section */
   .timer-section {
-    background-color: #f8f9fa;
-    padding: clamp(15px, 2.5vh, 25px);
-    margin-top: 0;
-    text-align: center;
+    padding: 15px 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-top: 2px solid #e9ecef;
   }
 
-  /* Timer label */
   .timer-label {
-    margin-bottom: clamp(10px, 2vh, 20px);
-    color: #495057;
-    width: 100%;
+    font-size: 18px;
+    color: #212529;
+    font-weight: 600;
+    margin-bottom: 15px;
     text-align: center;
-    font-weight: 700;
-    font-size: clamp(16px, 2.5vw, 18px);
   }
 
-  /* Timer value */
   .timer-value {
-    display: inline-block;
     background-color: #dc3545;
     color: white;
-    font-size: clamp(24px, 5vw, 32px);
+    font-size: 30px;
     font-weight: bold;
-    padding: clamp(8px, 1.5vh, 12px) clamp(15px, 2.5vw, 25px);
-    border-radius: 8px;
-    min-width: 60px;
+    padding: 10px 35px;
+    border-radius: 5px;
+    min-width: 120px;
     text-align: center;
-    box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3);
   }
 
-  /* Auction result styles */
+  /* Results styles */
   .result-container {
-    background-color: #f8f9fa;
-    padding: clamp(20px, 3vh, 30px);
+    background-color: #ffffff;
+    padding: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     text-align: center;
     flex: 1;
+    margin: 0;
+    box-shadow: none;
+    border-radius: 0 0 8px 8px;
+    min-height: 380px;
   }
 
   .result-header {
-    font-size: clamp(20px, 4vw, 28px);
+    font-size: 22px;
     font-weight: bold;
     color: #28a745;
-    margin-bottom: clamp(20px, 3vh, 30px);
+    margin: 20px 0;
     text-transform: uppercase;
-    border-bottom: 2px solid #28a745;
-    padding-bottom: 10px;
-    width: fit-content;
+    text-align: center;
+    width: 100%;
+    border-radius: 8px;
   }
 
   .winner-section {
-    margin-bottom: clamp(20px, 3vh, 30px);
+    margin: 10px 0 20px 0;
     background-color: #fff;
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    width: 80%;
+    border-radius: 8px;
+    box-shadow: none;
+    width: 90%;
   }
 
   .winner-label {
-    font-size: clamp(16px, 3vw, 20px);
-    color: #6c757d;
+    font-size: 18px;
+    color: #212529;
     margin-bottom: 10px;
+    text-align: center;
   }
 
   .winner-name {
-    font-size: clamp(18px, 3.5vw, 24px);
-    font-weight: bold;
-    color: #17a2b8;
+    font-size: 18px;
+    font-weight: 500;
+    color: #0275d8;
+    margin-bottom: 15px;
+    text-align: center;
   }
 
   .price-label {
-    font-size: clamp(16px, 3vw, 20px);
-    color: #6c757d;
+    font-size: 18px;
+    color: #212529;
     margin-bottom: 10px;
+    text-align: center;
   }
 
   .final-price {
-    font-size: clamp(20px, 4vw, 28px);
+    font-size: 22px;
     font-weight: bold;
     color: #28a745;
+    margin-bottom: 15px;
+    text-align: center;
   }
 
   .auction-stats {
     display: flex;
-    justify-content: space-around;
-    width: 80%;
-    margin-top: clamp(20px, 3vh, 30px);
+    justify-content: space-between;
+    gap: 2px;
+    width: 90%;
   }
 
   .stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     background-color: #fff;
     padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    min-width: 120px;
+    border-radius: 8px;
+    box-shadow: none;
+    flex: 1;
+    margin: 0;
   }
 
   .stat-label {
-    font-size: clamp(12px, 2vw, 14px);
-    color: #6c757d;
-    margin-bottom: 5px;
+    font-size: 16px;
+    color: #212529;
+    margin-bottom: 8px;
+    text-align: center;
   }
 
   .stat-value {
-    font-size: clamp(16px, 3vw, 20px);
+    font-size: 20px;
     font-weight: bold;
-    color: #007bff;
+    color: #0275d8;
+    text-align: center;
   }
 
-  /* Media queries for responsiveness */
-  @media (max-width: 650px) {
-    .detail-row {
-      grid-template-columns: 120px 1fr;
-      padding: 10px 0;
-    }
-
-    .detail-label {
-      padding-left: 10px;
-      font-size: 14px;
-    }
-
-    .detail-label.right-column {
-      padding-left: 10px;
-      margin-top: 10px;
-    }
-
-    .detail-value {
-      font-size: 14px;
-      padding: 0 10px;
-    }
-
-    .timer-value {
-      font-size: 28px;
-      padding: 8px 15px;
-    }
-
-    .winner-section, .auction-stats {
-      width: 90%;
-    }
-
-    .auction-stats {
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .stat-item {
-      width: 100%;
-    }
-
-    .highest-bid-label {
-      font-size: 14px;
-    }
-
-    .highest-bid-amount {
-      font-size: 20px;
-    }
-
-    .sub-title {
-      font-size: 12px;
-    }
-
-    .main-title {
-      font-size: 18px;
-    }
-  }
-
-  /* Additional styles */
+  /* Hide elements when auction is ended */
   .hidden {
     display: none;
   }
 
-  .unified-auction-content {
+  /* Ensure bidding view has consistent height */
+  .auction-details {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    width: 100%;
+    min-height: 380px;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 500px) {
+    .auction-container {
+      max-width: 95%;
+    }
+
+    .highest-bid-section {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .info-row {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .info-item {
+      margin-bottom: 8px;
+    }
   }
 `;
 
@@ -383,7 +374,7 @@ const globalStyles = `
     font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #101010;
+    background-color: #000000;
     height: 100vh;
     width: 100vw;
     overflow: hidden;
@@ -391,8 +382,11 @@ const globalStyles = `
 
   /* Styling for the auction ended state */
   body.auction-ended .result-container {
-    background-color: #f8f9fa;
-    padding: 20px;
+    background-color: #ffffff;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   /* Hidden elements */
@@ -406,12 +400,13 @@ const globalStyles = `
     flex-direction: column;
     flex: 1;
     width: 100%;
+    background-color: #ffffff;
   }
 
   /* Ensure result container has proper styling */
   .result-container {
-    background-color: #f8f9fa;
-    padding: 20px;
+    background-color: #ffffff;
+    padding: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -420,78 +415,120 @@ const globalStyles = `
   }
 
   .result-header {
-    font-size: 28px;
+    font-size: 22px;
     font-weight: bold;
     color: #28a745;
-    margin-bottom: 30px;
+    margin: 20px 0;
     text-transform: uppercase;
-    border-bottom: 2px solid #28a745;
-    padding-bottom: 10px;
-    width: fit-content;
+    text-align: center;
+    width: 100%;
   }
 
   .winner-section {
-    margin-bottom: 30px;
+    margin: 10px 0 20px 0;
     background-color: #fff;
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    width: 80%;
+    border-radius: 8px;
+    box-shadow: none;
+    width: 90%;
   }
 
   .winner-label {
-    font-size: 20px;
-    color: #6c757d;
+    font-size: 18px;
+    color: #212529;
     margin-bottom: 10px;
+    text-align: center;
   }
 
   .winner-name {
-    font-size: 24px;
-    font-weight: bold;
-    color: #17a2b8;
+    font-size: 18px;
+    font-weight: 500;
+    color: #0275d8;
     margin-bottom: 15px;
+    text-align: center;
   }
 
   .price-label {
-    font-size: 20px;
-    color: #6c757d;
+    font-size: 18px;
+    color: #212529;
     margin-bottom: 10px;
+    text-align: center;
   }
 
   .final-price {
-    font-size: 28px;
+    font-size: 22px;
     font-weight: bold;
     color: #28a745;
     margin-bottom: 5px;
+    text-align: center;
   }
 
   .auction-stats {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    width: 100%;
+    justify-content: space-between;
+    gap: 15px;
+    width: 90%;
   }
 
   .stat-item {
     background-color: #fff;
     padding: 15px;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    min-width: 200px;
+    box-shadow: none;
     flex: 1;
+    width: 100%;
   }
 
   .stat-label {
     font-size: 16px;
-    color: #6c757d;
+    color: #212529;
     margin-bottom: 8px;
+    text-align: center;
   }
 
   .stat-value {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: bold;
-    color: #007bff;
+    color: #0275d8;
+    text-align: center;
+  }
+
+  /* Company header - updated to match screenshot */
+  .company-header {
+    background-color: #0080ff;
+    color: white;
+    padding: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  /* Auction title section - updated to match screenshot */
+  .auction-title-section {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .title-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 4px;
+  }
+
+  .main-title {
+    font-size: 18px;
+    color: #0275d8;
+    font-weight: 600;
   }
 
   /* Additional animation for auction end transition */
@@ -505,55 +542,12 @@ const globalStyles = `
     100% { opacity: 1; }
   }
 
-  /* Highest Bid Banner Styles */
-  .highest-bid-banner {
-    background-color: #f8d7da; /* Light red background */
-    border-left: 4px solid #dc3545; /* Red accent */
-    padding: 15px 20px;
-    margin-bottom: 15px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-
-  .highest-bid-label {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 5px;
-    color: #721c24; /* Dark red text */
-  }
-
-  .highest-bid-amount {
-    font-size: 24px;
-    font-weight: 700;
-    color: #dc3545; /* Red text */
-  }
-
-  /* Auction title styles in global styles string */
-  .auction-title {
-    background-color: #f8f9fa;
-    padding: 15px 20px;
-    border-bottom: 2px solid #e9ecef;
-    border-left: 4px solid #007bff;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .sub-title {
-    font-size: 14px;
-    color: #6c757d;
-    font-weight: 400;
-    margin-bottom: 4px;
-  }
-
-  .main-title {
-    font-size: 20px;
-    color: #007bff;
-    font-weight: 700;
-    line-height: 1.3;
+  /* Reset some container styles to match screenshot */
+  .auction-container {
+    max-width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
   }
 `;
 
@@ -565,6 +559,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
     bidStep,
     bidNumber,
     highestBidderId,
+    selectedBidderId,
     auctionTitle,
     highestBidAmount,
     isAuctionEnded,
@@ -861,74 +856,6 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
     }
   };
 
-  // Render auction information content
-  const renderAuctionContent = () => {
-    return (
-      <div className="unified-auction-content">
-        {/* Auction details section - only visible when auction is active */}
-        <div className={`auction-details ${isAuctionEnded ? 'hidden' : ''}`}>
-          <div className="detail-row">
-            <div className="detail-label">Đấu Giá Viên:</div>
-            <div className="detail-value">{auctioneer}</div>
-            <div className="detail-label right-column">Lần Trả Giá:</div>
-            <div className="detail-value">{bidNumber}</div>
-          </div>
-
-          <div className="detail-row">
-            <div className="detail-label">Giá Khởi Điểm:</div>
-            <div className="detail-value green">{startingPrice}</div>
-            <div className="detail-label right-column">Bước Giá:</div>
-            <div className="detail-value">{bidStep}</div>
-          </div>
-
-          <div className="detail-row">
-            <div className="detail-label">Người Trả Giá Cao Nhất:</div>
-            <div className="detail-value italic">
-              {highestBidderId || "Chưa có"}
-            </div>
-          </div>
-        </div>
-
-        {/* Timer section - only visible when auction is active */}
-        <div className={`timer-section ${isAuctionEnded ? 'hidden' : ''}`}>
-          <div className="timer-label">
-            Thời Gian Trả Còn Lại
-          </div>
-          <div className="timer-value">
-            {formatTime(Math.floor(remainingTime))}
-          </div>
-        </div>
-
-        {/* Results section - only visible when auction is ended */}
-        <div className={`result-container ${!isAuctionEnded ? 'hidden' : ''}`}>
-          <div className="result-header">Đấu Giá Kết Thúc</div>
-
-          <div className="winner-section">
-            <div className="winner-label">Người Trả Giá Cao Nhất</div>
-            <div className="winner-name">
-              {winnerId || highestBidderId || "Không có ID"}
-            </div>
-
-            <div className="price-label">Giá Trả Cao Nhất</div>
-            <div className="final-price">{finalPrice || highestBidAmount || startingPrice}</div>
-          </div>
-
-          <div className="auction-stats">
-            <div className="stat-item">
-              <div className="stat-label">Tổng Số Lượt Đấu Giá</div>
-              <div className="stat-value">{totalBids || bidNumber || 0}</div>
-            </div>
-
-            <div className="stat-item">
-              <div className="stat-label">Thời Gian Diễn Ra</div>
-              <div className="stat-value">{auctionDuration || "00:00:00"}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   // Add a specific effect to handle changes to isAuctionEnded that forces a re-render
   useEffect(() => {
     console.log("AuctionPopupRenderer: isAuctionEnded changed to", isAuctionEnded);
@@ -996,37 +923,113 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
           title={isAuctionEnded ? "Kết Quả Đấu Giá" : "Thông Tin Đấu Giá"}
           features={{
             width: 750,
-            height: 650,
+            height: 550,
             left: 100,
-            top: 100
+            top: 100,
+            resizable: false
           }}
           onUnload={handleClose}
           onBlock={() => console.log("Popup was blocked!")}
-          name="auction_display" // Use a consistent name for the popup window
+          name="auction_display"
           center="parent"
-          copyStyles={false} // Disable style copying to prevent security issues
+          copyStyles={false}
         >
           <StyleSheetManager target={containerRef.current?.ownerDocument?.head || document.head}>
             <StyledContainer ref={containerRef}>
               <div className={`auction-container ${isAuctionEnded ? 'auction-ended-container' : ''}`}>
                 <div className="company-header">
-                  {companyName}
+                  {companyName || "Công Ty Đấu Giá HP.AUSERCO"}
                 </div>
 
-                <div className={`auction-content ${isAuctionEnded ? 'auction-ended-content' : ''}`}>
-                  <div className="auction-title">
-                    <div className="sub-title">Phiên Đấu Giá Tài Sản</div>
-                    <div className="main-title">{auctionTitle || "Thông Tin Đấu Giá"}</div>
+                <div className="auction-title-section">
+                  <div className="title-column">
+                    <div className="subtitle">Phiên Đấu Giá Tài Sản</div>
+                    <div className="main-title">{auctionTitle || "Tài Sản XYZ"}</div>
                   </div>
-
-                  {!isAuctionEnded && (
-                  <div className="highest-bid-banner">
-                    <div className="highest-bid-label">Giá Trả Cao Nhất</div>
-                    <div className="highest-bid-amount">{highestBidAmount}</div>
-                  </div>)}
-
-                  {renderAuctionContent()}
+                  <div className="auctioneer-column">
+                    <div className="auctioneer-label">Đấu Giá Viên</div>
+                    <div className="auctioneer-name">{auctioneer || "-"}</div>
+                  </div>
                 </div>
+
+                {/* Results section - updated to match screenshot */}
+                {isAuctionEnded ? (
+                  <div className="result-container">
+                    <div className="result-header">Đấu Giá Kết Thúc</div>
+
+                    <div className="winner-section">
+                      <div className="winner-label">Người Trả Giá Cao Nhất</div>
+                      <div className="winner-name">
+                        {winnerId || highestBidderId || "Không có ID"}
+                      </div>
+
+                      <div className="price-label">Giá Trả Cao Nhất</div>
+                      <div className="final-price">{finalPrice || highestBidAmount || "1.000.000.000 VND"}</div>
+                    </div>
+
+                    <div className="auction-stats">
+                      <div className="stat-item">
+                        <div className="stat-label">Tổng Số Lượt Đấu Giá</div>
+                        <div className="stat-value">{totalBids || bidNumber || "0"}</div>
+                      </div>
+
+                      <div className="stat-item">
+                        <div className="stat-label">Thời Gian Diễn Ra</div>
+                        <div className="stat-value">{auctionDuration || "00:00:10"}</div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="auction-details">
+                    {/* Highest bidder and highest bid section */}
+                    <div className="highest-bid-section">
+                      <div className="highest-bidder-column">
+                        <div className="highest-bidder-label">Người Trả Cao Nhất</div>
+                        <div className="highest-bidder-value">
+                          {highestBidderId || "2"}
+                        </div>
+                      </div>
+                      <div className="highest-bid-column">
+                        <div className="highest-bid-label">Giá Trả Cao Nhất</div>
+                        <div className="highest-bid-amount">{highestBidAmount || "1.030.000.000 VND"}</div>
+                      </div>
+                    </div>
+
+                    {/* Starting price and bid step */}
+                    <div className="info-row">
+                      <div className="info-item">
+                        <div className="info-label">Giá Khởi Điểm:</div>
+                        <div className="info-value">{startingPrice || "1.000.000.000 VND"}</div>
+                      </div>
+                      <div className="info-item">
+                        <div className="info-label">Bước Giá:</div>
+                        <div className="info-value">{bidStep || "10.000.000 VND"}</div>
+                      </div>
+                    </div>
+
+                    {/* Bidder info and bid count */}
+                    <div className="info-row">
+                      <div className="info-item">
+                        <div className="info-label">Người Trả Giá:</div>
+                        <div className="info-value">{selectedBidderId || "4"}</div>
+                      </div>
+                      <div className="info-item">
+                        <div className="info-label">Lượt Trả Giá:</div>
+                        <div className="info-value">{bidNumber || "4"}</div>
+                      </div>
+                    </div>
+
+                    {/* Timer section */}
+                    <div className="timer-section">
+                      <div className="timer-label">
+                        Thời Gian Trả Còn Lại
+                      </div>
+                      <div className="timer-value">
+                        {formatTime(Math.floor(remainingTime)) || "00:00"}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </StyledContainer>
           </StyleSheetManager>

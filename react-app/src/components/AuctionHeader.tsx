@@ -48,7 +48,6 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
         <h3 className="auction-title">{title}</h3>
       </div>
 
-      {/* Timer */}
       <div className="auction-elapsed-time-container">
         <i className="bi bi-stopwatch auction-elapsed-time-icon"></i>
         <span className="auction-elapsed-time">{elapsedTime}</span>
@@ -93,7 +92,6 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
               </div>
               <div className="modal-body">
                 <p>Bạn có chắc chắn muốn kết thúc phiên đấu giá này?</p>
-
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>

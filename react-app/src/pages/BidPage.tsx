@@ -68,13 +68,42 @@ export const BidPage: React.FC = () => {
   const location = useLocation();
 
   // Add popup management
-  const { isOpen, openPopup, closePopup } = useAuctionPopup({
+  const { isOpen, openPopup, closePopup, popupWindow } = useAuctionPopup({
     onClose: () => console.log('Auction popup closed')
   });
   const popupInitializedRef = useRef(false);
 
   // Add a flag to track popup creation to prevent duplicates
   const popupCreationInProgressRef = useRef(false);
+
+  // Declare shouldShowPopup state before it's used
+  const [shouldShowPopup, setShouldShowPopup] = useState(false);
+
+  // Format number to currency string
+  const formatCurrency = useCallback((amount: number | undefined): string => {
+    return bidService.formatCurrency(amount || 0);
+  }, []);
+
+  // Function to update the popup when there are changes
+  const updatePopupInfo = useCallback(() => {
+    if (!popupWindow || popupWindow.closed || !shouldShowPopup) {
+      return;
+    }
+
+    // We're using custom events to send data to the popup window
+    const popupUpdateEvent = new CustomEvent('popupUpdate', {
+      detail: {
+        highestBidderId: highestBidderId || '',
+        selectedBidderId: selectedBidder || '',
+        highestBidAmount: formatCurrency(bids && bids.length > 0 ? bids[0].amount : (auction?.settings?.startingPrice || 0)),
+        bidNumber: bids ? bids.length : 0
+      }
+    });
+
+    // Dispatch the event to the popup window
+    popupWindow.dispatchEvent(popupUpdateEvent);
+    console.log('Updated popup with latest information');
+  }, [popupWindow, shouldShowPopup, highestBidderId, selectedBidder, bids, auction?.settings?.startingPrice, formatCurrency]);
 
   const showToast = useCallback((
     message: string,
@@ -83,11 +112,6 @@ export const BidPage: React.FC = () => {
   ) => {
     setToast({ show: true, message, type, position });
     setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
-  }, []);
-
-  // Format number to currency string
-  const formatCurrency = useCallback((amount: number | undefined): string => {
-    return bidService.formatCurrency(amount || 0);
   }, []);
 
   // Calculate elapsed time in HH:MM:SS format
@@ -222,9 +246,6 @@ export const BidPage: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auction, dataLoading]); // Minimal dependencies to avoid re-running
 
-  // Replace the popup update effect with a simpler state variable
-  const [shouldShowPopup, setShouldShowPopup] = useState(false);
-
   // Add state for auction results to pass to the popup
   const [auctionResults, setAuctionResults] = useState<{
     winnerName: string;
@@ -244,6 +265,9 @@ export const BidPage: React.FC = () => {
         setShouldShowPopup(true);
       }
 
+      // Update popup with current information
+      updatePopupInfo();
+
       // Make sure to refresh the popup content when auction ends
       if (isAuctionEnded && auction.result) {
         console.log("BidPage: Auction ended, refreshing popup content");
@@ -260,7 +284,7 @@ export const BidPage: React.FC = () => {
       setShouldShowPopup(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, auction, isAuctionEnded]); // Dependencies include isAuctionEnded
+  }, [isOpen, auction, isAuctionEnded, updatePopupInfo]); // Dependencies include isAuctionEnded
 
   // Ensure proper cleanup on unmount
   useEffect(() => {
@@ -1230,6 +1254,7 @@ export const BidPage: React.FC = () => {
           bidStep={formatCurrency(auction.settings?.bidStep || 0)}
           bidNumber={bids ? bids.length : 0}
           highestBidderId={highestBidderId || ''}
+          selectedBidderId={selectedBidder || ''}
           companyName="Công Ty Đấu Giá HP.AUSERCO"
           auctionTitle={auctionTitle}
           highestBidAmount={formatCurrency(bids && bids.length > 0 ? bids[0].amount : (auction.settings?.startingPrice || 0))}
