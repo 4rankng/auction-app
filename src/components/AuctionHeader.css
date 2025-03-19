@@ -169,12 +169,56 @@
   transform: scale(1.02);
 }
 
+/* Make the popup button more noticeable with improved styling */
 .show-popup-btn {
-  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  animation: pulse-popup 2s infinite !important;
+  transition: all 0.3s ease !important;
 }
 
 .show-popup-btn:hover {
-  transform: scale(1.02);
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(108, 141, 174, 0.5) !important;
+  background-color: #5a7da1 !important;
+}
+
+.show-popup-btn:after {
+  position: absolute;
+  white-space: nowrap;
+  font-size: 12px;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(108, 141, 174, 0.9);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.show-popup-btn:hover:after {
+  opacity: 1;
+}
+
+.icon-man-hinh-phu {
+  font-size: 18px !important;
+  margin-right: 0 !important;
+}
+
+/* Enhanced animation for the popup button */
+@keyframes pulse-popup {
+  0% {
+    box-shadow: 0 0 0 0 rgba(108, 141, 174, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(108, 141, 174, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(108, 141, 174, 0);
+  }
 }
 
 .auction-ended-badge {

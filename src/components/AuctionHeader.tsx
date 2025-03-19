@@ -207,10 +207,12 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
             <button
               className="btn show-popup-btn icon-button"
               onClick={onShowPopup}
-              style={popupButtonStyle}
+              style={{
+                ...popupButtonStyle,
+                width: `${buttonWidth * 1.5}px` // Make it wider to accommodate text
+              }}
             >
               <i className="bi bi-display me-2 icon-man-hinh-phu"></i>
-
             </button>
           )}
 

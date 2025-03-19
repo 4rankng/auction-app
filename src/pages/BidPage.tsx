@@ -13,7 +13,6 @@ import { Bid, AuctionStatus } from '@types';
 import './BidPage.css';
 import { bidService } from '@services/bidService';
 import { exportExcelService } from '@services/exportExcelService';
-import * as popupService from '@services/popupService';
 import * as timerService from '@services/timerService';
 import { COMPANY_NAME } from '@utils/constants';
 
@@ -477,21 +476,16 @@ export const BidPage: React.FC = () => {
     }
   }, [isOpen, auction, isAuctionEnded, updatePopupInfo, shouldShowPopup, setShouldShowPopup, highestBidderId, bids, elapsedTime, setAuctionResults, popupInitializedRef, formatCurrency]);
 
-  // Ensure proper cleanup on unmount
+  // Ensure proper cleanup on unmount without closing popups prematurely
   useEffect(() => {
     return () => {
-      console.log("BidPage: Component unmounting, cleanup");
+      console.log("BidPage: Component unmounting, proper cleanup");
 
-      // Reset all flags
+      // Reset all flags but don't close popups
       popupInitializedRef.current = false;
       popupCreationInProgressRef.current = false;
-
-      // Make sure all popups are closed
-      console.log("BidPage: Closing popups during unmount");
-      closePopup();
-      popupService.closeAllPopups(true);
     };
-  }, [closePopup, popupInitializedRef, popupCreationInProgressRef]);
+  }, []);
 
   // Function to handle ending the auction
   const handleEndAuction = async () => {
@@ -821,6 +815,22 @@ export const BidPage: React.FC = () => {
       setPopupTimerValue(0);
     }
   }, [auction?.settings?.bidDuration, isAuctionEnded]);
+
+  // Add useEffect to keep shouldShowPopup in sync with actual popup window state
+  useEffect(() => {
+    if (popupWindow && shouldShowPopup) {
+      // Check if popup is still open periodically
+      const checkInterval = setInterval(() => {
+        if (popupWindow.closed) {
+          console.log("Popup detected as closed, updating shouldShowPopup state");
+          setShouldShowPopup(false);
+          clearInterval(checkInterval);
+        }
+      }, 1000);
+
+      return () => clearInterval(checkInterval);
+    }
+  }, [popupWindow, shouldShowPopup]);
 
   const handlePlaceBid = async (directBidAmount?: string) => {
     console.log('handlePlaceBid called with bidAmount:', bidAmount, 'directBidAmount:', directBidAmount);
@@ -1195,16 +1205,35 @@ export const BidPage: React.FC = () => {
     }
 
     console.log("Opening auction popup manually");
-    openPopup();
-    setShouldShowPopup(true);
+    try {
+      const newPopupWindow = openPopup();
+      if (newPopupWindow) {
+        // Force the state update for the popup to be visible
+        setShouldShowPopup(true);
 
-    // Make sure the popup has the correct timer value immediately
-    if (isTimerRunning && timeLeft > 0) {
-      console.log("Setting popup timer to current time:", timeLeft);
-      setPopupTimerValue(timeLeft);
-    } else {
-      console.log("Setting popup timer to initial time:", bidTimerInitialTime);
-      setPopupTimerValue(bidTimerInitialTime);
+        // Make sure the popup has the correct timer value immediately
+        if (isTimerRunning && timeLeft > 0) {
+          console.log("Setting popup timer to current time:", timeLeft);
+          setPopupTimerValue(timeLeft);
+        } else {
+          console.log("Setting popup timer to initial time:", bidTimerInitialTime);
+          setPopupTimerValue(bidTimerInitialTime);
+        }
+
+        // Ensure the popup reflects the latest auction data with a slight delay
+        // to make sure the popup is fully initialized
+        setTimeout(() => {
+          if (newPopupWindow && !newPopupWindow.closed) {
+            updatePopupInfo();
+          }
+        }, 500);
+      } else {
+        console.error("Failed to open popup window - it may have been blocked by the browser");
+        showToast("Không thể mở cửa sổ phụ. Vui lòng kiểm tra cài đặt trình duyệt.", "error");
+      }
+    } catch (e) {
+      console.error("Error opening popup:", e);
+      showToast("Lỗi khi mở cửa sổ phụ. Vui lòng thử lại.", "error");
     }
   };
 
