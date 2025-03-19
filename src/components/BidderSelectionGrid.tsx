@@ -65,67 +65,77 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
 
   return (
     <div className="bidder-selection-container mb-3">
-      {/* Timer controls added above the "Chọn người tham gia" heading */}
-      <div className="d-flex mb-3 align-items-center">
-        {/* Start Bid Button */}
-        <button
-          className="btn btn-success me-2"
-          style={{
-            padding: '8px 16px',
-            borderRadius: '4px',
-            fontWeight: 'bold',
-            height: '40px',
-            backgroundColor: '#28a745',
-            border: 'none'
-          }}
-          onClick={onStartBid}
-          disabled={isTimerRunning}
-        >
-          <i className="bi bi-play-circle me-1"></i>
-          Bắt Đầu
-        </button>
+      {/* Timer controls section */}
+      <div style={{ marginBottom: '20px' }}>
+        <h6 className="mb-2">Bidder Timer</h6>
+        <div className="d-flex align-items-center" style={{
+          justifyContent: 'flex-start',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'nowrap'
+        }}>
+          {/* Start Bid Button */}
+          <button
+            className="btn btn-success"
+            style={{
+              padding: '8px 16px',
+              borderRadius: '4px',
+              fontWeight: 'bold',
+              height: '40px',
+              backgroundColor: '#28a745',
+              border: 'none',
+              marginRight: '10px'
+            }}
+            onClick={onStartBid}
+            disabled={isTimerRunning}
+          >
+            <i className="bi bi-play-circle me-1"></i>
+            Bắt Đầu
+          </button>
 
-        {/* Countdown Timer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '4px',
-            padding: '8px 16px',
-            border: '1px solid #dee2e6',
-            minWidth: '80px',
-            height: '40px',
-            margin: '0 5px',
-            fontWeight: 'normal'
-          }}
-        >
-          <span style={{
-            fontSize: '1rem',
-            color: '#212529'
-          }}>
-            {formatTime(bidderTimeLeft !== undefined && isTimerRunning ? bidderTimeLeft : bidDuration)}
-          </span>
+          {/* Countdown Timer */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '4px',
+              padding: '8px 16px',
+              border: '1px solid #dee2e6',
+              minWidth: '80px',
+              height: '40px',
+              marginRight: '10px',
+              fontWeight: 'normal'
+            }}
+          >
+            <span style={{
+              fontSize: '1rem',
+              color: '#212529'
+            }}>
+              {formatTime(bidderTimeLeft !== undefined && isTimerRunning ? bidderTimeLeft : bidDuration)}
+            </span>
+          </div>
+
+          {/* Reset Timer Button */}
+          <button
+            className="btn"
+            style={{
+              padding: '8px 16px',
+              borderRadius: '4px',
+              fontWeight: 'bold',
+              backgroundColor: '#dc3545',
+              color: 'white',
+              height: '40px',
+              border: 'none'
+            }}
+            onClick={onResetTimer}
+          >
+            <i className="bi bi-arrow-counterclockwise me-1"></i>
+            Đặt Lại
+          </button>
         </div>
-
-        {/* Reset Timer Button */}
-        <button
-          className="btn ms-2"
-          style={{
-            padding: '8px 16px',
-            borderRadius: '4px',
-            fontWeight: 'bold',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            height: '40px',
-            border: 'none'
-          }}
-          onClick={onResetTimer}
-        >
-          <i className="bi bi-arrow-counterclockwise me-1"></i>
-          Đặt Lại
-        </button>
       </div>
 
       <h6 className="mb-2">Chọn người tham gia</h6>
