@@ -137,7 +137,23 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
         </div>
       </div>
 
-      <h6 className="mb-2">Chọn người tham gia</h6>
+      {/* Display heading and selected bidder information in one line */}
+      <div className="d-flex align-items-center mb-2">
+        <h6 className="mb-0 me-3">Chọn người tham gia</h6>
+        {selectedBidder && (
+          <div className="selected-bidder-info" style={{
+            backgroundColor: '#e9f5ff',
+            padding: '4px 10px',
+            borderRadius: '4px',
+            border: '1px solid #b8daff',
+            fontSize: '1rem',
+            fontWeight: 'bold'
+          }}>
+            <i className="bi bi-person-check-fill me-1" style={{ color: '#0d6efd' }}></i>
+            {selectedBidder} - {bidders.find(b => b.id === selectedBidder)?.name || ''}
+          </div>
+        )}
+      </div>
 
       {isTimerEnded && (
         <div className="alert alert-warning mb-3">
