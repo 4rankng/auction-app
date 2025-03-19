@@ -220,7 +220,9 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
           margin: '0',
           marginRight: '8px',
           flexShrink: 0
-        }}>Chọn người tham gia:</h6>
+        }}>
+          {isMobile ? 'Chọn:' : 'Chọn người tham gia:'}
+        </h6>
         {selectedBidder ? (
           <div className="selected-bidder-info" style={{
             backgroundColor: '#f0f4f8',

@@ -28,9 +28,6 @@ export default function SetupPage() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Add state for screen size
-  const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
-
   const DEFAULT_AUCTION_DETAILS = {
     description: "",
     startingPrice: DEFAULT_STARTING_PRICE,
@@ -54,22 +51,6 @@ export default function SetupPage() {
     bidDuration: DEFAULT_BID_DURATION,
     auctioneer: ""
   });
-
-  // Check screen size on mount and when window is resized
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsSmallScreen(window.innerWidth < 768);
-    };
-
-    // Initial check
-    checkScreenSize();
-
-    // Add event listener for window resize
-    window.addEventListener('resize', checkScreenSize);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
 
   // Load bidders on component mount
   useEffect(() => {
@@ -394,11 +375,6 @@ export default function SetupPage() {
       auctioneer: name,
       auctioneerId: id
     }));
-  };
-
-  // Function to get button text based on screen size
-  const getButtonText = (text: string): JSX.Element | string => {
-    return isSmallScreen ? '' : text;
   };
 
   return (

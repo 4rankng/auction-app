@@ -84,37 +84,6 @@ const BidControls: React.FC<BidControlsProps> = ({
     fontFamily: 'Roboto, sans-serif'
   };
 
-
-
-  // Add state to track screen size
-  const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
-
-  // Check screen size on mount and when window is resized
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsSmallScreen(window.innerWidth < 768);
-    };
-
-    // Initial check
-    checkScreenSize();
-
-    // Add event listener for window resize
-    window.addEventListener('resize', checkScreenSize);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-
-  // Function to get button text based on screen size
-  const getButtonText = (text: string): string => {
-    return isSmallScreen ? '' : text;
-  };
-
-  // Function to get button width based on screen size
-  const getButtonWidth = (defaultWidth: string, iconOnlyWidth: string = '76px'): string => {
-    return isSmallScreen ? iconOnlyWidth : defaultWidth;
-  };
-
   // Update bid method when bid history changes
   useEffect(() => {
     if (!bidHistoryEmpty && bidMethod === 'basePrice') {
