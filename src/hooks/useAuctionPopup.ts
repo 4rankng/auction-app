@@ -43,8 +43,8 @@ export const useAuctionPopup = (options: UseAuctionPopupOptions = {}) => {
         popupWindow.close();
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array - only runs on unmount
+
+  }, [popupWindow]); // Add popupWindow to dependency array
 
   // Open the popup
   const openPopup = useCallback(() => {
@@ -81,8 +81,8 @@ export const useAuctionPopup = (options: UseAuctionPopupOptions = {}) => {
     }
 
     return popup;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, popupWindow]); // Removed options.onOpen to prevent unnecessary re-renders
+
+  }, [isOpen, popupWindow, options]); // Add options to dependencies
 
   // Close the popup
   const closePopup = useCallback(() => {
@@ -105,8 +105,7 @@ export const useAuctionPopup = (options: UseAuctionPopupOptions = {}) => {
     if (options.onClose) {
       options.onClose();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [popupWindow]); // Removed options.onClose to prevent unnecessary re-renders
+  }, [popupWindow, options]); // Include options in dependencies
 
   return {
     isOpen,

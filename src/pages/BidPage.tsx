@@ -33,8 +33,7 @@ export const BidPage: React.FC = () => {
   const { auction, bidders, bids, loading: dataLoading, error: dataError, updateAuction, getAuctionById } = useAuction();
   const location = useLocation();
 
-  // Check if the page was accessed from the AuctionHistory page
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [isFromHistory, setIsFromHistory] = useState<boolean>(false);
 
   const [currentPrice, setCurrentPrice] = useState<string>('0 VND');
@@ -415,38 +414,14 @@ export const BidPage: React.FC = () => {
     return bidService.formatBidsForDisplay(bids, bidders) as BidHistoryDisplay[];
   }, [bidders]);
 
-  // Update the popup initialization logic to prevent automatic opening
+  // Initialization effect for the popup
   useEffect(() => {
-    // Only initialize if we have auction data, not loading, popup isn't initialized,
-    // and we're not already in the process of creating a popup
-    if (auction &&
-        !dataLoading &&
-        !popupInitializedRef.current &&
-        !popupCreationInProgressRef.current) {
-
-      // Set flag to prevent multiple initialization attempts during the same cycle
+    // Skip if already initialized or in progress
+    if (!popupInitializedRef.current && !popupCreationInProgressRef.current) {
+      console.log("BidPage: Starting popup initialization");
       popupCreationInProgressRef.current = true;
 
-      console.log("BidPage: Checking existing popups");
-
-      // Check if any popups are already open with our name
-      const isAlreadyOpen = popupService.isPopupOpen('auction_display');
-      if (isAlreadyOpen) {
-        console.log("BidPage: Popup already exists, will reuse existing window");
-        popupInitializedRef.current = true;
-        // Do not automatically set shouldShowPopup to true
-        popupCreationInProgressRef.current = false;
-        return;
-      }
-
-      console.log("BidPage: Closing any existing popups before creating a new one");
-      // Close ALL popups to ensure clean slate
-      popupService.closeAllPopups(true);
-
-      // Reset popup state
-      setShouldShowPopup(false);
-
-      // Initialize popup without opening
+      // Delay to prevent multiple initializations
       setTimeout(() => {
         try {
           console.log("BidPage: Initializing popup system without opening");
@@ -461,8 +436,7 @@ export const BidPage: React.FC = () => {
         }
       }, 300);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auction, dataLoading]); // Minimal dependencies to avoid re-running
+  }, [auction, dataLoading, popupInitializedRef, popupCreationInProgressRef]);
 
   // Add state for auction results to pass to the popup
   const [auctionResults, setAuctionResults] = useState<{
@@ -501,8 +475,7 @@ export const BidPage: React.FC = () => {
       console.log("BidPage: Setting shouldShowPopup to false");
       setShouldShowPopup(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, auction, isAuctionEnded, updatePopupInfo]); // Dependencies include isAuctionEnded
+  }, [isOpen, auction, isAuctionEnded, updatePopupInfo, shouldShowPopup, setShouldShowPopup, highestBidderId, bids, elapsedTime, setAuctionResults, popupInitializedRef, formatCurrency]);
 
   // Ensure proper cleanup on unmount
   useEffect(() => {
@@ -518,8 +491,7 @@ export const BidPage: React.FC = () => {
       closePopup();
       popupService.closeAllPopups(true);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array - only runs on unmount
+  }, [closePopup, popupInitializedRef, popupCreationInProgressRef]);
 
   // Function to handle ending the auction
   const handleEndAuction = async () => {
@@ -1163,7 +1135,7 @@ export const BidPage: React.FC = () => {
     setBidAmount(amount);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const handleExportData = async () => {
     if (!auction) return;
 
@@ -1215,7 +1187,6 @@ export const BidPage: React.FC = () => {
   };
 
   // New function to navigate to auction history
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleGoToHistory = () => {
     navigate('/history');
   };
@@ -1499,6 +1470,57 @@ export const BidPage: React.FC = () => {
       {/* Add backdrop when modal is open */}
       {showGoBackModal && (
         <div className="modal-backdrop fade show" style={{ zIndex: 1040 }}></div>
+      )}
+
+      {/* Navigation breadcrumb */}
+      <nav aria-label="breadcrumb" className="mb-3">
+        <ol className="breadcrumb">
+          <li className="breadcrumb-item">
+            <button
+              onClick={handleGoBack}
+              style={{
+                fontFamily: 'Roboto, sans-serif',
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                color: '#0d6efd',
+                textDecoration: 'underline',
+                cursor: 'pointer'
+              }}
+            >
+              <i className="bi bi-house-door"></i> Trang chủ
+            </button>
+          </li>
+          {isFromHistory && (
+            <li className="breadcrumb-item">
+              <button
+                onClick={handleGoToHistory}
+                style={{
+                  fontFamily: 'Roboto, sans-serif',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  color: '#0d6efd',
+                  textDecoration: 'underline',
+                  cursor: 'pointer'
+                }}
+              >
+                <i className="bi bi-clock-history"></i> Lịch sử đấu giá
+              </button>
+            </li>
+          )}
+          <li className="breadcrumb-item active" aria-current="page" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            Phiên đấu giá {auction?.id ? `#${auction.id}` : ''}
+          </li>
+        </ol>
+      </nav>
+
+      {/* Add a notification if coming from history */}
+      {isFromHistory && (
+        <div className="alert alert-info mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
+          <i className="bi bi-info-circle me-2"></i>
+          Bạn đang xem phiên đấu giá từ trang lịch sử
+        </div>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './AuctionHeader.css';
 import CompanyBanner from './CompanyBanner';
 
@@ -26,40 +26,12 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
 }) => {
   // Add state for modal visibility
   const [showModal, setShowModal] = useState(false);
-  // Add state to track screen size
-  const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
   // Add state for truncated description
   const [isTruncated, setIsTruncated] = useState(true);
-
-  // Check screen size on mount and when window is resized
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsSmallScreen(window.innerWidth < 768);
-    };
-
-    // Initial check
-    checkScreenSize();
-
-    // Add event listener for window resize
-    window.addEventListener('resize', checkScreenSize);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
 
   // Function to toggle description truncation
   const toggleTruncation = () => {
     setIsTruncated(!isTruncated);
-  };
-
-  // Function to get button text based on screen size
-  const getButtonText = (text: string): string => {
-    return isSmallScreen ? '' : text;
-  };
-
-  // Function to get button width based on screen size
-  const getButtonWidth = (defaultWidth: string, iconOnlyWidth: string = '76px'): string => {
-    return isSmallScreen ? iconOnlyWidth : defaultWidth;
   };
 
   // Function to handle opening the modal
@@ -83,12 +55,34 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
   // Width is twice the height
   const buttonWidth = buttonHeight * 2;
 
+  // Common button style with 50% transparency
+  const transparentButtonStyle = {
+    width: `${buttonWidth}px`,
+    height: `${buttonHeight}px`,
+    backgroundColor: 'rgba(13, 110, 253, 0.5)',
+    borderColor: 'rgba(13, 110, 253, 0.5)',
+    fontFamily: 'Roboto, sans-serif'
+  };
+
+  const transparentDangerButtonStyle = {
+    width: `${buttonWidth}px`,
+    height: `${buttonHeight}px`,
+    backgroundColor: 'rgba(220, 53, 69, 0.5)',
+    borderColor: 'rgba(220, 53, 69, 0.5)',
+    fontFamily: 'Roboto, sans-serif'
+  };
+
+  // Common text style for consistent font
+  const robotoStyle = {
+    fontFamily: 'Roboto, sans-serif'
+  };
+
   return (
-    <div className="auction-header-container">
+    <div className="auction-header-container" style={robotoStyle}>
       <div className="auction-header-info">
         <div
           className={`auction-description ${isTruncated ? 'truncated' : ''}`}
-          style={{ fontSize: '18px' }}
+          style={{ fontSize: '18px', fontFamily: 'Roboto, sans-serif' }}
         >
           <div className="auction-description-text">
             {title}
@@ -106,12 +100,13 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
         </div>
       </div>
 
-      <div className="auction-controls-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+      <div className="auction-controls-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', fontFamily: 'Roboto, sans-serif' }}>
         {/* Elapsed Time Container now above the buttons */}
         <div className="auction-elapsed-time-container" style={{
           height: `${buttonHeight}px`,
           width: '100%',
-          marginBottom: '5px'
+          marginBottom: '5px',
+          fontFamily: 'Roboto, sans-serif'
         }}>
           <i className="bi bi-stopwatch auction-elapsed-time-icon"></i>
           <span className="auction-elapsed-time">{elapsedTime}</span>
@@ -124,10 +119,7 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
             <button
               className="btn btn-primary show-popup-btn icon-button"
               onClick={onShowPopup}
-              style={{
-                width: `${buttonWidth}px`,
-                height: `${buttonHeight}px`
-              }}
+              style={transparentButtonStyle}
             >
               <i className="bi bi-display me-1 icon-man-hinh-phu"></i>
             </button>
@@ -137,7 +129,9 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
             <div className="auction-ended-badge icon-button"
               style={{
                 width: `${buttonWidth}px`,
-                height: `${buttonHeight}px`
+                height: `${buttonHeight}px`,
+                backgroundColor: 'rgba(108, 117, 125, 0.5)',
+                fontFamily: 'Roboto, sans-serif'
               }}
             >
               <i className="bi bi-stopwatch-fill"></i>
@@ -146,10 +140,7 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
             <button
               className="btn end-auction-btn icon-button"
               onClick={handleOpenModal}
-              style={{
-                width: `${buttonWidth}px`,
-                height: `${buttonHeight}px`
-              }}
+              style={transparentDangerButtonStyle}
             >
               <i className="bi bi-stop-circle icon-ket-thuc"></i>
             </button>
@@ -161,20 +152,21 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
       {showModal && (
         <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex={-1} aria-modal="true" role="dialog">
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
+            <div className="modal-content" style={robotoStyle}>
               {/* Replace the modal header with CompanyBanner */}
               <CompanyBanner className="modal-header" />
               <div className="modal-body">
-                <p>Bạn có chắc chắn muốn kết thúc phiên đấu giá này?</p>
+                <p style={robotoStyle}>Bạn có chắc chắn muốn kết thúc phiên đấu giá này?</p>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                <button type="button" className="btn btn-secondary" onClick={handleCloseModal} style={{ backgroundColor: 'rgba(108, 117, 125, 0.5)', borderColor: 'rgba(108, 117, 125, 0.5)', fontFamily: 'Roboto, sans-serif' }}>
                   <i className="bi bi-x-circle me-1"></i> Hủy
                 </button>
                 <button
                   type="button"
                   className="btn btn-danger"
                   onClick={handleConfirmEndAuction}
+                  style={{ backgroundColor: 'rgba(220, 53, 69, 0.5)', borderColor: 'rgba(220, 53, 69, 0.5)', fontFamily: 'Roboto, sans-serif' }}
                 >
                   <i className="bi bi-stop-circle me-1"></i> Xác nhận kết thúc
                 </button>
