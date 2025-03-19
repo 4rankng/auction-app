@@ -484,8 +484,8 @@ export default function SetupPage() {
 
                 {/* Third row: Đấu Giá Viên */}
                 <div className="row mb-3">
-                  <div className="col-12">
-                    <label className="form-label">Đấu Giá Viên</label>
+                  <div className="col-10">
+
 
                       <AuctioneerSelector
                         value={auctionDetails.auctioneerId}
@@ -530,7 +530,7 @@ export default function SetupPage() {
                           name="name"
                           className="form-control"
                           required
-                          placeholder="Nguyễn Văn A"
+                          placeholder=""
                         />
                       </div>
                       <div className="col-12 col-md-4">

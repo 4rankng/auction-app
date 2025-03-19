@@ -25,6 +25,14 @@ const AuctioneerManagement: React.FC = () => {
     setIsEditing(false);
     setNewName('');
     setFormError(null);
+
+    // Scroll to bottom after a small delay to ensure form is rendered
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth'
+      });
+    }, 100);
   };
 
   // Handle editing an auctioneer
@@ -34,6 +42,14 @@ const AuctioneerManagement: React.FC = () => {
     setCurrentAuctioneer(auctioneer);
     setNewName(auctioneer.name);
     setFormError(null);
+
+    // Scroll to bottom after a small delay to ensure form is rendered
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth'
+      });
+    }, 100);
   };
 
   // Handle form submission
@@ -119,27 +135,10 @@ const AuctioneerManagement: React.FC = () => {
   }
 
   return (
-    <div className="container py-4">
+    <div className="container py-4 pb-5 mb-5">
       <div className="card shadow">
-        <div className="card-header d-flex justify-content-between align-items-center">
+        <div className="card-header">
           <h4 className="mb-0">Quản lý Đấu Giá Viên</h4>
-          <div className="action-buttons">
-            <button
-              className="btn btn-primary"
-              onClick={handleAddClick}
-              disabled={isAdding || isEditing}
-            >
-              <i className="bi bi-plus-circle me-2"></i>
-              Thêm Đấu Giá Viên
-            </button>
-            <button
-              className="btn btn-secondary"
-              onClick={handleBackClick}
-            >
-              <i className="bi bi-arrow-left me-2"></i>
-              Quay Lại
-            </button>
-          </div>
         </div>
 
         <div className="card-body">
@@ -147,66 +146,6 @@ const AuctioneerManagement: React.FC = () => {
             <div className="alert alert-danger" role="alert">
               <i className="bi bi-exclamation-triangle-fill me-2"></i>
               {error}
-            </div>
-          )}
-
-          {(isAdding || isEditing) && (
-            <div className="form-section mb-4">
-              <div className="card">
-                <div className="card-header">
-                  <h5 className="mb-0">
-                    {isAdding ? (
-                      <><i className="bi bi-plus-circle me-2"></i>Thêm Đấu Giá Viên Mới</>
-                    ) : (
-                      <><i className="bi bi-pencil me-2"></i>Chỉnh Sửa Đấu Giá Viên</>
-                    )}
-                  </h5>
-                </div>
-                <div className="card-body">
-                  <form onSubmit={handleSubmit}>
-                    {formError && (
-                      <div className="alert alert-danger" role="alert">
-                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                        {formError}
-                      </div>
-                    )}
-                    <div className="mb-3">
-                      <label htmlFor="auctioneerName" className="form-label">
-                        Tên Đấu Giá Viên
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="auctioneerName"
-                        value={newName}
-                        onChange={(e) => setNewName(e.target.value)}
-                        placeholder="Nhập tên đấu giá viên"
-                        autoFocus
-                      />
-                    </div>
-                    <div className="form-buttons">
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={handleCancel}
-                      >
-                        <i className="bi bi-x-circle me-2"></i>
-                        Hủy
-                      </button>
-                      <button
-                        type="submit"
-                        className="btn btn-primary"
-                      >
-                        {isAdding ? (
-                          <><i className="bi bi-plus-lg me-2"></i>Thêm</>
-                        ) : (
-                          <><i className="bi bi-check-lg me-2"></i>Lưu Thay Đổi</>
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
             </div>
           )}
 
@@ -260,22 +199,110 @@ const AuctioneerManagement: React.FC = () => {
               </table>
             </div>
           )}
+
+          {/* Form section - moved to bottom */}
+          {(isAdding || isEditing) && (
+            <div className="form-section mt-4">
+              <div className="card">
+                <div className="card-header">
+                  <h5 className="mb-0">
+                    {isAdding ? (
+                      <><i className="bi bi-plus-circle me-2"></i>Thêm Đấu Giá Viên Mới</>
+                    ) : (
+                      <><i className="bi bi-pencil me-2"></i>Chỉnh Sửa Đấu Giá Viên</>
+                    )}
+                  </h5>
+                </div>
+                <div className="card-body">
+                  <form onSubmit={handleSubmit}>
+                    {formError && (
+                      <div className="alert alert-danger" role="alert">
+                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                        {formError}
+                      </div>
+                    )}
+                    <div className="mb-3">
+                      <label htmlFor="auctioneerName" className="form-label">
+                        Tên Đấu Giá Viên
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="auctioneerName"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        placeholder="Nhập tên đấu giá viên"
+                        autoFocus
+                      />
+                    </div>
+                    <div className="form-buttons full-width">
+                      <button
+                        type="button"
+                        className="btn btn-secondary flex-grow-1"
+                        onClick={handleCancel}
+                      >
+                        <i className="bi bi-x-circle me-2"></i>
+                        Hủy
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn btn-primary flex-grow-1"
+                      >
+                        {isAdding ? (
+                          <><i className="bi bi-plus-lg me-2"></i>Thêm</>
+                        ) : (
+                          <><i className="bi bi-check-lg me-2"></i>Lưu</>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Fixed bottom action buttons */}
+      <div className="fixed-bottom-actions">
+        <div className="bottom-sheet">
+          <div className="container">
+            <div className="action-buttons full-width">
+              <button
+                className="btn btn-primary flex-grow-1"
+                onClick={handleAddClick}
+                disabled={isAdding || isEditing}
+              >
+                <i className="bi bi-plus-circle me-2"></i>
+                <span className="d-none d-sm-inline">Thêm </span>Đấu Giá Viên
+              </button>
+              <button
+                className="btn btn-secondary flex-grow-1"
+                onClick={handleBackClick}
+              >
+                <i className="bi bi-arrow-left me-2"></i>
+                Quay Lại
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Delete Confirmation Modal */}
-      <Modal show={showDeleteModal} onHide={handleCloseDeleteModal}>
+      <Modal show={showDeleteModal} onHide={handleCloseDeleteModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Xác nhận xóa</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Bạn có chắc chắn muốn xóa đấu giá viên này?
+          Bạn có chắc chắn muốn xóa đấu giá viên này không?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseDeleteModal}>
+            <i className="bi bi-x-circle me-2"></i>
             Hủy
           </Button>
           <Button variant="danger" onClick={handleConfirmDelete}>
+            <i className="bi bi-trash me-2"></i>
             Xóa
           </Button>
         </Modal.Footer>
