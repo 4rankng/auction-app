@@ -505,65 +505,28 @@ const BidControls: React.FC<BidControlsProps> = ({
         </div>
       )}
 
-      {/* Buttons for bid actions - reduced size */}
-      <div className="bid-action-buttons d-flex flex-row mt-3" style={{ justifyContent: 'center' }}>
+      {/* Buttons for bid actions - using CSS classes for layout */}
+      <div className="bid-action-buttons">
         {/* Primary Action Button - Đấu Giá (Place Bid) */}
         <button
-          className="btn"
+          className="btn bid-button"
           disabled={isPlaceBidDisabled}
           onClick={handleSubmit}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '4px',
-            fontWeight: '500',
-            height: '38px',
-            backgroundColor: isPlaceBidDisabled ? '#a0a0a0' : '#7baf7b',
-            border: 'none',
-            marginRight: '12px',
-            fontFamily: 'Roboto, Arial, sans-serif',
-            width: getButtonWidth('140px', '70px'),
-            opacity: isPlaceBidDisabled ? 0.65 : 1,
-            cursor: isPlaceBidDisabled ? 'not-allowed' : 'pointer',
-            transition: 'all 0.3s ease-in-out',
-            boxShadow: isPlaceBidDisabled ? 'none' : '0 2px 4px rgba(0, 0, 0, 0.1)',
-            fontSize: '14px',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
+          aria-label="Đấu giá"
         >
-          <i className="bi bi-cash-coin me-2"></i>
-          {getButtonText('ĐẤU GIÁ')}
+          <i className="bi bi-cash-coin me-md-2"></i>
+          <span className="d-none d-md-inline">ĐẤU GIÁ</span>
         </button>
 
         {/* Secondary Action Button - Hủy (Cancel) */}
         <button
-          className="btn"
+          className="btn cancel-button"
           disabled={isCancelBidDisabled}
           onClick={onCancelBid}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '4px',
-            fontWeight: '500',
-            backgroundColor: isCancelBidDisabled ? '#a0a0a0' : '#b17a7a',
-            color: 'white',
-            height: '38px',
-            border: 'none',
-            fontFamily: 'Roboto, Arial, sans-serif',
-            width: getButtonWidth('70px', '38px'),
-            opacity: isCancelBidDisabled ? 0.65 : 1,
-            cursor: isCancelBidDisabled ? 'not-allowed' : 'pointer',
-            transition: 'all 0.3s ease-in-out',
-            boxShadow: isCancelBidDisabled ? 'none' : '0 2px 4px rgba(0, 0, 0, 0.1)',
-            fontSize: '14px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
+          aria-label="Hủy đấu giá cuối"
         >
-          <i className="bi bi-x-circle me-2"></i>
-          {getButtonText('HỦY')}
+          <i className="bi bi-x-circle me-md-2"></i>
+          <span className="d-none d-md-inline">HỦY ĐẤU GIÁ CUỐI</span>
         </button>
       </div>
     </div>

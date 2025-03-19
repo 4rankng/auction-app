@@ -447,6 +447,7 @@ export default function SetupPage() {
                         className="form-control"
                         value={auctionDetails.startingPrice.toLocaleString('vi-VN')}
                         onChange={(e) => handlePriceChange(e, 'startingPrice')}
+                        placeholder="1,000,000"
                       />
                       <span className="input-group-text">VND</span>
                     </div>
@@ -459,6 +460,7 @@ export default function SetupPage() {
                         className="form-control"
                         value={auctionDetails.bidStep.toLocaleString('vi-VN')}
                         onChange={(e) => handlePriceChange(e, 'bidStep')}
+
                       />
                       <span className="input-group-text">VND</span>
                     </div>
@@ -467,7 +469,7 @@ export default function SetupPage() {
 
                 {/* Second row: Thời Gian only - remove Vòng Đấu Giá */}
                 <div className="row mb-3">
-                  <div className="col-6">
+                  <div className="col-6 col-sm-6">
                     <label className="form-label">Thời Gian (giây)</label>
                     <input
                       type="number"
@@ -475,6 +477,7 @@ export default function SetupPage() {
                       value={auctionDetails.bidDuration}
                       onChange={handleDurationChange}
                       min="1"
+                      placeholder="60"
                     />
                   </div>
                 </div>
@@ -483,10 +486,12 @@ export default function SetupPage() {
                 <div className="row mb-3">
                   <div className="col-12">
                     <label className="form-label">Đấu Giá Viên</label>
-                    <AuctioneerSelector
-                      value={auctionDetails.auctioneerId}
-                      onChange={handleAuctioneerChange}
-                    />
+
+                      <AuctioneerSelector
+                        value={auctionDetails.auctioneerId}
+                        onChange={handleAuctioneerChange}
+                      />
+
                   </div>
                 </div>
               </div>
@@ -525,6 +530,7 @@ export default function SetupPage() {
                           name="name"
                           className="form-control"
                           required
+                          placeholder="Nguyễn Văn A"
                         />
                       </div>
                       <div className="col-12 col-md-4">
@@ -534,6 +540,7 @@ export default function SetupPage() {
                           name="nric"
                           className="form-control"
                           required
+
                         />
                       </div>
                       <div className="col-12 col-md-4 d-flex flex-wrap gap-2">
@@ -543,8 +550,8 @@ export default function SetupPage() {
                             type="submit"
                             className="btn btn-outline-primary w-50 py-2 d-flex align-items-center justify-content-center"
                           >
-                            <i className="bi bi-plus-lg me-2"></i>
-                            Thêm
+                            <i className="bi bi-plus-lg me-md-2"></i>
+                            <span className="d-none d-md-inline">Thêm</span>
                           </button>
                           <input
                             ref={fileInputRef}
@@ -559,8 +566,8 @@ export default function SetupPage() {
                             onClick={handleImportClick}
                             disabled={importing}
                           >
-                            <i className="bi bi-file-earmark-excel me-2"></i>
-                            {importing ? 'Đang tải...' : 'Excel'}
+                            <i className="bi bi-file-earmark-excel me-md-2"></i>
+                            <span className="d-none d-md-inline">{importing ? 'Đang tải...' : 'Excel'}</span>
                           </button>
                         </div>
                       </div>
@@ -632,13 +639,13 @@ export default function SetupPage() {
               >
                 {isStartingAuction ? (
                   <>
-                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    {getButtonText('Đang Bắt Đầu...')}
+                    <span className="spinner-border spinner-border-sm me-md-2" role="status" aria-hidden="true"></span>
+                    <span className="d-none d-md-inline">Đang Bắt Đầu...</span>
                   </>
                 ) : (
                   <>
-                    <i className="bi bi-shop me-2" style={{ color: 'white' }}></i>
-                    {getButtonText('Bắt Đầu')}
+                    <i className="bi bi-shop me-md-2" style={{ color: 'white' }}></i>
+                    <span className="d-none d-md-inline">Bắt Đầu</span>
                   </>
                 )}
               </button>
@@ -658,8 +665,8 @@ export default function SetupPage() {
                 }}
                 id="historyButton"
               >
-                <i className="bi bi-database me-2"></i>
-                {getButtonText('Lịch Sử')}
+                <i className="bi bi-database me-md-2"></i>
+                <span className="d-none d-md-inline">Lịch Sử</span>
               </button>
             </div>
           </div>
@@ -667,14 +674,14 @@ export default function SetupPage() {
       </div>
 
       {/* Confirmation Modal */}
-      <Modal show={showConfirmation} onHide={handleCloseModal} centered>
+      <Modal show={showConfirmation} onHide={handleCloseModal} centered className="mobile-friendly-modal">
         <Modal.Header closeButton>
           <Modal.Title>Xác Nhận Bắt Đầu Đấu Giá</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Bạn có chắc chắn muốn bắt đầu phiên đấu giá với thông tin sau?</p>
+          <p className="confirmation-description">Bạn có chắc chắn muốn bắt đầu phiên đấu giá với thông tin sau?</p>
 
-          <ListGroup className="mb-3">
+          <ListGroup className="mb-3 auction-summary-list">
             <ListGroup.Item><strong>Mô tả:</strong> {auctionDetails.description}</ListGroup.Item>
             <ListGroup.Item><strong>Giá khởi điểm:</strong> {auctionDetails.startingPrice.toLocaleString('vi-VN')} VND</ListGroup.Item>
             <ListGroup.Item><strong>Bước giá:</strong> {auctionDetails.bidStep.toLocaleString('vi-VN')} VND</ListGroup.Item>
@@ -683,45 +690,55 @@ export default function SetupPage() {
             <ListGroup.Item><strong>Người tham gia:</strong> {bidders.length}</ListGroup.Item>
           </ListGroup>
 
-          <p className="mb-0 text-danger">Lưu ý: Sau khi bắt đầu, bạn không thể chỉnh sửa thông tin đấu giá!</p>
+          <p className="mb-0 text-danger confirmation-warning">Lưu ý: Sau khi bắt đầu, bạn không thể chỉnh sửa thông tin đấu giá!</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={handleCloseModal}
-            style={{
-              backgroundColor: "#f8f9fa",
-              borderColor: "#d9e2ec",
-              color: "#6c8dae",
-              fontFamily: "Roboto, Arial, sans-serif",
-              fontWeight: "500",
-              transition: "all 0.3s ease-in-out"
-            }}
-          >
-            Hủy
-          </Button>
-          <Button
-            variant="success"
-            onClick={handleStartAuction}
-            disabled={isStartingAuction}
-            style={{
-              backgroundColor: "#7baf7b",
-              borderColor: "#7baf7b",
-              fontFamily: "Roboto, Arial, sans-serif",
-              fontWeight: "500",
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-              transition: "all 0.3s ease-in-out"
-            }}
-          >
-            {isStartingAuction ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Đang Bắt Đầu...
-              </>
-            ) : (
-              'Bắt Đầu'
-            )}
-          </Button>
+          <div className="d-flex w-100 gap-2">
+            <Button
+              variant="secondary"
+              onClick={handleCloseModal}
+              className="flex-grow-1 d-flex align-items-center justify-content-center"
+              style={{
+                backgroundColor: "#f8f9fa",
+                borderColor: "#d9e2ec",
+                color: "#6c8dae",
+                fontFamily: "Roboto, Arial, sans-serif",
+                fontWeight: "500",
+                transition: "all 0.3s ease-in-out",
+                minHeight: "44px"
+              }}
+            >
+              <i className="bi bi-x-circle me-md-2"></i>
+              <span className="d-none d-md-inline">Hủy</span>
+            </Button>
+            <Button
+              variant="success"
+              onClick={handleStartAuction}
+              disabled={isStartingAuction}
+              className="flex-grow-1 d-flex align-items-center justify-content-center"
+              style={{
+                backgroundColor: "#7baf7b",
+                borderColor: "#7baf7b",
+                fontFamily: "Roboto, Arial, sans-serif",
+                fontWeight: "500",
+                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+                transition: "all 0.3s ease-in-out",
+                minHeight: "44px"
+              }}
+            >
+              {isStartingAuction ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-md-2" role="status" aria-hidden="true"></span>
+                  <span className="d-none d-md-inline">Đang Bắt Đầu...</span>
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-check-circle me-md-2"></i>
+                  <span className="d-none d-md-inline">Bắt Đầu</span>
+                </>
+              )}
+            </Button>
+          </div>
         </Modal.Footer>
       </Modal>
 

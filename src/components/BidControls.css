@@ -207,3 +207,106 @@
     margin-top: 1rem;
   }
 }
+
+/* Bid Action Buttons - Full Width Layout */
+.bid-action-buttons {
+  display: flex;
+  width: 100%;
+  margin-top: 1rem;
+  gap: 12px;
+}
+
+.bid-button,
+.cancel-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border: none !important;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 44px;
+  border-radius: 5px;
+  padding: 0 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bid-button {
+  background-color: #7baf7b;
+  color: white;
+  width: 60% !important;
+  min-width: unset !important;
+}
+
+.bid-button:hover:not(:disabled) {
+  background-color: #6ca06c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.bid-button:disabled {
+  background-color: #a0a0a0;
+  opacity: 0.65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.cancel-button {
+  background-color: #b17a7a;
+  color: white;
+  width: 40% !important;
+  min-width: unset !important;
+}
+
+.cancel-button:hover:not(:disabled) {
+  background-color: #a06c6c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.cancel-button:disabled {
+  background-color: #a0a0a0;
+  opacity: 0.65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.bid-button .d-md-inline,
+.cancel-button .d-md-inline {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mobile Optimization for Bid Action Buttons */
+@media (max-width: 768px) {
+  .bid-action-buttons {
+    display: flex;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .bid-button {
+    width: 70% !important;
+    min-width: unset !important;
+    margin-right: 0;
+  }
+
+  .cancel-button {
+    width: 30% !important;
+    min-width: unset !important;
+  }
+
+  /* Hide text, show only icons on mobile */
+  .me-md-2 {
+    margin-right: 0 !important;
+  }
+
+  .bid-button i,
+  .cancel-button i {
+    font-size: 1.25rem;
+  }
+}

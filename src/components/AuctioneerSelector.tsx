@@ -13,6 +13,7 @@ const AuctioneerSelector: React.FC<AuctioneerSelectorProps> = ({ value, onChange
   const [auctioneers, setAuctioneers] = useState<Auctioneer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedId, setSelectedId] = useState<string>(value || "");
+  const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
 
   useEffect(() => {
     const loadAuctioneers = async () => {
@@ -28,6 +29,14 @@ const AuctioneerSelector: React.FC<AuctioneerSelectorProps> = ({ value, onChange
     };
 
     loadAuctioneers();
+
+    // Track window size for responsive design
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handleManageAuctioneers = () => {
@@ -54,29 +63,37 @@ const AuctioneerSelector: React.FC<AuctioneerSelectorProps> = ({ value, onChange
     }
   };
 
+  const isMobile = windowWidth < 768;
+
   return (
-    <div className="auctioneer-selector">
-      <div className="input-group">
-        <select
-          className="form-select"
-          value={selectedId}
-          onChange={handleSelectChange}
-          disabled={loading}
-        >
-          <option value="">-- Chọn đấu giá viên --</option>
-          {auctioneers.map((auctioneer) => (
-            <option key={auctioneer.id} value={auctioneer.id}>
-              {auctioneer.name}
-            </option>
-          ))}
-        </select>
+    <div className="auctioneer-selector-wrapper">
+      <div className="input-group auctioneer-input-group">
+        <div className="form-select-container w-100">
+          <select
+            className="form-select mobile-select"
+            value={selectedId}
+            onChange={handleSelectChange}
+            disabled={loading}
+            style={{ paddingRight: '30px' }}
+          >
+            <option value="">-- Chọn đấu giá viên --</option>
+            {auctioneers.map((auctioneer) => (
+              <option key={auctioneer.id} value={auctioneer.id}>
+                {auctioneer.name}
+              </option>
+            ))}
+          </select>
+          <i className="bi bi-chevron-down dropdown-indicator"></i>
+        </div>
         <button
-          className="btn btn-outline-secondary"
+          className="btn btn-outline-secondary auctioneer-button"
           type="button"
           onClick={handleManageAuctioneers}
           title="Quản lý Đấu Giá Viên"
+          aria-label="Quản lý Đấu Giá Viên"
         >
           <i className="bi bi-gear"></i>
+          {!isMobile && <span className="ms-1">Quản lý</span>}
         </button>
       </div>
       {loading ? (

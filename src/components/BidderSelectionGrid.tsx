@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface Bidder {
   id: string;
@@ -42,6 +42,22 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
   bidderTimeLeft,
   isTimerRunning = false
 }) => {
+  const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    // Initial check
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = windowWidth < 768;
+
   const gridStyles = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(48px, 1fr))',
@@ -63,6 +79,17 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  // Determine timer color based on remaining time
+  const getTimerColorClass = (seconds: number = 0): string => {
+    if (seconds <= 10) return 'timer-urgent';
+    if (seconds <= 30) return 'timer-warning';
+    return '';
+  };
+
+  // Get the actual time value to display
+  const timeValue = bidderTimeLeft !== undefined && isTimerRunning ? bidderTimeLeft : bidDuration;
+  const timerColorClass = getTimerColorClass(timeValue);
+
   return (
     <div className="bidder-selection-container mb-3" style={{
       fontFamily: 'Roboto, Arial, sans-serif',
@@ -75,8 +102,8 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
       {/* Timer controls section */}
       <div style={{ marginBottom: '18px' }}>
 
-        <div className="d-flex align-items-center" style={{
-          justifyContent: 'flex-start',
+        <div className="d-flex align-items-center timer-control-container" style={{
+          justifyContent: 'space-between',
           width: '100%',
           display: 'flex',
           flexDirection: 'row',
@@ -85,7 +112,7 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
         }}>
           {/* Start Bid Button */}
           <button
-            className="btn"
+            className="btn start-bid-button"
             style={{
               padding: '8px 16px',
               borderRadius: '4px',
@@ -103,17 +130,19 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              minWidth: '100px'
+              minWidth: isMobile ? '48px' : '100px',
+              zIndex: 5
             }}
             onClick={onStartBid}
             disabled={isTimerRunning}
           >
-            <i className="bi bi-play-circle me-2"></i>
-            Bắt Đầu
+            <i className="bi bi-play-circle me-md-2"></i>
+            <span className="d-none d-md-inline">Bắt Đầu</span>
           </button>
 
           {/* Countdown Timer */}
           <div
+            className={`timer-display-container ${isTimerRunning ? 'timer-active' : ''}`}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -122,25 +151,32 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
               borderRadius: '4px',
               padding: '8px 16px',
               border: '1px solid #e0e0e0',
-              minWidth: '80px',
+              minWidth: '100px',
               height: '38px',
               fontWeight: '500',
               fontFamily: 'Roboto, Arial, sans-serif',
-              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+              flex: isMobile ? 1 : 'unset',
+              position: 'relative',
+              zIndex: 10
             }}
           >
-            <span style={{
-              fontSize: '14px',
-              color: '#6c8dae',
-              fontFamily: 'Roboto, Arial, sans-serif'
-            }}>
-              {formatTime(bidderTimeLeft !== undefined && isTimerRunning ? bidderTimeLeft : bidDuration)}
+            <span
+              className={`timer-value-display ${timerColorClass}`}
+              style={{
+                fontSize: '16px',
+                fontWeight: '700',
+                color: '#6c8dae',
+                fontFamily: 'Roboto, Arial, sans-serif'
+              }}
+            >
+              {formatTime(timeValue)}
             </span>
           </div>
 
           {/* Reset Timer Button */}
           <button
-            className="btn"
+            className="btn reset-timer-button"
             style={{
               padding: '8px 16px',
               borderRadius: '4px',
@@ -156,12 +192,13 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              minWidth: '100px'
+              minWidth: isMobile ? '48px' : '100px',
+              zIndex: 5
             }}
             onClick={onResetTimer}
           >
-            <i className="bi bi-arrow-counterclockwise me-2"></i>
-            Đặt Lại
+            <i className="bi bi-arrow-counterclockwise me-md-2"></i>
+            <span className="d-none d-md-inline">Đặt Lại</span>
           </button>
         </div>
       </div>

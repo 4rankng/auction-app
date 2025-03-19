@@ -608,3 +608,117 @@ textarea:focus {
   border-color: #80bdff;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
+
+/* Timer control buttons */
+.timer-control-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.timer-control-container .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .timer-control-container {
+    justify-content: space-between;
+  }
+
+  .timer-display-container {
+    height: 48px !important;
+    min-width: 90px !important;
+    flex: 1;
+    margin: 0 8px;
+    padding: 8px 10px !important;
+  }
+
+  .timer-value-display {
+    font-size: 20px !important;
+  }
+
+  .timer-control-container .btn {
+    min-width: unset;
+    width: 48px;
+    height: 48px;
+    padding: 8px;
+    justify-content: center;
+  }
+
+  .timer-control-container .btn i {
+    margin-right: 0 !important;
+    font-size: 1.25rem;
+  }
+
+  .timer-control-container .me-md-2 {
+    margin-right: 0 !important;
+  }
+
+  .d-none.d-md-inline {
+    display: none !important;
+  }
+}
+
+/* Timer styling improvements */
+.timer-display-container {
+  position: relative;
+  min-width: 110px !important;
+  background-color: #f8f9fa !important;
+  padding: 8px 16px !important;
+  border: 1px solid #d9e2ec !important;
+  border-radius: 6px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  z-index: 10;
+  margin: 0 5px;
+}
+
+.timer-value-display {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #4a5568 !important;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* Timer status styling */
+.timer-active {
+  box-shadow: 0 0 0 2px rgba(108, 141, 174, 0.3) !important;
+}
+
+.timer-warning {
+  color: #f0ad4e !important;
+  animation: pulse 2s infinite;
+}
+
+.timer-urgent {
+  color: #dc3545 !important;
+  animation: pulse 1s infinite;
+  font-weight: 800 !important;
+  font-size: 20px !important;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .timer-urgent {
+    font-size: 22px !important;
+  }
+}
