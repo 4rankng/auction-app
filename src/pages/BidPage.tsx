@@ -766,7 +766,7 @@ export const BidPage: React.FC = () => {
     }
   }, [auction, bidders, bids, dataLoading, dataError, auctionId, navigate, convertBidsToDisplayFormat, formatCurrency, showToast, calculateElapsedTime]);
 
-  // Handle bidder selection and start timer
+  // Handle bidder selection - modified to NOT affect the timer
   const handleBidderSelect = useCallback((bidderId: string) => {
     // Prevent selection if auction is ended
     if (isAuctionEnded) {
@@ -777,44 +777,21 @@ export const BidPage: React.FC = () => {
     // Toggle selection if clicking the same bidder
     if (bidderId === selectedBidder) {
       setSelectedBidder(null);
-      stopTimer();
-      // Update popup timer to 0 when deselecting
-      setPopupTimerValue(0);
       return;
     }
 
+    // Simply set the selected bidder without affecting the timer
     setSelectedBidder(bidderId);
 
-    // If this is the last bidder, set timer to 0
-    if (bidderId === lastBidderId) {
-      resetTimer(0);
-      // Update popup timer to 0 for last bidder
-      setPopupTimerValue(0);
-      return;
-    }
+  }, [isAuctionEnded, selectedBidder, showToast]);
 
-    // Stop any running timer
-    stopTimer();
-
-    // Reset timer to the auction's bidDuration setting but don't start it
-    const newTimerValue = auction?.settings?.bidDuration || 60;
-    resetTimer(newTimerValue);
-
-    // Update popup timer with the new value immediately
-    setPopupTimerValue(newTimerValue);
-
-    // The Bat Dau button will now be enabled since isTimerRunning is false after stopping the timer
-  }, [isAuctionEnded, selectedBidder, lastBidderId, auction?.settings?.bidDuration, showToast, stopTimer, resetTimer]);
-
-  // Add a useEffect to update the popup timer whenever bidderTimeLeft changes
+  // Add a useEffect to update the popup timer whenever timeLeft changes from timer controls
   useEffect(() => {
-    // Always use bidDuration for popup timer consistency
-    if (!isAuctionEnded && auction?.settings?.bidDuration) {
-      setPopupTimerValue(auction.settings.bidDuration);
-    } else if (isAuctionEnded) {
-      setPopupTimerValue(0);
+    // Only update popup timer when timer is actually running or explicitly stopped
+    if (isTimerRunning) {
+      setPopupTimerValue(timeLeft);
     }
-  }, [auction?.settings?.bidDuration, isAuctionEnded]);
+  }, [timeLeft, isTimerRunning]);
 
   // Add useEffect to keep shouldShowPopup in sync with actual popup window state
   useEffect(() => {
@@ -846,6 +823,7 @@ export const BidPage: React.FC = () => {
       showToast('Đấu giá đã kết thúc', 'error', 'bottom-center');
       return;
     }
+
 
     // Use the direct bid amount if provided, otherwise use the state bidAmount
     let effectiveBidAmount = directBidAmount || bidAmount;
@@ -1110,11 +1088,9 @@ export const BidPage: React.FC = () => {
     // Can't bid if the auction is ended
     if (isAuctionEnded) return false;
 
-    // Can't bid if bidder timer expired
-    if (selectedBidder === bidderId && timeLeft <= 0) return false;
-
+    // Timer restrictions are handled by the Bid button being disabled when timer isn't running
     return true;
-  }, [lastBidderId, isAuctionEnded, selectedBidder, timeLeft]);
+  }, [lastBidderId, isAuctionEnded]);
 
   // Check if cancel bid should be disabled
   const isCancelBidDisabled = useCallback(() => {
@@ -1348,7 +1324,6 @@ export const BidPage: React.FC = () => {
                       onTick: (remainingTime) => {
                         console.log(`BidPage: Timer tick received: ${remainingTime}s remaining`);
                         setTimeLeft(remainingTime);
-                        setPopupTimerValue(remainingTime);
                       },
                       onComplete: () => {
                         console.log('BidPage: Timer completed');
@@ -1365,9 +1340,9 @@ export const BidPage: React.FC = () => {
                   resetTimer(newTimerValue);
                   console.log('Starting timer...');
                   startTimer();
-                  // Ensure popup timer is updated when timer starts
+
+                  // Explicitly update popup timer when starting timer
                   setPopupTimerValue(newTimerValue);
-                  console.log('Is timer running state:', isTimerRunning);
                 }}
                 onResetTimer={() => {
                   console.log('Reset Timer button clicked');
@@ -1381,7 +1356,6 @@ export const BidPage: React.FC = () => {
                       onTick: (remainingTime) => {
                         console.log(`BidPage: Timer tick received: ${remainingTime}s remaining`);
                         setTimeLeft(remainingTime);
-                        setPopupTimerValue(remainingTime);
                       },
                       onComplete: () => {
                         console.log('BidPage: Timer completed');
@@ -1398,9 +1372,9 @@ export const BidPage: React.FC = () => {
                   resetTimer(newTimerValue);
                   // Stop the timer after resetting it
                   stopTimer();
-                  // Ensure popup timer is updated when timer is reset
+
+                  // Explicitly update popup timer when resetting
                   setPopupTimerValue(newTimerValue);
-                  console.log('Is timer running state after reset:', isTimerRunning);
                 }}
                 bidDuration={auction?.settings?.bidDuration || 60}
                 isTimerRunning={isTimerRunning}

@@ -467,7 +467,7 @@ export default function SetupPage() {
 
                 {/* Second row: Thời Gian only - remove Vòng Đấu Giá */}
                 <div className="row mb-3">
-                  <div className="col-12">
+                  <div className="col-6">
                     <label className="form-label">Thời Gian (giây)</label>
                     <input
                       type="number"

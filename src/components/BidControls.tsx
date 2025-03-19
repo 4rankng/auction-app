@@ -84,12 +84,7 @@ const BidControls: React.FC<BidControlsProps> = ({
     fontFamily: 'Roboto, sans-serif'
   };
 
-  const valueStyle = {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    margin: 0,
-    fontFamily: 'Roboto, sans-serif'
-  };
+
 
   // Add state to track screen size
   const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
