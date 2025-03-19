@@ -67,7 +67,6 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
     <div className="bidder-selection-container mb-3">
       {/* Timer controls section */}
       <div style={{ marginBottom: '20px' }}>
-        <h6 className="mb-2">Bidder Timer</h6>
         <div className="d-flex align-items-center" style={{
           justifyContent: 'flex-start',
           width: '100%',

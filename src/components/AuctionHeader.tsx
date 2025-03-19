@@ -106,47 +106,55 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
         </div>
       </div>
 
-      <div className="auction-elapsed-time-container" style={{ height: `${buttonHeight}px` }}>
-        <i className="bi bi-stopwatch auction-elapsed-time-icon"></i>
-        <span className="auction-elapsed-time">{elapsedTime}</span>
-      </div>
+      <div className="auction-controls-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+        {/* Elapsed Time Container now above the buttons */}
+        <div className="auction-elapsed-time-container" style={{
+          height: `${buttonHeight}px`,
+          width: '100%',
+          marginBottom: '5px'
+        }}>
+          <i className="bi bi-stopwatch auction-elapsed-time-icon"></i>
+          <span className="auction-elapsed-time">{elapsedTime}</span>
+        </div>
 
-      <div className="auction-header-actions">
-        {/* Add button to show popup */}
-        {onShowPopup && (
-          <button
-            className="btn btn-primary show-popup-btn icon-button"
-            onClick={onShowPopup}
-            style={{
-              width: `${buttonWidth}px`,
-              height: `${buttonHeight}px`
-            }}
-          >
-            <i className="bi bi-display me-1 icon-man-hinh-phu"></i>
-          </button>
-        )}
+        {/* Buttons Container */}
+        <div className="auction-header-actions" style={{ display: 'flex', gap: '8px', width: '100%' }}>
+          {/* Add button to show popup */}
+          {onShowPopup && (
+            <button
+              className="btn btn-primary show-popup-btn icon-button"
+              onClick={onShowPopup}
+              style={{
+                width: `${buttonWidth}px`,
+                height: `${buttonHeight}px`
+              }}
+            >
+              <i className="bi bi-display me-1 icon-man-hinh-phu"></i>
+            </button>
+          )}
 
-        {isAuctionEnded ? (
-          <div className="auction-ended-badge icon-button"
-            style={{
-              width: `${buttonWidth}px`,
-              height: `${buttonHeight}px`
-            }}
-          >
-            <i className="bi bi-stopwatch-fill"></i>
-          </div>
-        ) : (
-          <button
-            className="btn end-auction-btn icon-button"
-            onClick={handleOpenModal}
-            style={{
-              width: `${buttonWidth}px`,
-              height: `${buttonHeight}px`
-            }}
-          >
-            <i className="bi bi-stop-circle icon-ket-thuc"></i>
-          </button>
-        )}
+          {isAuctionEnded ? (
+            <div className="auction-ended-badge icon-button"
+              style={{
+                width: `${buttonWidth}px`,
+                height: `${buttonHeight}px`
+              }}
+            >
+              <i className="bi bi-stopwatch-fill"></i>
+            </div>
+          ) : (
+            <button
+              className="btn end-auction-btn icon-button"
+              onClick={handleOpenModal}
+              style={{
+                width: `${buttonWidth}px`,
+                height: `${buttonHeight}px`
+              }}
+            >
+              <i className="bi bi-stop-circle icon-ket-thuc"></i>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Confirmation Modal */}
