@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './AuctionHeader.css';
+import CompanyBanner from './CompanyBanner';
 
 interface AuctionHeaderProps {
-  title: string;
+  title: string; // This is now the description
   elapsedTime: string;
   onEndAuction: () => void;
   totalBids: number;
@@ -15,18 +16,20 @@ interface AuctionHeaderProps {
  * A reusable component for displaying the auction header with title, elapsed time, and end button
  */
 const AuctionHeader: React.FC<AuctionHeaderProps> = ({
-  title,
+  title, // This is now the description
   elapsedTime,
   onEndAuction,
   totalBids,
   isAuctionEnded = false,
   auctioneer = 'Không có thông tin',
-  onShowPopup // Add this prop to the function parameters
+  onShowPopup
 }) => {
   // Add state for modal visibility
   const [showModal, setShowModal] = useState(false);
   // Add state to track screen size
   const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+  // Add state for truncated description
+  const [isTruncated, setIsTruncated] = useState(true);
 
   // Check screen size on mount and when window is resized
   useEffect(() => {
@@ -43,6 +46,11 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
     // Cleanup
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
+
+  // Function to toggle description truncation
+  const toggleTruncation = () => {
+    setIsTruncated(!isTruncated);
+  };
 
   // Function to get button text based on screen size
   const getButtonText = (text: string): string => {
@@ -70,17 +78,35 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
     setShowModal(false);
   };
 
+  // Standard height for buttons
+  const buttonHeight = 40;
+  // Width is twice the height
+  const buttonWidth = buttonHeight * 2;
+
   return (
     <div className="auction-header-container">
       <div className="auction-header-info">
-        <h3 className="auction-title">{title}</h3>
+        <div
+          className={`auction-description ${isTruncated ? 'truncated' : ''}`}
+          style={{ fontSize: '18px' }}
+        >
+          <div className="auction-description-text">
+            {title}
+          </div>
+          <div
+            className="auction-description-toggle"
+            onClick={toggleTruncation}
+          >
+            {isTruncated ? 'Hiện' : 'Ẩn'}
+          </div>
+        </div>
         <div className="auction-auctioneer">
           <span className="auctioneer-label">Đấu giá viên:</span>
           <span className="auctioneer-name">{auctioneer}</span>
         </div>
       </div>
 
-      <div className="auction-elapsed-time-container">
+      <div className="auction-elapsed-time-container" style={{ height: `${buttonHeight}px` }}>
         <i className="bi bi-stopwatch auction-elapsed-time-icon"></i>
         <span className="auction-elapsed-time">{elapsedTime}</span>
       </div>
@@ -89,36 +115,36 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
         {/* Add button to show popup */}
         {onShowPopup && (
           <button
-            className="btn btn-primary show-popup-btn"
+            className="btn btn-primary show-popup-btn icon-button"
             onClick={onShowPopup}
             style={{
-              minWidth: getButtonWidth('120px')
+              width: `${buttonWidth}px`,
+              height: `${buttonHeight}px`
             }}
           >
-            <i className="bi bi-display me-1"></i>
-            {getButtonText('Màn Hình Phụ')}
+            <i className="bi bi-display me-1 icon-man-hinh-phu"></i>
           </button>
         )}
 
         {isAuctionEnded ? (
-          <div className="auction-ended-badge"
+          <div className="auction-ended-badge icon-button"
             style={{
-              minWidth: getButtonWidth('120px')
+              width: `${buttonWidth}px`,
+              height: `${buttonHeight}px`
             }}
           >
             <i className="bi bi-stopwatch-fill"></i>
-            {getButtonText('Đã Kết Thúc')}
           </div>
         ) : (
           <button
-            className="btn end-auction-btn"
+            className="btn end-auction-btn icon-button"
             onClick={handleOpenModal}
             style={{
-              minWidth: getButtonWidth('120px')
+              width: `${buttonWidth}px`,
+              height: `${buttonHeight}px`
             }}
           >
-            <i className="bi bi-stop-circle"></i>
-            {getButtonText('Kết Thúc')}
+            <i className="bi bi-stop-circle icon-ket-thuc"></i>
           </button>
         )}
       </div>
@@ -128,13 +154,8 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
         <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex={-1} aria-modal="true" role="dialog">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
-              <div className="modal-header bg-danger text-white">
-                <h5 className="modal-title">
-                  <i className="bi bi-exclamation-triangle me-2"></i>
-                  Xác nhận kết thúc đấu giá
-                </h5>
-                <button type="button" className="btn-close btn-close-white" onClick={handleCloseModal} aria-label="Close"></button>
-              </div>
+              {/* Replace the modal header with CompanyBanner */}
+              <CompanyBanner className="modal-header" />
               <div className="modal-body">
                 <p>Bạn có chắc chắn muốn kết thúc phiên đấu giá này?</p>
               </div>

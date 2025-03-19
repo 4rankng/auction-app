@@ -15,7 +15,7 @@ export type AuctionStatus = 'SETUP' | 'IN_PROGRESS' | 'ENDED';
 
 export interface Auction {
   id: string;
-  title: string;
+  title?: string;
   description: string;
   status: AuctionStatus;
   currentPrice: number;
@@ -73,7 +73,6 @@ export interface Database {
 }
 
 export interface AuctionFormData {
-  title: string;
   description: string;
   startingPrice: number;
   bidStep: number;

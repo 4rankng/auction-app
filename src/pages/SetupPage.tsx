@@ -12,7 +12,7 @@ import { databaseService } from '@services/databaseService';
 import { errorService, ErrorType } from '@services/errorService';
 import { toastService } from '@services/toastService';
 import ToastContainer from '@components/ToastContainer';
-import { AUCTION_STATUS, DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE, DEFAULT_AUCTION_TITLE, DEFAULT_AUCTION_DESCRIPTION } from '@utils/constants';
+import { AUCTION_STATUS, DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE } from '@utils/constants';
 import AuctioneerSelector from '@components/AuctioneerSelector';
 
 // Define the form input types to match BidderManagement
@@ -32,8 +32,7 @@ export default function SetupPage() {
   const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
 
   const DEFAULT_AUCTION_DETAILS = {
-    title: DEFAULT_AUCTION_TITLE,
-    description: DEFAULT_AUCTION_DESCRIPTION,
+    description: "",
     startingPrice: DEFAULT_STARTING_PRICE,
     bidStep: DEFAULT_BID_STEP,
     bidDuration: DEFAULT_BID_DURATION,
@@ -89,8 +88,7 @@ export default function SetupPage() {
           // Update auctionDetails with the existing settings
           setAuctionDetails(prevDetails => ({
             ...prevDetails,
-            title: setupAuction.title || DEFAULT_AUCTION_TITLE,
-            description: setupAuction.description || DEFAULT_AUCTION_DESCRIPTION,
+            description: setupAuction.description || "",
             startingPrice: setupAuction.settings.startingPrice || DEFAULT_STARTING_PRICE,
             bidStep: setupAuction.settings.bidStep || DEFAULT_BID_STEP,
             bidDuration: setupAuction.settings.bidDuration || DEFAULT_BID_DURATION,
@@ -101,8 +99,7 @@ export default function SetupPage() {
           // Create a temporary auction for setup using default values from ref
           const defaults = defaultSettingsRef.current;
           const newAuction = await databaseService.createAuction(
-            DEFAULT_AUCTION_TITLE,
-            DEFAULT_AUCTION_DESCRIPTION,
+            "",
             {
               startingPrice: defaults.startingPrice,
               bidStep: defaults.bidStep,
@@ -235,9 +232,9 @@ export default function SetupPage() {
   };
 
   const validateAuctionSetup = (): { isValid: boolean; errorMessage?: string } => {
-    // Validate auction title
-    if (!auctionDetails.title.trim()) {
-      return { isValid: false, errorMessage: 'Vui lòng nhập tiêu đề đấu giá' };
+    // Validate auction description
+    if (!auctionDetails.description.trim()) {
+      return { isValid: false, errorMessage: 'Vui lòng nhập mô tả đấu giá' };
     }
 
     // Validate starting price
@@ -327,7 +324,6 @@ export default function SetupPage() {
       // Update the auction with final details
       const updatedAuction: Auction = {
         ...setupAuction,
-        title: auctionDetails.title.trim(),
         description: auctionDetails.description.trim(),
         status: AUCTION_STATUS.IN_PROGRESS,
         currentPrice: auctionDetails.startingPrice,
@@ -368,13 +364,6 @@ export default function SetupPage() {
   };
 
   // Event handlers for form inputs
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAuctionDetails(prev => ({
-      ...prev,
-      title: e.target.value
-    }));
-  };
-
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAuctionDetails(prev => ({
       ...prev,
@@ -414,7 +403,11 @@ export default function SetupPage() {
 
   return (
     <div className="setup-page-container">
-      <h1 className="mt-4 mb-4 text-center">Thiết Lập Đấu Giá</h1>
+      <div className="d-flex justify-content-between align-items-center mt-4 mb-4 container">
+        <div style={{ width: '80px' }}></div> {/* Empty div for balance */}
+        <h1 className="fs-3 text-center m-0" style={{ color: '#495057' }}>Thiết Lập Đấu Giá</h1>
+        <div style={{ width: '80px' }}></div> {/* Empty div for balance */}
+      </div>
 
       <div className="container">
         <div className="row">
@@ -422,32 +415,20 @@ export default function SetupPage() {
           <div className="col-12 col-lg-6 mb-4">
             <div className="card outline-card h-100">
               <div className="card-header">
-                <h5 className="card-title mb-0">Thông Tin</h5>
+                <h5 className="card-title mb-0">Mô Tả Đấu Giá</h5>
               </div>
-              <div className="card-body">
-                <div className="mb-3">
-                  <label className="form-label">Tiêu Đề Đấu Giá</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={auctionDetails.title}
-                    onChange={handleTitleChange}
-                    placeholder="Nhập tiêu đề đấu giá"
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Mô Tả Đấu Giá</label>
+              <div className="card-body d-flex flex-column">
+                <div className="mb-3 flex-grow-1 d-flex">
                   <textarea
-                    className="form-control"
-                    rows={5}
+                    className="form-control full-size-textarea flex-grow-1"
                     value={auctionDetails.description}
                     onChange={handleDescriptionChange}
-                    placeholder="Nhập mô tả chi tiết về đấu giá"
+                    placeholder=""
                   />
                 </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
           {/* Right column - Cài Đặt */}
           <div className="col-12 col-lg-6 mb-4">
@@ -639,7 +620,7 @@ export default function SetupPage() {
                 className="btn btn-success btn-lg w-100"
                 onClick={handleConfirmAuction}
                 disabled={isStartingAuction}
-                style={{ height: "60px" }}
+                style={{ height: "50px" }}
               >
                 {isStartingAuction ? (
                   <>
@@ -658,7 +639,7 @@ export default function SetupPage() {
               <button
                 className="btn btn-primary btn-lg w-100"
                 onClick={() => navigate('/history')}
-                style={{ height: "60px" }}
+                style={{ height: "50px" }}
                 id="historyButton"
               >
                 <i className="bi bi-database me-2"></i>
@@ -678,7 +659,7 @@ export default function SetupPage() {
           <p>Bạn có chắc chắn muốn bắt đầu phiên đấu giá với thông tin sau?</p>
 
           <ListGroup className="mb-3">
-            <ListGroup.Item><strong>Tiêu đề:</strong> {auctionDetails.title}</ListGroup.Item>
+            <ListGroup.Item><strong>Mô tả:</strong> {auctionDetails.description}</ListGroup.Item>
             <ListGroup.Item><strong>Giá khởi điểm:</strong> {auctionDetails.startingPrice.toLocaleString('vi-VN')} VND</ListGroup.Item>
             <ListGroup.Item><strong>Bước giá:</strong> {auctionDetails.bidStep.toLocaleString('vi-VN')} VND</ListGroup.Item>
             <ListGroup.Item><strong>Thời gian:</strong> {auctionDetails.bidDuration} giây</ListGroup.Item>

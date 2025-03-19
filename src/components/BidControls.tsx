@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './BidControls.css';
 
 // Add keyframes animation for the bid button
 const bidButtonAnimation = `
@@ -35,15 +36,10 @@ interface BidControlsProps {
   onBidAmountChange: (amount: string) => void;
   onPlaceBid: (amount: string) => void;
   onCancelBid: () => void;
-  onStartBid?: () => void; // New prop for handling Start Bid button click
-  onResetTimer?: () => void; // New prop for handling Reset Timer button click
-  bidDuration?: number; // New prop for static bid duration time
   isPlaceBidDisabled: boolean;
-  isCancelBidDisabled?: boolean; // New prop to control when cancel button is disabled
-  bidHistoryEmpty?: boolean; // New prop to check if bid history is empty
-  bidderTimeLeft?: number; // No longer needed, but keeping for backward compatibility
-  isLastBidder?: boolean; // New prop to check if the selected bidder is the last bidder
-  isTimerRunning?: boolean; // New prop to check if the timer is running
+  isCancelBidDisabled?: boolean;
+  bidHistoryEmpty?: boolean;
+  isLastBidder?: boolean;
 }
 
 /**
@@ -58,15 +54,10 @@ const BidControls: React.FC<BidControlsProps> = ({
   onBidAmountChange,
   onPlaceBid,
   onCancelBid,
-  onStartBid = () => {}, // Default empty function if not provided
-  onResetTimer = () => {}, // Default empty function if not provided
-  bidDuration = 60, // Default to 60 seconds if not provided
   isPlaceBidDisabled,
-  isCancelBidDisabled = false, // Default to enabled
-  bidHistoryEmpty = true, // Default to true if not provided
-  bidderTimeLeft, // Kept for backward compatibility
-  isLastBidder = false, // Default to false if not provided
-  isTimerRunning = false // Default to false if not provided
+  isCancelBidDisabled = false,
+  bidHistoryEmpty = true,
+  isLastBidder = false
 }) => {
   // State for bid method selection - default to stepPrice if bid history is not empty
   const [bidMethod, setBidMethod] = useState<'basePrice' | 'stepPrice' | 'customPrice'>(
@@ -208,10 +199,6 @@ const BidControls: React.FC<BidControlsProps> = ({
     console.log('Calling onPlaceBid with amount:', numericAmount);
     onPlaceBid(numericAmount);
 
-    // Reset the timer to its initial value and stop it
-    console.log('Resetting and stopping timer after Dau Gia button click');
-    onResetTimer();
-
     // Reset the form after successful submission
     if (bidMethod === 'customPrice') {
       setCustomBidAmount('');
@@ -275,23 +262,6 @@ const BidControls: React.FC<BidControlsProps> = ({
     }
   };
 
-  // Format the timer in mm:ss format
-  const formatTime = (seconds: number = 0): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
-  // Check if the bid button should be disabled
-  const isBidButtonDisabled = () => {
-    if (!isTimerRunning) return true; // Disable if timer is not running (Bat Dau is enabled)
-    if (isPlaceBidDisabled) return true;
-    if (!bidderName) return true;
-    if (isLastBidder) return true; // Disable if this is the last bidder
-    if (bidMethod === 'customPrice' && !customBidAmount) return true;
-    return false;
-  };
-
   return (
     <div className="position-relative border-0" style={{
       padding: '1rem',
@@ -302,66 +272,6 @@ const BidControls: React.FC<BidControlsProps> = ({
     }}>
       {/* Add style element for animation */}
       <style>{bidButtonAnimation}</style>
-
-      {/* Timer moved above Ma So / Ten as requested */}
-      <div className="mb-3 d-flex justify-content-start align-items-center">
-        {/* Start Bid Button */}
-        <button
-          className="btn fw-bold app-btn app-btn-success me-3 d-flex align-items-center justify-content-center"
-          style={{
-            minWidth: getButtonWidth('120px'),
-            padding: '0.35rem 0.75rem',
-            height: '38px',
-            boxSizing: 'border-box'
-          }}
-          onClick={onStartBid}
-          disabled={isTimerRunning}
-        >
-          <i className="bi bi-play-circle me-1"></i>
-          {getButtonText('Bắt Đầu')}
-        </button>
-
-        {/* Countdown Timer */}
-        <div
-          style={{
-            zIndex: 10,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'rgba(141, 141, 141, 0.1)',
-            borderRadius: '6px',
-            padding: '0.35rem 0.75rem',
-            border: '1px solid rgba(141, 141, 141, 0.2)',
-            animation: 'time-shimmer 2s infinite',
-            minWidth: '120px',
-            height: '38px'
-          }}
-        >
-          <i className="bi bi-clock me-1" style={{ color: '#6C6C6C' }}></i>
-          <span style={{
-            fontWeight: 'bold',
-            fontSize: '1.2rem',
-            color: '#6C6C6C',
-          }}>
-            {formatTime(bidderTimeLeft !== undefined && isTimerRunning ? bidderTimeLeft : bidDuration)}
-          </span>
-        </div>
-
-        {/* Reset Timer Button */}
-        <button
-          className="btn fw-bold app-btn app-btn-danger ms-3 d-flex align-items-center justify-content-center"
-          style={{
-            minWidth: getButtonWidth('120px'),
-            padding: '0.35rem 0.75rem',
-            height: '38px',
-            boxSizing: 'border-box'
-          }}
-          onClick={onResetTimer}
-        >
-          <i className="bi bi-arrow-clockwise me-1"></i>
-          {getButtonText('Đặt Lại')}
-        </button>
-      </div>
 
       <div>
         {/* Top row with bidder name and bid method selection */}
@@ -551,24 +461,10 @@ const BidControls: React.FC<BidControlsProps> = ({
                 minWidth: getButtonWidth('120px'),
                 padding: '8px 15px',
                 fontSize: '1.1rem',
-                transform: isBidButtonDisabled() ? 'none' : 'translateY(-2px)',
-                animation: isBidButtonDisabled() ? 'none' : 'pulse-button 2s infinite',
                 height: '38px'
               }}
               onClick={handleSubmit}
-              disabled={isBidButtonDisabled()}
-              onMouseEnter={(e) => {
-                if (!isBidButtonDisabled()) {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.animation = 'none'; // Pause animation on hover
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isBidButtonDisabled()) {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.animation = 'pulse-button 2s infinite'; // Resume animation
-                }
-              }}
+              disabled={isPlaceBidDisabled}
             >
               <i className="bi bi-check-circle me-2"></i>
               {getButtonText('Đấu Giá')}

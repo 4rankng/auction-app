@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheetManager } from 'styled-components';
 import NewWindow from 'react-new-window';
 import styled from 'styled-components';
+import CompanyBanner from './CompanyBanner';
 
 interface AuctionPopupRendererProps {
   auctioneer: string;
@@ -72,6 +73,35 @@ const StyledContainer = styled.div`
     margin: 0 auto;
   }
 
+  /* Add styles for the auctioneer display */
+  .auction-auctioneer {
+    margin-top: 0.3rem;
+    padding-left: 4px;
+    font-size: 0.95rem;
+    color: #6c757d;
+  }
+
+  .auctioneer-label {
+    font-weight: 600;
+    margin-right: 0.5rem;
+  }
+
+  .auctioneer-name {
+    font-weight: 500;
+  }
+
+  /* Override CompanyBanner styles for the popup */
+  .company-header.company-banner {
+    background-color: #0080ff;
+    color: white;
+    padding: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 8px 8px 0 0;
+    width: 100%;
+  }
+
   /* Company header */
   .company-header {
     background-color: #0080ff;
@@ -86,7 +116,7 @@ const StyledContainer = styled.div`
   /* Auction title section */
   .auction-title-section {
     background-color: #f8f9fa;
-    padding: 10px 15px;
+    padding: 15px 20px;
     border-bottom: 1px solid #e9ecef;
     display: flex;
     justify-content: space-between;
@@ -97,18 +127,21 @@ const StyledContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    width: 100%;
   }
 
   .subtitle {
-    font-size: 14px;
+    font-size: 16px;
     color: #6c757d;
-    margin-bottom: 4px;
+    margin-bottom: 10px;
+    font-weight: 500;
   }
 
   .main-title {
-    font-size: 18px;
+    font-size: 20px;
     color: #0275d8;
     font-weight: 600;
+    margin-bottom: 10px;
   }
 
   /* Update auctioneer column alignment */
@@ -117,20 +150,6 @@ const StyledContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-  }
-
-  .auctioneer-label {
-    font-size: 14px;
-    color: #6c757d;
-    font-weight: 500;
-    text-align: center;
-  }
-
-  .auctioneer-name {
-    font-size: 16px;
-    color: #6c757d;
-    font-weight: 600;
-    text-align: center;
   }
 
   /* Highest bid section */
@@ -403,6 +422,23 @@ const globalStyles = `
     background-color: #ffffff;
   }
 
+  /* Add auctioneer styles */
+  .auction-auctioneer {
+    margin-top: 0.3rem;
+    padding-left: 4px;
+    font-size: 0.95rem;
+    color: #6c757d;
+  }
+
+  .auctioneer-label {
+    font-weight: 600;
+    margin-right: 0.5rem;
+  }
+
+  .auctioneer-name {
+    font-weight: 500;
+  }
+
   /* Ensure result container has proper styling */
   .result-container {
     background-color: #ffffff;
@@ -493,20 +529,22 @@ const globalStyles = `
     text-align: center;
   }
 
-  /* Company header - updated to match screenshot */
-  .company-header {
+  /* Company header - override CompanyBanner styles for the popup */
+  .company-header.company-banner {
     background-color: #0080ff;
     color: white;
     padding: 15px;
     font-size: 20px;
     font-weight: bold;
     text-align: center;
+    width: 100%;
+    border-radius: 8px 8px 0 0;
   }
 
-  /* Auction title section - updated to match screenshot */
+  /* Auction title section - updated to match AuctionHeader */
   .auction-title-section {
     background-color: #f8f9fa;
-    padding: 10px 15px;
+    padding: 15px 20px;
     border-bottom: 1px solid #e9ecef;
     display: flex;
     justify-content: space-between;
@@ -517,18 +555,21 @@ const globalStyles = `
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    width: 100%;
   }
 
   .subtitle {
-    font-size: 14px;
+    font-size: 16px;
     color: #6c757d;
-    margin-bottom: 4px;
+    margin-bottom: 10px;
+    font-weight: 500;
   }
 
   .main-title {
-    font-size: 18px;
+    font-size: 20px;
     color: #0275d8;
     font-weight: 600;
+    margin-bottom: 10px;
   }
 
   /* Additional animation for auction end transition */
@@ -957,18 +998,16 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
           <StyleSheetManager target={containerRef.current?.ownerDocument?.head || document.head}>
             <StyledContainer ref={containerRef}>
               <div className={`auction-container ${isAuctionEnded ? 'auction-ended-container' : ''}`}>
-                <div className="company-header">
-                  {companyName || "Công Ty Đấu Giá HP.AUSERCO"}
-                </div>
+                <CompanyBanner className="company-header" companyName={companyName} />
 
                 <div className="auction-title-section">
                   <div className="title-column">
                     <div className="subtitle">Phiên Đấu Giá Tài Sản</div>
-                    <div className="main-title">{auctionTitle || "Tài Sản XYZ"}</div>
-                  </div>
-                  <div className="auctioneer-column">
-                    <div className="auctioneer-label">Đấu Giá Viên</div>
-                    <div className="auctioneer-name">{auctioneer || "-"}</div>
+                    <div className="main-title">{auctionTitle || "-"}</div>
+                    <div className="auction-auctioneer">
+                      <span className="auctioneer-label">Đấu giá viên:</span>
+                      <span className="auctioneer-name">{auctioneer || "-"}</span>
+                    </div>
                   </div>
                 </div>
 

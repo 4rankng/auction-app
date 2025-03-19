@@ -16,18 +16,67 @@
   flex-direction: column;
   justify-content: center;
   flex: 1;
+  min-width: 0; /* Allows the flex item to shrink below content size */
 }
 
-.auction-title {
+.auction-description {
   font-size: 1.3rem;
   font-weight: 700;
-  margin: 0;
   color: #212529;
   border-left: 4px solid #8D8D8D;
   padding-left: 12px;
-  white-space: nowrap;
+  padding-right: 8px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  word-wrap: break-word;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.auction-description-text {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-grow: 1;
+}
+
+.auction-description:not(.truncated) .auction-description-text {
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.auction-description:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Replace the gradient with a fixed background for tooltip */
+.auction-description:after {
+  content: none;
+}
+
+/* Add a tooltip button for both states */
+.auction-description-toggle {
+  padding: 2px 10px;
+  background-color: #f8f9fa;
+  color: #495057;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  min-width: 50px;
+  text-align: center;
+  flex-shrink: 0;
+  margin-left: 12px;
+  align-self: flex-start;
+  margin-top: 3px;
+  transition: all 0.2s ease;
+}
+
+.auction-description-toggle:hover {
+  background-color: #e9ecef;
+  border-color: #ced4da;
 }
 
 .auction-auctioneer {
@@ -63,6 +112,7 @@
   min-width: 120px;
   justify-content: center;
   height: 38px;
+  flex-shrink: 0; /* Prevent the timer from shrinking */
 }
 
 .auction-elapsed-time {
@@ -77,6 +127,13 @@
   font-size: 1.1rem;
 }
 
+/* Ensure the action buttons don't shrink */
+.auction-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 @keyframes time-shimmer {
   0% {
     background-color: rgba(141, 141, 141, 0.1);
@@ -89,126 +146,56 @@
   }
 }
 
-/* End Auction Button Styles */
+/* Button Styles */
 .end-auction-btn {
-  background: #f8d7da;
-  color: #dc3545;
-  border: 1px solid #dc3545;
-  font-weight: 600;
+  background-color: #dc3545;
+  color: white;
+  border: none;
   transition: all 0.3s ease;
-  padding: 0.35rem 0.75rem;
-  border-radius: 6px;
-  min-width: 120px;
-  animation: pulse-danger 2s infinite;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  text-align: center;
-  line-height: 1.2;
-  height: 38px;
 }
 
 .end-auction-btn:hover {
-  background: rgba(220, 53, 69, 0.25);
-  color: #dc3545;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+  background-color: #c82333;
+  transform: scale(1.02);
 }
 
-.end-auction-btn:active {
-  transform: translateY(0);
-}
-
-@keyframes pulse-danger {
-  0% {
-    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(220, 53, 69, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
-  }
-}
-
-/* Ended Status Badge */
-.auction-ended-badge {
-  background-color: #8D8D8D;
-  color: white;
-  padding: 0.35rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  display: inline-flex;
-  align-items: center;
-  font-weight: 600;
-  min-width: 120px;
-  justify-content: center;
-  gap: 0.5rem;
-  text-align: center;
-  line-height: 1.2;
-  height: 38px;
-}
-
-.auction-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-/* Show Popup Button Styles */
 .show-popup-btn {
-  background-color: #007bff;
-  color: white;
-  border: 1px solid #007bff;
-  font-weight: 600;
   transition: all 0.3s ease;
-  padding: 0.35rem 0.75rem;
-  border-radius: 6px;
-  min-width: 120px;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
-  text-align: center;
-  line-height: 1.2;
-  height: 38px;
 }
 
 .show-popup-btn:hover {
-  background-color: #0069d9;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+  transform: scale(1.02);
 }
 
-.show-popup-btn:active {
-  transform: translateY(0);
+.auction-ended-badge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #6C757D;
+  color: white;
+  border-radius: 4px;
+  padding: 6px 12px;
+  gap: 6px;
 }
 
 /* Responsive adjustments */
-@media (max-width: 992px) {
+@media (max-width: 768px) {
   .auction-header-container {
-    flex-direction: column;
-    padding: 1rem;
-    gap: 1rem;
+    flex-wrap: wrap;
   }
 
   .auction-header-info {
-    width: 100%;
-    justify-content: center;
+    order: 1;
+    flex: 1 0 100%;
+    margin-bottom: 0.75rem;
   }
 
   .auction-elapsed-time-container {
-    width: 100%;
-    max-width: 200px;
+    order: 2;
   }
 
   .auction-header-actions {
-    width: 100%;
-    justify-content: center;
+    order: 3;
+    margin-left: auto;
   }
 }

@@ -6,6 +6,9 @@ export const AUCTION_STATUS = {
   ENDED: 'ENDED'
 } as const;
 
+// Global company name
+export const COMPANY_NAME = 'Công Ty Đấu Giá HP.AUSERCO';
+
 // Define auction status type from constants
 export type AuctionStatus = typeof AUCTION_STATUS[keyof typeof AUCTION_STATUS];
 
@@ -28,6 +31,5 @@ export const DEFAULT_BID_STEP = 10000000; // Default bid step in VND
 export const DEFAULT_STARTING_PRICE = 1000000000; // Default starting price in VND
 export const DEFAULT_TOAST_DURATION = 2000; // Default toast duration in milliseconds
 
-export const DEFAULT_AUCTION_TITLE = 'Tài Sản XYZ' // Default auction title
-export const DEFAULT_AUCTION_DESCRIPTION = 'Mô tả chi tiết về phiên đấu giá' // Default auction description
+
 

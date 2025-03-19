@@ -1,7 +1,7 @@
 .auction-history-container {
   padding: 20px;
   margin-top: 20px;
-  padding-bottom: 80px; /* Space for the fixed button */
+  padding-bottom: 120px; /* Increased space for the fixed button */
   position: relative;
 }
 
@@ -72,7 +72,7 @@
   display: flex;
   justify-content: center;
   margin-top: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 40px; /* Add space after pagination */
 }
 
 /* Bottom action container styles */
@@ -119,7 +119,7 @@
   }
 
   .auction-history-container {
-    padding-bottom: 100px; /* More space on mobile */
+    padding-bottom: 120px; /* More space on mobile */
   }
 
   .bottom-action-container {

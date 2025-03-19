@@ -75,7 +75,7 @@ export function useAuction() {
 
         setError(null);
         // Reduce logging to prevent console spam
-        console.log(`Loaded auction: ${foundAuction.title} (ID: ${auctionId})`);
+        console.log(`Loaded auction: ${foundAuction.description} (ID: ${auctionId})`);
       } else {
         console.error(`Auction with ID ${auctionId} not found`);
         setAuction(null);
@@ -95,9 +95,8 @@ export function useAuction() {
 
   const createAuction = async (auctionData: Omit<Auction, 'id'>) => {
     try {
-      const { title, description, settings } = auctionData;
+      const { description, settings } = auctionData;
       const newAuction = await databaseService.createAuction(
-        title,
         description,
         settings
       );

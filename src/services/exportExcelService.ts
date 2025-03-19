@@ -55,7 +55,6 @@ class ExportExcelService {
     const auctionInfoData = [
       ['Thông tin đấu giá', 'Giá trị'],
       ['ID phiên đấu giá', auction.id || ''],
-      ['Tên phiên đấu giá', auction.title || ''],
       ['Mô tả', auction.description || ''],
       ['Đấu giá viên', auction.settings?.auctioneer || 'N/A'],
       ['Trạng thái', auction.status === 'ENDED' ? 'Đã kết thúc' : (auction.status === 'IN_PROGRESS' ? 'Đang diễn ra' : 'Chuẩn bị')],

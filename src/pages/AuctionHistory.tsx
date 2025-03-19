@@ -248,7 +248,7 @@ const AuctionHistory: React.FC = () => {
                     {currentAuctions.map((auction, index) => (
                       <tr key={auction.id}>
                         <td className="text-center align-middle">{indexOfFirstItem + index + 1}</td>
-                        <td className="align-middle text-truncate" style={{ maxWidth: '200px' }}>{auction.title || 'Không có tiêu đề'}</td>
+                        <td className="align-middle text-truncate" style={{ maxWidth: '200px' }}>{auction.description || 'Không có mô tả'}</td>
                         <td className="text-end align-middle fw-bold">{getDisplayPrice(auction)}</td>
                         <td className="text-center align-middle">{formatDateTime(auction.startTime)}</td>
                         <td className="text-center align-middle fw-semibold">{getBidCount(auction)}</td>

@@ -7,6 +7,7 @@ import { BidPage } from '@pages/BidPage';
 import AuctioneerManagement from '@pages/AuctioneerManagement';
 import AuctionHistory from '@pages/AuctionHistory';
 import ErrorBoundary from '@components/ErrorBoundary';
+import CompanyBanner from '@components/CompanyBanner';
 
 // Import ManageAuctioneer if it exists, otherwise comment it out
 // import ManageAuctioneer from '@pages/ManageAuctioneer';
@@ -16,6 +17,7 @@ function App() {
     <Provider store={store}>
       <ErrorBoundary>
         <BrowserRouter>
+          <CompanyBanner />
           <Routes>
             <Route path="/" element={<SetupPage />} />
             <Route path="/setup" element={<SetupPage />} />

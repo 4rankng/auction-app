@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding-bottom: 80px; /* Space for the fixed button */
+  padding-bottom: 120px; /* Increased space for the fixed button */
   position: relative;
   background-color: #f8f9fa;
 }
@@ -14,17 +14,18 @@
   right: 0;
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(5px);
-  padding: 15px 0;
+  padding: 10px 0; /* Reduced padding */
   border-top: 1px solid #dee2e6;
   z-index: 1000;
   transition: background-color 0.3s ease;
 }
 
-.start-auction-container .btn-success {
+.start-auction-container .btn-success,
+.start-auction-container .btn-primary {
   font-weight: 600;
   letter-spacing: 0.5px;
-  padding: 12px 20px;
-  font-size: 1.1rem;
+  padding: 8px 16px; /* Reduced padding */
+  font-size: 0.95rem; /* Smaller font */
 }
 
 .card {
@@ -39,6 +40,9 @@
   border: 1px solid #dee2e6;
   border-radius: 6px;
   background-color: #ffffff;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
 }
 
 .card-header {
@@ -302,12 +306,44 @@
 
 /* Make sure Start Auction button looks good on mobile */
 .start-auction-container {
-  padding: 0 1rem 1rem;
+  padding: 0 1rem 0.75rem; /* Reduced bottom padding */
 }
 
 @media (max-width: 575.98px) {
   .start-auction-container .btn {
-    font-size: 1rem;
+    font-size: 0.9rem; /* Smaller font */
     padding: 0.5rem;
+    height: 50px !important; /* Smaller button height */
   }
+}
+
+.full-size-textarea {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 200px !important;
+  box-sizing: border-box !important;
+  resize: none !important;
+  padding: 10px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  font-family: inherit !important;
+}
+
+/* Make sure the card body and textarea container take proper height */
+.card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card-body .mb-3 {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Target specifically the textarea container in SetupPage */
+.card-header + .card-body {
+  padding: 0.5rem;
+  min-height: 200px;
 }

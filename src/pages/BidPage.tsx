@@ -15,7 +15,7 @@ import { bidService } from '@services/bidService';
 import { exportExcelService } from '@services/exportExcelService';
 import * as popupService from '@services/popupService';
 import * as timerService from '@services/timerService';
-import { Modal, Button } from 'react-bootstrap';
+import { COMPANY_NAME } from '@utils/constants';
 
 // Interface for the bid history display format
 interface BidHistoryDisplay {
@@ -34,6 +34,7 @@ export const BidPage: React.FC = () => {
   const location = useLocation();
 
   // Check if the page was accessed from the AuctionHistory page
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isFromHistory, setIsFromHistory] = useState<boolean>(false);
 
   const [currentPrice, setCurrentPrice] = useState<string>('0 VND');
@@ -43,7 +44,7 @@ export const BidPage: React.FC = () => {
   const [bidAmount, setBidAmount] = useState<string>('');
   const [bidHistory, setBidHistory] = useState<BidHistoryDisplay[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [auctionTitle, setAuctionTitle] = useState<string>('Phiên Đấu Giá');
+  const [auctionDescription, setAuctionDescription] = useState<string>('Phiên Đấu Giá');
   const [toast, setToast] = useState<{
     show: boolean;
     message: string;
@@ -710,102 +711,92 @@ export const BidPage: React.FC = () => {
   // Update component state when auction data changes
   useEffect(() => {
     if (dataLoading) {
-      setLoading(true);
+      console.log("Loading auction data...");
       return;
     }
 
     if (dataError) {
-      showToast(dataError, 'error', 'top-center');
-      setLoading(false);
+      console.error("Error loading auction data:", dataError);
       return;
     }
 
-    if (!auction) {
-      showToast('Không tìm thấy phiên đấu giá', 'error', 'top-center');
-      // Don't navigate away, just show the error
-      setLoading(false);
-      return;
-    }
+    if (auction) {
+      try {
+        // Update auction details with safe access to properties
+        setAuctionDescription(auction.description || 'Phiên Đấu Giá');
+        setCurrentPrice(formatCurrency(auction.currentPrice));
+        // Make sure settings exists before accessing bidStep
+        setBidIncrement(formatCurrency(auction.settings?.bidStep || 0));
+        setParticipantsCount(bidders.length);
 
-    try {
-      // Update auction details with safe access to properties
-      setAuctionTitle(auction.title || 'Phiên Đấu Giá');
-      setCurrentPrice(formatCurrency(auction.currentPrice));
-      // Make sure settings exists before accessing bidStep
-      if (auction.settings && auction.settings.bidStep !== undefined) {
-        setBidIncrement(formatCurrency(auction.settings.bidStep));
-      } else {
-        setBidIncrement("0 VND");
-      }
+        // Log the bidders loaded from the database
+        console.log(`Loaded ${bidders.length} bidders from database:`, bidders);
 
-    // Log the bidders loaded from the database
-    console.log(`Loaded ${bidders.length} bidders from database:`, bidders);
-    setParticipantsCount(bidders.length);
+        // Filter bids for this auction and sort by timestamp (newest first)
+        const auctionBids = bids.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-    // Filter bids for this auction and sort by timestamp (newest first)
-      const auctionBids = bids.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        // Check if auction is ended
+        setIsAuctionEnded(auction.status === 'ENDED');
 
-    // Check if auction is ended
-    setIsAuctionEnded(auction.status === 'ENDED');
+        // Initialize elapsed time immediately based on auction status
+        if (auction.status === 'ENDED' && auction.result?.duration) {
+          // For ended auctions, set elapsed time from the saved duration
+          console.log("Setting elapsed time from auction result duration:", auction.result.duration);
+          const durationMs = auction.result.duration;
+          const durationSec = Math.floor(durationMs / 1000);
+          const hours = Math.floor(durationSec / 3600);
+          const minutes = Math.floor((durationSec % 3600) / 60);
+          const seconds = durationSec % 60;
+          const formattedDuration = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+          console.log("Setting initial elapsed time for ended auction:", formattedDuration,
+                      "hours:", hours, "minutes:", minutes, "seconds:", seconds,
+                      "from duration (ms):", durationMs);
+          setElapsedTime(formattedDuration);
 
-      // Initialize elapsed time immediately based on auction status
-      if (auction.status === 'ENDED' && auction.result?.duration) {
-        // For ended auctions, set elapsed time from the saved duration
-        console.log("Setting elapsed time from auction result duration:", auction.result.duration);
-        const durationMs = auction.result.duration;
-        const durationSec = Math.floor(durationMs / 1000);
-        const hours = Math.floor(durationSec / 3600);
-        const minutes = Math.floor((durationSec % 3600) / 60);
-        const seconds = durationSec % 60;
-        const formattedDuration = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        console.log("Setting initial elapsed time for ended auction:", formattedDuration,
-                    "hours:", hours, "minutes:", minutes, "seconds:", seconds,
-                    "from duration (ms):", durationMs);
-        setElapsedTime(formattedDuration);
-
-        // Also set auction results for consistent display
-        if (auction.result) {
-          setAuctionResults({
-            winnerName: auction.result.winnerName || '',
-            winnerId: auction.result.winnerId || '',
-            finalPrice: formatCurrency(auction.result.finalPrice || 0),
-            totalBids: auction.result.totalBids || auctionBids.length,
-            auctionDuration: formattedDuration
-          });
+          // Also set auction results for consistent display
+          if (auction.result) {
+            setAuctionResults({
+              winnerName: auction.result.winnerName || '',
+              winnerId: auction.result.winnerId || '',
+              finalPrice: formatCurrency(auction.result.finalPrice || 0),
+              totalBids: auction.result.totalBids || auctionBids.length,
+              auctionDuration: formattedDuration
+            });
+          }
+        } else if (auction.startTime) {
+          // For ongoing auctions, calculate from start time
+          const initialTime = calculateElapsedTime();
+          console.log("Setting initial elapsed time for active auction:", initialTime);
+          setElapsedTime(initialTime);
         }
-      } else if (auction.startTime) {
-        // For ongoing auctions, calculate from start time
-        const initialTime = calculateElapsedTime();
-        console.log("Setting initial elapsed time for active auction:", initialTime);
-        setElapsedTime(initialTime);
+
+        // Set last bidder if there are bids
+        if (auctionBids.length > 0) {
+          setLastBidderId(auctionBids[0].bidderId);
+        }
+
+        // Find the highest bidder (by amount)
+        if (auctionBids.length > 0) {
+          const highestBid = [...auctionBids].sort((a, b) => (b.amount || 0) - (a.amount || 0))[0];
+          setHighestBidderId(highestBid.bidderId);
+          // Get bidder name from the bidders array
+          const bidderName = bidders.find(b => b.id === highestBid.bidderId)?.name || 'Unknown';
+          console.log(`Highest bidder is ${bidderName} (ID: ${highestBid.bidderId}) with amount ${highestBid.amount}`);
+        } else {
+          setHighestBidderId(null);
+        }
+
+        // Convert bids to display format and ensure they are sorted by timestamp (newest first)
+        const sortedBidHistory = convertBidsToDisplayFormat(auctionBids);
+        console.log('Sorted bid history on initial load:', sortedBidHistory);
+        setBidHistory(sortedBidHistory);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error updating component state:", error);
+        showToast("Error loading auction data: " + (error instanceof Error ? error.message : "Unknown error"), 'error', 'top-center');
+        setLoading(false);
       }
-
-    // Set last bidder if there are bids
-    if (auctionBids.length > 0) {
-      setLastBidderId(auctionBids[0].bidderId);
-    }
-
-    // Find the highest bidder (by amount)
-    if (auctionBids.length > 0) {
-        const highestBid = [...auctionBids].sort((a, b) => (b.amount || 0) - (a.amount || 0))[0];
-      setHighestBidderId(highestBid.bidderId);
-        // Get bidder name from the bidders array
-        const bidderName = bidders.find(b => b.id === highestBid.bidderId)?.name || 'Unknown';
-        console.log(`Highest bidder is ${bidderName} (ID: ${highestBid.bidderId}) with amount ${highestBid.amount}`);
-    } else {
-      setHighestBidderId(null);
-    }
-
-    // Convert bids to display format and ensure they are sorted by timestamp (newest first)
-    const sortedBidHistory = convertBidsToDisplayFormat(auctionBids);
-    console.log('Sorted bid history on initial load:', sortedBidHistory);
-    setBidHistory(sortedBidHistory);
-
-    setLoading(false);
-    } catch (error) {
-      console.error("Error updating component state:", error);
-      showToast("Error loading auction data: " + (error instanceof Error ? error.message : "Unknown error"), 'error', 'top-center');
-      setLoading(false);
     }
   }, [auction, bidders, bids, dataLoading, dataError, auctionId, navigate, convertBidsToDisplayFormat, formatCurrency, showToast, calculateElapsedTime]);
 
@@ -1113,6 +1104,9 @@ export const BidPage: React.FC = () => {
     }
   };
 
+  // Add missing state for Go Back confirmation modal
+  const [showGoBackModal, setShowGoBackModal] = useState<boolean>(false);
+
   const handleGoBack = () => {
     setShowGoBackModal(true);
   };
@@ -1169,7 +1163,7 @@ export const BidPage: React.FC = () => {
     setBidAmount(amount);
   };
 
-  // Handle exporting auction data
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleExportData = async () => {
     if (!auction) return;
 
@@ -1220,9 +1214,8 @@ export const BidPage: React.FC = () => {
     setShouldShowPopup(true);
   };
 
-  const [showGoBackModal, setShowGoBackModal] = useState(false);
-
   // New function to navigate to auction history
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleGoToHistory = () => {
     navigate('/history');
   };
@@ -1257,7 +1250,7 @@ export const BidPage: React.FC = () => {
             <h4 className="mt-3 mb-3">Không tìm thấy phiên đấu giá</h4>
             <p className="mb-4">Phiên đấu giá không tồn tại hoặc đã kết thúc.</p>
             <button className="btn btn-primary" onClick={handleGoBack}>
-              <i className="bi bi-arrow-left me-1"></i> Quay Lại Trang Thiết Lập
+              <i className="bi bi-arrow-left me-1"></i> Quay Lại Thiết Lập
             </button>
           </div>
         </div>
@@ -1281,10 +1274,10 @@ export const BidPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="card mb-3">
+      <div className="card mb-3" style={{marginTop: '0rem'}}>
         {/* Auction Header Component */}
         <AuctionHeader
-          title={auctionTitle}
+          title={auctionDescription}
           elapsedTime={elapsedTime}
           onEndAuction={handleEndAuction}
           totalBids={bidHistory.length}
@@ -1320,17 +1313,6 @@ export const BidPage: React.FC = () => {
                 lastBidderId={lastBidderId}
                 highestBidderId={highestBidderId}
                 isTimerEnded={isAuctionEnded}
-              />
-
-              {/* Bid Controls Component */}
-              <BidControls
-                bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
-                bidAmount={bidAmount}
-                currentPrice={currentPrice}
-                bidIncrement={bidIncrement}
-                onBidAmountChange={handleBidAmountChange}
-                onPlaceBid={handlePlaceBid}
-                onCancelBid={handleCancelBid}
                 onStartBid={() => {
                   console.log('Bat Dau button clicked');
                   // Allow timer to start even without a selected bidder
@@ -1399,25 +1381,38 @@ export const BidPage: React.FC = () => {
                   console.log('Is timer running state after reset:', isTimerRunning);
                 }}
                 bidDuration={auction?.settings?.bidDuration || 60}
+                isTimerRunning={isTimerRunning}
+                bidderTimeLeft={timeLeft}
+              />
+
+              {/* Bid Controls Component */}
+              <BidControls
+                bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
+                bidAmount={bidAmount}
+                currentPrice={currentPrice}
+                bidIncrement={bidIncrement}
+                onBidAmountChange={handleBidAmountChange}
+                onPlaceBid={handlePlaceBid}
+                onCancelBid={handleCancelBid}
                 isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
                 isCancelBidDisabled={isCancelBidDisabled()}
                 bidHistoryEmpty={bidHistory.length === 0}
                 isLastBidder={selectedBidder === lastBidderId}
-                isTimerRunning={isTimerRunning}
-                bidderTimeLeft={timeLeft}
               />
             </>
           )}
         </div>
       </div>
 
-      {/* Bid History Table Component */}
-      {auctionId && <BidHistoryTable
-        auctionId={auctionId}
-        initialData={bidHistory}
-        refreshTrigger={refreshTrigger}
-        onRefresh={handleRefreshBidHistory}
-      />}
+      {/* Bid History Table Component with reduced top margin */}
+      {auctionId && <div className="bid-history-container">
+        <BidHistoryTable
+          auctionId={auctionId}
+          initialData={bidHistory}
+          refreshTrigger={refreshTrigger}
+          onRefresh={handleRefreshBidHistory}
+        />
+      </div>}
 
       {/* Fixed bottom buttons container (replacing floating buttons) */}
       <div className="action-buttons-container">
@@ -1431,75 +1426,80 @@ export const BidPage: React.FC = () => {
               Quay Lại Thiết Lập
             </button>
 
-            {/* Only show the history button if coming from history page */}
-            {isFromHistory && (
-              <button
-                className="btn btn-info"
-                onClick={handleGoToHistory}
-              >
-                <i className="bi bi-database me-2"></i>
-                Lịch Sử Đấu Giá
-              </button>
-            )}
-
             {isAuctionEnded && (
               <button
                 className="btn btn-success"
                 onClick={handleExportData}
               >
-                <i className="bi bi-file-earmark-excel me-2"></i>
+                <i className="bi bi-file-excel me-2"></i>
                 Xuất Excel
               </button>
+            )}
+
+            {shouldShowPopup && auction && (
+              <AuctionPopupRenderer
+                auctioneer={auction.settings?.auctioneer || 'N/A'}
+                startingPrice={formatCurrency(auction.settings?.startingPrice || 0)}
+                bidStep={formatCurrency(auction.settings?.bidStep || 0)}
+                bidNumber={bids ? bids.length : 0}
+                highestBidderId={highestBidderId || ''}
+                selectedBidderId={selectedBidder || ''}
+                companyName={COMPANY_NAME}
+                auctionTitle={auctionDescription}
+                highestBidAmount={formatCurrency(bids && bids.length > 0 ? bids[0].amount : (auction.settings?.startingPrice || 0))}
+                isAuctionEnded={isAuctionEnded}
+                timerValue={popupTimerValue}
+                onClose={() => {
+                  console.log('Popup closed by user');
+                  closePopup();
+                }}
+                // Pass auction result data
+                winnerId={isAuctionEnded ? (auctionResults?.winnerId || highestBidderId || '') : undefined}
+                finalPrice={isAuctionEnded ? (auctionResults?.finalPrice || formatCurrency(bids && bids.length > 0 ? bids[0].amount : (auction.settings?.startingPrice || 0))) : undefined}
+                totalBids={isAuctionEnded ? (auctionResults?.totalBids || (bids ? bids.length : 0)) : undefined}
+                auctionDuration={isAuctionEnded ? (auctionResults?.auctionDuration || elapsedTime) : undefined}
+              />
             )}
           </div>
         </div>
       </div>
 
-      {/* Render the auction popup when needed */}
-      {shouldShowPopup && auction && (
-        <AuctionPopupRenderer
-          auctioneer={auction.settings?.auctioneer || 'N/A'}
-          startingPrice={formatCurrency(auction.settings?.startingPrice || 0)}
-          bidStep={formatCurrency(auction.settings?.bidStep || 0)}
-          bidNumber={bids ? bids.length : 0}
-          highestBidderId={highestBidderId || ''}
-          selectedBidderId={selectedBidder || ''}
-          companyName="Công Ty Đấu Giá HP.AUSERCO"
-          auctionTitle={auctionTitle}
-          highestBidAmount={formatCurrency(bids && bids.length > 0 ? bids[0].amount : (auction.settings?.startingPrice || 0))}
-          isAuctionEnded={isAuctionEnded}
-          timerValue={popupTimerValue}
-          onClose={() => {
-            console.log('Popup closed by user');
-            closePopup();
-          }}
-          // Pass auction result data
-          winnerId={isAuctionEnded ? (auctionResults?.winnerId || highestBidderId || '') : undefined}
-          finalPrice={isAuctionEnded ? (auctionResults?.finalPrice || formatCurrency(bids && bids.length > 0 ? bids[0].amount : (auction.settings?.startingPrice || 0))) : undefined}
-          totalBids={isAuctionEnded ? (auctionResults?.totalBids || (bids ? bids.length : 0)) : undefined}
-          auctionDuration={isAuctionEnded ? (auctionResults?.auctionDuration || elapsedTime) : undefined}
-        />
+      {/* Confirmation Modal for Go Back */}
+      {showGoBackModal && (
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex={-1} aria-modal="true" role="dialog">
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header bg-primary text-white">
+                <h5 className="modal-title">
+                  <i className="bi bi-question-circle me-2"></i>
+                  Xác nhận quay lại
+                </h5>
+                <button type="button" className="btn-close btn-close-white" onClick={closeGoBackModal} aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                <p>Bạn có chắc chắn muốn quay lại trang thiết lập? Mọi thay đổi hiện tại sẽ được lưu lại.</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={closeGoBackModal}>
+                  <i className="bi bi-x-circle me-1"></i> Hủy
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={confirmGoBack}
+                >
+                  <i className="bi bi-check-circle me-1"></i> Xác nhận
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Confirmation Modal */}
-      <Modal show={showGoBackModal} onHide={closeGoBackModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Xác Nhận</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Bạn có chắc chắn muốn quay lại trang thiết lập không?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={closeGoBackModal}>
-            Hủy Bỏ
-          </Button>
-          <Button variant="primary" onClick={confirmGoBack}>
-            Xác Nhận
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      {/* Add backdrop when modal is open */}
+      {showGoBackModal && (
+        <div className="modal-backdrop fade show" style={{ zIndex: 1040 }}></div>
+      )}
     </div>
   );
 };
-
-export default BidPage;

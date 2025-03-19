@@ -94,9 +94,8 @@ export const useAuctionStore = create<AuctionState>((set, get) => ({
 
   createAuction: async (auctionData: Omit<Auction, 'id'>) => {
     try {
-      const { title, description, settings } = auctionData;
+      const { description, settings } = auctionData;
       const newAuction = await databaseService.createAuction(
-        title,
         description,
         settings as AuctionSettings
       );

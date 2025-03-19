@@ -93,13 +93,12 @@ export class DatabaseService {
   /**
    * Create a new auction
    */
-  public async createAuction(title: string, description: string, settings: AuctionSettings): Promise<Auction> {
+  public async createAuction(description: string, settings: AuctionSettings): Promise<Auction> {
     const id = Date.now().toString();
 
     // Create a new auction with empty bidders and bids collections
     const newAuction = {
       id,
-      title,
       description,
       status: AUCTION_STATUS.SETUP,
       currentPrice: settings.startingPrice,

@@ -206,7 +206,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
             Chưa có lịch sử đấu giá
           </div>
         ) : (
-          <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+          <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto', zIndex: 100 }}>
             <table className="table table-striped mb-0">
               <thead className="sticky-top bg-white">
                 <tr>

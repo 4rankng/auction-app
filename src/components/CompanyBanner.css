@@ -1,0 +1,19 @@
+.company-banner {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 6px 16px; /* Add horizontal padding for spacing */
+  text-align: left; /* Align content to the left */
+  width: 100%;
+  font-size: 28px; /* Increase font size */
+  color: #495057;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 100;
+}
+
+.company-name {
+  margin: 0;
+  padding: 0;
+  letter-spacing: 0.5px;
+}

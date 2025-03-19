@@ -16,6 +16,12 @@ interface BidderSelectionGridProps {
   lastBidderId?: string | null;
   highestBidderId?: string | null;
   isTimerEnded?: boolean;
+  // Timer control props
+  onStartBid?: () => void;
+  onResetTimer?: () => void;
+  bidDuration?: number;
+  bidderTimeLeft?: number;
+  isTimerRunning?: boolean;
 }
 
 /**
@@ -28,7 +34,13 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
   disabledBidders = [],
   lastBidderId = null,
   highestBidderId = null,
-  isTimerEnded = false
+  isTimerEnded = false,
+  // Timer control props with defaults
+  onStartBid = () => {},
+  onResetTimer = () => {},
+  bidDuration = 60,
+  bidderTimeLeft,
+  isTimerRunning = false
 }) => {
   const gridStyles = {
     display: 'grid',
@@ -44,8 +56,78 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
     justifyContent: 'center'
   };
 
+  // Format the timer in mm:ss format
+  const formatTime = (seconds: number = 0): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="bidder-selection-container mb-3">
+      {/* Timer controls added above the "Chọn người tham gia" heading */}
+      <div className="d-flex mb-3 align-items-center">
+        {/* Start Bid Button */}
+        <button
+          className="btn btn-success me-2"
+          style={{
+            padding: '8px 16px',
+            borderRadius: '4px',
+            fontWeight: 'bold',
+            height: '40px',
+            backgroundColor: '#28a745',
+            border: 'none'
+          }}
+          onClick={onStartBid}
+          disabled={isTimerRunning}
+        >
+          <i className="bi bi-play-circle me-1"></i>
+          Bắt Đầu
+        </button>
+
+        {/* Countdown Timer */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#f8f9fa',
+            borderRadius: '4px',
+            padding: '8px 16px',
+            border: '1px solid #dee2e6',
+            minWidth: '80px',
+            height: '40px',
+            margin: '0 5px',
+            fontWeight: 'normal'
+          }}
+        >
+          <span style={{
+            fontSize: '1rem',
+            color: '#212529'
+          }}>
+            {formatTime(bidderTimeLeft !== undefined && isTimerRunning ? bidderTimeLeft : bidDuration)}
+          </span>
+        </div>
+
+        {/* Reset Timer Button */}
+        <button
+          className="btn ms-2"
+          style={{
+            padding: '8px 16px',
+            borderRadius: '4px',
+            fontWeight: 'bold',
+            backgroundColor: '#dc3545',
+            color: 'white',
+            height: '40px',
+            border: 'none'
+          }}
+          onClick={onResetTimer}
+        >
+          <i className="bi bi-arrow-counterclockwise me-1"></i>
+          Đặt Lại
+        </button>
+      </div>
+
       <h6 className="mb-2">Chọn người tham gia</h6>
 
       {isTimerEnded && (
