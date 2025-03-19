@@ -620,7 +620,15 @@ export default function SetupPage() {
                 className="btn btn-success btn-lg w-100"
                 onClick={handleConfirmAuction}
                 disabled={isStartingAuction}
-                style={{ height: "50px" }}
+                style={{
+                  height: "50px",
+                  backgroundColor: "#7baf7b",
+                  borderColor: "#7baf7b",
+                  fontFamily: "Roboto, Arial, sans-serif",
+                  fontWeight: "500",
+                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease-in-out"
+                }}
               >
                 {isStartingAuction ? (
                   <>
@@ -639,7 +647,15 @@ export default function SetupPage() {
               <button
                 className="btn btn-primary btn-lg w-100"
                 onClick={() => navigate('/history')}
-                style={{ height: "50px" }}
+                style={{
+                  height: "50px",
+                  backgroundColor: "#6c8dae",
+                  borderColor: "#6c8dae",
+                  fontFamily: "Roboto, Arial, sans-serif",
+                  fontWeight: "500",
+                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease-in-out"
+                }}
                 id="historyButton"
               >
                 <i className="bi bi-database me-2"></i>
@@ -670,13 +686,32 @@ export default function SetupPage() {
           <p className="mb-0 text-danger">Lưu ý: Sau khi bắt đầu, bạn không thể chỉnh sửa thông tin đấu giá!</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
+          <Button
+            variant="secondary"
+            onClick={handleCloseModal}
+            style={{
+              backgroundColor: "#f8f9fa",
+              borderColor: "#d9e2ec",
+              color: "#6c8dae",
+              fontFamily: "Roboto, Arial, sans-serif",
+              fontWeight: "500",
+              transition: "all 0.3s ease-in-out"
+            }}
+          >
             Hủy
           </Button>
           <Button
             variant="success"
             onClick={handleStartAuction}
             disabled={isStartingAuction}
+            style={{
+              backgroundColor: "#7baf7b",
+              borderColor: "#7baf7b",
+              fontFamily: "Roboto, Arial, sans-serif",
+              fontWeight: "500",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+              transition: "all 0.3s ease-in-out"
+            }}
           >
             {isStartingAuction ? (
               <>

@@ -56,13 +56,6 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
     justifyContent: 'center'
   };
 
-  // Common font styles to match AuctionSummary
-  const labelStyle = {
-    fontSize: '0.875rem',
-    color: '#6c757d',
-    fontFamily: 'Roboto, sans-serif'
-  };
-
   // Format the timer in mm:ss format
   const formatTime = (seconds: number = 0): string => {
     const minutes = Math.floor(seconds / 60);
@@ -71,35 +64,50 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
   };
 
   return (
-    <div className="bidder-selection-container mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
+    <div className="bidder-selection-container mb-3" style={{
+      fontFamily: 'Roboto, Arial, sans-serif',
+      backgroundColor: '#f8f9fa',
+      padding: '16px',
+      borderRadius: '8px',
+      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+      border: '1px solid #e0e0e0'
+    }}>
       {/* Timer controls section */}
-      <div style={{ marginBottom: '20px' }}>
+      <div style={{ marginBottom: '18px' }}>
         <div className="d-flex align-items-center" style={{
           justifyContent: 'flex-start',
           width: '100%',
           display: 'flex',
           flexDirection: 'row',
-          flexWrap: 'nowrap'
+          flexWrap: 'nowrap',
+          gap: '12px'
         }}>
           {/* Start Bid Button */}
           <button
-            className="btn btn-success"
+            className="btn"
             style={{
               padding: '8px 16px',
               borderRadius: '4px',
-              fontWeight: 'bold',
-              height: '40px',
-              backgroundColor: isTimerRunning ? '#6c757d' : '#28a745',
+              fontWeight: '500',
+              height: '38px',
+              backgroundColor: isTimerRunning ? '#a0a0a0' : '#7baf7b',
               border: 'none',
-              marginRight: '10px',
-              fontFamily: 'Roboto, sans-serif',
+              color: 'white',
+              fontFamily: 'Roboto, Arial, sans-serif',
               opacity: isTimerRunning ? 0.65 : 1,
-              cursor: isTimerRunning ? 'not-allowed' : 'pointer'
+              cursor: isTimerRunning ? 'not-allowed' : 'pointer',
+              transition: 'all 0.3s ease-in-out',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              fontSize: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: '100px'
             }}
             onClick={onStartBid}
             disabled={isTimerRunning}
           >
-            <i className="bi bi-play-circle me-1"></i>
+            <i className="bi bi-play-circle me-2"></i>
             Bắt Đầu
           </button>
 
@@ -109,21 +117,21 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: '#f8f9fa',
+              backgroundColor: '#ffffff',
               borderRadius: '4px',
               padding: '8px 16px',
-              border: '1px solid #dee2e6',
+              border: '1px solid #e0e0e0',
               minWidth: '80px',
-              height: '40px',
-              marginRight: '10px',
-              fontWeight: 'normal',
-              fontFamily: 'Roboto, sans-serif'
+              height: '38px',
+              fontWeight: '500',
+              fontFamily: 'Roboto, Arial, sans-serif',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
             }}
           >
             <span style={{
-              fontSize: '1rem',
-              color: '#212529',
-              fontFamily: 'Roboto, sans-serif'
+              fontSize: '14px',
+              color: '#6c8dae',
+              fontFamily: 'Roboto, Arial, sans-serif'
             }}>
               {formatTime(bidderTimeLeft !== undefined && isTimerRunning ? bidderTimeLeft : bidDuration)}
             </span>
@@ -135,49 +143,108 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
             style={{
               padding: '8px 16px',
               borderRadius: '4px',
-              fontWeight: 'bold',
-              backgroundColor: '#dc3545',
+              fontWeight: '500',
+              height: '38px',
+              backgroundColor: '#b17a7a',
               color: 'white',
-              height: '40px',
               border: 'none',
-              fontFamily: 'Roboto, sans-serif'
+              fontFamily: 'Roboto, Arial, sans-serif',
+              transition: 'all 0.3s ease-in-out',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              fontSize: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: '100px'
             }}
             onClick={onResetTimer}
           >
-            <i className="bi bi-arrow-counterclockwise me-1"></i>
+            <i className="bi bi-arrow-counterclockwise me-2"></i>
             Đặt Lại
           </button>
         </div>
       </div>
 
       {/* Display heading and selected bidder information in one line */}
-      <div className="d-flex align-items-center mb-2">
-        <h6 className="mb-0 me-3" style={labelStyle}>Chọn người tham gia</h6>
-        {selectedBidder && (
+      <div className="d-flex align-items-center mb-3" style={{
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'nowrap',
+        width: '100%',
+        flexDirection: 'row'
+      }}>
+        <h6 style={{
+          fontSize: '14px',
+          color: '#6c757d',
+          fontFamily: 'Roboto, Arial, sans-serif',
+          fontWeight: '500',
+          whiteSpace: 'nowrap',
+          margin: '0',
+          marginRight: '8px',
+          flexShrink: 0
+        }}>Chọn người tham gia:</h6>
+        {selectedBidder ? (
           <div className="selected-bidder-info" style={{
-            backgroundColor: '#e9f5ff',
-            padding: '4px 10px',
+            backgroundColor: '#f0f4f8',
+            padding: '6px 12px',
             borderRadius: '4px',
-            border: '1px solid #b8daff',
-            fontSize: '1rem',
-            fontWeight: 'bold',
-            fontFamily: 'Roboto, sans-serif'
+            border: '1px solid #d9e2ec',
+            fontSize: '14px',
+            fontWeight: '500',
+            fontFamily: 'Roboto, Arial, sans-serif',
+            color: '#6c8dae',
+            display: 'inline-flex',
+            alignItems: 'center',
+            maxWidth: 'max-content',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            flexShrink: 0,
+            whiteSpace: 'nowrap'
           }}>
-            <i className="bi bi-person-check-fill me-1" style={{ color: '#0d6efd' }}></i>
-            {selectedBidder} - {bidders.find(b => b.id === selectedBidder)?.name || ''}
+            <i className="bi bi-person-check-fill me-2" style={{ color: '#6c8dae', flexShrink: 0 }}></i>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {selectedBidder} - {bidders.find(b => b.id === selectedBidder)?.name || ''}
+            </span>
+          </div>
+        ) : (
+          <div style={{
+            color: '#6c757d',
+            fontSize: '14px',
+            fontStyle: 'italic',
+            fontFamily: 'Roboto, Arial, sans-serif',
+            flexGrow: 1
+          }}>
+            Chưa chọn người tham gia
           </div>
         )}
       </div>
 
       {isTimerEnded && (
-        <div className="alert alert-warning mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
+        <div className="alert mb-3" style={{
+          fontFamily: 'Roboto, Arial, sans-serif',
+          fontSize: '14px',
+          backgroundColor: '#fff9db',
+          color: '#856404',
+          border: '1px solid #f8efc5',
+          borderRadius: '4px',
+          padding: '10px 14px'
+        }}>
           <i className="bi bi-exclamation-triangle-fill me-2"></i>
           Vòng đấu giá đã kết thúc. Không thể chọn người tham gia cho đến khi vòng tiếp theo bắt đầu.
         </div>
       )}
 
       {bidders.length === 0 && (
-        <div className="alert alert-info" style={{ fontFamily: 'Roboto, sans-serif' }}>
+        <div className="alert mb-3" style={{
+          fontFamily: 'Roboto, Arial, sans-serif',
+          fontSize: '14px',
+          backgroundColor: '#e5f0f4',
+          color: '#607d8b',
+          border: '1px solid #d1e2e9',
+          borderRadius: '4px',
+          padding: '10px 14px'
+        }}>
+          <i className="bi bi-info-circle me-2"></i>
           Không có người tham gia. Vui lòng thêm người tham gia trong trang thiết lập.
         </div>
       )}
@@ -206,6 +273,27 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
               tooltipText = `${tooltipText} (Người đấu giá cao nhất)`;
             }
 
+            // Determine button colors based on state
+            let backgroundColor, borderColor, textColor;
+
+            if (selectedBidder === bidder.id) {
+              backgroundColor = '#6c8dae';
+              borderColor = '#6c8dae';
+              textColor = '#ffffff';
+            } else if (isLastBidder) {
+              backgroundColor = '#ffffff';
+              borderColor = '#b17a7a';
+              textColor = '#b17a7a';
+            } else if (isDisabled || isTimerEnded) {
+              backgroundColor = '#e0e0e0';
+              borderColor = '#e0e0e0';
+              textColor = '#6c757d';
+            } else {
+              backgroundColor = '#ffffff';
+              borderColor = '#6c757d';
+              textColor = '#6c757d';
+            }
+
             return (
               <div
                 key={bidder.id}
@@ -213,31 +301,26 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
                 style={{ ...bidderItemStyles, margin: '4px' }}
               >
                 <button
-                  className={`btn ${
-                    selectedBidder === bidder.id
-                      ? 'btn-primary'
-                      : isLastBidder
-                        ? 'btn-outline-danger'
-                        : isDisabled
-                          ? 'btn-light'
-                          : 'btn-outline-secondary'
-                  }`}
+                  className="btn"
                   style={{
-                    width: '40px',
-                    height: '40px',
+                    width: '38px',
+                    height: '38px',
                     padding: '0',
                     borderRadius: '4px',
-                    border: selectedBidder === bidder.id
-                      ? '2px solid #0d6efd'
-                      : isLastBidder
-                        ? '2px solid #dc3545'
-                        : '1px solid #6c757d',
-                    fontWeight: 'bold',
-                    opacity: (isTimerEnded || isDisabled) ? 0.65 : 1,
+                    border: `1px solid ${borderColor}`,
+                    fontWeight: '500',
+                    opacity: (isTimerEnded || isDisabled) ? 0.75 : 1,
                     cursor: (isTimerEnded || isDisabled) ? 'not-allowed' : 'pointer',
                     position: 'relative',
-                    fontFamily: 'Roboto, sans-serif',
-                    backgroundColor: (isTimerEnded || isDisabled) ? '#6c757d' : undefined
+                    fontFamily: 'Roboto, Arial, sans-serif',
+                    backgroundColor: backgroundColor,
+                    color: textColor,
+                    transition: 'all 0.2s ease-in-out',
+                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                    fontSize: '13px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
                   onClick={() => onBidderSelect(bidder.id)}
                   title={tooltipText}
@@ -250,13 +333,15 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
                     <span
                       style={{
                         position: 'absolute',
-                        top: '-8px',
-                        right: '-8px',
-                        color: '#FFD700',
-                        fontSize: '12px',
-                        backgroundColor: 'white',
+                        top: '-6px',
+                        right: '-6px',
+                        color: '#d4af37',
+                        fontSize: '10px',
+                        backgroundColor: '#ffffff',
                         borderRadius: '50%',
-                        padding: '1px'
+                        padding: '2px',
+                        border: '1px solid #e0e0e0',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
                       }}
                     >
                       <i className="bi bi-star-fill"></i>

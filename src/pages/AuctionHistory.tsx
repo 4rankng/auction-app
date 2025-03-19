@@ -304,7 +304,15 @@ const AuctionHistory: React.FC = () => {
                 size="lg"
                 className="w-100"
                 onClick={handleBackClick}
-                style={{ height: "60px" }}
+                style={{
+                  height: "60px",
+                  backgroundColor: "#6c8dae",
+                  borderColor: "#6c8dae",
+                  fontFamily: "Roboto, Arial, sans-serif",
+                  fontWeight: "500",
+                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease-in-out"
+                }}
               >
                 <i className="bi bi-arrow-left me-2"></i>
                 Quay Lại Thiết Lập

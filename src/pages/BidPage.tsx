@@ -1414,6 +1414,15 @@ export const BidPage: React.FC = () => {
             <button
               className="btn btn-primary"
               onClick={handleGoBack}
+              style={{
+                backgroundColor: "#6c8dae",
+                borderColor: "#6c8dae",
+                fontFamily: "Roboto, Arial, sans-serif",
+                fontWeight: "500",
+                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+                transition: "all 0.3s ease-in-out",
+                padding: "8px 16px"
+              }}
             >
               <i className="bi bi-arrow-left me-2"></i>
               Quay Lại Thiết Lập
@@ -1423,6 +1432,15 @@ export const BidPage: React.FC = () => {
               <button
                 className="btn btn-success"
                 onClick={handleExportData}
+                style={{
+                  backgroundColor: "#7baf7b",
+                  borderColor: "#7baf7b",
+                  fontFamily: "Roboto, Arial, sans-serif",
+                  fontWeight: "500",
+                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease-in-out",
+                  padding: "8px 16px"
+                }}
               >
                 <i className="bi bi-file-excel me-2"></i>
                 Xuất Excel
@@ -1473,13 +1491,37 @@ export const BidPage: React.FC = () => {
                 <p>Bạn có chắc chắn muốn quay lại trang thiết lập? Mọi thay đổi hiện tại sẽ được lưu lại.</p>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={closeGoBackModal}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={closeGoBackModal}
+                  style={{
+                    backgroundColor: "#f8f9fa",
+                    borderColor: "#d9e2ec",
+                    color: "#6c8dae",
+                    fontFamily: "Roboto, Arial, sans-serif",
+                    fontWeight: "500",
+                    transition: "all 0.3s ease-in-out",
+                    fontSize: "14px",
+                    padding: "8px 16px"
+                  }}
+                >
                   <i className="bi bi-x-circle me-1"></i> Hủy
                 </button>
                 <button
                   type="button"
                   className="btn btn-primary"
                   onClick={confirmGoBack}
+                  style={{
+                    backgroundColor: "#6c8dae",
+                    borderColor: "#6c8dae",
+                    fontFamily: "Roboto, Arial, sans-serif",
+                    fontWeight: "500",
+                    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+                    transition: "all 0.3s ease-in-out",
+                    fontSize: "14px",
+                    padding: "8px 16px"
+                  }}
                 >
                   <i className="bi bi-check-circle me-1"></i> Xác nhận
                 </button>

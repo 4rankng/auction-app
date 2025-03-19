@@ -293,7 +293,7 @@ const BidControls: React.FC<BidControlsProps> = ({
           )}
         </div>
 
-        <div className="btn-group w-100" role="group" style={{ borderRadius: '5px', overflow: 'hidden' }}>
+        <div className="btn-group w-100" role="group" style={{ borderRadius: '4px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)' }}>
           {/* Only show basePrice button when bidHistoryEmpty is true */}
           {bidHistoryEmpty && (
             <button
@@ -301,12 +301,15 @@ const BidControls: React.FC<BidControlsProps> = ({
               className={`btn btn-sm ${bidMethod === 'basePrice' ? 'btn-primary' : 'btn-outline-primary'}`}
               onClick={() => setBidMethod('basePrice')}
               style={{
-                fontFamily: 'Roboto, sans-serif',
-                fontSize: '0.85rem',
-                padding: '0.25rem 0.5rem',
-                transition: 'all 0.3s ease',
-                fontWeight: bidMethod === 'basePrice' ? 'bold' : 'normal',
-                boxShadow: bidMethod === 'basePrice' ? 'inset 0 1px 3px rgba(0, 0, 0, 0.1)' : 'none'
+                fontFamily: 'Roboto, Arial, sans-serif',
+                fontSize: '13px',
+                padding: '6px 10px',
+                transition: 'all 0.3s ease-in-out',
+                fontWeight: bidMethod === 'basePrice' ? '500' : 'normal',
+                boxShadow: bidMethod === 'basePrice' ? 'inset 0 1px 3px rgba(0, 0, 0, 0.1)' : 'none',
+                backgroundColor: bidMethod === 'basePrice' ? '#6c8dae' : '#ffffff',
+                color: bidMethod === 'basePrice' ? '#ffffff' : '#6c8dae',
+                borderColor: '#d1d3e2'
               }}
             >
               <i className="bi bi-tag-fill me-1"></i>
@@ -319,16 +322,19 @@ const BidControls: React.FC<BidControlsProps> = ({
             className={`btn btn-sm ${bidMethod === 'stepPrice' ? 'btn-primary' : 'btn-outline-primary'}`}
             onClick={() => setBidMethod('stepPrice')}
             style={{
-              fontFamily: 'Roboto, sans-serif',
-              fontSize: '0.85rem',
-              padding: '0.25rem 0.5rem',
-              transition: 'all 0.3s ease',
-              fontWeight: bidMethod === 'stepPrice' ? 'bold' : 'normal',
-              boxShadow: bidMethod === 'stepPrice' ? 'inset 0 1px 3px rgba(0, 0, 0, 0.1)' : 'none'
+              fontFamily: 'Roboto, Arial, sans-serif',
+              fontSize: '13px',
+              padding: '6px 10px',
+              transition: 'all 0.3s ease-in-out',
+              fontWeight: bidMethod === 'stepPrice' ? '500' : 'normal',
+              boxShadow: bidMethod === 'stepPrice' ? 'inset 0 1px 3px rgba(0, 0, 0, 0.1)' : 'none',
+              backgroundColor: bidMethod === 'stepPrice' ? '#6c8dae' : '#ffffff',
+              color: bidMethod === 'stepPrice' ? '#ffffff' : '#6c8dae',
+              borderColor: '#d1d3e2'
             }}
           >
             <i className="bi bi-plus-circle-fill me-1"></i>
-            Giá từng bước
+            Theo Bước Giá
           </button>
 
           <button
@@ -336,16 +342,19 @@ const BidControls: React.FC<BidControlsProps> = ({
             className={`btn btn-sm ${bidMethod === 'customPrice' ? 'btn-primary' : 'btn-outline-primary'}`}
             onClick={() => setBidMethod('customPrice')}
             style={{
-              fontFamily: 'Roboto, sans-serif',
-              fontSize: '0.85rem',
-              padding: '0.25rem 0.5rem',
-              transition: 'all 0.3s ease',
-              fontWeight: bidMethod === 'customPrice' ? 'bold' : 'normal',
-              boxShadow: bidMethod === 'customPrice' ? 'inset 0 1px 3px rgba(0, 0, 0, 0.1)' : 'none'
+              fontFamily: 'Roboto, Arial, sans-serif',
+              fontSize: '13px',
+              padding: '6px 10px',
+              transition: 'all 0.3s ease-in-out',
+              fontWeight: bidMethod === 'customPrice' ? '500' : 'normal',
+              boxShadow: bidMethod === 'customPrice' ? 'inset 0 1px 3px rgba(0, 0, 0, 0.1)' : 'none',
+              backgroundColor: bidMethod === 'customPrice' ? '#6c8dae' : '#ffffff',
+              color: bidMethod === 'customPrice' ? '#ffffff' : '#6c8dae',
+              borderColor: '#d1d3e2'
             }}
           >
             <i className="bi bi-pencil-fill me-1"></i>
-            Tự nhập
+            Theo Giá Nhập
           </button>
         </div>
       </div>
@@ -353,8 +362,18 @@ const BidControls: React.FC<BidControlsProps> = ({
       {/* Different bid inputs based on method */}
       {bidMethod === 'basePrice' && (
         <div className="bid-amount-info mb-3">
-          <div style={labelStyle}>Giá ban đầu</div>
-          <div className="base-price-display" style={valueStyle}>
+          <div style={{...labelStyle, fontSize: '14px'}}>Giá ban đầu</div>
+          <div className="base-price-display" style={{
+            fontSize: '16px',
+            fontWeight: '600',
+            color: '#6c8dae',
+            padding: '10px 14px',
+            backgroundColor: '#f0f4f8',
+            borderRadius: '4px',
+            border: '1px solid #d9e2ec',
+            fontFamily: 'Roboto, Arial, sans-serif',
+            marginTop: '8px'
+          }}>
             {currentPrice}
           </div>
         </div>
@@ -362,52 +381,86 @@ const BidControls: React.FC<BidControlsProps> = ({
 
       {bidMethod === 'stepPrice' && (
         <div className="bid-step-control mb-3">
-          <div style={labelStyle}>Giá hiện tại + (Bước giá × Số bước)</div>
+          <div style={{...labelStyle, fontSize: '14px'}}>Giá hiện tại + (Bước giá × Số bước)</div>
           <div className="input-group mt-2">
-            <span className="input-group-text" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '0.85rem' }}>
+            <span className="input-group-text" style={{
+              fontFamily: 'Roboto, Arial, sans-serif',
+              fontSize: '13px',
+              backgroundColor: '#f8f9fa',
+              borderColor: '#e0e0e0'
+            }}>
               {currentPrice} + ({bidIncrement} ×
             </span>
-            <div className="input-group-text btn-group">
+            <div className="input-group-text btn-group" style={{ borderColor: '#e0e0e0' }}>
               <button
-                className="btn btn-sm btn-outline-secondary"
+                className="btn btn-sm"
                 type="button"
                 onClick={handleStepDecrement}
                 disabled={steps <= 1}
                 style={{
-                  fontFamily: 'Roboto, sans-serif',
-                  fontSize: '0.75rem',
-                  padding: '0.15rem 0.4rem',
-                  transition: 'all 0.2s ease',
-                  backgroundColor: steps <= 1 ? '#e9ecef' : 'white',
-                  borderColor: '#6c757d',
-                  opacity: steps <= 1 ? 0.65 : 1
+                  fontFamily: 'Roboto, Arial, sans-serif',
+                  fontSize: '13px',
+                  padding: '4px 8px',
+                  transition: 'all 0.2s ease-in-out',
+                  backgroundColor: steps <= 1 ? '#f8f9fa' : '#ffffff',
+                  borderColor: '#e0e0e0',
+                  color: '#6c757d',
+                  opacity: steps <= 1 ? 0.65 : 1,
+                  width: '30px',
+                  height: '30px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '3px'
                 }}
               >
                 <i className="bi bi-dash"></i>
               </button>
-              <span className="px-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '0.85rem' }}>{steps}</span>
+              <span className="px-2" style={{
+                fontFamily: 'Roboto, Arial, sans-serif',
+                fontSize: '13px',
+                color: '#495057',
+                display: 'flex',
+                alignItems: 'center',
+                minWidth: '22px',
+                justifyContent: 'center'
+              }}>{steps}</span>
               <button
-                className="btn btn-sm btn-outline-secondary"
+                className="btn btn-sm"
                 type="button"
                 onClick={handleStepIncrement}
                 style={{
-                  fontFamily: 'Roboto, sans-serif',
-                  fontSize: '0.75rem',
-                  padding: '0.15rem 0.4rem',
-                  transition: 'all 0.2s ease',
-                  borderColor: '#6c757d'
+                  fontFamily: 'Roboto, Arial, sans-serif',
+                  fontSize: '13px',
+                  padding: '4px 8px',
+                  transition: 'all 0.2s ease-in-out',
+                  backgroundColor: '#ffffff',
+                  borderColor: '#e0e0e0',
+                  color: '#6c757d',
+                  width: '30px',
+                  height: '30px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '3px'
                 }}
               >
                 <i className="bi bi-plus"></i>
               </button>
             </div>
-            <span className="input-group-text" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '0.85rem' }}>)</span>
             <span className="input-group-text" style={{
-              ...valueStyle,
-              fontSize: '1.1rem',
-              backgroundColor: '#e9f5ff',
-              borderColor: '#b8daff',
-              color: '#0d6efd'
+              fontFamily: 'Roboto, Arial, sans-serif',
+              fontSize: '13px',
+              backgroundColor: '#f8f9fa',
+              borderColor: '#e0e0e0'
+            }}>)</span>
+            <span className="input-group-text" style={{
+              fontSize: '14px',
+              fontWeight: '600',
+              backgroundColor: '#f0f4f8',
+              borderColor: '#d9e2ec',
+              color: '#6c8dae',
+              fontFamily: 'Roboto, Arial, sans-serif'
             }}>
               = {(currentPriceValue + (bidIncrementValue * steps)).toLocaleString('vi-VN')} VND
             </span>
@@ -417,7 +470,7 @@ const BidControls: React.FC<BidControlsProps> = ({
 
       {bidMethod === 'customPrice' && (
         <div className="custom-bid-input mb-3">
-          <div style={labelStyle}>Nhập số tiền</div>
+          <div style={{...labelStyle, fontSize: '14px'}}>Nhập số tiền</div>
           <div className="input-group">
             <input
               type="text"
@@ -425,11 +478,32 @@ const BidControls: React.FC<BidControlsProps> = ({
               value={customBidAmount}
               onChange={handleCustomBidChange}
               placeholder="Nhập số tiền đấu giá"
-              style={{ fontFamily: 'Roboto, sans-serif', fontSize: '0.9rem' }}
+              style={{
+                fontFamily: 'Roboto, Arial, sans-serif',
+                fontSize: '14px',
+                padding: '8px 12px',
+                height: '38px',
+                borderColor: '#e0e0e0',
+                borderRadius: '4px 0 0 4px',
+                boxShadow: 'none',
+                transition: 'all 0.2s ease-in-out'
+              }}
             />
-            <span className="input-group-text" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '0.85rem' }}>VND</span>
+            <span className="input-group-text" style={{
+              fontFamily: 'Roboto, Arial, sans-serif',
+              fontSize: '13px',
+              backgroundColor: '#f8f9fa',
+              borderColor: '#e0e0e0',
+              borderRadius: '0 4px 4px 0',
+              height: '38px'
+            }}>VND</span>
           </div>
-          <div className="form-text" style={{ ...labelStyle, fontSize: '0.75rem' }}>
+          <div className="form-text" style={{
+            color: '#6c757d',
+            fontSize: '12px',
+            marginTop: '6px',
+            fontFamily: 'Roboto, Arial, sans-serif'
+          }}>
             <i className="bi bi-info-circle me-1"></i>
             Giá đấu phải lớn hơn giá hiện tại ít nhất một bước giá ({bidIncrement})
           </div>
@@ -440,24 +514,25 @@ const BidControls: React.FC<BidControlsProps> = ({
       <div className="bid-action-buttons d-flex flex-row mt-3" style={{ justifyContent: 'center' }}>
         {/* Primary Action Button - Đấu Giá (Place Bid) */}
         <button
-          className="btn btn-success"
+          className="btn"
           disabled={isPlaceBidDisabled}
           onClick={handleSubmit}
           style={{
             padding: '8px 16px',
-            borderRadius: '5px',
-            fontWeight: 'bold',
-            height: '40px',
-            backgroundColor: isPlaceBidDisabled ? '#6c757d' : '#28a745',
+            borderRadius: '4px',
+            fontWeight: '500',
+            height: '38px',
+            backgroundColor: isPlaceBidDisabled ? '#a0a0a0' : '#7baf7b',
             border: 'none',
-            marginRight: '10px',
-            fontFamily: 'Roboto, sans-serif',
-            width: getButtonWidth('160px', '80px'),
+            marginRight: '12px',
+            fontFamily: 'Roboto, Arial, sans-serif',
+            width: getButtonWidth('140px', '70px'),
             opacity: isPlaceBidDisabled ? 0.65 : 1,
             cursor: isPlaceBidDisabled ? 'not-allowed' : 'pointer',
-            transition: 'all 0.3s ease',
+            transition: 'all 0.3s ease-in-out',
             boxShadow: isPlaceBidDisabled ? 'none' : '0 2px 4px rgba(0, 0, 0, 0.1)',
-            fontSize: '0.9rem',
+            fontSize: '14px',
+            color: 'white',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -474,18 +549,19 @@ const BidControls: React.FC<BidControlsProps> = ({
           onClick={onCancelBid}
           style={{
             padding: '8px 16px',
-            borderRadius: '5px',
-            fontWeight: 'bold',
-            backgroundColor: isCancelBidDisabled ? '#6c757d' : '#dc3545',
+            borderRadius: '4px',
+            fontWeight: '500',
+            backgroundColor: isCancelBidDisabled ? '#a0a0a0' : '#b17a7a',
             color: 'white',
-            height: '40px',
+            height: '38px',
             border: 'none',
-            fontFamily: 'Roboto, sans-serif',
-            width: getButtonWidth('80px', '40px'),
+            fontFamily: 'Roboto, Arial, sans-serif',
+            width: getButtonWidth('70px', '38px'),
             opacity: isCancelBidDisabled ? 0.65 : 1,
             cursor: isCancelBidDisabled ? 'not-allowed' : 'pointer',
-            transition: 'all 0.3s ease',
+            transition: 'all 0.3s ease-in-out',
             boxShadow: isCancelBidDisabled ? 'none' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+            fontSize: '14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
