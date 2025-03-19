@@ -843,11 +843,6 @@ export const BidPage: React.FC = () => {
       return;
     }
 
-    // Check if bidder timer has expired
-    if (timeLeft <= 0) {
-      showToast('Thời gian đấu giá đã hết', 'error', 'bottom-center');
-      return;
-    }
 
     try {
       // Convert bid amount from formatted string to number
@@ -872,14 +867,6 @@ export const BidPage: React.FC = () => {
 
       // Immediately update the current price in the UI
       setCurrentPrice(bidService.formatCurrency(numericAmount));
-
-      // Reset and restart bidder timer
-      startTimer();
-
-      // Reset the timer in the popup as well when a bid is placed
-      if (timeLeft > 0) {
-        setPopupTimerValue(timeLeft);
-      }
 
       // Create a new bid history entry and add it to the current bid history
       const newBidHistoryEntry: BidHistoryDisplay = {
