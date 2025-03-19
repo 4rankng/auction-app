@@ -1200,10 +1200,6 @@ export const BidPage: React.FC = () => {
     }
   };
 
-  // New function to navigate to auction history
-  const handleGoToHistory = () => {
-    navigate('/history');
-  };
 
   // Check if page was accessed from history when component mounts
   useEffect(() => {
@@ -1525,49 +1521,6 @@ export const BidPage: React.FC = () => {
       {showGoBackModal && (
         <div className="modal-backdrop fade show" style={{ zIndex: 1040 }}></div>
       )}
-
-      {/* Navigation breadcrumb */}
-      <nav aria-label="breadcrumb" className="mb-3">
-        <ol className="breadcrumb">
-          <li className="breadcrumb-item">
-            <button
-              onClick={handleGoBack}
-              style={{
-                fontFamily: 'Roboto, sans-serif',
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                color: '#0d6efd',
-                textDecoration: 'underline',
-                cursor: 'pointer'
-              }}
-            >
-              <i className="bi bi-house-door"></i> Trang chủ
-            </button>
-          </li>
-          {isFromHistory && (
-            <li className="breadcrumb-item">
-              <button
-                onClick={handleGoToHistory}
-                style={{
-                  fontFamily: 'Roboto, sans-serif',
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  color: '#0d6efd',
-                  textDecoration: 'underline',
-                  cursor: 'pointer'
-                }}
-              >
-                <i className="bi bi-clock-history"></i> Lịch sử đấu giá
-              </button>
-            </li>
-          )}
-          <li className="breadcrumb-item active" aria-current="page" style={{ fontFamily: 'Roboto, sans-serif' }}>
-            Phiên đấu giá {auction?.id ? `#${auction.id}` : ''}
-          </li>
-        </ol>
-      </nav>
 
       {/* Add a notification if coming from history */}
       {isFromHistory && (
