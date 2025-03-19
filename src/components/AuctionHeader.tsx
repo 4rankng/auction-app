@@ -2,6 +2,33 @@ import React, { useState } from 'react';
 import './AuctionHeader.css';
 import CompanyBanner from './CompanyBanner';
 
+// Add keyframes animation for the popup button
+const popupButtonAnimation = `
+@keyframes pulse-popup {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(13, 110, 253, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+  }
+}
+
+@keyframes pulse-end {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(220, 53, 69, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+  }
+}
+`;
+
 interface AuctionHeaderProps {
   title: string; // This is now the description
   elapsedTime: string;
@@ -55,21 +82,28 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
   // Width is twice the height
   const buttonWidth = buttonHeight * 2;
 
-  // Common button style with 50% transparency
-  const transparentButtonStyle = {
+  // Button style for popup button - outline with animation
+  const outlinePopupButtonStyle = {
     width: `${buttonWidth}px`,
     height: `${buttonHeight}px`,
-    backgroundColor: 'rgba(13, 110, 253, 0.5)',
-    borderColor: 'rgba(13, 110, 253, 0.5)',
-    fontFamily: 'Roboto, sans-serif'
+    backgroundColor: '#ffffff',
+    borderColor: '#0d6efd',
+    color: '#0d6efd',
+    fontFamily: 'Roboto, sans-serif',
+    animation: 'pulse-popup 2s infinite',
+    boxShadow: '0 0 0 0 rgba(13, 110, 253, 0.7)'
   };
 
-  const transparentDangerButtonStyle = {
+  // Button style for end auction button - outline with animation
+  const outlineDangerButtonStyle = {
     width: `${buttonWidth}px`,
     height: `${buttonHeight}px`,
-    backgroundColor: 'rgba(220, 53, 69, 0.5)',
-    borderColor: 'rgba(220, 53, 69, 0.5)',
-    fontFamily: 'Roboto, sans-serif'
+    backgroundColor: '#ffffff',
+    borderColor: '#dc3545',
+    color: '#dc3545',
+    fontFamily: 'Roboto, sans-serif',
+    animation: 'pulse-end 2s infinite',
+    boxShadow: '0 0 0 0 rgba(220, 53, 69, 0.7)'
   };
 
   // Common text style for consistent font
@@ -79,6 +113,11 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
 
   return (
     <div className="auction-header-container" style={robotoStyle}>
+      {/* Add style tag for animations */}
+      <style>
+        {popupButtonAnimation}
+      </style>
+
       <div className="auction-header-info">
         <div
           className={`auction-description ${isTruncated ? 'truncated' : ''}`}
@@ -117,9 +156,9 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
           {/* Add button to show popup */}
           {onShowPopup && (
             <button
-              className="btn btn-primary show-popup-btn icon-button"
+              className="btn btn-outline-primary show-popup-btn icon-button"
               onClick={onShowPopup}
-              style={transparentButtonStyle}
+              style={outlinePopupButtonStyle}
             >
               <i className="bi bi-display me-1 icon-man-hinh-phu"></i>
             </button>
@@ -138,9 +177,9 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
             </div>
           ) : (
             <button
-              className="btn end-auction-btn icon-button"
+              className="btn btn-outline-danger end-auction-btn icon-button"
               onClick={handleOpenModal}
-              style={transparentDangerButtonStyle}
+              style={outlineDangerButtonStyle}
             >
               <i className="bi bi-stop-circle icon-ket-thuc"></i>
             </button>
@@ -159,14 +198,14 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
                 <p style={robotoStyle}>Bạn có chắc chắn muốn kết thúc phiên đấu giá này?</p>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={handleCloseModal} style={{ backgroundColor: 'rgba(108, 117, 125, 0.5)', borderColor: 'rgba(108, 117, 125, 0.5)', fontFamily: 'Roboto, sans-serif' }}>
+                <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal} style={{ fontFamily: 'Roboto, sans-serif' }}>
                   <i className="bi bi-x-circle me-1"></i> Hủy
                 </button>
                 <button
                   type="button"
-                  className="btn btn-danger"
+                  className="btn btn-outline-danger"
                   onClick={handleConfirmEndAuction}
-                  style={{ backgroundColor: 'rgba(220, 53, 69, 0.5)', borderColor: 'rgba(220, 53, 69, 0.5)', fontFamily: 'Roboto, sans-serif' }}
+                  style={{ fontFamily: 'Roboto, sans-serif' }}
                 >
                   <i className="bi bi-stop-circle me-1"></i> Xác nhận kết thúc
                 </button>

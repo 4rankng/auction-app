@@ -56,6 +56,13 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
     justifyContent: 'center'
   };
 
+  // Common font styles to match AuctionSummary
+  const labelStyle = {
+    fontSize: '0.875rem',
+    color: '#6c757d',
+    fontFamily: 'Roboto, sans-serif'
+  };
+
   // Format the timer in mm:ss format
   const formatTime = (seconds: number = 0): string => {
     const minutes = Math.floor(seconds / 60);
@@ -64,7 +71,7 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
   };
 
   return (
-    <div className="bidder-selection-container mb-3">
+    <div className="bidder-selection-container mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
       {/* Timer controls section */}
       <div style={{ marginBottom: '20px' }}>
         <div className="d-flex align-items-center" style={{
@@ -82,9 +89,12 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
               borderRadius: '4px',
               fontWeight: 'bold',
               height: '40px',
-              backgroundColor: '#28a745',
+              backgroundColor: isTimerRunning ? '#6c757d' : '#28a745',
               border: 'none',
-              marginRight: '10px'
+              marginRight: '10px',
+              fontFamily: 'Roboto, sans-serif',
+              opacity: isTimerRunning ? 0.65 : 1,
+              cursor: isTimerRunning ? 'not-allowed' : 'pointer'
             }}
             onClick={onStartBid}
             disabled={isTimerRunning}
@@ -106,12 +116,14 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
               minWidth: '80px',
               height: '40px',
               marginRight: '10px',
-              fontWeight: 'normal'
+              fontWeight: 'normal',
+              fontFamily: 'Roboto, sans-serif'
             }}
           >
             <span style={{
               fontSize: '1rem',
-              color: '#212529'
+              color: '#212529',
+              fontFamily: 'Roboto, sans-serif'
             }}>
               {formatTime(bidderTimeLeft !== undefined && isTimerRunning ? bidderTimeLeft : bidDuration)}
             </span>
@@ -127,7 +139,8 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
               backgroundColor: '#dc3545',
               color: 'white',
               height: '40px',
-              border: 'none'
+              border: 'none',
+              fontFamily: 'Roboto, sans-serif'
             }}
             onClick={onResetTimer}
           >
@@ -139,7 +152,7 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
 
       {/* Display heading and selected bidder information in one line */}
       <div className="d-flex align-items-center mb-2">
-        <h6 className="mb-0 me-3">Chọn người tham gia</h6>
+        <h6 className="mb-0 me-3" style={labelStyle}>Chọn người tham gia</h6>
         {selectedBidder && (
           <div className="selected-bidder-info" style={{
             backgroundColor: '#e9f5ff',
@@ -147,7 +160,8 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
             borderRadius: '4px',
             border: '1px solid #b8daff',
             fontSize: '1rem',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            fontFamily: 'Roboto, sans-serif'
           }}>
             <i className="bi bi-person-check-fill me-1" style={{ color: '#0d6efd' }}></i>
             {selectedBidder} - {bidders.find(b => b.id === selectedBidder)?.name || ''}
@@ -156,14 +170,14 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
       </div>
 
       {isTimerEnded && (
-        <div className="alert alert-warning mb-3">
+        <div className="alert alert-warning mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
           <i className="bi bi-exclamation-triangle-fill me-2"></i>
           Vòng đấu giá đã kết thúc. Không thể chọn người tham gia cho đến khi vòng tiếp theo bắt đầu.
         </div>
       )}
 
       {bidders.length === 0 && (
-        <div className="alert alert-info">
+        <div className="alert alert-info" style={{ fontFamily: 'Roboto, sans-serif' }}>
           Không có người tham gia. Vui lòng thêm người tham gia trong trang thiết lập.
         </div>
       )}
@@ -219,9 +233,11 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
                         ? '2px solid #dc3545'
                         : '1px solid #6c757d',
                     fontWeight: 'bold',
-                    opacity: isDisabled ? 0.6 : 1,
-                    cursor: isDisabled ? 'not-allowed' : 'pointer',
-                    position: 'relative'
+                    opacity: (isTimerEnded || isDisabled) ? 0.65 : 1,
+                    cursor: (isTimerEnded || isDisabled) ? 'not-allowed' : 'pointer',
+                    position: 'relative',
+                    fontFamily: 'Roboto, sans-serif',
+                    backgroundColor: (isTimerEnded || isDisabled) ? '#6c757d' : undefined
                   }}
                   onClick={() => onBidderSelect(bidder.id)}
                   title={tooltipText}
@@ -251,7 +267,7 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
             );
           })}
         </div>
-      )}
+       )}
     </div>
   );
 };

@@ -77,6 +77,20 @@ const BidControls: React.FC<BidControlsProps> = ({
   const currentPriceValue = parseInt(currentPrice.replace(/\D/g, '')) || 0;
   const bidIncrementValue = parseInt(bidIncrement.replace(/\D/g, '')) || 0;
 
+  // Common font styles to match AuctionSummary
+  const labelStyle = {
+    fontSize: '0.875rem',
+    color: '#6c757d',
+    fontFamily: 'Roboto, sans-serif'
+  };
+
+  const valueStyle = {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    margin: 0,
+    fontFamily: 'Roboto, sans-serif'
+  };
+
   // Add state to track screen size
   const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
 
@@ -263,223 +277,223 @@ const BidControls: React.FC<BidControlsProps> = ({
   };
 
   return (
-    <div className="position-relative border-0" style={{
-      padding: '1rem',
-      marginTop: '1rem',
-      marginBottom: '1rem',
-      backgroundColor: 'transparent',
-      borderTop: '1px solid rgba(0,0,0,0.125)',
-      width: '100%',
-      maxWidth: '100%'
-    }}>
-      {/* Add style element for animation */}
-      <style>{bidButtonAnimation}</style>
+    <div className="bid-controls-container mb-4" style={{ fontFamily: 'Roboto, sans-serif' }}>
+      {/* Add the style tag with animation keyframes */}
+      <style dangerouslySetInnerHTML={{ __html: bidButtonAnimation }} />
 
-      <div className="container-fluid p-0">
-        {/* Bidding method selection only (no bidder name textbox) */}
-        <div className="mb-3">
-          <label className="form-label mb-1">Phương Thức Trả Giá</label>
-          <div className="d-flex flex-wrap" style={{ gap: '8px' }}>
-            {/* Base price option (first-time bidding only) */}
-            {bidHistoryEmpty && (
+      {/* Bid Method Selector - Horizontal tabs with smaller size */}
+      <div className="bid-method-selector mb-3">
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <span style={labelStyle}>Phương thức đấu giá</span>
+          {validationError && (
+            <div className="validation-error text-danger">
+              <i className="bi bi-exclamation-triangle-fill me-1"></i>
+              {validationError}
+            </div>
+          )}
+        </div>
+
+        <div className="btn-group w-100" role="group" style={{ borderRadius: '5px', overflow: 'hidden' }}>
+          {/* Only show basePrice button when bidHistoryEmpty is true */}
+          {bidHistoryEmpty && (
+            <button
+              type="button"
+              className={`btn btn-sm ${bidMethod === 'basePrice' ? 'btn-primary' : 'btn-outline-primary'}`}
+              onClick={() => setBidMethod('basePrice')}
+              style={{
+                fontFamily: 'Roboto, sans-serif',
+                fontSize: '0.85rem',
+                padding: '0.25rem 0.5rem',
+                transition: 'all 0.3s ease',
+                fontWeight: bidMethod === 'basePrice' ? 'bold' : 'normal',
+                boxShadow: bidMethod === 'basePrice' ? 'inset 0 1px 3px rgba(0, 0, 0, 0.1)' : 'none'
+              }}
+            >
+              <i className="bi bi-tag-fill me-1"></i>
+              Giá ban đầu
+            </button>
+          )}
+
+          <button
+            type="button"
+            className={`btn btn-sm ${bidMethod === 'stepPrice' ? 'btn-primary' : 'btn-outline-primary'}`}
+            onClick={() => setBidMethod('stepPrice')}
+            style={{
+              fontFamily: 'Roboto, sans-serif',
+              fontSize: '0.85rem',
+              padding: '0.25rem 0.5rem',
+              transition: 'all 0.3s ease',
+              fontWeight: bidMethod === 'stepPrice' ? 'bold' : 'normal',
+              boxShadow: bidMethod === 'stepPrice' ? 'inset 0 1px 3px rgba(0, 0, 0, 0.1)' : 'none'
+            }}
+          >
+            <i className="bi bi-plus-circle-fill me-1"></i>
+            Giá từng bước
+          </button>
+
+          <button
+            type="button"
+            className={`btn btn-sm ${bidMethod === 'customPrice' ? 'btn-primary' : 'btn-outline-primary'}`}
+            onClick={() => setBidMethod('customPrice')}
+            style={{
+              fontFamily: 'Roboto, sans-serif',
+              fontSize: '0.85rem',
+              padding: '0.25rem 0.5rem',
+              transition: 'all 0.3s ease',
+              fontWeight: bidMethod === 'customPrice' ? 'bold' : 'normal',
+              boxShadow: bidMethod === 'customPrice' ? 'inset 0 1px 3px rgba(0, 0, 0, 0.1)' : 'none'
+            }}
+          >
+            <i className="bi bi-pencil-fill me-1"></i>
+            Tự nhập
+          </button>
+        </div>
+      </div>
+
+      {/* Different bid inputs based on method */}
+      {bidMethod === 'basePrice' && (
+        <div className="bid-amount-info mb-3">
+          <div style={labelStyle}>Giá ban đầu</div>
+          <div className="base-price-display" style={valueStyle}>
+            {currentPrice}
+          </div>
+        </div>
+      )}
+
+      {bidMethod === 'stepPrice' && (
+        <div className="bid-step-control mb-3">
+          <div style={labelStyle}>Giá hiện tại + (Bước giá × Số bước)</div>
+          <div className="input-group mt-2">
+            <span className="input-group-text" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '0.85rem' }}>
+              {currentPrice} + ({bidIncrement} ×
+            </span>
+            <div className="input-group-text btn-group">
               <button
+                className="btn btn-sm btn-outline-secondary"
                 type="button"
-                className={`btn ${bidMethod === 'basePrice' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                onClick={() => {
-                  setBidMethod('basePrice');
-                  onBidAmountChange(currentPrice);
-                }}
-                disabled={!bidHistoryEmpty}
+                onClick={handleStepDecrement}
+                disabled={steps <= 1}
                 style={{
-                  minWidth: getButtonWidth('140px'),
-                  fontWeight: bidMethod === 'basePrice' ? 'bold' : 'normal',
-                  boxShadow: 'none',
-                  outline: bidMethod === 'basePrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none',
-                  backgroundColor: bidMethod === 'basePrice' ? '#C0C0C0' : 'white',
-                  borderColor: bidMethod === 'basePrice' ? '#A9A9A9' : '#6c757d',
-                  color: '#333',
-                  fontSize: '0.85rem'
+                  fontFamily: 'Roboto, sans-serif',
+                  fontSize: '0.75rem',
+                  padding: '0.15rem 0.4rem',
+                  transition: 'all 0.2s ease',
+                  backgroundColor: steps <= 1 ? '#e9ecef' : 'white',
+                  borderColor: '#6c757d',
+                  opacity: steps <= 1 ? 0.65 : 1
                 }}
               >
-                <i className={`bi ${bidMethod === 'basePrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
-                <i className="bi bi-tag-fill me-1"></i>
-                {getButtonText('Trả Bằng Giá Ban Đầu')}
+                <i className="bi bi-dash"></i>
               </button>
-            )}
-
-            {/* Step price option */}
-            <button
-              type="button"
-              className={`btn ${bidMethod === 'stepPrice' ? 'btn-primary' : 'btn-outline-secondary'}`}
-              onClick={() => {
-                setBidMethod('stepPrice');
-                const stepPrice = (currentPriceValue + (bidIncrementValue * steps));
-                onBidAmountChange(stepPrice.toLocaleString('vi-VN'));
-              }}
-              style={{
-                minWidth: getButtonWidth('140px'),
-                fontWeight: bidMethod === 'stepPrice' ? 'bold' : 'normal',
-                boxShadow: 'none',
-                outline: bidMethod === 'stepPrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none',
-                backgroundColor: bidMethod === 'stepPrice' ? '#C0C0C0' : 'white',
-                borderColor: bidMethod === 'stepPrice' ? '#A9A9A9' : '#6c757d',
-                color: '#333',
-                fontSize: '0.85rem'
-              }}
-            >
-              <i className={`bi ${bidMethod === 'stepPrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
-              <i className="bi bi-graph-up-arrow me-1"></i>
-              {getButtonText('Trả Theo Bước Giá')}
-            </button>
-
-            {/* Custom price option */}
-            <button
-              type="button"
-              className={`btn ${bidMethod === 'customPrice' ? 'btn-primary' : 'btn-outline-secondary'}`}
-              onClick={() => {
-                setBidMethod('customPrice');
-                if (customBidAmount) {
-                  onBidAmountChange(customBidAmount);
-                }
-              }}
-              style={{
-                minWidth: getButtonWidth('140px'),
-                fontWeight: bidMethod === 'customPrice' ? 'bold' : 'normal',
-                boxShadow: 'none',
-                outline: bidMethod === 'customPrice' ? '1px solid rgba(13, 110, 253, 0.25)' : 'none',
-                backgroundColor: bidMethod === 'customPrice' ? '#C0C0C0' : 'white',
-                borderColor: bidMethod === 'customPrice' ? '#A9A9A9' : '#6c757d',
-                color: '#333',
-                fontSize: '0.85rem'
-              }}
-            >
-              <i className={`bi ${bidMethod === 'customPrice' ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
-              <i className="bi bi-pencil-fill me-1"></i>
-              {getButtonText('Nhập Giá Trả')}
-            </button>
-          </div>
-        </div>
-
-        {/* Validation error message */}
-        {validationError && (
-          <div className="alert alert-danger py-2 mb-3">
-            <i className="bi bi-exclamation-triangle-fill me-2"></i>
-            {validationError}
-          </div>
-        )}
-
-        {/* Bid amount input with method-specific controls - So Buoc on the line below */}
-        <div className="row mb-3">
-          <div className="col-12">
-            {/* Giá Trả input with VND suffix - reduced width by 70% */}
-            <div style={{ width: '30%', minWidth: '200px' }} className="mb-3">
-              <label className="form-label mb-1 fw-bold">Giá Trả</label>
-              <div className="input-group">
-                <input
-                  type="text"
-                  className="form-control"
-                  style={{
-                    fontWeight: 'bold',
-                    border: '1px solid #ced4da',
-                    fontSize: '1.1rem',
-                    height: '38px'
-                  }}
-                  value={bidMethod === 'customPrice'
-                    ? customBidAmount
-                    : bidMethod === 'basePrice'
-                      ? currentPrice.replace(' VND', '')
-                      : (currentPriceValue + (bidIncrementValue * steps)).toLocaleString('vi-VN')
-                  }
-                  onChange={bidMethod === 'customPrice' ? handleCustomBidChange : undefined}
-                  placeholder={bidMethod === 'customPrice' ? "Nhập số tiền" : ""}
-                  readOnly={bidMethod !== 'customPrice'}
-                />
-                <span className="input-group-text">VND</span>
-              </div>
+              <span className="px-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '0.85rem' }}>{steps}</span>
+              <button
+                className="btn btn-sm btn-outline-secondary"
+                type="button"
+                onClick={handleStepIncrement}
+                style={{
+                  fontFamily: 'Roboto, sans-serif',
+                  fontSize: '0.75rem',
+                  padding: '0.15rem 0.4rem',
+                  transition: 'all 0.2s ease',
+                  borderColor: '#6c757d'
+                }}
+              >
+                <i className="bi bi-plus"></i>
+              </button>
             </div>
-
-            {/* Step controls on a new line, only visible when step price method is selected */}
-            <div style={{
-              display: bidMethod === 'stepPrice' ? 'flex' : 'none',
-              alignItems: 'center',
-              width: '30%',
-              minWidth: '200px'
+            <span className="input-group-text" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '0.85rem' }}>)</span>
+            <span className="input-group-text" style={{
+              ...valueStyle,
+              fontSize: '1.1rem',
+              backgroundColor: '#e9f5ff',
+              borderColor: '#b8daff',
+              color: '#0d6efd'
             }}>
-              <label className="form-label me-2 mb-0">Số Bước:</label>
-              <div className="d-flex">
-                <button
-                  className="btn btn-outline-secondary"
-                  type="button"
-                  onClick={handleStepDecrement}
-                  style={{ height: '38px', width: '38px' }}
-                >
-                  <i className="bi bi-caret-down-fill"></i>
-                </button>
-                <input
-                  type="text"
-                  className="form-control text-center"
-                  value={steps}
-                  onChange={(e) => {
-                    const newSteps = parseInt(e.target.value) || 1;
-                    setSteps(newSteps);
-                    if (bidMethod === 'stepPrice') {
-                      const stepPrice = (currentPriceValue + (bidIncrementValue * newSteps));
-                      onBidAmountChange(stepPrice.toLocaleString('vi-VN'));
-                    }
-                  }}
-                  style={{
-                    width: '50px',
-                    height: '38px',
-                    padding: '0.25rem 0.5rem',
-                    margin: '0 1px'
-                  }}
-                />
-                <button
-                  className="btn btn-outline-secondary"
-                  type="button"
-                  onClick={handleStepIncrement}
-                  style={{ height: '38px', width: '38px' }}
-                >
-                  <i className="bi bi-caret-up-fill"></i>
-                </button>
-              </div>
-            </div>
+              = {(currentPriceValue + (bidIncrementValue * steps)).toLocaleString('vi-VN')} VND
+            </span>
           </div>
         </div>
+      )}
 
-        {/* Action buttons */}
-        <div className="row">
-          <div className="col-12 d-flex justify-content-center">
-            <button
-              className="btn fw-bold me-3 app-btn app-btn-success"
-              style={{
-                minWidth: getButtonWidth('140px'),
-                padding: '10px 20px',
-                fontSize: '1.1rem',
-                height: '46px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-              }}
-              onClick={handleSubmit}
-              disabled={isPlaceBidDisabled}
-            >
-              <i className="bi bi-check-circle me-2"></i>
-              {getButtonText('Đấu Giá')}
-            </button>
-            <button
-              className="btn fw-bold app-btn app-btn-danger"
-              style={{
-                minWidth: getButtonWidth('140px'),
-                padding: '10px 20px',
-                height: '46px'
-              }}
-              onClick={onCancelBid}
-              disabled={isCancelBidDisabled}
-            >
-              <i className="bi bi-x-circle me-1"></i>
-              {getButtonText('Hủy Đấu Giá Cuối')}
-            </button>
+      {bidMethod === 'customPrice' && (
+        <div className="custom-bid-input mb-3">
+          <div style={labelStyle}>Nhập số tiền</div>
+          <div className="input-group">
+            <input
+              type="text"
+              className="form-control"
+              value={customBidAmount}
+              onChange={handleCustomBidChange}
+              placeholder="Nhập số tiền đấu giá"
+              style={{ fontFamily: 'Roboto, sans-serif', fontSize: '0.9rem' }}
+            />
+            <span className="input-group-text" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '0.85rem' }}>VND</span>
+          </div>
+          <div className="form-text" style={{ ...labelStyle, fontSize: '0.75rem' }}>
+            <i className="bi bi-info-circle me-1"></i>
+            Giá đấu phải lớn hơn giá hiện tại ít nhất một bước giá ({bidIncrement})
           </div>
         </div>
+      )}
+
+      {/* Buttons for bid actions - reduced size */}
+      <div className="bid-action-buttons d-flex flex-row mt-3" style={{ justifyContent: 'center' }}>
+        {/* Primary Action Button - Đấu Giá (Place Bid) */}
+        <button
+          className="btn btn-success"
+          disabled={isPlaceBidDisabled}
+          onClick={handleSubmit}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '5px',
+            fontWeight: 'bold',
+            height: '40px',
+            backgroundColor: isPlaceBidDisabled ? '#6c757d' : '#28a745',
+            border: 'none',
+            marginRight: '10px',
+            fontFamily: 'Roboto, sans-serif',
+            width: getButtonWidth('160px', '80px'),
+            opacity: isPlaceBidDisabled ? 0.65 : 1,
+            cursor: isPlaceBidDisabled ? 'not-allowed' : 'pointer',
+            transition: 'all 0.3s ease',
+            boxShadow: isPlaceBidDisabled ? 'none' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+            fontSize: '0.9rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <i className="bi bi-cash-coin me-2"></i>
+          {getButtonText('ĐẤU GIÁ')}
+        </button>
+
+        {/* Secondary Action Button - Hủy (Cancel) */}
+        <button
+          className="btn"
+          disabled={isCancelBidDisabled}
+          onClick={onCancelBid}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '5px',
+            fontWeight: 'bold',
+            backgroundColor: isCancelBidDisabled ? '#6c757d' : '#dc3545',
+            color: 'white',
+            height: '40px',
+            border: 'none',
+            fontFamily: 'Roboto, sans-serif',
+            width: getButtonWidth('80px', '40px'),
+            opacity: isCancelBidDisabled ? 0.65 : 1,
+            cursor: isCancelBidDisabled ? 'not-allowed' : 'pointer',
+            transition: 'all 0.3s ease',
+            boxShadow: isCancelBidDisabled ? 'none' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <i className="bi bi-x-circle me-2"></i>
+          {getButtonText('HỦY')}
+        </button>
       </div>
     </div>
   );

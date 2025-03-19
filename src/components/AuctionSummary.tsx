@@ -16,26 +16,40 @@ const AuctionSummary: React.FC<AuctionSummaryProps> = ({
   bidIncrement,
   participantsCount
 }) => {
+  // Common font styles
+  const labelStyle = {
+    fontSize: '0.875rem',
+    color: '#6c757d',
+    fontFamily: 'Roboto, sans-serif'
+  };
+
+  const valueStyle = {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    margin: 0,
+    fontFamily: 'Roboto, sans-serif'
+  };
+
   return (
-    <div className="auction-summary mb-3">
+    <div className="auction-summary mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
       <div className="row text-center mb-2">
         <div className="col-md-3">
-          <small className="text-muted">Lượt Trả Giá</small>
+          <small className="text-muted" style={labelStyle}>Lượt Trả Giá</small>
           <div className="d-flex align-items-center justify-content-center">
-            <h4 className="mb-0">{totalBids + 1}</h4>
+            <h4 className="mb-0" style={valueStyle}>{totalBids + 1}</h4>
           </div>
         </div>
         <div className="col-md-3">
-          <small className="text-muted">Giá hiện tại</small>
-          <h4 className="mb-0">{currentPrice}</h4>
+          <small className="text-muted" style={labelStyle}>Giá hiện tại</small>
+          <h4 className="mb-0" style={valueStyle}>{currentPrice}</h4>
         </div>
         <div className="col-md-3">
-          <small className="text-muted">Bước giá</small>
-          <h4 className="mb-0">{bidIncrement}</h4>
+          <small className="text-muted" style={labelStyle}>Bước giá</small>
+          <h4 className="mb-0" style={valueStyle}>{bidIncrement}</h4>
         </div>
         <div className="col-md-3">
-          <small className="text-muted">Người tham gia</small>
-          <h4 className="mb-0">{participantsCount}</h4>
+          <small className="text-muted" style={labelStyle}>Người tham gia</small>
+          <h4 className="mb-0" style={valueStyle}>{participantsCount}</h4>
         </div>
       </div>
     </div>

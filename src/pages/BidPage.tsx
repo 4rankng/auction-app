@@ -1174,16 +1174,38 @@ export const BidPage: React.FC = () => {
     }
   }, [isAuctionEnded]);
 
-  // New function to handle showing the popup manually
+  // Add useEffect to ensure popup timer is synchronized with the main timer
+  useEffect(() => {
+    // Always keep popup timer synchronized with the actual timer
+    if (isTimerRunning && timeLeft > 0) {
+      console.log('Updating popup timer value to match main timer:', timeLeft);
+      setPopupTimerValue(timeLeft);
+    } else if (!isTimerRunning && bidTimerInitialTime > 0) {
+      // Use the correct initial time when timer is not running
+      console.log('Setting popup timer to initial time:', bidTimerInitialTime);
+      setPopupTimerValue(bidTimerInitialTime);
+    }
+  }, [timeLeft, isTimerRunning, bidTimerInitialTime]);
+
+  // Modify handleShowPopup to ensure the popup is properly initialized
   const handleShowPopup = () => {
     if (!popupInitializedRef.current) {
-      console.log("Popup system not initialized yet");
-      return;
+      console.log("Popup system not initialized yet, initializing now");
+      popupInitializedRef.current = true;
     }
 
     console.log("Opening auction popup manually");
     openPopup();
     setShouldShowPopup(true);
+
+    // Make sure the popup has the correct timer value immediately
+    if (isTimerRunning && timeLeft > 0) {
+      console.log("Setting popup timer to current time:", timeLeft);
+      setPopupTimerValue(timeLeft);
+    } else {
+      console.log("Setting popup timer to initial time:", bidTimerInitialTime);
+      setPopupTimerValue(bidTimerInitialTime);
+    }
   };
 
   // New function to navigate to auction history
