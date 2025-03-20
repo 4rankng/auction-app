@@ -1003,7 +1003,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
                 <div className="auction-title-section">
                   <div className="title-column">
-                    <div className="subtitle">Phiên Đấu Giá Tài Sản</div>
+                    <div className="subtitle">Phiên đấu giá</div>
                     <div className="main-title">{auctionTitle || "-"}</div>
                     <div className="auction-auctioneer">
                       <span className="auctioneer-label">Đấu giá viên:</span>

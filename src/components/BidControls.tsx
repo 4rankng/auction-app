@@ -128,7 +128,7 @@ const BidControls: React.FC<BidControlsProps> = ({
     if (bidHistoryEmpty) {
       // If bid history is empty, check if the price is >= the current price
       if (numericAmount < currentPriceValue) {
-        setValidationError('Giá trả phải lớn hơn hoặc bằng giá ban đầu');
+        setValidationError('Giá trả phải lớn hơn hoặc bằng giá khởi điểm');
         return false;
       }
     } else {
@@ -278,7 +278,7 @@ const BidControls: React.FC<BidControlsProps> = ({
               }}
             >
               <i className="bi bi-tag-fill me-1"></i>
-              Giá ban đầu
+              Giá khởi điểm
             </button>
           )}
 
@@ -327,7 +327,7 @@ const BidControls: React.FC<BidControlsProps> = ({
       {/* Different bid inputs based on method */}
       {bidMethod === 'basePrice' && (
         <div className="bid-amount-info mb-3">
-          <div style={{...labelStyle, fontSize: '14px'}}>Giá ban đầu</div>
+          <div style={{...labelStyle, fontSize: '14px'}}>Giá khởi điểm</div>
           <div className="base-price-display" style={{
             fontSize: '16px',
             fontWeight: '600',
@@ -482,7 +482,7 @@ const BidControls: React.FC<BidControlsProps> = ({
           className="btn bid-button"
           disabled={isPlaceBidDisabled}
           onClick={handleSubmit}
-          aria-label="Đấu giá"
+          aria-label="Trả giá"
         >
           <i className="bi bi-cash-coin me-md-2"></i>
           <span className="d-none d-md-inline">ĐẤU GIÁ</span>
@@ -493,7 +493,7 @@ const BidControls: React.FC<BidControlsProps> = ({
           className="btn cancel-button"
           disabled={isCancelBidDisabled}
           onClick={onCancelBid}
-          aria-label="Hủy đấu giá cuối"
+          aria-label="Hủy lượt trả giá cuối"
         >
           <i className="bi bi-x-circle me-md-2"></i>
           <span className="d-none d-md-inline">HỦY ĐẤU GIÁ CUỐI</span>

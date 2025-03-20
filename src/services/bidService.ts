@@ -30,7 +30,7 @@ class BidService {
 
       // Check if auction is ended
       if (auction.status === AUCTION_STATUS.ENDED) {
-        throw new Error('Đấu giá đã kết thúc');
+        throw new Error('Trả giá đã kết thúc');
       }
 
       // Check if bidder exists

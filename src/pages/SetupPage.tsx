@@ -321,7 +321,7 @@ export default function SetupPage() {
       };
 
       await databaseService.updateAuction(updatedAuction);
-      toastService.success('Đấu giá đã bắt đầu thành công!');
+      toastService.success('Trả giá đã bắt đầu thành công!');
       setShowConfirmation(false);
 
       // Navigate to the bidding page with the auction ID

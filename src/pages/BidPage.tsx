@@ -821,7 +821,7 @@ export const BidPage: React.FC = () => {
 
     // Check if auction is ended
     if (isAuctionEnded) {
-      showToast('Đấu giá đã kết thúc', 'error', 'bottom-center');
+      showToast('Trả giá đã kết thúc', 'error', 'bottom-center');
       return;
     }
 
@@ -973,7 +973,7 @@ export const BidPage: React.FC = () => {
     // Check if the selected bidder is the last bidder
     if (selectedBidder && selectedBidder !== lastBidderId) {
       // If a bidder is selected but they're not the last bidder, show an error
-      showToast('Chỉ có thể hủy đấu giá cuối cùng', 'error', 'bottom-center');
+      showToast('Chỉ có thể hủy lượt trả giá cuối cùng', 'error', 'bottom-center');
         return;
     }
 
@@ -1033,7 +1033,7 @@ export const BidPage: React.FC = () => {
         )
       );
 
-      showToast('Đã hủy đấu giá cuối cùng', 'success', 'bottom-center');
+      showToast('Đã hủy lượt trả giá cuối cùng', 'success', 'bottom-center');
 
       // Increment refresh trigger to force BidHistoryTable to refresh
       setRefreshTrigger(prev => prev + 1);

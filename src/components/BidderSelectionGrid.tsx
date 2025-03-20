@@ -302,9 +302,9 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
             if (isTimerEnded) {
               tooltipText = 'Vòng đấu giá đã kết thúc. Không thể chọn người tham gia cho đến khi vòng tiếp theo bắt đầu.';
             } else if (isLastBidder && isDisabled) {
-              tooltipText = 'Người này vừa đấu giá, không thể đấu giá tiếp. Chọn để hủy đấu giá cuối cùng.';
+              tooltipText = 'Người này vừa đấu giá, không thể đấu giá tiếp. Chọn để hủy lượt trả giá cuối cùng.';
             } else if (isLastBidder) {
-              tooltipText = 'Người này vừa đấu giá. Chọn để hủy đấu giá cuối cùng.';
+              tooltipText = 'Người này vừa đấu giá. Chọn để hủy lượt trả giá cuối cùng.';
             } else if (isDisabled) {
               tooltipText = 'Người này không thể đấu giá lúc này.';
             }
