@@ -1,4 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import logger from '../services/loggerService';
 import { databaseService } from '@services/databaseService';
 import {
   auctionLoading,
@@ -120,7 +121,7 @@ export const endAuction = createAsyncThunk(
 
       return updatedAuction;
     } catch (error) {
-      console.error('Failed to end auction:', error);
+      logger.error('Failed to end auction:', error);
       throw error;
     }
   }

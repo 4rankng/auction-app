@@ -1,3 +1,5 @@
+import logger from './loggerService';
+
 /**
  * Popup Service
  * Handles opening and managing popup windows for the auction application
@@ -28,7 +30,7 @@ let activePopups: Record<string, { window: Window | null, preventAutoClose?: boo
 export const openPopup = (url: string, name: string, config: PopupConfig = {}): Window | null => {
   // First check if a popup with this name already exists and is open
   if (isPopupOpen(name)) {
-    console.log(`Popup '${name}' already exists and is open. Returning existing reference.`);
+    logger.info(`Popup '${name}' already exists and is open. Returning existing reference.`);
     return activePopups[name].window;
   }
 
@@ -63,12 +65,12 @@ export const openPopup = (url: string, name: string, config: PopupConfig = {}): 
 
   // Open the new popup
   try {
-    console.log(`Opening popup window '${name}'`);
+    logger.info(`Opening popup window '${name}'`);
     const popupWindow = window.open(url, name, features);
 
     // Check if popup was successfully created
     if (!popupWindow) {
-      console.warn(`Failed to open popup '${name}'. It may have been blocked by the browser.`);
+      logger.warn(`Failed to open popup '${name}'. It may have been blocked by the browser.`);
       return null;
     }
 
@@ -76,7 +78,7 @@ export const openPopup = (url: string, name: string, config: PopupConfig = {}): 
     try {
       popupWindow.focus();
     } catch (e) {
-      console.warn(`Could not focus popup window:`, e);
+      logger.warn(`Could not focus popup window:`, e);
     }
 
     // Store reference to the popup with its configuration
@@ -92,7 +94,7 @@ export const openPopup = (url: string, name: string, config: PopupConfig = {}): 
         if (!popupWindow || popupWindow.closed) {
           clearInterval(checkClosed);
           delete activePopups[name];
-          console.log(`Popup '${name}' was closed by user`);
+          logger.info(`Popup '${name}' was closed by user`);
         }
       }, 500);
 
@@ -100,13 +102,13 @@ export const openPopup = (url: string, name: string, config: PopupConfig = {}): 
       try {
         (popupWindow as any).__checkClosedInterval = checkClosed;
       } catch (e) {
-        console.warn(`Could not attach interval ID to popup:`, e);
+        logger.warn(`Could not attach interval ID to popup:`, e);
       }
     }
 
     return popupWindow;
   } catch (error) {
-    console.error(`Failed to open popup window '${name}':`, error);
+    logger.error(`Failed to open popup window '${name}':`, error);
     return null;
   }
 };
@@ -132,9 +134,9 @@ export const closePopup = (name: string): boolean => {
     // Close the popup
     try {
       popup.close();
-      console.log(`Popup '${name}' closed programmatically`);
+      logger.info(`Popup '${name}' closed programmatically`);
     } catch (error) {
-      console.error(`Error closing popup '${name}':`, error);
+      logger.error(`Error closing popup '${name}':`, error);
     }
 
     // Remove from tracking
@@ -166,7 +168,7 @@ export const closeAllPopups = (includePreventAutoClose: boolean = false): void =
       try {
         popupInfo.window.close();
       } catch (error) {
-        console.error(`Error closing popup '${name}' during closeAllPopups:`, error);
+        logger.error(`Error closing popup '${name}' during closeAllPopups:`, error);
       }
 
       delete activePopups[name];

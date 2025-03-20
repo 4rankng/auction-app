@@ -4,6 +4,7 @@ import { databaseService } from '@services/databaseService';
 import { exportExcelService } from '@services/exportExcelService';
 import { Auction } from '@types';
 import { Button, Table, Container, Spinner, Alert, Pagination, Card, Toast } from 'react-bootstrap';
+import logger from '../services/loggerService';
 import './AuctionHistory.css';
 
 const HISTORY_PAGE_KEY = 'auction_history_current_page';
@@ -72,7 +73,7 @@ const AuctionHistory: React.FC = () => {
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load auctions');
-      console.error('Error loading auctions:', err);
+      logger.error('Error loading auctions:', err);
     } finally {
       setLoading(false);
     }
@@ -97,7 +98,7 @@ const AuctionHistory: React.FC = () => {
         throw new Error('Export failed');
       }
     } catch (error) {
-      console.error('Error exporting data to Excel:', error);
+      logger.error('Error exporting data to Excel:', error);
       showToast('Không thể xuất dữ liệu Excel. Vui lòng thử lại.', 'error');
     }
   };

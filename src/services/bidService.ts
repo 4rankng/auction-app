@@ -1,6 +1,7 @@
 import { databaseService } from '@services/databaseService';
 import { Bid, Auction, AuctionStatus } from '@types';
 import * as formatUtils from '@utils/formatUtils';
+import logger from './loggerService';
 
 // Auction status constants
 const AUCTION_STATUS = {
@@ -61,7 +62,7 @@ class BidService {
       }
 
       // Create the bid using the database service
-      console.log(`Creating bid for auction ${auctionId}, bidder ${bidderId}, amount ${amount}`);
+      logger.info(`Creating bid for auction ${auctionId}, bidder ${bidderId}, amount ${amount}`);
       const newBid = await databaseService.createBid(auctionId, bidderId, amount);
 
       // Update the auction with the new current price
@@ -72,11 +73,11 @@ class BidService {
       };
 
       await databaseService.updateAuction(updatedAuction);
-      console.log('Auction updated with new price:', amount);
+      logger.info('Auction updated with new price:', amount);
 
       return newBid;
     } catch (error) {
-      console.error('Error in bidService.placeBid:', error);
+      logger.error('Error in bidService.placeBid:', error);
       throw error;
     }
   }
@@ -91,7 +92,7 @@ class BidService {
     try {
       await databaseService.removeBid(auctionId, bidId);
     } catch (error) {
-      console.error('Error in bidService.cancelBid:', error);
+      logger.error('Error in bidService.cancelBid:', error);
       throw error;
     }
   }
@@ -107,7 +108,7 @@ class BidService {
       // Sort bids by timestamp (newest first)
       return bids.sort((a, b) => b.timestamp - a.timestamp);
     } catch (error) {
-      console.error('Error in bidService.getLatestBids:', error);
+      logger.error('Error in bidService.getLatestBids:', error);
       throw error;
     }
   }
@@ -127,7 +128,7 @@ class BidService {
       // Sort bids by amount (highest first)
       return bids.sort((a, b) => b.amount - a.amount)[0];
     } catch (error) {
-      console.error('Error in bidService.getHighestBid:', error);
+      logger.error('Error in bidService.getHighestBid:', error);
       throw error;
     }
   }

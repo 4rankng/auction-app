@@ -1,3 +1,5 @@
+import logger from './loggerService';
+
 /**
  * Toast Service
  *
@@ -98,7 +100,7 @@ class ToastService {
       try {
         listener(toastsCopy);
       } catch (err) {
-        console.error('Error in toast listener:', err);
+        logger.error('Error in toast listener:', err);
       }
     });
   }

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import logger from '../services/loggerService';
 import { databaseService } from '@services/databaseService';
 import { Auction, Bidder, Bid, UISettings, AuctionSettings } from '@types';
 
@@ -174,13 +175,13 @@ export const useAuctionStore = create<AuctionState>((set, get) => ({
         try {
           await databaseService.deleteBidder(auction.id, bidder.id);
         } catch (error) {
-          console.log(`Could not delete bidder ${bidder.id}: ${error}`);
+          logger.info(`Could not delete bidder ${bidder.id}: ${error}`);
         }
       }
 
       await get().refreshData();
     } catch (error) {
-      console.error('Error clearing bidders:', error);
+      logger.error('Error clearing bidders:', error);
       throw error;
     }
   }

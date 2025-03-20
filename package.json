@@ -35,9 +35,8 @@
     "test": "craco test",
     "eject": "react-scripts eject",
     "lint": "eslint src/**/*.{ts,tsx}",
-    "lint:fix": "eslint src/**/*.{ts,tsx} --fix",
-    "migrate-aliases": "node scripts/migrateToAliases.js",
-    "update-imports": "node scripts/updateSpecificImports.js"
+    "lint:fix": "eslint src/**/*.{ts,tsx} --fix"
+
   },
   "eslintConfig": {
     "extends": [

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import logger from '../services/loggerService';
 import BidHistoryTable from '@components/BidHistoryTable';
 import BidderSelectionGrid from '@components/BidderSelectionGrid';
 import BidControls from '@components/BidControls';
@@ -94,7 +95,7 @@ export const BidPage: React.FC = () => {
       const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
       const remainingTime = Math.max(0, parseInt(savedTimeLeft, 10) - elapsedSeconds);
 
-      console.log(`Restored timer state from localStorage: ${remainingTime}s remaining, running: ${savedIsRunning}`);
+      logger.info(`Restored timer state from localStorage: ${remainingTime}s remaining, running: ${savedIsRunning}`);
 
       if (remainingTime > 0) {
         setTimeLeft(remainingTime);
@@ -125,7 +126,7 @@ export const BidPage: React.FC = () => {
   useEffect(() => {
     if (auction?.id) {
       timerIdRef.current = `bidder_timer_${auction.id}`;
-      console.log(`Set stable timer ID: ${timerIdRef.current}`);
+      logger.info(`Set stable timer ID: ${timerIdRef.current}`);
     }
   }, [auction?.id]);
 
@@ -145,18 +146,18 @@ export const BidPage: React.FC = () => {
       ? parseInt(savedTimeLeft, 10)
       : bidTimerInitialTime;
 
-    console.log(`Creating new timer with ID: ${timerId}, duration: ${initialTime}s`);
+    logger.info(`Creating new timer with ID: ${timerId}, duration: ${initialTime}s`);
 
     // Create the timer in the service
     timerService.createTimer(timerId, initialTime, {
       onTick: (remainingTime) => {
-        console.log(`BidPage: Timer tick received: ${remainingTime}s remaining`);
+        logger.info(`BidPage: Timer tick received: ${remainingTime}s remaining`);
         setTimeLeft(remainingTime);
         // Update popup timer in sync with main timer
         setPopupTimerValue(remainingTime);
       },
       onComplete: () => {
-        console.log('BidPage: Timer completed');
+        logger.info('BidPage: Timer completed');
         setIsTimerRunning(false);
         // Reset popup timer when timer completes
         setPopupTimerValue(0);
@@ -172,14 +173,14 @@ export const BidPage: React.FC = () => {
 
     // Start the timer if it was previously running
     if (savedIsRunning === 'true' && parseInt(savedTimeLeft || '0', 10) > 0) {
-      console.log('Resuming timer from previous state');
+      logger.info('Resuming timer from previous state');
       timerService.startTimer(timerId);
       setIsTimerRunning(true);
     }
 
     // Clean up on unmount
     return () => {
-      console.log(`Cleaning up timer with ID: ${timerId}`);
+      logger.info(`Cleaning up timer with ID: ${timerId}`);
       timerService.stopTimer(timerId);
       timerInitializedRef.current = false;
       setIsTimerRunning(false);
@@ -188,9 +189,9 @@ export const BidPage: React.FC = () => {
 
   // Define timer control functions
   const startTimer = useCallback(() => {
-    console.log(`BidPage: startTimer called for timer ${timerIdRef.current}`);
+    logger.info(`BidPage: startTimer called for timer ${timerIdRef.current}`);
     const result = timerService.startTimer(timerIdRef.current);
-    console.log(`BidPage: startTimer result: ${result ? 'success' : 'failed'}`);
+    logger.info(`BidPage: startTimer result: ${result ? 'success' : 'failed'}`);
     setIsTimerRunning(true);
 
     // Save timer state to localStorage
@@ -200,16 +201,16 @@ export const BidPage: React.FC = () => {
   }, [timeLeft, timerRunningKey, timerStartTimeKey, timerValueKey]);
 
   const stopTimer = useCallback(() => {
-    console.log(`BidPage: stopTimer called for timer ${timerIdRef.current}`);
+    logger.info(`BidPage: stopTimer called for timer ${timerIdRef.current}`);
 
     if (!timerService.timerExists(timerIdRef.current)) {
-      console.log(`Timer ${timerIdRef.current} doesn't exist, nothing to stop`);
+      logger.info(`Timer ${timerIdRef.current} doesn't exist, nothing to stop`);
       setIsTimerRunning(false);
       return;
     }
 
     const result = timerService.stopTimer(timerIdRef.current);
-    console.log(`BidPage: stopTimer result: ${result ? 'success' : 'failed'}`);
+    logger.info(`BidPage: stopTimer result: ${result ? 'success' : 'failed'}`);
     setIsTimerRunning(false);
 
     // Update localStorage
@@ -217,10 +218,10 @@ export const BidPage: React.FC = () => {
   }, [timerRunningKey]);
 
   const resetTimer = useCallback((newTime = bidTimerInitialTime) => {
-    console.log(`BidPage: resetTimer called for timer ${timerIdRef.current} with new time ${newTime}s`);
+    logger.info(`BidPage: resetTimer called for timer ${timerIdRef.current} with new time ${newTime}s`);
     setTimeLeft(newTime);
     const result = timerService.resetTimer(timerIdRef.current, newTime, false);
-    console.log(`BidPage: resetTimer result: ${result ? 'success' : 'failed'}`);
+    logger.info(`BidPage: resetTimer result: ${result ? 'success' : 'failed'}`);
 
     // Update localStorage
     localStorage.setItem(timerValueKey, newTime.toString());
@@ -249,7 +250,7 @@ export const BidPage: React.FC = () => {
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (isTimerRunning && timeLeft > 0) {
-        console.log('Saving timer state before page unload');
+        logger.info('Saving timer state before page unload');
         localStorage.setItem(timerValueKey, timeLeft.toString());
         localStorage.setItem(timerRunningKey, isTimerRunning.toString());
         localStorage.setItem(timerStartTimeKey, Date.now().toString());
@@ -268,7 +269,7 @@ export const BidPage: React.FC = () => {
     return () => {
       // Only clear timer-related localStorage items when unmounting
       if (!isAuctionEnded) {
-        console.log('Saving final timer state on component unmount');
+        logger.info('Saving final timer state on component unmount');
         if (isTimerRunning && timeLeft > 0) {
           localStorage.setItem(timerValueKey, timeLeft.toString());
           localStorage.setItem(timerRunningKey, isTimerRunning.toString());
@@ -285,7 +286,7 @@ export const BidPage: React.FC = () => {
 
   // Add popup management
   const { isOpen, openPopup, closePopup, popupWindow } = useAuctionPopup({
-    onClose: () => console.log('Auction popup closed')
+    onClose: () => logger.info('Auction popup closed')
   });
   const popupInitializedRef = useRef(false);
 
@@ -318,7 +319,7 @@ export const BidPage: React.FC = () => {
 
     // Dispatch the event to the popup window
     popupWindow.dispatchEvent(popupUpdateEvent);
-    console.log('Updated popup with latest information');
+    logger.info('Updated popup with latest information');
   }, [popupWindow, shouldShowPopup, highestBidderId, selectedBidder, bids, auction?.settings?.startingPrice, formatCurrency]);
 
   const showToast = useCallback((
@@ -336,7 +337,7 @@ export const BidPage: React.FC = () => {
 
     // For ended auctions, always use the stored duration from result
     if (isAuctionEnded && auction.result?.duration) {
-      console.log("calculateElapsedTime: Using duration from auction result:", auction.result.duration);
+      logger.info("calculateElapsedTime: Using duration from auction result:", auction.result.duration);
       const durationMs = auction.result.duration;
       const durationSec = Math.floor(durationMs / 1000);
       const hours = Math.floor(durationSec / 3600);
@@ -344,7 +345,7 @@ export const BidPage: React.FC = () => {
       const seconds = durationSec % 60;
 
       const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-      console.log("Formatted elapsed time for ended auction:", formattedTime,
+      logger.info("Formatted elapsed time for ended auction:", formattedTime,
                   "hours:", hours, "minutes:", minutes, "seconds:", seconds);
       return formattedTime;
     }
@@ -355,7 +356,7 @@ export const BidPage: React.FC = () => {
 
     const elapsedMs = Date.now() - startTime;
     if (elapsedMs < 0) {
-      console.warn("Calculated negative elapsed time, using 00:00:00 instead");
+      logger.warn("Calculated negative elapsed time, using 00:00:00 instead");
       return "00:00:00";
     }
 
@@ -379,14 +380,14 @@ export const BidPage: React.FC = () => {
 
     // For ended auctions, use the stored duration and don't start a timer
     if (isAuctionEnded && auction.result?.duration) {
-      console.log("Auction is ended, setting final elapsed time from result");
+      logger.info("Auction is ended, setting final elapsed time from result");
       const durationMs = auction.result.duration;
       const durationSec = Math.floor(durationMs / 1000);
       const hours = Math.floor(durationSec / 3600);
       const minutes = Math.floor((durationSec % 3600) / 60);
       const seconds = durationSec % 60;
       const finalTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-      console.log("Final elapsed time set to:", finalTime,
+      logger.info("Final elapsed time set to:", finalTime,
                   "hours:", hours, "minutes:", minutes, "seconds:", seconds,
                   "from duration (ms):", durationMs);
       setElapsedTime(finalTime);
@@ -417,17 +418,17 @@ export const BidPage: React.FC = () => {
   useEffect(() => {
     // Skip if already initialized or in progress
     if (!popupInitializedRef.current && !popupCreationInProgressRef.current) {
-      console.log("BidPage: Starting popup initialization");
+      logger.info("BidPage: Starting popup initialization");
       popupCreationInProgressRef.current = true;
 
       // Delay to prevent multiple initializations
       setTimeout(() => {
         try {
-          console.log("BidPage: Initializing popup system without opening");
+          logger.info("BidPage: Initializing popup system without opening");
           popupInitializedRef.current = true;
           // Don't automatically open the popup
         } catch (error) {
-          console.error("Error initializing popup:", error);
+          logger.error("Error initializing popup:", error);
           popupInitializedRef.current = false;
         } finally {
           // Reset creation flag when done
@@ -452,7 +453,7 @@ export const BidPage: React.FC = () => {
     // Only show popup if it's initialized, open, and we have auction data
     if (popupInitializedRef.current && isOpen && auction) {
       if (!shouldShowPopup) {
-        console.log("BidPage: Setting shouldShowPopup to true");
+        logger.info("BidPage: Setting shouldShowPopup to true");
         setShouldShowPopup(true);
       }
 
@@ -461,7 +462,7 @@ export const BidPage: React.FC = () => {
 
       // Make sure to refresh the popup content when auction ends
       if (isAuctionEnded && auction.result) {
-        console.log("BidPage: Auction ended, refreshing popup content");
+        logger.info("BidPage: Auction ended, refreshing popup content");
         setAuctionResults({
           winnerName: auction.result.winnerName || '',
           winnerId: auction.result.winnerId || highestBidderId || '',
@@ -471,7 +472,7 @@ export const BidPage: React.FC = () => {
         });
       }
     } else if (shouldShowPopup) {
-      console.log("BidPage: Setting shouldShowPopup to false");
+      logger.info("BidPage: Setting shouldShowPopup to false");
       setShouldShowPopup(false);
     }
   }, [isOpen, auction, isAuctionEnded, updatePopupInfo, shouldShowPopup, setShouldShowPopup, highestBidderId, bids, elapsedTime, setAuctionResults, popupInitializedRef, formatCurrency]);
@@ -479,7 +480,7 @@ export const BidPage: React.FC = () => {
   // Ensure proper cleanup on unmount without closing popups prematurely
   useEffect(() => {
     return () => {
-      console.log("BidPage: Component unmounting, proper cleanup");
+      logger.info("BidPage: Component unmounting, proper cleanup");
 
       // Reset all flags but don't close popups
       popupInitializedRef.current = false;
@@ -489,19 +490,19 @@ export const BidPage: React.FC = () => {
 
   // Function to handle ending the auction
   const handleEndAuction = async () => {
-    console.log("🔄 End Auction button clicked");
+    logger.info("🔄 End Auction button clicked");
 
     if (!auction || !auction.id) {
-      console.error("❌ No auction or auction ID found:", auction);
+      logger.error("❌ No auction or auction ID found:", auction);
       return;
     }
 
     try {
       setLoading(true);
-      console.log("🔍 Starting auction end process for auction ID:", auction.id);
+      logger.info("🔍 Starting auction end process for auction ID:", auction.id);
 
       // Calculate auction duration - Using database startTime for consistency
-      console.log("🕒 Original auction.startTime:", auction.startTime);
+      logger.info("🕒 Original auction.startTime:", auction.startTime);
 
       // Use the database startTime to ensure consistent time calculation across page reloads
       const endTime = Date.now();
@@ -511,9 +512,9 @@ export const BidPage: React.FC = () => {
       // Ensure we have a positive duration
       const correctedDurationMs = Math.max(1000, durationMs); // At least 1 second
 
-      console.log("⏱️ Auction duration calculated:", correctedDurationMs, "ms");
-      console.log("⏱️ Start time:", new Date(startTime).toISOString());
-      console.log("⏱️ End time:", new Date(endTime).toISOString());
+      logger.info("⏱️ Auction duration calculated:", correctedDurationMs, "ms");
+      logger.info("⏱️ Start time:", new Date(startTime).toISOString());
+      logger.info("⏱️ End time:", new Date(endTime).toISOString());
 
       // Format duration as HH:MM:SS - Fix the calculation to avoid timezone issues
       const durationSec = Math.floor(correctedDurationMs / 1000);
@@ -523,8 +524,8 @@ export const BidPage: React.FC = () => {
       const formattedDuration =
         `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-      console.log("⏱️ Final formatted duration:", formattedDuration);
-      console.log("⏱️ Calculated hours:", hours, "minutes:", minutes, "seconds:", seconds);
+      logger.info("⏱️ Final formatted duration:", formattedDuration);
+      logger.info("⏱️ Calculated hours:", hours, "minutes:", minutes, "seconds:", seconds);
 
       // Set final elapsed time immediately
       setElapsedTime(formattedDuration);
@@ -532,12 +533,12 @@ export const BidPage: React.FC = () => {
       // Get the winner (highest bidder) info for the result object
       const winnerInfo = highestBidderId && bidders ?
         bidders.find(b => b.id === highestBidderId) : null;
-      console.log("🏆 Winner info:", winnerInfo);
+      logger.info("🏆 Winner info:", winnerInfo);
 
       // Calculate final price
       const highestBid = bids && bids.length > 0 ?
         bids[0].amount : (auction.settings?.startingPrice || 0);
-      console.log("💰 Final price:", highestBid);
+      logger.info("💰 Final price:", highestBid);
 
       // Create a proper auction result object that matches the Auction interface
       const auctionResult = {
@@ -550,7 +551,7 @@ export const BidPage: React.FC = () => {
         winnerName: winnerInfo ? winnerInfo.name : '',
         totalBids: bids ? bids.length : 0
       };
-      console.log("📝 Created auction result object:", auctionResult);
+      logger.info("📝 Created auction result object:", auctionResult);
 
       // Define an enum for AuctionStatus if it doesn't exist
       const AUCTION_STATUS = {
@@ -567,10 +568,10 @@ export const BidPage: React.FC = () => {
         endTime: endTime, // Use number instead of string
         result: auctionResult // Add proper result object
       };
-      console.log("🔄 Prepared updated auction object:", updatedAuction);
+      logger.info("🔄 Prepared updated auction object:", updatedAuction);
 
       // First set the auction as ended locally - do this BEFORE the database update
-      console.log("🏁 Setting auction as ended locally");
+      logger.info("🏁 Setting auction as ended locally");
       setIsAuctionEnded(true);
 
       // Set auction results for display in popup
@@ -583,42 +584,42 @@ export const BidPage: React.FC = () => {
         // Add a timestamp to ensure React detects a state change
         _updateTimestamp: Date.now()
       });
-      console.log("📊 Auction results set for popup");
+      logger.info("📊 Auction results set for popup");
 
       // Save to database
-      console.log("💾 Calling updateAuction...");
+      logger.info("💾 Calling updateAuction...");
       await updateAuction(updatedAuction);
-      console.log("✅ Database update successful");
+      logger.info("✅ Database update successful");
 
       // Verify that the updated auction now has the correct duration stored
-      console.log("Verifying updated auction result data...");
+      logger.info("Verifying updated auction result data...");
       if (auctionId) {
         // Force a refresh of the auction data to get the updated status
-        console.log("🔄 Refreshing auction data from database");
+        logger.info("🔄 Refreshing auction data from database");
         await getAuctionById(auctionId);
 
         // Log the refreshed auction data to verify duration
         if (auction && auction.result) {
-          console.log("Refreshed auction result duration:", auction.result.duration);
-          console.log("Expected duration:", correctedDurationMs);
+          logger.info("Refreshed auction result duration:", auction.result.duration);
+          logger.info("Expected duration:", correctedDurationMs);
         }
       }
 
       // Show success message
-      console.log("✉️ Showing success toast");
+      logger.info("✉️ Showing success toast");
       showToast('Phiên đấu giá đã kết thúc thành công!', 'success');
 
       // Instead of closing and reopening the popup, just update the existing one
       // by toggling the isAuctionEnded state which will cause the popup content to update
-      console.log("🔄 Updating existing popup with auction results");
+      logger.info("🔄 Updating existing popup with auction results");
 
       // If the popup is not currently visible, make it visible
       if (!shouldShowPopup && popupInitializedRef.current) {
-        console.log("🪟 Making popup visible");
+        logger.info("🪟 Making popup visible");
         setShouldShowPopup(true);
       } else if (shouldShowPopup) {
         // If popup is already visible, ensure it stays visible by setting a flag
-        console.log("🪟 Keeping existing popup open with auction results");
+        logger.info("🪟 Keeping existing popup open with auction results");
 
         // Instead of closing and reopening, force a re-render by updating auction results state
         // This will trigger the component to re-render with the new data
@@ -637,12 +638,12 @@ export const BidPage: React.FC = () => {
           // Dispatch a custom event that the popup can listen for
           const event = new CustomEvent('auctionEnded', { detail: { timestamp: Date.now() } });
           window.dispatchEvent(event);
-          console.log("🔄 Dispatched auctionEnded event to force style refresh");
+          logger.info("🔄 Dispatched auctionEnded event to force style refresh");
         }
       }
 
     } catch (error) {
-      console.error('❌ Error ending auction:', error);
+      logger.error('❌ Error ending auction:', error);
       showToast('Không thể kết thúc phiên đấu giá', 'error');
     } finally {
       setLoading(false);
@@ -668,7 +669,7 @@ export const BidPage: React.FC = () => {
 
     // Only load the auction if we haven't loaded it yet
     if (!auctionLoadedRef.current) {
-      console.log(`Loading auction with ID: ${auctionIdParam}`);
+      logger.info(`Loading auction with ID: ${auctionIdParam}`);
       getAuctionById(auctionIdParam);
       auctionLoadedRef.current = true;
     }
@@ -677,12 +678,12 @@ export const BidPage: React.FC = () => {
   // Update component state when auction data changes
   useEffect(() => {
     if (dataLoading) {
-      console.log("Loading auction data...");
+      logger.info("Loading auction data...");
       return;
     }
 
     if (dataError) {
-      console.error("Error loading auction data:", dataError);
+      logger.error("Error loading auction data:", dataError);
       return;
     }
 
@@ -696,7 +697,7 @@ export const BidPage: React.FC = () => {
         setParticipantsCount(bidders.length);
 
         // Log the bidders loaded from the database
-        console.log(`Loaded ${bidders.length} bidders from database:`, bidders);
+        logger.info(`Loaded ${bidders.length} bidders from database:`, bidders);
 
         // Filter bids for this auction and sort by timestamp (newest first)
         const auctionBids = bids.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
@@ -707,14 +708,14 @@ export const BidPage: React.FC = () => {
         // Initialize elapsed time immediately based on auction status
         if (auction.status === 'ENDED' && auction.result?.duration) {
           // For ended auctions, set elapsed time from the saved duration
-          console.log("Setting elapsed time from auction result duration:", auction.result.duration);
+          logger.info("Setting elapsed time from auction result duration:", auction.result.duration);
           const durationMs = auction.result.duration;
           const durationSec = Math.floor(durationMs / 1000);
           const hours = Math.floor(durationSec / 3600);
           const minutes = Math.floor((durationSec % 3600) / 60);
           const seconds = durationSec % 60;
           const formattedDuration = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-          console.log("Setting initial elapsed time for ended auction:", formattedDuration,
+          logger.info("Setting initial elapsed time for ended auction:", formattedDuration,
                       "hours:", hours, "minutes:", minutes, "seconds:", seconds,
                       "from duration (ms):", durationMs);
           setElapsedTime(formattedDuration);
@@ -732,7 +733,7 @@ export const BidPage: React.FC = () => {
         } else if (auction.startTime) {
           // For ongoing auctions, calculate from start time
           const initialTime = calculateElapsedTime();
-          console.log("Setting initial elapsed time for active auction:", initialTime);
+          logger.info("Setting initial elapsed time for active auction:", initialTime);
           setElapsedTime(initialTime);
         }
 
@@ -747,19 +748,19 @@ export const BidPage: React.FC = () => {
           setHighestBidderId(highestBid.bidderId);
           // Get bidder name from the bidders array
           const bidderName = bidders.find(b => b.id === highestBid.bidderId)?.name || 'Unknown';
-          console.log(`Highest bidder is ${bidderName} (ID: ${highestBid.bidderId}) with amount ${highestBid.amount}`);
+          logger.info(`Highest bidder is ${bidderName} (ID: ${highestBid.bidderId}) with amount ${highestBid.amount}`);
         } else {
           setHighestBidderId(null);
         }
 
         // Convert bids to display format and ensure they are sorted by timestamp (newest first)
         const sortedBidHistory = convertBidsToDisplayFormat(auctionBids);
-        console.log('Sorted bid history on initial load:', sortedBidHistory);
+        logger.info('Sorted bid history on initial load:', sortedBidHistory);
         setBidHistory(sortedBidHistory);
 
         setLoading(false);
       } catch (error) {
-        console.error("Error updating component state:", error);
+        logger.error("Error updating component state:", error);
         showToast("Error loading auction data: " + (error instanceof Error ? error.message : "Unknown error"), 'error', 'top-center');
         setLoading(false);
       }
@@ -799,7 +800,7 @@ export const BidPage: React.FC = () => {
       // Check if popup is still open periodically
       const checkInterval = setInterval(() => {
         if (popupWindow.closed) {
-          console.log("Popup detected as closed, updating shouldShowPopup state");
+          logger.info("Popup detected as closed, updating shouldShowPopup state");
           setShouldShowPopup(false);
           clearInterval(checkInterval);
         }
@@ -810,7 +811,7 @@ export const BidPage: React.FC = () => {
   }, [popupWindow, shouldShowPopup]);
 
   const handlePlaceBid = async (directBidAmount?: string) => {
-    console.log('handlePlaceBid called with bidAmount:', bidAmount, 'directBidAmount:', directBidAmount);
+    logger.info('handlePlaceBid called with bidAmount:', bidAmount, 'directBidAmount:', directBidAmount);
 
     // Ensure we have a selected bidder and auction
     if (!selectedBidder || !auction) {
@@ -834,7 +835,7 @@ export const BidPage: React.FC = () => {
       const currentPriceValue = bidService.parseCurrency(currentPrice);
       const bidIncrementValue = bidService.parseCurrency(bidIncrement);
       effectiveBidAmount = (currentPriceValue + bidIncrementValue).toString();
-      console.log('Using calculated bid amount:', effectiveBidAmount);
+      logger.info('Using calculated bid amount:', effectiveBidAmount);
     }
 
     // Check if we still don't have a bid amount
@@ -852,9 +853,9 @@ export const BidPage: React.FC = () => {
       const selectedBidderName = bidders.find(b => b.id === selectedBidder)?.name || '';
 
       // Use the bidService to place the bid
-      console.log(`Placing bid: ${numericAmount} VND by bidder ${selectedBidder} (${selectedBidderName})`);
+      logger.info(`Placing bid: ${numericAmount} VND by bidder ${selectedBidder} (${selectedBidderName})`);
       const newBid = await bidService.placeBid(auction.id, selectedBidder, numericAmount);
-      console.log('New bid placed successfully:', newBid);
+      logger.info('New bid placed successfully:', newBid);
 
       // Set this bidder as the last bidder
       setLastBidderId(selectedBidder);
@@ -893,7 +894,7 @@ export const BidPage: React.FC = () => {
         await fetchLatestBidHistory(auctionId);
       }
     } catch (error) {
-      console.error('Error placing bid:', error);
+      logger.error('Error placing bid:', error);
       showToast(error instanceof Error ? error.message : 'Không thể đấu giá', 'error');
     }
   };
@@ -901,11 +902,11 @@ export const BidPage: React.FC = () => {
   // Function to fetch the latest bid history from the database
   const fetchLatestBidHistory = useCallback(async (auctionId: string) => {
     try {
-      console.log(`Fetching latest bid history for auction ${auctionId}`);
+      logger.info(`Fetching latest bid history for auction ${auctionId}`);
 
       // Get latest bids using bidService
       const latestBids = await bidService.getLatestBids(auctionId);
-      console.log(`Found ${latestBids.length} bids for auction ${auctionId}`);
+      logger.info(`Found ${latestBids.length} bids for auction ${auctionId}`);
 
       if (latestBids.length === 0) {
         setBidHistory([]);
@@ -925,7 +926,7 @@ export const BidPage: React.FC = () => {
 
         // Get bidder name from the bidders array
         const bidderName = bidders.find(b => b.id === highestBid.bidderId)?.name || 'Unknown';
-        console.log(`Highest bidder is ${bidderName} (ID: ${highestBid.bidderId}) with amount ${highestBid.amount}`);
+        logger.info(`Highest bidder is ${bidderName} (ID: ${highestBid.bidderId}) with amount ${highestBid.amount}`);
 
         // Update the current price based on the highest bid
         setCurrentPrice(bidService.formatCurrency(highestBid.amount));
@@ -941,19 +942,19 @@ export const BidPage: React.FC = () => {
       // Format the bids for display
       const formattedBids = bidService.formatBidsForDisplay(latestBids, bidders);
 
-      console.log('Updated bid history from bidService:', formattedBids);
+      logger.info('Updated bid history from bidService:', formattedBids);
       setBidHistory(formattedBids);
 
       // Increment refresh trigger to force BidHistoryTable to refresh
       setRefreshTrigger(prev => prev + 1);
     } catch (error) {
-      console.error('Error fetching latest bid history:', error);
+      logger.error('Error fetching latest bid history:', error);
       showToast(error instanceof Error ? error.message : 'Không thể tải lịch sử đấu giá', 'error');
     }
   }, [bidders, auction, showToast]);
 
   const handleCancelBid = async () => {
-    console.log('handleCancelBid called');
+    logger.info('handleCancelBid called');
 
     if (!auction) {
       showToast('Không tìm thấy phiên đấu giá', 'error', 'bottom-center');
@@ -962,7 +963,7 @@ export const BidPage: React.FC = () => {
 
     // If no bidder is selected, use the last bidder
     const bidderToCancel = selectedBidder || lastBidderId;
-    console.log('Bidder to cancel:', bidderToCancel, 'Selected bidder:', selectedBidder, 'Last bidder:', lastBidderId);
+    logger.info('Bidder to cancel:', bidderToCancel, 'Selected bidder:', selectedBidder, 'Last bidder:', lastBidderId);
 
     if (!bidderToCancel) {
       showToast('Không có người đấu giá để hủy', 'error', 'bottom-center');
@@ -987,11 +988,11 @@ export const BidPage: React.FC = () => {
 
       // Get the last bid
       const lastBid = latestBids[0];
-      console.log('Last bid to cancel:', lastBid);
+      logger.info('Last bid to cancel:', lastBid);
 
       // Use bidService to cancel the bid
       await bidService.cancelBid(auction.id, lastBid.id);
-      console.log('Bid removed successfully');
+      logger.info('Bid removed successfully');
 
       // Get updated bids after cancellation
       const updatedBids = await bidService.getLatestBids(auction.id);
@@ -1003,7 +1004,7 @@ export const BidPage: React.FC = () => {
       if (updatedBids.length > 0) {
         const newLastBidder = updatedBids[0].bidderId;
         setLastBidderId(newLastBidder);
-        console.log('New last bidder set to:', newLastBidder);
+        logger.info('New last bidder set to:', newLastBidder);
 
         // Update the highest bidder
         if (highestBid) {
@@ -1036,7 +1037,7 @@ export const BidPage: React.FC = () => {
 
       // Increment refresh trigger to force BidHistoryTable to refresh
       setRefreshTrigger(prev => prev + 1);
-      console.log('Refresh trigger incremented to force UI update');
+      logger.info('Refresh trigger incremented to force UI update');
 
       // Refresh data to get the updated auction and bids
       if (auctionId) {
@@ -1046,7 +1047,7 @@ export const BidPage: React.FC = () => {
         await fetchLatestBidHistory(auctionId);
       }
     } catch (error) {
-      console.error('Error canceling bid:', error);
+      logger.error('Error canceling bid:', error);
       showToast(error instanceof Error ? error.message : 'Không thể hủy đấu giá', 'error', 'bottom-center');
     }
   };
@@ -1104,7 +1105,7 @@ export const BidPage: React.FC = () => {
 
   // Create a wrapper for setBidAmount to add logging
   const handleBidAmountChange = (amount: string) => {
-    console.log('Bid amount changed to:', amount);
+    logger.info('Bid amount changed to:', amount);
     setBidAmount(amount);
   };
 
@@ -1126,7 +1127,7 @@ export const BidPage: React.FC = () => {
         throw new Error('Export failed');
       }
     } catch (error) {
-      console.error('Error exporting data to Excel:', error);
+      logger.error('Error exporting data to Excel:', error);
       showToast('Không thể xuất dữ liệu Excel. Vui lòng thử lại.', 'error');
     }
   };
@@ -1134,7 +1135,7 @@ export const BidPage: React.FC = () => {
   // Replace with a function to manually fetch bid history
   const handleRefreshBidHistory = () => {
     if (auctionId) {
-      console.log('Manually refreshing bid history');
+      logger.info('Manually refreshing bid history');
       fetchLatestBidHistory(auctionId);
     }
   };
@@ -1151,11 +1152,11 @@ export const BidPage: React.FC = () => {
   useEffect(() => {
     // Always keep popup timer synchronized with the actual timer
     if (isTimerRunning && timeLeft > 0) {
-      console.log('Updating popup timer value to match main timer:', timeLeft);
+      logger.info('Updating popup timer value to match main timer:', timeLeft);
       setPopupTimerValue(timeLeft);
     } else if (!isTimerRunning && bidTimerInitialTime > 0) {
       // Use the correct initial time when timer is not running
-      console.log('Setting popup timer to initial time:', bidTimerInitialTime);
+      logger.info('Setting popup timer to initial time:', bidTimerInitialTime);
       setPopupTimerValue(bidTimerInitialTime);
     }
   }, [timeLeft, isTimerRunning, bidTimerInitialTime]);
@@ -1163,11 +1164,11 @@ export const BidPage: React.FC = () => {
   // Modify handleShowPopup to ensure the popup is properly initialized
   const handleShowPopup = () => {
     if (!popupInitializedRef.current) {
-      console.log("Popup system not initialized yet, initializing now");
+      logger.info("Popup system not initialized yet, initializing now");
       popupInitializedRef.current = true;
     }
 
-    console.log("Opening auction popup manually");
+    logger.info("Opening auction popup manually");
     try {
       const newPopupWindow = openPopup();
       if (newPopupWindow) {
@@ -1176,10 +1177,10 @@ export const BidPage: React.FC = () => {
 
         // Make sure the popup has the correct timer value immediately
         if (isTimerRunning && timeLeft > 0) {
-          console.log("Setting popup timer to current time:", timeLeft);
+          logger.info("Setting popup timer to current time:", timeLeft);
           setPopupTimerValue(timeLeft);
         } else {
-          console.log("Setting popup timer to initial time:", bidTimerInitialTime);
+          logger.info("Setting popup timer to initial time:", bidTimerInitialTime);
           setPopupTimerValue(bidTimerInitialTime);
         }
 
@@ -1191,11 +1192,11 @@ export const BidPage: React.FC = () => {
           }
         }, 500);
       } else {
-        console.error("Failed to open popup window - it may have been blocked by the browser");
+        logger.error("Failed to open popup window - it may have been blocked by the browser");
         showToast("Không thể mở cửa sổ phụ. Vui lòng kiểm tra cài đặt trình duyệt.", "error");
       }
     } catch (e) {
-      console.error("Error opening popup:", e);
+      logger.error("Error opening popup:", e);
       showToast("Lỗi khi mở cửa sổ phụ. Vui lòng thử lại.", "error");
     }
   };
@@ -1295,21 +1296,21 @@ export const BidPage: React.FC = () => {
                 highestBidderId={highestBidderId}
                 isTimerEnded={isAuctionEnded}
                 onStartBid={() => {
-                  console.log('Bat Dau button clicked');
+                  logger.info('Bat Dau button clicked');
                   // Allow timer to start even without a selected bidder
                   const newTimerValue = auction?.settings?.bidDuration || 60;
-                  console.log('Setting timer value to:', newTimerValue);
+                  logger.info('Setting timer value to:', newTimerValue);
 
                   // Check if timer exists, if not create it
                   if (!timerService.timerExists(timerIdRef.current)) {
-                    console.log(`Timer ${timerIdRef.current} doesn't exist, creating it first`);
+                    logger.info(`Timer ${timerIdRef.current} doesn't exist, creating it first`);
                     timerService.createTimer(timerIdRef.current, newTimerValue, {
                       onTick: (remainingTime) => {
-                        console.log(`BidPage: Timer tick received: ${remainingTime}s remaining`);
+                        logger.info(`BidPage: Timer tick received: ${remainingTime}s remaining`);
                         setTimeLeft(remainingTime);
                       },
                       onComplete: () => {
-                        console.log('BidPage: Timer completed');
+                        logger.info('BidPage: Timer completed');
                         setIsTimerRunning(false);
                         setPopupTimerValue(0);
                         localStorage.removeItem(timerValueKey);
@@ -1321,27 +1322,27 @@ export const BidPage: React.FC = () => {
                   }
 
                   resetTimer(newTimerValue);
-                  console.log('Starting timer...');
+                  logger.info('Starting timer...');
                   startTimer();
 
                   // Explicitly update popup timer when starting timer
                   setPopupTimerValue(newTimerValue);
                 }}
                 onResetTimer={() => {
-                  console.log('Reset Timer button clicked');
+                  logger.info('Reset Timer button clicked');
                   const newTimerValue = auction?.settings?.bidDuration || 60;
-                  console.log('Resetting timer to:', newTimerValue);
+                  logger.info('Resetting timer to:', newTimerValue);
 
                   // If timer doesn't exist, create it before resetting
                   if (!timerService.timerExists(timerIdRef.current)) {
-                    console.log(`Timer ${timerIdRef.current} doesn't exist, creating it before reset`);
+                    logger.info(`Timer ${timerIdRef.current} doesn't exist, creating it before reset`);
                     timerService.createTimer(timerIdRef.current, newTimerValue, {
                       onTick: (remainingTime) => {
-                        console.log(`BidPage: Timer tick received: ${remainingTime}s remaining`);
+                        logger.info(`BidPage: Timer tick received: ${remainingTime}s remaining`);
                         setTimeLeft(remainingTime);
                       },
                       onComplete: () => {
-                        console.log('BidPage: Timer completed');
+                        logger.info('BidPage: Timer completed');
                         setIsTimerRunning(false);
                         setPopupTimerValue(0);
                         localStorage.removeItem(timerValueKey);
@@ -1447,7 +1448,7 @@ export const BidPage: React.FC = () => {
                 isAuctionEnded={isAuctionEnded}
                 timerValue={popupTimerValue}
                 onClose={() => {
-                  console.log('Popup closed by user');
+                  logger.info('Popup closed by user');
                   closePopup();
                 }}
                 // Pass auction result data

@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import logger from './loggerService';
 import { Auction, Bid, Bidder } from '@types';
 
 /**
@@ -213,7 +214,7 @@ class ExportExcelService {
 
       return true;
     } catch (error) {
-      console.error('Error exporting auction data to Excel:', error);
+      logger.error('Error exporting auction data to Excel:', error);
       return false;
     }
   }

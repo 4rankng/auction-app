@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import logger from '../services/loggerService';
 
 interface BidHistory {
   id: number;
@@ -64,12 +65,12 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
       setLoading(true);
       setError(null);
 
-      console.log(`Fetching bid history for auction ${auctionId}`);
+      logger.info(`Fetching bid history for auction ${auctionId}`);
 
       // For demo purposes, we're simulating an API call with localStorage
       const storedDatabase = localStorage.getItem('auction_app_db');
       if (!storedDatabase) {
-        console.log('No database found in localStorage');
+        logger.info('No database found in localStorage');
         setBidHistory([]);
         setLoading(false);
         return;
@@ -79,7 +80,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
 
       // Check if database.auctions exists and has the specified auction
       if (!database.auctions || !database.auctions[auctionId]) {
-        console.log(`Auction with ID ${auctionId} not found in database`);
+        logger.info(`Auction with ID ${auctionId} not found in database`);
         setBidHistory([]);
         setLoading(false);
         return;
@@ -90,7 +91,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
       // Get all bids for this auction
       // Make sure auction.bids exists before calling Object.values
       const allBids = auction.bids ? Object.values(auction.bids) : [];
-      console.log(`Found ${allBids.length} bids for auction ${auctionId}`);
+      logger.info(`Found ${allBids.length} bids for auction ${auctionId}`);
 
       // Format the bids for display
       const formattedBids = allBids.map((bid: any, index: number) => ({
@@ -106,11 +107,11 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
       // Sort bids using the helper function
       const sortedBids = sortBidHistory(formattedBids);
 
-      console.log('Formatted and sorted bid history:', sortedBids);
+      logger.info('Formatted and sorted bid history:', sortedBids);
       setBidHistory(sortedBids);
       setLastRefreshTime(Date.now());
     } catch (err) {
-      console.error('Error fetching bid history:', err);
+      logger.error('Error fetching bid history:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch bid history');
     } finally {
       setLoading(false);
@@ -121,7 +122,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
   // This prevents infinite loops by not including fetchBidHistory in dependencies
   useEffect(() => {
     if (auctionId) {
-      console.log(`Refreshing bid history due to trigger change: ${refreshTrigger}`);
+      logger.info(`Refreshing bid history due to trigger change: ${refreshTrigger}`);
       fetchBidHistory();
     }
   }, [auctionId, refreshTrigger, fetchBidHistory]); // Include fetchBidHistory as it's memoized with useCallback
@@ -129,7 +130,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
   // Update bid history when initialData changes
   useEffect(() => {
     if (initialData.length > 0) {
-      console.log('Updating bid history with new initialData:', initialData);
+      logger.info('Updating bid history with new initialData:', initialData);
 
       // Ensure all initialData items have rawAmount if not already present
       const enhancedData = initialData.map(bid => {
@@ -145,7 +146,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
       // Sort initialData using the helper function
       const sortedData = sortBidHistory(enhancedData);
 
-      console.log('Sorted bid history:', sortedData);
+      logger.info('Sorted bid history:', sortedData);
       setBidHistory(sortedData);
       setLoading(false);
     }

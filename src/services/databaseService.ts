@@ -1,3 +1,5 @@
+import logger from './loggerService';
+
 import {
   Database,
   Auction,
@@ -54,7 +56,7 @@ export class DatabaseService {
       try {
         return JSON.parse(stored);
       } catch (e) {
-        console.error('Error parsing database from localStorage:', e);
+        logger.error('Error parsing database from localStorage:', e);
       }
     }
 
@@ -269,9 +271,9 @@ export class DatabaseService {
     this.saveDatabase();
 
     // More detailed logging
-    console.log(`Bid created: ID=${id}, bidder=${bidder.name}, amount=${amount.toLocaleString('vi-VN')} VND`);
-    console.log(`Updated auction ${auctionId} current price to ${amount.toLocaleString('vi-VN')} VND`);
-    console.log(`Total bids for auction ${auctionId}: ${Object.values(auction.bids).length}`);
+    logger.info(`Bid created: ID=${id}, bidder=${bidder.name}, amount=${amount.toLocaleString('vi-VN')} VND`);
+    logger.info(`Updated auction ${auctionId} current price to ${amount.toLocaleString('vi-VN')} VND`);
+    logger.info(`Total bids for auction ${auctionId}: ${Object.values(auction.bids).length}`);
 
     return newBid;
   }
@@ -314,7 +316,7 @@ export class DatabaseService {
     // Get the bid to be removed
     const bidToRemove = auction.bids[bidId];
     const bidderName = auction.bidders[bidToRemove.bidderId]?.name || 'Unknown';
-    console.log(`Removing bid: ID=${bidId}, bidder=${bidderName}, amount=${bidToRemove.amount.toLocaleString('vi-VN')} VND`);
+    logger.info(`Removing bid: ID=${bidId}, bidder=${bidderName}, amount=${bidToRemove.amount.toLocaleString('vi-VN')} VND`);
 
     // Remove the bid from the auction
     delete auction.bids[bidId];
@@ -326,16 +328,16 @@ export class DatabaseService {
     // Update the auction's current price to the highest remaining bid or the starting price
     if (remainingBids.length > 0) {
       auction.currentPrice = (remainingBids[0] as Bid).amount;
-      console.log(`Updated auction ${auction.id} current price to ${auction.currentPrice.toLocaleString('vi-VN')} VND (highest remaining bid)`);
+      logger.info(`Updated auction ${auction.id} current price to ${auction.currentPrice.toLocaleString('vi-VN')} VND (highest remaining bid)`);
     } else {
       auction.currentPrice = auction.settings.startingPrice;
-      console.log(`Updated auction ${auction.id} current price to ${auction.currentPrice.toLocaleString('vi-VN')} VND (starting price)`);
+      logger.info(`Updated auction ${auction.id} current price to ${auction.currentPrice.toLocaleString('vi-VN')} VND (starting price)`);
     }
 
     // Save changes to localStorage
     this.saveDatabase();
-    console.log(`Bid ${bidId} removed successfully`);
-    console.log(`Total bids for auction ${auctionId}: ${Object.values(auction.bids).length}`);
+    logger.info(`Bid ${bidId} removed successfully`);
+    logger.info(`Total bids for auction ${auctionId}: ${Object.values(auction.bids).length}`);
   }
 
   private getNextBidderId(auction: any): string {
@@ -393,7 +395,7 @@ export class DatabaseService {
     );
 
     if (existingAuctioneer) {
-      console.log(`Auctioneer with name "${trimmedName}" already exists, returning existing record`);
+      logger.info(`Auctioneer with name "${trimmedName}" already exists, returning existing record`);
       return existingAuctioneer;
     }
 

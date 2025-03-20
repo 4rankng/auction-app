@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheetManager } from 'styled-components';
 import NewWindow from 'react-new-window';
+import logger from '../services/loggerService';
 import styled from 'styled-components';
 import CompanyBanner from './CompanyBanner';
 
@@ -640,7 +641,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
   //   // Check if timerValue has changed - this is the key optimization
   //   if (timerValue !== undefined && timerValue !== prevTimerValueRef.current) {
-  //     console.log("AuctionPopupRenderer: New timer value received:", timerValue);
+  //     logger.info("AuctionPopupRenderer: New timer value received:", timerValue);
 
   //     // Update the state and ref with new value
   //     setRemainingTime(timerValue);
@@ -654,7 +655,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
   //     // Start a new countdown if value is > 0
   //     if (timerValue > 0) {
-  //       console.log("AuctionPopupRenderer: Starting new countdown");
+  //       logger.info("AuctionPopupRenderer: Starting new countdown");
   //       timerRef.current = setInterval(() => {
   //         setRemainingTime(prev => {
   //           const newValue = Math.max(0, prev - 1);
@@ -680,7 +681,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
   // Remove the timer subscription which is causing conflicts
   useEffect(() => {
     // This effect should only run once when the component mounts
-    console.log("AuctionPopupRenderer: Component mounted");
+    logger.info("AuctionPopupRenderer: Component mounted");
 
     // Set a flag to track that we're rendering a popup to prevent duplicates
     popupCreatedRef.current = true;
@@ -705,7 +706,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
     // Clean up subscription and event listeners on unmount
     return () => {
-      console.log("AuctionPopupRenderer: Component unmounting, cleanup");
+      logger.info("AuctionPopupRenderer: Component unmounting, cleanup");
 
       // Remove timer cleanup since we're not using an internal timer anymore
       // if (timerRef.current) {
@@ -734,7 +735,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
       if (containerRef.current && containerRef.current.ownerDocument) {
         const popupDocument = containerRef.current.ownerDocument;
 
-        console.log("AuctionPopupRenderer: Applying styles to popup");
+        logger.info("AuctionPopupRenderer: Applying styles to popup");
 
         // Check if the font link is already in the document
         const existingLink = popupDocument.querySelector('link[href*="fonts.googleapis.com"]');
@@ -747,14 +748,14 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
           fontLink.crossOrigin = 'anonymous';
 
           popupDocument.head.appendChild(fontLink);
-          console.log("AuctionPopupRenderer: Font link added to popup window");
+          logger.info("AuctionPopupRenderer: Font link added to popup window");
         }
 
         // Always add global styles directly to ensure basic styling works
         const styleTag = popupDocument.createElement('style');
         styleTag.textContent = globalStyles;
         popupDocument.head.appendChild(styleTag);
-        console.log("AuctionPopupRenderer: Global styles added to popup window");
+        logger.info("AuctionPopupRenderer: Global styles added to popup window");
 
         // Mark styles as applied
         stylesAppliedRef.current = true;
@@ -777,7 +778,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
       // Check if the auction end state has changed
       if (isAuctionEnded !== prevEndedStateRef.current) {
-        console.log("AuctionPopupRenderer: Auction end state changed to", isAuctionEnded);
+        logger.info("AuctionPopupRenderer: Auction end state changed to", isAuctionEnded);
         prevEndedStateRef.current = isAuctionEnded;
 
         // If the auction just ended, reapply styles to ensure they persist
@@ -792,7 +793,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
           const styleTag = popupWindow.document.createElement('style');
           styleTag.textContent = globalStyles;
           popupWindow.document.head.appendChild(styleTag);
-          console.log("AuctionPopupRenderer: Global styles reapplied after auction end");
+          logger.info("AuctionPopupRenderer: Global styles reapplied after auction end");
 
           // Add class to body for auction-ended state
           popupWindow.document.body.classList.add('auction-ended');
@@ -824,14 +825,14 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
   useEffect(() => {
     // Function to handle the auction ended event
     const handleAuctionEnded = (event: any) => {
-      console.log("AuctionPopupRenderer: Received auctionEnded event", event.detail);
+      logger.info("AuctionPopupRenderer: Received auctionEnded event", event.detail);
 
       // Make sure we have access to the popup document
       if (containerRef.current?.ownerDocument) {
         const popupDocument = containerRef.current.ownerDocument;
         const popupWindow = popupDocument.defaultView as Window;
 
-        console.log("AuctionPopupRenderer: Reapplying styles to popup after auction ended event");
+        logger.info("AuctionPopupRenderer: Reapplying styles to popup after auction ended event");
 
         // Force reapplication of styles
         stylesAppliedRef.current = false;
@@ -888,11 +889,11 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
   // Update the handleClose function to be more robust when auction ends
   const handleClose = () => {
-    console.log("AuctionPopupRenderer: handleClose called, isAuctionEnded:", isAuctionEnded, "endHandledRef:", endHandledRef.current);
+    logger.info("AuctionPopupRenderer: handleClose called, isAuctionEnded:", isAuctionEnded, "endHandledRef:", endHandledRef.current);
 
     // If the auction just ended and this is the first close event, ignore it
     if (isAuctionEnded && endHandledRef.current) {
-      console.log("AuctionPopupRenderer: Ignoring close event because auction just ended");
+      logger.info("AuctionPopupRenderer: Ignoring close event because auction just ended");
       // Reset the flag so future close events work
       endHandledRef.current = false;
       return;
@@ -907,7 +908,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
   // Add a specific effect to handle changes to isAuctionEnded that forces a re-render
   useEffect(() => {
-    console.log("AuctionPopupRenderer: isAuctionEnded changed to", isAuctionEnded);
+    logger.info("AuctionPopupRenderer: isAuctionEnded changed to", isAuctionEnded);
 
     // If the auction has ended, force a content update
     if (isAuctionEnded && containerRef.current?.ownerDocument) {
@@ -939,7 +940,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
   useEffect(() => {
     // Combine all key props that might affect styling into a dependency string
     const propsString = `${isAuctionEnded}-${highestBidderId}-${winnerId}-${finalPrice}-${totalBids}`;
-    console.log("AuctionPopupRenderer: Key props changed:", propsString);
+    logger.info("AuctionPopupRenderer: Key props changed:", propsString);
 
     // Only reapply styles if the popup container exists
     if (containerRef.current?.ownerDocument) {
@@ -950,7 +951,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
         // Check if we need to add global styles
         if (!stylesAppliedRef.current || isAuctionEnded) {
-          console.log("AuctionPopupRenderer: Reapplying styles after props change");
+          logger.info("AuctionPopupRenderer: Reapplying styles after props change");
 
           // Create a unique ID for the style tag to avoid duplicates
           const styleId = 'auction-popup-global-styles';
@@ -990,7 +991,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
             resizable: false
           }}
           onUnload={handleClose}
-          onBlock={() => console.log("Popup was blocked!")}
+          onBlock={() => logger.info("Popup was blocked!")}
           name="auction_display"
           center="parent"
           copyStyles={false}

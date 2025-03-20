@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import logger from '../services/loggerService';
 import { Auctioneer } from '@types';
 import { auctioneerService } from '@services/auctioneerService';
 
@@ -18,7 +19,7 @@ export const useAuctioneers = () => {
       const data = await auctioneerService.getAuctioneers();
       setAuctioneers(data);
     } catch (err) {
-      console.error('Error loading auctioneers:', err);
+      logger.error('Error loading auctioneers:', err);
       setError(err instanceof Error ? err.message : 'Error loading auctioneers');
     } finally {
       setLoading(false);
@@ -37,7 +38,7 @@ export const useAuctioneers = () => {
 
       return newAuctioneer;
     } catch (err) {
-      console.error('Error creating auctioneer:', err);
+      logger.error('Error creating auctioneer:', err);
       setError(err instanceof Error ? err.message : 'Error creating auctioneer');
       throw err;
     } finally {
@@ -57,7 +58,7 @@ export const useAuctioneers = () => {
 
       return updatedAuctioneer;
     } catch (err) {
-      console.error('Error updating auctioneer:', err);
+      logger.error('Error updating auctioneer:', err);
       setError(err instanceof Error ? err.message : 'Error updating auctioneer');
       throw err;
     } finally {
@@ -77,7 +78,7 @@ export const useAuctioneers = () => {
       }
       return success;
     } catch (err) {
-      console.error('Error deleting auctioneer:', err);
+      logger.error('Error deleting auctioneer:', err);
       setError(err instanceof Error ? err.message : 'Error deleting auctioneer');
       throw err;
     } finally {

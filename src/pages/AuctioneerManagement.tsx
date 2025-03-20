@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuctioneers } from '@hooks/useAuctioneers';
 import { Auctioneer } from '@types';
 import { Modal, Button } from 'react-bootstrap';
+import logger from '../services/loggerService';
 import './AuctioneerManagement.css';
 
 const AuctioneerManagement: React.FC = () => {
@@ -111,7 +112,7 @@ const AuctioneerManagement: React.FC = () => {
       setShowDeleteModal(false);
       setAuctioneerToDelete(null);
     } catch (err) {
-      console.error('Error deleting auctioneer:', err);
+      logger.error('Error deleting auctioneer:', err);
       setFormError(err instanceof Error ? err.message : 'Không thể xóa đấu giá viên. Vui lòng thử lại sau.');
     }
   };

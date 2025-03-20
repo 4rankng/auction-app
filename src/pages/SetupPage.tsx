@@ -8,6 +8,7 @@ import './SetupPage.css';
 
 import { parseBiddersFromExcel } from '@utils/excelParser';
 import { Modal, Button, ListGroup } from 'react-bootstrap';
+import logger from '../services/loggerService';
 import { databaseService } from '@services/databaseService';
 import { errorService, ErrorType } from '@services/errorService';
 import { toastService } from '@services/toastService';
@@ -144,7 +145,7 @@ export default function SetupPage() {
         try {
           await databaseService.deleteBidder(setupAuctionId, bidder.id);
         } catch (err) {
-          console.warn(`Could not delete bidder ${bidder.id}:`, err);
+          logger.warn(`Could not delete bidder ${bidder.id}:`, err);
         }
       }
 
@@ -159,7 +160,7 @@ export default function SetupPage() {
 
       toastService.success(`Đã nhập thành công ${bidderData.length} người tham gia`);
     } catch (error) {
-      console.error('Error importing bidders:', error);
+      logger.error('Error importing bidders:', error);
       // Show toast message directly
       toastService.error(errorService.formatErrorMessage(error) || 'Không thể nhập người tham gia');
 
@@ -203,7 +204,7 @@ export default function SetupPage() {
 
       toastService.success('Đã thêm người tham gia thành công');
     } catch (error) {
-      console.error('Error adding bidder:', error);
+      logger.error('Error adding bidder:', error);
       errorService.handleError(
         errorService.formatErrorMessage(error) || 'Không thể thêm người tham gia',
         ErrorType.DATABASE,
@@ -326,7 +327,7 @@ export default function SetupPage() {
       // Navigate to the bidding page with the auction ID
       navigate(`/bid?id=${setupAuctionId}`);
     } catch (error) {
-      console.error('Error starting auction:', error);
+      logger.error('Error starting auction:', error);
 
       // Show explicit toast error message
       const errorMessage = errorService.formatErrorMessage(error) || 'Không thể bắt đầu đấu giá. Vui lòng thử lại.';

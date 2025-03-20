@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import logger from '../services/loggerService';
 import { Auctioneer } from '@types';
 import { auctioneerService } from '@services/auctioneerService';
 
@@ -22,7 +23,7 @@ const AuctioneerSelector: React.FC<AuctioneerSelectorProps> = ({ value, onChange
         const data = await auctioneerService.getAuctioneers();
         setAuctioneers(data || []);
       } catch (err) {
-        console.error('Error loading auctioneers:', err);
+        logger.error('Error loading auctioneers:', err);
       } finally {
         setLoading(false);
       }
@@ -58,7 +59,7 @@ const AuctioneerSelector: React.FC<AuctioneerSelectorProps> = ({ value, onChange
     if (selectedAuctioneer) {
       onChange(selectedId, selectedAuctioneer.name);
     } else {
-      console.error(`Auctioneer with ID ${selectedId} not found`);
+      logger.error(`Auctioneer with ID ${selectedId} not found`);
       onChange(selectedId, "Unknown");
     }
   };

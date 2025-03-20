@@ -1,4 +1,5 @@
 import React from 'react';
+import logger from '../services/loggerService';
 import './AuctionResult.css';
 import { AuctionResult as AuctionResultType } from '@types';
 
@@ -40,7 +41,7 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
       // Otherwise try to parse it as a date
       return new Date(dateInput).toLocaleString('vi-VN');
     } catch (error) {
-      console.error('Error formatting date:', error);
+      logger.error('Error formatting date:', error);
       return 'N/A';
     }
   };

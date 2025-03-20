@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { createRoot, Root } from 'react-dom/client';
+import logger from '../services/loggerService';
 
 interface RenderOptions {
   onRender?: () => void;
@@ -21,7 +22,7 @@ export const renderInPopup = (
   options: RenderOptions = {}
 ) => {
   if (!popup || popup.closed) {
-    console.error('Cannot render in a closed or invalid popup window');
+    logger.error('Cannot render in a closed or invalid popup window');
     return null;
   }
 
@@ -33,7 +34,7 @@ export const renderInPopup = (
     attempts++;
 
     if (attempts > maxAttempts) {
-      console.error('Failed to render in popup: Maximum attempts exceeded');
+      logger.error('Failed to render in popup: Maximum attempts exceeded');
       return;
     }
 
@@ -70,11 +71,11 @@ export const renderInPopup = (
             delete (popup as any).__reactRoot;
             if (options.onCleanup) options.onCleanup();
           } catch (error) {
-            console.error('Error during React cleanup in popup:', error);
+            logger.error('Error during React cleanup in popup:', error);
           }
         };
       } catch (e) {
-        console.error('Error creating React root:', e);
+        logger.error('Error creating React root:', e);
         // Fallback to legacy render for older React versions
         if (!(popup as any).__reactRootLegacy) {
           // Only render if we haven't already set up a legacy render
@@ -91,14 +92,14 @@ export const renderInPopup = (
             }
             if (options.onCleanup) options.onCleanup();
           } catch (error) {
-            console.error('Error during React cleanup in popup:', error);
+            logger.error('Error during React cleanup in popup:', error);
           }
         };
       }
 
       if (options.onRender) options.onRender();
     } catch (error) {
-      console.error('Failed to render in popup:', error);
+      logger.error('Failed to render in popup:', error);
       setTimeout(tryRender, 50);
     }
   };
@@ -119,7 +120,7 @@ export const cleanupPopupRendering = (popup: Window) => {
       delete (popup as any).__reactCleanup;
     }
   } catch (error) {
-    console.error('Error cleaning up popup rendering:', error);
+    logger.error('Error cleaning up popup rendering:', error);
   }
 };
 

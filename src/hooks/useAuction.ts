@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import logger from '../services/loggerService';
 import { databaseService } from '@services/databaseService';
 import { bidService } from '@services/bidService';
 import { Auction, Bidder, Bid, AuctionSettings } from '@types';
@@ -75,14 +76,14 @@ export function useAuction() {
 
         setError(null);
         // Reduce logging to prevent console spam
-        console.log(`Loaded auction: ${foundAuction.description} (ID: ${auctionId})`);
+        logger.info(`Loaded auction: ${foundAuction.description} (ID: ${auctionId})`);
       } else {
-        console.error(`Auction with ID ${auctionId} not found`);
+        logger.error(`Auction with ID ${auctionId} not found`);
         setAuction(null);
         setError(`Auction with ID ${auctionId} not found`);
       }
     } catch (err) {
-      console.error('Error getting auction by ID:', err);
+      logger.error('Error getting auction by ID:', err);
       setError(err instanceof Error ? err.message : `Failed to get auction with ID ${auctionId}`);
     } finally {
       setLoading(false);
@@ -150,7 +151,7 @@ export function useAuction() {
       await refreshData(); // Refresh to get updated auction data
       return newBid;
     } catch (err) {
-      console.error('Error placing bid:', err);
+      logger.error('Error placing bid:', err);
       setError(err instanceof Error ? err.message : 'Failed to place bid');
       throw err;
     }
@@ -165,7 +166,7 @@ export function useAuction() {
       await refreshData(); // Refresh to get updated auction data
       return true;
     } catch (err) {
-      console.error('Error removing bid:', err);
+      logger.error('Error removing bid:', err);
       setError(err instanceof Error ? err.message : 'Failed to remove bid');
       throw err;
     }
@@ -189,7 +190,7 @@ export function useAuction() {
       setBidders([]);
 
     } catch (error) {
-      console.error('Error clearing bidders:', error);
+      logger.error('Error clearing bidders:', error);
       setError(error instanceof Error ? error.message : 'Failed to clear bidders');
       throw error;
     }

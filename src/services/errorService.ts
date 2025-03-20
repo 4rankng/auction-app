@@ -1,3 +1,5 @@
+import logger from './loggerService';
+
 /**
  * Error Management Service
  *
@@ -39,7 +41,7 @@ class ErrorService {
     };
 
     // Always log to console for debugging
-    console.error(`[${type}] ${message}`, originalError || '');
+    logger.error(`[${type}] ${message}`, originalError || '');
 
     // Add to internal error log
     this.errors.push(appError);
@@ -94,7 +96,7 @@ class ErrorService {
       try {
         listener(error);
       } catch (err) {
-        console.error('Error in error listener:', err);
+        logger.error('Error in error listener:', err);
       }
     });
   }

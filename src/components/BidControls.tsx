@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './BidControls.css';
+import logger from '../services/loggerService';
 
 // Add keyframes animation for the bid button
 const bidButtonAnimation = `
@@ -96,12 +97,12 @@ const BidControls: React.FC<BidControlsProps> = ({
     switch (bidMethod) {
       case 'basePrice':
         // For the first bid, return the exact current price
-        console.log('Base price method selected, returning:', currentPrice);
+        logger.info('Base price method selected, returning:', currentPrice);
         return currentPrice;
       case 'stepPrice': {
         // Calculate the step price and ensure it's properly formatted
         const stepPrice = (currentPriceValue + (bidIncrementValue * steps));
-        console.log('Calculated step price:', stepPrice, 'from current:', currentPriceValue, 'increment:', bidIncrementValue, 'steps:', steps);
+        logger.info('Calculated step price:', stepPrice, 'from current:', currentPriceValue, 'increment:', bidIncrementValue, 'steps:', steps);
         return stepPrice.toLocaleString('vi-VN');
       }
       case 'customPrice':
@@ -151,7 +152,7 @@ const BidControls: React.FC<BidControlsProps> = ({
   const handleSubmit = () => {
     // Calculate the bid amount based on the selected method
     const calculatedAmount = calculateBidAmount();
-    console.log('Calculated bid amount:', calculatedAmount);
+    logger.info('Calculated bid amount:', calculatedAmount);
 
     // Format the amount properly for validation and submission
     let formattedAmount = calculatedAmount;
@@ -161,20 +162,20 @@ const BidControls: React.FC<BidControlsProps> = ({
 
     // Get the numeric amount without VND
     const numericAmount = formattedAmount.replace(' VND', '');
-    console.log('Validating bid amount:', numericAmount);
+    logger.info('Validating bid amount:', numericAmount);
 
     // Validate the bid amount
     if (!validateBid(numericAmount)) {
-      console.log('Bid validation failed');
+      logger.info('Bid validation failed');
       return;
     }
 
     // Update the bid amount in the parent component
-    console.log('Setting bid amount:', numericAmount);
+    logger.info('Setting bid amount:', numericAmount);
     onBidAmountChange(numericAmount);
 
     // Call the parent's onPlaceBid function with the validated amount
-    console.log('Calling onPlaceBid with amount:', numericAmount);
+    logger.info('Calling onPlaceBid with amount:', numericAmount);
     onPlaceBid(numericAmount);
 
     // Reset the form after successful submission

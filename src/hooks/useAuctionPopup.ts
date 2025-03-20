@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import logger from '../services/loggerService';
 import * as popupService from '@services/popupService';
 
 // HTML content for the popup window
@@ -57,21 +58,21 @@ export const useAuctionPopup = (options: UseAuctionPopupOptions = {}) => {
       const isClosed = popupWindow.closed;
 
       if (!isClosed) {
-        console.log("Popup already open, focusing existing window");
+        logger.info("Popup already open, focusing existing window");
         try {
           // Focus the window to bring it to front
           popupWindow.focus();
           return popupWindow;
         } catch (e) {
-          console.log("Error focusing existing popup, will create new one:", e);
+          logger.info("Error focusing existing popup, will create new one:", e);
           // Continue to create a new popup if focusing fails
         }
       } else {
-        console.log("Existing popup reference found but window is closed, creating new one");
+        logger.info("Existing popup reference found but window is closed, creating new one");
       }
     }
 
-    console.log("Opening new popup window");
+    logger.info("Opening new popup window");
     lastOperationRef.current = 'open';
     // Track creation time to prevent immediate closing
     popupCreationTimeRef.current = Date.now();
@@ -97,7 +98,7 @@ export const useAuctionPopup = (options: UseAuctionPopupOptions = {}) => {
       // Add an onbeforeunload event to detect when the popup is closed
       try {
         popup.onbeforeunload = () => {
-          console.log("Popup is being closed by user");
+          logger.info("Popup is being closed by user");
           // Set a timeout to update our state after the popup is closed
           setTimeout(() => {
             setIsOpen(false);
@@ -105,14 +106,14 @@ export const useAuctionPopup = (options: UseAuctionPopupOptions = {}) => {
           }, 100);
         };
       } catch (e) {
-        console.warn("Could not attach onbeforeunload event to popup:", e);
+        logger.warn("Could not attach onbeforeunload event to popup:", e);
       }
 
       // Set up polling to detect closed popup in case onbeforeunload doesn't fire
       const checkInterval = setInterval(() => {
         if (popup.closed) {
           clearInterval(checkInterval);
-          console.log("Popup closed (detected by polling)");
+          logger.info("Popup closed (detected by polling)");
           setIsOpen(false);
           setPopupWindow(null);
         }
@@ -132,11 +133,11 @@ export const useAuctionPopup = (options: UseAuctionPopupOptions = {}) => {
     // Prevent closing if we just opened (potential loop)
     const timeSinceCreation = Date.now() - popupCreationTimeRef.current;
     if (lastOperationRef.current === 'open' && timeSinceCreation < 500) {
-      console.log(`Skipping close as popup was just opened (${timeSinceCreation}ms ago)`);
+      logger.info(`Skipping close as popup was just opened (${timeSinceCreation}ms ago)`);
       return;
     }
 
-    console.log("Closing popup window");
+    logger.info("Closing popup window");
     lastOperationRef.current = 'close';
 
     if (popupWindow && !popupWindow.closed) {
