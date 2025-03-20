@@ -1,32 +1,29 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import logger from '../services/loggerService';
 
 interface BidHistory {
   id: number;
-  bidNumber?: number; // Make optional for continuous bidding
+  bidNumber?: number;
   bidder: string;
   amount: string;
   timestamp: string;
-  rawTimestamp?: number; // Raw timestamp for sorting
-  rawAmount?: number; // Raw amount for secondary sorting
+  rawTimestamp?: number;
+  rawAmount?: number;
 }
 
 interface BidHistoryTableProps {
   auctionId: string;
-  initialData?: BidHistory[];
-  refreshTrigger?: number; // Add refreshTrigger prop
-  onRefresh?: () => void; // Add onRefresh prop
+  bidData: BidHistory[]; // Make bidData required
+  refreshTrigger?: number;
+  onRefresh?: () => void;
 }
 
 const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
-  auctionId,
-  initialData = [],
-  refreshTrigger = 0, // Default to 0
+  bidData = [],
+  refreshTrigger = 0,
   onRefresh
 }) => {
-  const [bidHistory, setBidHistory] = useState<BidHistory[]>(initialData);
-  const [loading, setLoading] = useState<boolean>(initialData.length === 0);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(Date.now());
 
   // Helper function to extract numeric value from formatted currency string
@@ -60,99 +57,40 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
     }));
   }, [extractNumericValue]);
 
-  const fetchBidHistory = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  // Process the bidData to ensure it has all required fields
+  const processedBidData = useCallback(() => {
+    if (bidData.length === 0) return [];
 
-      logger.info(`Fetching bid history for auction ${auctionId}`);
-
-      // For demo purposes, we're simulating an API call with localStorage
-      const storedDatabase = localStorage.getItem('auction_app_db');
-      if (!storedDatabase) {
-        logger.info('No database found in localStorage');
-        setBidHistory([]);
-        setLoading(false);
-        return;
+    // Ensure all data items have rawAmount if not already present
+    const enhancedData = bidData.map(bid => {
+      if (bid.rawAmount === undefined) {
+        return {
+          ...bid,
+          rawAmount: extractNumericValue(bid.amount)
+        };
       }
+      return bid;
+    });
 
-      const database = JSON.parse(storedDatabase);
+    // Sort data using the helper function
+    return sortBidHistory(enhancedData);
+  }, [bidData, extractNumericValue, sortBidHistory]);
 
-      // Check if database.auctions exists and has the specified auction
-      if (!database.auctions || !database.auctions[auctionId]) {
-        logger.info(`Auction with ID ${auctionId} not found in database`);
-        setBidHistory([]);
-        setLoading(false);
-        return;
-      }
-
-      const auction = database.auctions[auctionId];
-
-      // Get all bids for this auction
-      // Make sure auction.bids exists before calling Object.values
-      const allBids = auction.bids ? Object.values(auction.bids) : [];
-      logger.info(`Found ${allBids.length} bids for auction ${auctionId}`);
-
-      // Format the bids for display
-      const formattedBids = allBids.map((bid: any, index: number) => ({
-        id: bid.id || index,
-        bidNumber: bid.bidNumber,
-        bidder: bid.bidderId ? (auction.bidders && auction.bidders[bid.bidderId] ? auction.bidders[bid.bidderId].name : bid.bidderId) : 'Unknown',
-        amount: `${parseInt(bid.amount || 0).toLocaleString('vi-VN')} VND`,
-        timestamp: new Date(bid.timestamp || Date.now()).toLocaleString('vi-VN'),
-        rawTimestamp: bid.timestamp || Date.now(), // Store the raw timestamp for sorting
-        rawAmount: bid.amount || 0 // Store the raw amount for secondary sorting
-      }));
-
-      // Sort bids using the helper function
-      const sortedBids = sortBidHistory(formattedBids);
-
-      logger.info('Formatted and sorted bid history:', sortedBids);
-      setBidHistory(sortedBids);
-      setLastRefreshTime(Date.now());
-    } catch (err) {
-      logger.error('Error fetching bid history:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch bid history');
-    } finally {
+  // Handle refresh button click
+  const handleRefresh = () => {
+    setLoading(true);
+    setLastRefreshTime(Date.now());
+    if (onRefresh) {
+      logger.info('Manually refreshing bid history');
+      onRefresh();
+    } else {
       setLoading(false);
     }
-  }, [auctionId, sortBidHistory]);
+  };
 
-  // Only fetch bid history on initial load and when refreshTrigger changes
-  // This prevents infinite loops by not including fetchBidHistory in dependencies
-  useEffect(() => {
-    if (auctionId) {
-      logger.info(`Refreshing bid history due to trigger change: ${refreshTrigger}`);
-      fetchBidHistory();
-    }
-  }, [auctionId, refreshTrigger, fetchBidHistory]); // Include fetchBidHistory as it's memoized with useCallback
+  const sortedBidHistory = processedBidData();
 
-  // Update bid history when initialData changes
-  useEffect(() => {
-    if (initialData.length > 0) {
-      logger.info('Updating bid history with new initialData:', initialData);
-
-      // Ensure all initialData items have rawAmount if not already present
-      const enhancedData = initialData.map(bid => {
-        if (bid.rawAmount === undefined) {
-          return {
-            ...bid,
-            rawAmount: extractNumericValue(bid.amount)
-          };
-        }
-        return bid;
-      });
-
-      // Sort initialData using the helper function
-      const sortedData = sortBidHistory(enhancedData);
-
-      logger.info('Sorted bid history:', sortedData);
-      setBidHistory(sortedData);
-      setLoading(false);
-    }
-  }, [initialData, sortBidHistory, extractNumericValue]);
-
-  if (loading && bidHistory.length === 0) {
+  if (loading && sortedBidHistory.length === 0) {
     return (
       <div className="card mb-3" style={{
         borderRadius: '8px',
@@ -176,45 +114,6 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
         <div className="card-body text-center py-4">
           <div className="spinner-border" role="status" style={{ color: '#6c8dae' }}>
             <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error && bidHistory.length === 0) {
-    return (
-      <div className="card mb-3" style={{
-        borderRadius: '8px',
-        border: '1px solid #e0e0e0',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-        fontFamily: 'Roboto, Arial, sans-serif',
-        overflow: 'hidden'
-      }}>
-        <div className="card-header py-2" style={{
-          backgroundColor: '#f8f9fa',
-          borderBottom: '1px solid #e0e0e0',
-          padding: '12px 16px'
-        }}>
-          <h5 className="mb-0" style={{
-            color: '#343a40',
-            fontSize: '16px',
-            fontWeight: '500',
-            fontFamily: 'Roboto, Arial, sans-serif'
-          }}>Lịch Sử Đấu Giá</h5>
-        </div>
-        <div className="card-body text-center py-3">
-          <div className="alert mb-0" style={{
-            backgroundColor: '#f8d7da',
-            color: '#856363',
-            border: '1px solid #efd5d5',
-            borderRadius: '4px',
-            padding: '12px 16px',
-            fontFamily: 'Roboto, Arial, sans-serif',
-            fontSize: '14px'
-          }}>
-            <i className="bi bi-exclamation-triangle-fill me-2"></i>
-            {error}
           </div>
         </div>
       </div>
@@ -249,7 +148,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
           {(
             <button
               className="btn btn-sm ms-2"
-              onClick={onRefresh || fetchBidHistory}
+              onClick={handleRefresh}
               title="Làm mới"
               style={{
                 color: '#6c757d',
@@ -269,7 +168,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
         </small>
       </div>
       <div className="card-body p-0">
-        {bidHistory.length === 0 ? (
+        {sortedBidHistory.length === 0 ? (
           <div className="text-center py-4 text-muted" style={{
             color: '#6c757d',
             padding: '24px',
@@ -301,12 +200,12 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {bidHistory.map((bid, index) => (
+                {sortedBidHistory.map((bid, index) => (
                   <tr key={bid.id || index} style={{
                     borderBottom: '1px solid #f2f2f2',
                     backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8f9fa'
                   }}>
-                    <td style={{ padding: '10px 16px' }}>{bid.bidNumber || bidHistory.length - index}</td>
+                    <td style={{ padding: '10px 16px' }}>{bid.bidNumber || sortedBidHistory.length - index}</td>
                     <td style={{ padding: '10px 16px' }}>{bid.bidder}</td>
                     <td style={{ padding: '10px 16px', color: '#6c8dae', fontWeight: '500' }}>{bid.amount}</td>
                     <td style={{ padding: '10px 16px', color: '#6c757d', fontSize: '13px' }}>{bid.timestamp}</td>

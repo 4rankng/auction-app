@@ -1411,7 +1411,7 @@ export const BidPage: React.FC = () => {
       {auctionId && <div className="bid-history-container">
         <MemoizedBidHistoryTable
           auctionId={auctionId}
-          initialData={memoizedBidHistory}
+          bidData={memoizedBidHistory}
           refreshTrigger={refreshTrigger}
           onRefresh={handleRefreshBidHistory}
         />
