@@ -14,6 +14,11 @@ import {
 
 const STORAGE_KEY = 'auction_app_db';
 
+// Add cache and debounce configuration
+const CACHE_TTL = 2000; // 2 seconds cache TTL
+const WRITE_DEBOUNCE_TIME = 300; // 300ms debounce for writes
+const ENABLE_CACHE = true;
+
 // Auction status constants
 const AUCTION_STATUS = {
   SETUP: 'SETUP' as AuctionStatus,
@@ -45,9 +50,58 @@ const getDefaultAuctionResult = (): AuctionResult => ({
 export class DatabaseService {
   // Use type assertion to handle the database type
   private database: any;
+  private saveTimeout: NodeJS.Timeout | null = null;
+
+  // Cache structure
+  private cache = {
+    timestamp: 0,
+    auctions: new Map<string, Auction>(),
+    auctionBidders: new Map<string, Bidder[]>(),
+    auctionBids: new Map<string, Bid[]>(),
+    auctioneers: null as Auctioneer[] | null,
+  };
 
   constructor() {
     this.database = this.loadDatabase();
+
+    // Initialize cache with loaded data
+    if (ENABLE_CACHE) {
+      this.refreshCache();
+    }
+  }
+
+  // Refresh entire cache with current database state
+  private refreshCache() {
+    this.cache.timestamp = Date.now();
+
+    // Clear existing cache
+    this.cache.auctions.clear();
+    this.cache.auctionBidders.clear();
+    this.cache.auctionBids.clear();
+
+    // Cache auctions
+    if (this.database.auctions) {
+      Object.values(this.database.auctions).forEach((auction: any) => {
+        this.cache.auctions.set(auction.id, JSON.parse(JSON.stringify(auction)));
+      });
+    }
+
+    // Cache auctioneers
+    if (this.database.auctioneers) {
+      this.cache.auctioneers = JSON.parse(JSON.stringify(this.database.auctioneers));
+    }
+  }
+
+  // Clear specific auction cache
+  private clearAuctionCache(auctionId: string) {
+    this.cache.auctions.delete(auctionId);
+    this.cache.auctionBidders.delete(auctionId);
+    this.cache.auctionBids.delete(auctionId);
+  }
+
+  // Check if cache is fresh
+  private isCacheFresh(): boolean {
+    return Date.now() - this.cache.timestamp < CACHE_TTL;
   }
 
   private loadDatabase(): any {
@@ -68,7 +122,42 @@ export class DatabaseService {
   }
 
   private saveDatabase() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.database));
+    // Debounce writes to localStorage to improve performance
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+    }
+
+    this.saveTimeout = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.database));
+
+        if (ENABLE_CACHE) {
+          this.refreshCache();
+        }
+
+        this.saveTimeout = null;
+      } catch (e) {
+        logger.error('Error saving database to localStorage:', e);
+      }
+    }, WRITE_DEBOUNCE_TIME);
+  }
+
+  // Force immediate save for critical operations
+  private forceSaveDatabase() {
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+      this.saveTimeout = null;
+    }
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.database));
+
+      if (ENABLE_CACHE) {
+        this.refreshCache();
+      }
+    } catch (e) {
+      logger.error('Error force saving database to localStorage:', e);
+    }
   }
 
   public getDatabase(): Database {
@@ -81,6 +170,10 @@ export class DatabaseService {
    * Get all auctions
    */
   public async getAuctions(): Promise<Auction[]> {
+    if (ENABLE_CACHE && this.isCacheFresh() && this.cache.auctions.size > 0) {
+      return Array.from(this.cache.auctions.values());
+    }
+
     return Object.values(this.database.auctions);
   }
 
@@ -88,7 +181,16 @@ export class DatabaseService {
    * Get a specific auction by ID
    */
   public async getAuctionById(auctionId: string): Promise<Auction | null> {
+    if (ENABLE_CACHE && this.isCacheFresh() && this.cache.auctions.has(auctionId)) {
+      return this.cache.auctions.get(auctionId) || null;
+    }
+
     const auction = this.database.auctions[auctionId];
+
+    if (auction && ENABLE_CACHE) {
+      this.cache.auctions.set(auctionId, JSON.parse(JSON.stringify(auction)));
+    }
+
     return auction || null;
   }
 
@@ -112,7 +214,10 @@ export class DatabaseService {
     } as Auction;
 
     this.database.auctions[id] = newAuction;
-    this.saveDatabase();
+
+    // Force save for auction creation
+    this.forceSaveDatabase();
+
     return newAuction;
   }
 
@@ -121,6 +226,11 @@ export class DatabaseService {
    */
   public async updateAuction(auction: Auction): Promise<void> {
     this.database.auctions[auction.id] = auction;
+
+    if (ENABLE_CACHE) {
+      this.clearAuctionCache(auction.id);
+    }
+
     this.saveDatabase();
   }
 
@@ -133,6 +243,11 @@ export class DatabaseService {
     }
 
     delete this.database.auctions[auctionId];
+
+    if (ENABLE_CACHE) {
+      this.clearAuctionCache(auctionId);
+    }
+
     this.saveDatabase();
     return true;
   }
@@ -143,10 +258,20 @@ export class DatabaseService {
    * Get all bidders for a specific auction
    */
   public async getBidders(auctionId: string): Promise<Bidder[]> {
+    if (ENABLE_CACHE && this.isCacheFresh() && this.cache.auctionBidders.has(auctionId)) {
+      return this.cache.auctionBidders.get(auctionId) || [];
+    }
+
     const auction = this.database.auctions[auctionId];
     if (!auction) return [];
 
-    return Object.values(auction.bidders);
+    const bidders = Object.values(auction.bidders) as Bidder[];
+
+    if (ENABLE_CACHE) {
+      this.cache.auctionBidders.set(auctionId, JSON.parse(JSON.stringify(bidders)));
+    }
+
+    return bidders;
   }
 
   /**
@@ -178,6 +303,10 @@ export class DatabaseService {
     // Add bidder to the specific auction
     auction.bidders[id] = newBidder;
 
+    if (ENABLE_CACHE) {
+      this.cache.auctionBidders.delete(auctionId);
+    }
+
     this.saveDatabase();
     return newBidder;
   }
@@ -192,6 +321,11 @@ export class DatabaseService {
     }
 
     auction.bidders[bidder.id] = bidder;
+
+    if (ENABLE_CACHE) {
+      this.cache.auctionBidders.delete(auctionId);
+    }
+
     this.saveDatabase();
     return true;
   }
@@ -212,6 +346,11 @@ export class DatabaseService {
     }
 
     delete auction.bidders[bidderId];
+
+    if (ENABLE_CACHE) {
+      this.cache.auctionBidders.delete(auctionId);
+    }
+
     this.saveDatabase();
     return true;
   }
@@ -222,10 +361,20 @@ export class DatabaseService {
    * Get all bids for a specific auction
    */
   public async getBids(auctionId: string): Promise<Bid[]> {
+    if (ENABLE_CACHE && this.isCacheFresh() && this.cache.auctionBids.has(auctionId)) {
+      return this.cache.auctionBids.get(auctionId) || [];
+    }
+
     const auction = this.database.auctions[auctionId];
     if (!auction) return [];
 
-    return Object.values(auction.bids);
+    const bids = Object.values(auction.bids) as Bid[];
+
+    if (ENABLE_CACHE) {
+      this.cache.auctionBids.set(auctionId, JSON.parse(JSON.stringify(bids)));
+    }
+
+    return bids;
   }
 
   /**
@@ -248,11 +397,7 @@ export class DatabaseService {
     const bidder = auction.bidders[bidderId];
     if (!bidder) throw new Error('Người đấu giá không tồn tại');
 
-    // Validation is now handled in useAuction, no need to validate here
-    // This allows for consistent validation logic in one place
-
     const id = Date.now().toString();
-    // Use type assertion to bypass TS property checks
     const newBid = {
       id,
       bidderId,
@@ -267,13 +412,15 @@ export class DatabaseService {
     auction.currentPrice = amount;
     auction.status = AUCTION_STATUS.IN_PROGRESS;
 
-    // Save changes to localStorage
-    this.saveDatabase();
+    // Clear the cache for this auction
+    if (ENABLE_CACHE) {
+      this.clearAuctionCache(auctionId);
+    }
 
-    // More detailed logging
+    // Force save for bid creation to ensure data integrity
+    this.forceSaveDatabase();
+
     logger.info(`Bid created: ID=${id}, bidder=${bidder.name}, amount=${amount.toLocaleString('vi-VN')} VND`);
-    logger.info(`Updated auction ${auctionId} current price to ${amount.toLocaleString('vi-VN')} VND`);
-    logger.info(`Total bids for auction ${auctionId}: ${Object.values(auction.bids).length}`);
 
     return newBid;
   }
@@ -295,6 +442,10 @@ export class DatabaseService {
 
     if (highestBid) {
       auction.currentPrice = highestBid.amount;
+    }
+
+    if (ENABLE_CACHE) {
+      this.clearAuctionCache(auctionId);
     }
 
     this.saveDatabase();
@@ -328,16 +479,16 @@ export class DatabaseService {
     // Update the auction's current price to the highest remaining bid or the starting price
     if (remainingBids.length > 0) {
       auction.currentPrice = (remainingBids[0] as Bid).amount;
-      logger.info(`Updated auction ${auction.id} current price to ${auction.currentPrice.toLocaleString('vi-VN')} VND (highest remaining bid)`);
     } else {
       auction.currentPrice = auction.settings.startingPrice;
-      logger.info(`Updated auction ${auction.id} current price to ${auction.currentPrice.toLocaleString('vi-VN')} VND (starting price)`);
     }
 
-    // Save changes to localStorage
-    this.saveDatabase();
-    logger.info(`Bid ${bidId} removed successfully`);
-    logger.info(`Total bids for auction ${auctionId}: ${Object.values(auction.bids).length}`);
+    if (ENABLE_CACHE) {
+      this.clearAuctionCache(auctionId);
+    }
+
+    // Force save for bid removal to ensure data integrity
+    this.forceSaveDatabase();
   }
 
   private getNextBidderId(auction: any): string {
@@ -352,11 +503,20 @@ export class DatabaseService {
       auctions: {},
       settings: defaultUISettings
     };
-    this.saveDatabase();
+
+    if (ENABLE_CACHE) {
+      this.refreshCache();
+    }
+
+    this.forceSaveDatabase();
   }
 
   // Auctioneer management functions
   public getAuctioneers = (): Auctioneer[] => {
+    if (ENABLE_CACHE && this.isCacheFresh() && this.cache.auctioneers) {
+      return this.cache.auctioneers;
+    }
+
     if (!this.database.auctioneers) {
       this.database.auctioneers = [];
     }
@@ -372,6 +532,10 @@ export class DatabaseService {
     // Update the database with deduplicated list
     this.database.auctioneers = uniqueAuctioneers;
     this.saveDatabase();
+
+    if (ENABLE_CACHE) {
+      this.cache.auctioneers = JSON.parse(JSON.stringify(uniqueAuctioneers));
+    }
 
     return uniqueAuctioneers;
   };

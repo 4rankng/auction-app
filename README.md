@@ -178,6 +178,6 @@ src/
 
 optimize the timerService to reduce unnecessary renders
 optimize the BidPage to reduce unnecessary renders and improve performance
-optimize the database service to improve localStorage operations
+optimize the databaseService to improve localStorage operations by implementing an in-memory cache and debouncing writes.
 ptimize the bidService.ts with improved error handling and performance
 make one final improvement to webpack.config.js to ensure optimal bundling and code splitting
