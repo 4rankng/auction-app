@@ -19,6 +19,22 @@ module.exports = {
         },
       }),
     ],
+    splitChunks: {
+      chunks: 'all', // Split all chunks (async and initial)
+      cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+        },
+        default: {
+          minChunks: 2,
+          priority: -20,
+          reuseExistingChunk: true,
+        },
+      },
+    },
+    runtimeChunk: 'single', // Create a single runtime chunk for better caching
   },
   plugins: [
     new WebpackObfuscator({
