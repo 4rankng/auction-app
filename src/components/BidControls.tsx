@@ -34,6 +34,8 @@ interface BidControlsProps {
   bidAmount: string;
   currentPrice: string;
   bidIncrement: string;
+  bidMethod: 'basePrice' | 'stepPrice' | 'customPrice';
+  onBidMethodChange: (method: 'basePrice' | 'stepPrice' | 'customPrice') => void;
   onBidAmountChange: (amount: string) => void;
   onPlaceBid: (amount: string) => void;
   onCancelBid: () => void;
@@ -52,6 +54,8 @@ const BidControls: React.FC<BidControlsProps> = ({
   bidAmount,
   currentPrice,
   bidIncrement,
+  bidMethod,
+  onBidMethodChange,
   onBidAmountChange,
   onPlaceBid,
   onCancelBid,
@@ -60,11 +64,6 @@ const BidControls: React.FC<BidControlsProps> = ({
   bidHistoryEmpty = true,
   isLastBidder = false
 }) => {
-  // State for bid method selection - default to stepPrice if bid history is not empty
-  const [bidMethod, setBidMethod] = useState<'basePrice' | 'stepPrice' | 'customPrice'>(
-    bidHistoryEmpty ? 'basePrice' : 'stepPrice'
-  );
-
   // State for number of steps when using incremental bidding
   const [steps, setSteps] = useState<number>(1);
 
@@ -88,9 +87,9 @@ const BidControls: React.FC<BidControlsProps> = ({
   // Update bid method when bid history changes
   useEffect(() => {
     if (!bidHistoryEmpty && bidMethod === 'basePrice') {
-      setBidMethod('stepPrice');
+      onBidMethodChange('stepPrice');
     }
-  }, [bidHistoryEmpty, bidMethod]);
+  }, [bidHistoryEmpty, bidMethod, onBidMethodChange]);
 
   // Calculate bid amount based on selected method
   const calculateBidAmount = () => {
@@ -264,7 +263,7 @@ const BidControls: React.FC<BidControlsProps> = ({
             <button
               type="button"
               className={`btn btn-sm ${bidMethod === 'basePrice' ? 'btn-primary' : 'btn-outline-primary'}`}
-              onClick={() => setBidMethod('basePrice')}
+              onClick={() => onBidMethodChange('basePrice')}
               style={{
                 fontFamily: 'Roboto, Arial, sans-serif',
                 fontSize: '13px',
@@ -285,7 +284,7 @@ const BidControls: React.FC<BidControlsProps> = ({
           <button
             type="button"
             className={`btn btn-sm ${bidMethod === 'stepPrice' ? 'btn-primary' : 'btn-outline-primary'}`}
-            onClick={() => setBidMethod('stepPrice')}
+            onClick={() => onBidMethodChange('stepPrice')}
             style={{
               fontFamily: 'Roboto, Arial, sans-serif',
               fontSize: '13px',
@@ -305,7 +304,7 @@ const BidControls: React.FC<BidControlsProps> = ({
           <button
             type="button"
             className={`btn btn-sm ${bidMethod === 'customPrice' ? 'btn-primary' : 'btn-outline-primary'}`}
-            onClick={() => setBidMethod('customPrice')}
+            onClick={() => onBidMethodChange('customPrice')}
             style={{
               fontFamily: 'Roboto, Arial, sans-serif',
               fontSize: '13px',
@@ -503,4 +502,23 @@ const BidControls: React.FC<BidControlsProps> = ({
   );
 };
 
-export default React.memo(BidControls);
+// Custom equality function for memo
+const arePropsEqual = (prevProps: BidControlsProps, nextProps: BidControlsProps) => {
+  // Compare primitive props directly
+  if (prevProps.bidderName !== nextProps.bidderName) return false;
+  if (prevProps.bidAmount !== nextProps.bidAmount) return false;
+  if (prevProps.currentPrice !== nextProps.currentPrice) return false;
+  if (prevProps.bidIncrement !== nextProps.bidIncrement) return false;
+  if (prevProps.isPlaceBidDisabled !== nextProps.isPlaceBidDisabled) return false;
+  if (prevProps.isCancelBidDisabled !== nextProps.isCancelBidDisabled) return false;
+  if (prevProps.bidHistoryEmpty !== nextProps.bidHistoryEmpty) return false;
+  if (prevProps.isLastBidder !== nextProps.isLastBidder) return false;
+  if (prevProps.bidMethod !== nextProps.bidMethod) return false;
+
+  // For function props, we assume they are stable (should be useCallback'd by parent)
+  // If they're always changing reference, that's a problem in the parent component
+
+  return true;
+};
+
+export default React.memo(BidControls, arePropsEqual);

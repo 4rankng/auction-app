@@ -63,6 +63,9 @@ export const BidPage: React.FC = () => {
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0); // Add refresh trigger state
   const [isAuctionEnded, setIsAuctionEnded] = useState<boolean>(false);
 
+  // Add bidMethod state
+  const [bidMethod, setBidMethod] = useState<'basePrice' | 'stepPrice' | 'customPrice'>('basePrice');
+
   // Add state to control timer value sent to popup (separate from bidderTimeLeft)
   const [popupTimerValue, setPopupTimerValue] = useState<number>(0);
 
@@ -944,6 +947,9 @@ export const BidPage: React.FC = () => {
         if (auction?.settings) {
           setCurrentPrice(bidService.formatCurrency(auction.settings.startingPrice || 0));
         }
+
+        // Reset bid method to basePrice when bid history becomes empty
+        setBidMethod('basePrice');
       }
 
       // Format the bids for display
@@ -1030,6 +1036,9 @@ export const BidPage: React.FC = () => {
         // Reset the current price to the starting price
         const startingPrice = auction.settings.startingPrice || 0;
         setCurrentPrice(bidService.formatCurrency(startingPrice));
+
+        // Reset bid method to basePrice when bid history becomes empty
+        setBidMethod('basePrice');
       }
 
       // Immediately update the bid history by removing the canceled bid
@@ -1111,11 +1120,16 @@ export const BidPage: React.FC = () => {
   }, [isAuctionEnded, bidders]);
 
   // Create a wrapper for setBidAmount to add logging
-  const handleBidAmountChange = (amount: string) => {
+  const handleBidAmountChange = useCallback((amount: string) => {
     logger.info('Bid amount changed to:', amount);
     setBidAmount(amount);
-  };
+  }, []);
 
+  // Create a wrapper for setBidMethod to add logging
+  const handleBidMethodChange = useCallback((method: 'basePrice' | 'stepPrice' | 'customPrice') => {
+    logger.info('Bid method changed to:', method);
+    setBidMethod(method);
+  }, []);
 
   const handleExportData = async () => {
     if (!auction) return;
@@ -1225,6 +1239,8 @@ export const BidPage: React.FC = () => {
 
   // Memoize the bid history to avoid unnecessary re-renders
   const memoizedBidHistory = useMemo(() => bidHistory, [bidHistory]);
+
+
 
   // Wrap child components with React.memo to prevent unnecessary renders
   // AuctionHeader is already memoized in its own file with a custom comparison function
@@ -1394,6 +1410,8 @@ export const BidPage: React.FC = () => {
                 bidAmount={bidAmount}
                 currentPrice={formattedCurrentPrice}
                 bidIncrement={formattedBidIncrement}
+                bidMethod={bidMethod}
+                onBidMethodChange={handleBidMethodChange}
                 onBidAmountChange={handleBidAmountChange}
                 onPlaceBid={handlePlaceBid}
                 onCancelBid={handleCancelBid}
