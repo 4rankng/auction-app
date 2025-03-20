@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logger from '../services/loggerService';
 import BidHistoryTable from '@components/BidHistoryTable';
@@ -1209,6 +1209,24 @@ export const BidPage: React.FC = () => {
     setIsFromHistory(fromParam === 'history');
   }, [location.search]);
 
+  // Memoize derived states to avoid recalculating on every render
+  const formattedCurrentPrice = useMemo(() => formatCurrency(auction?.currentPrice || 0), [auction?.currentPrice, formatCurrency]);
+  const formattedBidIncrement = useMemo(() => formatCurrency(auction?.settings?.bidStep || 0), [auction?.settings?.bidStep, formatCurrency]);
+
+  // Memoize the list of disabled bidders
+  const disabledBidders = useMemo(() => getDisabledBidders(), [getDisabledBidders]);
+
+  // Memoize the bid history to avoid unnecessary re-renders
+  const memoizedBidHistory = useMemo(() => bidHistory, [bidHistory]);
+
+  // Wrap child components with React.memo to prevent unnecessary renders
+  const MemoizedAuctionHeader = React.memo(AuctionHeader);
+  const MemoizedAuctionSummary = React.memo(AuctionSummary);
+  const MemoizedBidderSelectionGrid = React.memo(BidderSelectionGrid);
+  const MemoizedBidControls = React.memo(BidControls);
+  const MemoizedBidHistoryTable = React.memo(BidHistoryTable);
+  const MemoizedAuctionResult = React.memo(AuctionResult);
+
   if (loading) {
     return (
       <div className="container py-4 text-center">
@@ -1258,11 +1276,11 @@ export const BidPage: React.FC = () => {
 
       <div className="card mb-3" style={{marginTop: '0rem'}}>
         {/* Auction Header Component */}
-        <AuctionHeader
+        <MemoizedAuctionHeader
           title={auctionDescription}
           elapsedTime={elapsedTime}
           onEndAuction={handleEndAuction}
-          totalBids={bidHistory.length}
+          totalBids={memoizedBidHistory.length}
           isAuctionEnded={isAuctionEnded}
           auctioneer={auction?.settings?.auctioneer || 'NA'}
           onShowPopup={handleShowPopup}
@@ -1270,28 +1288,26 @@ export const BidPage: React.FC = () => {
 
         <div className="card-body py-2">
           {isAuctionEnded ? (
-            <>
-            <AuctionResult
-                result={auction.result}
-              totalBids={bidHistory.length}
+            <MemoizedAuctionResult
+              result={auction.result}
+              totalBids={memoizedBidHistory.length}
             />
-            </>
           ) : (
             <>
               {/* Auction Summary Component */}
-              <AuctionSummary
-                totalBids={bidHistory.length}
-                currentPrice={currentPrice}
-                bidIncrement={bidIncrement}
+              <MemoizedAuctionSummary
+                totalBids={memoizedBidHistory.length}
+                currentPrice={formattedCurrentPrice}
+                bidIncrement={formattedBidIncrement}
                 participantsCount={participantsCount}
               />
 
               {/* Bidder Selection Grid Component */}
-              <BidderSelectionGrid
+              <MemoizedBidderSelectionGrid
                 bidders={bidders}
                 selectedBidder={selectedBidder}
                 onBidderSelect={handleBidderSelect}
-                disabledBidders={getDisabledBidders()}
+                disabledBidders={disabledBidders}
                 lastBidderId={lastBidderId}
                 highestBidderId={highestBidderId}
                 isTimerEnded={isAuctionEnded}
@@ -1366,17 +1382,17 @@ export const BidPage: React.FC = () => {
               />
 
               {/* Bid Controls Component */}
-              <BidControls
+              <MemoizedBidControls
                 bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
                 bidAmount={bidAmount}
-                currentPrice={currentPrice}
-                bidIncrement={bidIncrement}
+                currentPrice={formattedCurrentPrice}
+                bidIncrement={formattedBidIncrement}
                 onBidAmountChange={handleBidAmountChange}
                 onPlaceBid={handlePlaceBid}
                 onCancelBid={handleCancelBid}
                 isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
                 isCancelBidDisabled={isCancelBidDisabled()}
-                bidHistoryEmpty={bidHistory.length === 0}
+                bidHistoryEmpty={memoizedBidHistory.length === 0}
                 isLastBidder={selectedBidder === lastBidderId}
               />
             </>
@@ -1386,9 +1402,9 @@ export const BidPage: React.FC = () => {
 
       {/* Bid History Table Component with reduced top margin */}
       {auctionId && <div className="bid-history-container">
-        <BidHistoryTable
+        <MemoizedBidHistoryTable
           auctionId={auctionId}
-          initialData={bidHistory}
+          initialData={memoizedBidHistory}
           refreshTrigger={refreshTrigger}
           onRefresh={handleRefreshBidHistory}
         />

@@ -216,7 +216,7 @@ export default function SetupPage() {
   const validateAuctionSetup = (): { isValid: boolean; errorMessage?: string } => {
     // Validate auction description
     if (!auctionDetails.description.trim()) {
-      return { isValid: false, errorMessage: 'Vui lòng nhập mô tả đấu giá' };
+      return { isValid: false, errorMessage: 'Vui lòng nhập tên cuộc đấu giá' };
     }
 
     // Validate starting price
@@ -392,7 +392,7 @@ export default function SetupPage() {
           <div className="col-12 col-lg-6 mb-4">
             <div className="card outline-card h-100">
               <div className="card-header">
-                <h5 className="card-title mb-0">Mô Tả Đấu Giá</h5>
+                <h5 className="card-title mb-0">Tên cuộc đấu giá</h5>
               </div>
               <div className="card-body d-flex flex-column">
                 <div className="mb-3 flex-grow-1 d-flex">
@@ -659,12 +659,12 @@ export default function SetupPage() {
           <p className="confirmation-description">Bạn có chắc chắn muốn bắt đầu phiên đấu giá với thông tin sau?</p>
 
           <ListGroup className="mb-3 auction-summary-list">
-            <ListGroup.Item><strong>Mô tả:</strong> {auctionDetails.description}</ListGroup.Item>
+            <ListGroup.Item><strong>Tên:</strong> {auctionDetails.description}</ListGroup.Item>
             <ListGroup.Item><strong>Giá khởi điểm:</strong> {auctionDetails.startingPrice.toLocaleString('vi-VN')} VND</ListGroup.Item>
             <ListGroup.Item><strong>Bước giá:</strong> {auctionDetails.bidStep.toLocaleString('vi-VN')} VND</ListGroup.Item>
             <ListGroup.Item><strong>Thời gian:</strong> {auctionDetails.bidDuration} giây</ListGroup.Item>
             <ListGroup.Item><strong>Đấu Giá Viên:</strong> {auctionDetails.auctioneer || 'Chưa chọn'}</ListGroup.Item>
-            <ListGroup.Item><strong>Người tham gia:</strong> {bidders.length}</ListGroup.Item>
+            <ListGroup.Item><strong>Số người tham gia:</strong> {bidders.length}</ListGroup.Item>
           </ListGroup>
 
           <p className="mb-0 text-danger confirmation-warning">Lưu ý: Sau khi bắt đầu, bạn không thể chỉnh sửa thông tin đấu giá!</p>

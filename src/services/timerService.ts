@@ -53,7 +53,11 @@ const timers = new Map<string, {
   isRunning: boolean;
   isPaused: boolean;
   options: TimerOptions;
+  lastTickCallbackTime?: number; // Track last onTick call time for throttling
 }>();
+
+// Throttle time for onTick callbacks (in ms)
+const TICK_THROTTLE_TIME = 1000;
 
 /**
  * Creates a new timer
@@ -151,6 +155,7 @@ export const startTimer = (timerId: string, autoStart = false): boolean => {
   if (timer.options.onTick) {
     logger.info(`timerService: Calling onTick with ${initialSeconds}s`);
     timer.options.onTick(initialSeconds);
+    timer.lastTickCallbackTime = Date.now();
   } else {
     logger.info(`timerService: No onTick callback defined for timer ${timerId}`);
   }
@@ -173,6 +178,7 @@ export const startTimer = (timerId: string, autoStart = false): boolean => {
     timer.id = setTimeout(() => {
       // Make sure the timer is still valid
       const currentTimer = timers.get(timerId);
+
       if (!currentTimer) {
         logger.info(`timerService: Timer ${timerId} no longer exists`);
         return;
@@ -188,10 +194,18 @@ export const startTimer = (timerId: string, autoStart = false): boolean => {
 
       logger.info(`timerService: Timer ${timerId} tick - ${newSecondsRemaining}s remaining`);
 
+      // Call onTick callback only if throttle time has passed or it's the first/last tick
+      const now = Date.now();
+      const shouldCallOnTick =
+        !currentTimer.lastTickCallbackTime ||
+        now - (currentTimer.lastTickCallbackTime || 0) >= TICK_THROTTLE_TIME ||
+        newSecondsRemaining <= 0;
+
       // Call onTick callback
-      if (currentTimer.options.onTick) {
+      if (currentTimer.options.onTick && shouldCallOnTick) {
         try {
           currentTimer.options.onTick(newSecondsRemaining);
+          currentTimer.lastTickCallbackTime = now;
         } catch (error) {
           logger.error(`timerService: Error in onTick callback for timer ${timerId}:`, error);
         }
@@ -209,7 +223,7 @@ export const startTimer = (timerId: string, autoStart = false): boolean => {
         currentTimer.isRunning = false;
         currentTimer.id = null;
 
-        // Call onComplete callback
+        // Trigger completion callback
         if (currentTimer.options.onComplete) {
           try {
             currentTimer.options.onComplete();
@@ -218,7 +232,7 @@ export const startTimer = (timerId: string, autoStart = false): boolean => {
           }
         }
       } else {
-        // Schedule the next tick
+        // Continue ticking
         createTickFunction(newSecondsRemaining);
       }
     }, nextTickTime);
