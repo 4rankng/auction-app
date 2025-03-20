@@ -65,7 +65,7 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
         <div className="info-grid">
           <div className="info-item">
             <div className="info-content">
-              <div className="info-label">Thông tin đấu giá</div>
+              <div className="info-label">Thông tin trả giá</div>
               <div className="info-value">Đang tải...</div>
             </div>
           </div>
@@ -98,7 +98,7 @@ const AuctionResult: React.FC<AuctionResultProps> = ({
 
       {/* Auction information */}
       <div className="auction-info-section">
-        <h2 className="section-title">Thông tin đấu giá</h2>
+        <h2 className="section-title">Thông tin trả giá</h2>
 
         <div className="info-grid">
           <div className="info-item">

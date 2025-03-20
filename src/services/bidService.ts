@@ -25,7 +25,7 @@ class BidService {
       const auction = db.auctions[auctionId];
 
       if (!auction) {
-        throw new Error('Không có phiên đấu giá đang diễn ra');
+        throw new Error('Không có phiên trả giá đang diễn ra');
       }
 
       // Check if auction is ended
@@ -35,7 +35,7 @@ class BidService {
 
       // Check if bidder exists
       if (!auction.bidders[bidderId]) {
-        throw new Error('Người đấu giá không tồn tại');
+        throw new Error('Người trả giá không tồn tại');
       }
 
       // Get all bids for this auction

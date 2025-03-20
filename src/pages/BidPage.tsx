@@ -614,7 +614,7 @@ export const BidPage: React.FC = () => {
 
       // Show success message
       logger.info("✉️ Showing success toast");
-      showToast('Phiên đấu giá đã kết thúc thành công!', 'success');
+      showToast('Phiên trả giá đã kết thúc thành công!', 'success');
 
       // Instead of closing and reopening the popup, just update the existing one
       // by toggling the isAuctionEnded state which will cause the popup content to update
@@ -651,7 +651,7 @@ export const BidPage: React.FC = () => {
 
     } catch (error) {
       logger.error('❌ Error ending auction:', error);
-      showToast('Không thể kết thúc phiên đấu giá', 'error');
+      showToast('Không thể kết thúc phiên trả giá', 'error');
     } finally {
       setLoading(false);
     }
@@ -664,7 +664,7 @@ export const BidPage: React.FC = () => {
     const auctionIdParam = queryParams.get('id');
 
     if (!auctionIdParam) {
-      showToast('Không tìm thấy ID phiên đấu giá', 'error', 'top-center');
+      showToast('Không tìm thấy ID phiên trả giá', 'error', 'top-center');
       return;
     }
 
@@ -778,7 +778,7 @@ export const BidPage: React.FC = () => {
   const handleBidderSelect = useCallback((bidderId: string) => {
     // Prevent selection if auction is ended
     if (isAuctionEnded) {
-      showToast('Không thể chọn người tham gia khi đấu giá đã kết thúc', 'error', 'bottom-center');
+      showToast('Không thể chọn người tham gia khi trả giá đã kết thúc', 'error', 'bottom-center');
       return;
     }
 
@@ -822,7 +822,7 @@ export const BidPage: React.FC = () => {
 
     // Ensure we have a selected bidder and auction
     if (!selectedBidder || !auction) {
-      showToast('Vui lòng chọn người đấu giá', 'error', 'bottom-center');
+      showToast('Vui lòng chọn người trả giá', 'error', 'bottom-center');
       return;
     }
 
@@ -847,7 +847,7 @@ export const BidPage: React.FC = () => {
 
     // Check if we still don't have a bid amount
     if (!effectiveBidAmount) {
-      showToast('Vui lòng nhập số tiền đấu giá', 'error', 'bottom-center');
+      showToast('Vui lòng nhập số tiền trả giá', 'error', 'bottom-center');
       return;
     }
 
@@ -902,7 +902,7 @@ export const BidPage: React.FC = () => {
       }
     } catch (error) {
       logger.error('Error placing bid:', error);
-      showToast(error instanceof Error ? error.message : 'Không thể đấu giá', 'error');
+      showToast(error instanceof Error ? error.message : 'Không thể trả giá', 'error');
     }
   };
 
@@ -956,7 +956,7 @@ export const BidPage: React.FC = () => {
       setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       logger.error('Error fetching latest bid history:', error);
-      showToast(error instanceof Error ? error.message : 'Không thể tải lịch sử đấu giá', 'error');
+      showToast(error instanceof Error ? error.message : 'Không thể tải lịch sử trả giá', 'error');
     }
   }, [bidders, auction, showToast]);
 
@@ -964,7 +964,7 @@ export const BidPage: React.FC = () => {
     logger.info('handleCancelBid called');
 
     if (!auction) {
-      showToast('Không tìm thấy phiên đấu giá', 'error', 'bottom-center');
+      showToast('Không tìm thấy phiên trả giá', 'error', 'bottom-center');
       return;
     }
 
@@ -973,7 +973,7 @@ export const BidPage: React.FC = () => {
     logger.info('Bidder to cancel:', bidderToCancel, 'Selected bidder:', selectedBidder, 'Last bidder:', lastBidderId);
 
     if (!bidderToCancel) {
-      showToast('Không có người đấu giá để hủy', 'error', 'bottom-center');
+      showToast('Không có người trả giá để hủy', 'error', 'bottom-center');
       return;
     }
 
@@ -989,7 +989,7 @@ export const BidPage: React.FC = () => {
       const latestBids = await bidService.getLatestBids(auction.id);
 
       if (latestBids.length === 0) {
-        showToast('Không tìm thấy lịch sử đấu giá', 'error', 'bottom-center');
+        showToast('Không tìm thấy lịch sử trả giá', 'error', 'bottom-center');
         return;
       }
 
@@ -1055,7 +1055,7 @@ export const BidPage: React.FC = () => {
       }
     } catch (error) {
       logger.error('Error canceling bid:', error);
-      showToast(error instanceof Error ? error.message : 'Không thể hủy đấu giá', 'error', 'bottom-center');
+      showToast(error instanceof Error ? error.message : 'Không thể hủy trả giá', 'error', 'bottom-center');
     }
   };
 
@@ -1129,7 +1129,7 @@ export const BidPage: React.FC = () => {
       );
 
       if (success) {
-        showToast('Dữ liệu đấu giá đã được xuất thành công dưới dạng Excel', 'success');
+        showToast('Dữ liệu trả giá đã được xuất thành công dưới dạng Excel', 'success');
       } else {
         throw new Error('Export failed');
       }
@@ -1254,8 +1254,8 @@ export const BidPage: React.FC = () => {
           </div>
           <div className="card-body text-center py-5">
             <i className="bi bi-exclamation-triangle-fill text-danger" style={{ fontSize: '3rem' }}></i>
-            <h4 className="mt-3 mb-3">Không tìm thấy phiên đấu giá</h4>
-            <p className="mb-4">Phiên đấu giá không tồn tại hoặc đã kết thúc.</p>
+            <h4 className="mt-3 mb-3">Không tìm thấy phiên trả giá</h4>
+            <p className="mb-4">Phiên trả giá không tồn tại hoặc đã kết thúc.</p>
             <button className="btn btn-primary" onClick={handleGoBack}>
               <i className="bi bi-arrow-left me-1"></i> Quay Lại Thiết Lập
             </button>
@@ -1464,7 +1464,7 @@ export const BidPage: React.FC = () => {
                 bidStep={formatCurrency(auction.settings?.bidStep || 0)}
                 bidNumber={bids ? bids.length : 0}
                 highestBidderId={highestBidderId || ''}
-                selectedBidderId={selectedBidder || ''}
+
                 companyName={COMPANY_NAME}
                 auctionTitle={auctionDescription}
                 highestBidAmount={formatCurrency(bids && bids.length > 0 ? bids[0].amount : (auction.settings?.startingPrice || 0))}
@@ -1550,7 +1550,7 @@ export const BidPage: React.FC = () => {
       {isFromHistory && (
         <div className="alert alert-info mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
           <i className="bi bi-info-circle me-2"></i>
-          Bạn đang xem phiên đấu giá từ trang lịch sử
+          Bạn đang xem phiên trả giá từ trang lịch sử
         </div>
       )}
     </div>

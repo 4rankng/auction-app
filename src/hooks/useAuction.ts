@@ -146,7 +146,7 @@ export function useAuction() {
 
   const placeBid = async (bidderId: string, amount: number) => {
     try {
-      if (!auction) throw new Error('Không có phiên đấu giá đang diễn ra');
+      if (!auction) throw new Error('Không có phiên trả giá đang diễn ra');
       const newBid = await bidService.placeBid(auction.id, bidderId, amount);
       await refreshData(); // Refresh to get updated auction data
       return newBid;

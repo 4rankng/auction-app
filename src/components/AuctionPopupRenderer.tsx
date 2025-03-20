@@ -11,7 +11,7 @@ interface AuctionPopupRendererProps {
   bidStep: string;
   bidNumber: number;
   highestBidderId?: string;
-  selectedBidderId?: string;
+
   companyName: string;
   auctionTitle: string;
   highestBidAmount: string;
@@ -73,6 +73,8 @@ const StyledContainer = styled.div`
     overflow: hidden;
     margin: 0 auto;
   }
+
+
 
   /* Add styles for the auctioneer display */
   .auction-auctioneer {
@@ -601,7 +603,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
     bidStep,
     bidNumber,
     highestBidderId,
-    selectedBidderId,
+
     auctionTitle,
     highestBidAmount,
     isAuctionEnded,
@@ -809,7 +811,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
               }
 
               window.document.title = count % 2 === 0
-                ? '🏆 ĐẤU GIÁ ĐÃ KẾT THÚC 🏆'
+                ? '🏆 TRẢ GIÁ ĐÃ KẾT THÚC 🏆'
                 : 'Kết Quả Đấu Giá';
               count++;
             }, 500);
@@ -1003,16 +1005,42 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
                 <div className="auction-title-section">
                   <div className="title-column">
-                    <div className="subtitle">Phiên đấu giá</div>
+                  <div className="subtitle" style={{ textAlign: 'center', width: '100%' }}>Phiên trả giá</div>
                     <div className="main-title">{auctionTitle || "-"}</div>
-                    <div className="auction-auctioneer">
-                      <span className="auctioneer-label">Đấu giá viên:</span>
+                    <div className="auction-auctioneer" style={{ textAlign: 'center', width: '100%' }}>
+                      <span className="auctioneer-label">Trả giá viên:</span>
                       <span className="auctioneer-name">{auctioneer || "-"}</span>
                     </div>
                   </div>
                 </div>
+   {/* Starting price and bid step */}
+   <div className="info-row">
+   <div className="info-item" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+  <div className="info-label">Giá Khởi Điểm:</div>
+  <div className="info-value">{startingPrice || "1.000.000.000 VND"}</div>
+</div>
+<div className="info-item" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                        <div className="info-label">Bước Giá:</div>
+                        <div className="info-value">{bidStep || "10.000.000 VND"}</div>
+                      </div>
+                    </div>
 
-                {/* Results section - updated to match screenshot */}
+                    <div
+  className="info-item"
+  style={{
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    width: '100%', // Ensures it occupies the full row
+  }}
+>
+  <div className="info-label">Lượt Trả Giá:</div>
+  <div className="info-value">{bidNumber + 1}</div>
+</div>
+
+
                 {isAuctionEnded ? (
                   <div className="result-container">
                     <div className="result-header">Đấu Giá Kết Thúc</div>
@@ -1055,29 +1083,9 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
                       </div>
                     </div>
 
-                    {/* Starting price and bid step */}
-                    <div className="info-row">
-                      <div className="info-item">
-                        <div className="info-label">Giá Khởi Điểm:</div>
-                        <div className="info-value">{startingPrice || "1.000.000.000 VND"}</div>
-                      </div>
-                      <div className="info-item">
-                        <div className="info-label">Bước Giá:</div>
-                        <div className="info-value">{bidStep || "10.000.000 VND"}</div>
-                      </div>
-                    </div>
 
-                    {/* Bidder info and bid count */}
-                    <div className="info-row">
-                      <div className="info-item">
-                        <div className="info-label">Người Trả Giá:</div>
-                        <div className="info-value">{selectedBidderId || "4"}</div>
-                      </div>
-                      <div className="info-item">
-                        <div className="info-label">Lượt Trả Giá:</div>
-                        <div className="info-value">{bidNumber + 1}</div>
-                      </div>
-                    </div>
+
+
 
                     {/* Timer section */}
                     <div className="timer-section">

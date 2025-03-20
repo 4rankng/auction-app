@@ -182,7 +182,7 @@ export default function SetupPage() {
   // Handle adding a new bidder
   const handleAddBidder = async (bidderData: BidderFormInputs) => {
     if (!setupAuctionId) {
-      errorService.handleError('Không thể thêm người tham gia khi chưa thiết lập phiên đấu giá', ErrorType.VALIDATION);
+      errorService.handleError('Không thể thêm người tham gia khi chưa thiết lập phiên trả giá', ErrorType.VALIDATION);
       return;
     }
 
@@ -216,7 +216,7 @@ export default function SetupPage() {
   const validateAuctionSetup = (): { isValid: boolean; errorMessage?: string } => {
     // Validate auction description
     if (!auctionDetails.description.trim()) {
-      return { isValid: false, errorMessage: 'Vui lòng nhập tên cuộc đấu giá' };
+      return { isValid: false, errorMessage: 'Vui lòng nhập tên cuộc trả giá' };
     }
 
     // Validate starting price
@@ -231,17 +231,17 @@ export default function SetupPage() {
 
     // Validate duration
     if (!auctionDetails.bidDuration || auctionDetails.bidDuration <= 0) {
-      return { isValid: false, errorMessage: 'Thời gian đấu giá phải là số dương' };
+      return { isValid: false, errorMessage: 'Thời gian trả giá phải là số dương' };
     }
 
     // Validate auctioneer
     if (!auctionDetails.auctioneer) {
-      return { isValid: false, errorMessage: 'Vui lòng chọn đấu giá viên' };
+      return { isValid: false, errorMessage: 'Vui lòng chọn trả giá viên' };
     }
 
     // Validate bidder list
     if (bidders.length < 2) {
-      return { isValid: false, errorMessage: 'Cần ít nhất 2 người tham gia để bắt đầu đấu giá' };
+      return { isValid: false, errorMessage: 'Cần ít nhất 2 người tham gia để bắt đầu trả giá' };
     }
 
     return { isValid: true };
@@ -252,11 +252,11 @@ export default function SetupPage() {
 
     if (!validation.isValid) {
       // Show validation error as toast message
-      toastService.warning(validation.errorMessage || 'Thiết lập đấu giá không hợp lệ');
+      toastService.warning(validation.errorMessage || 'Thiết lập trả giá không hợp lệ');
 
       // Still log the error through the error service
       errorService.handleError(
-        validation.errorMessage || 'Thiết lập đấu giá không hợp lệ',
+        validation.errorMessage || 'Thiết lập trả giá không hợp lệ',
         ErrorType.VALIDATION
       );
       return;
@@ -272,9 +272,9 @@ export default function SetupPage() {
   const handleStartAuction = async () => {
     if (!setupAuctionId) {
       // Show toast message directly for this error
-      toastService.error('Không tìm thấy phiên đấu giá để bắt đầu');
+      toastService.error('Không tìm thấy phiên trả giá để bắt đầu');
 
-      errorService.handleError('Không tìm thấy phiên đấu giá để bắt đầu', ErrorType.DATABASE);
+      errorService.handleError('Không tìm thấy phiên trả giá để bắt đầu', ErrorType.DATABASE);
       setShowConfirmation(false);
       return;
     }
@@ -285,10 +285,10 @@ export default function SetupPage() {
       const validation = validateAuctionSetup();
       if (!validation.isValid) {
         // Show toast message directly for validation errors
-        toastService.warning(validation.errorMessage || 'Thiết lập đấu giá không hợp lệ');
+        toastService.warning(validation.errorMessage || 'Thiết lập trả giá không hợp lệ');
 
         errorService.handleError(
-          validation.errorMessage || 'Thiết lập đấu giá không hợp lệ',
+          validation.errorMessage || 'Thiết lập trả giá không hợp lệ',
           ErrorType.VALIDATION
         );
         setIsStartingAuction(false);
@@ -299,8 +299,8 @@ export default function SetupPage() {
       // Get the setup auction and update it
       const setupAuction = await databaseService.getAuctionById(setupAuctionId);
       if (!setupAuction) {
-        toastService.error('Không tìm thấy phiên đấu giá để bắt đầu');
-        throw new Error('Không tìm thấy phiên đấu giá để bắt đầu');
+        toastService.error('Không tìm thấy phiên trả giá để bắt đầu');
+        throw new Error('Không tìm thấy phiên trả giá để bắt đầu');
       }
 
       // Update the auction with final details
@@ -330,7 +330,7 @@ export default function SetupPage() {
       logger.error('Error starting auction:', error);
 
       // Show explicit toast error message
-      const errorMessage = errorService.formatErrorMessage(error) || 'Không thể bắt đầu đấu giá. Vui lòng thử lại.';
+      const errorMessage = errorService.formatErrorMessage(error) || 'Không thể bắt đầu trả giá. Vui lòng thử lại.';
       toastService.error(errorMessage);
 
       // Still log via error service
@@ -392,7 +392,7 @@ export default function SetupPage() {
           <div className="col-12 col-lg-6 mb-4">
             <div className="card outline-card h-100">
               <div className="card-header">
-                <h5 className="card-title mb-0">Tên cuộc đấu giá</h5>
+                <h5 className="card-title mb-0">Tên cuộc trả giá</h5>
               </div>
               <div className="card-body d-flex flex-column">
                 <div className="mb-3 flex-grow-1 d-flex">
@@ -656,7 +656,7 @@ export default function SetupPage() {
           <Modal.Title>Xác Nhận Bắt Đầu Đấu Giá</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p className="confirmation-description">Bạn có chắc chắn muốn bắt đầu phiên đấu giá với thông tin sau?</p>
+          <p className="confirmation-description">Bạn có chắc chắn muốn bắt đầu phiên trả giá với thông tin sau?</p>
 
           <ListGroup className="mb-3 auction-summary-list">
             <ListGroup.Item><strong>Tên:</strong> {auctionDetails.description}</ListGroup.Item>
@@ -667,7 +667,7 @@ export default function SetupPage() {
             <ListGroup.Item><strong>Số người tham gia:</strong> {bidders.length}</ListGroup.Item>
           </ListGroup>
 
-          <p className="mb-0 text-danger confirmation-warning">Lưu ý: Sau khi bắt đầu, bạn không thể chỉnh sửa thông tin đấu giá!</p>
+          <p className="mb-0 text-danger confirmation-warning">Lưu ý: Sau khi bắt đầu, bạn không thể chỉnh sửa thông tin trả giá!</p>
         </Modal.Body>
         <Modal.Footer>
           <div className="d-flex w-100 gap-2">

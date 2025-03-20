@@ -392,10 +392,10 @@ export class DatabaseService {
    */
   public async createBid(auctionId: string, bidderId: string, amount: number): Promise<Bid> {
     const auction = this.database.auctions[auctionId];
-    if (!auction) throw new Error('Phiên đấu giá không tồn tại');
+    if (!auction) throw new Error('Phiên trả giá không tồn tại');
 
     const bidder = auction.bidders[bidderId];
-    if (!bidder) throw new Error('Người đấu giá không tồn tại');
+    if (!bidder) throw new Error('Người trả giá không tồn tại');
 
     const id = Date.now().toString();
     const newBid = {

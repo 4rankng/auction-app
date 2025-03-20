@@ -24,7 +24,7 @@ class AuctioneerService {
    */
   async createAuctioneer(name: string): Promise<Auctioneer> {
     if (!name || name.trim() === '') {
-      throw new Error('Tên đấu giá viên không được để trống');
+      throw new Error('Tên trả giá viên không được để trống');
     }
 
     return databaseService.createAuctioneer(name.trim());
@@ -35,7 +35,7 @@ class AuctioneerService {
    */
   async updateAuctioneer(auctioneer: Auctioneer): Promise<Auctioneer> {
     if (!auctioneer.name || auctioneer.name.trim() === '') {
-      throw new Error('Tên đấu giá viên không được để trống');
+      throw new Error('Tên trả giá viên không được để trống');
     }
 
     // Make sure name is trimmed

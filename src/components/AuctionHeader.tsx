@@ -170,7 +170,7 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
           </div>
         </div>
         <div className="auction-auctioneer" style={{ fontSize: '14px', marginTop: '8px' }}>
-          <span className="auctioneer-label" style={{ color: '#6c757d', marginRight: '8px' }}>Đấu giá viên:</span>
+          <span className="auctioneer-label" style={{ color: '#6c757d', marginRight: '8px' }}>Trả giá viên:</span>
           <span className="auctioneer-name" style={{ fontWeight: '500', color: '#343a40' }}>{auctioneer}</span>
         </div>
       </div>
@@ -261,7 +261,7 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
               {/* Replace the modal header with CompanyBanner */}
               <CompanyBanner className="modal-header" />
               <div className="modal-body" style={{ padding: '20px' }}>
-                <p style={{ ...robotoStyle, fontSize: '16px', marginBottom: '10px' }}>Bạn có chắc chắn muốn kết thúc phiên đấu giá này?</p>
+                <p style={{ ...robotoStyle, fontSize: '16px', marginBottom: '10px' }}>Bạn có chắc chắn muốn kết thúc phiên trả giá này?</p>
               </div>
               <div className="modal-footer" style={{ borderTop: '1px solid #e0e0e0', padding: '16px 20px' }}>
                 <button

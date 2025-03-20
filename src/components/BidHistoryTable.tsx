@@ -176,7 +176,7 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
             fontSize: '14px'
           }}>
             <i className="bi bi-clock-history fs-4 d-block mb-2" style={{ color: '#adb5bd' }}></i>
-            Chưa có lịch sử đấu giá
+            Chưa có lịch sử trả giá
           </div>
         ) : (
           <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto', zIndex: 100 }}>

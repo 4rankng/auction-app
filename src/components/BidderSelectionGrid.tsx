@@ -270,7 +270,7 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
           padding: '10px 14px'
         }}>
           <i className="bi bi-exclamation-triangle-fill me-2"></i>
-          Vòng đấu giá đã kết thúc. Không thể chọn người tham gia cho đến khi vòng tiếp theo bắt đầu.
+          Vòng trả giá đã kết thúc. Không thể chọn người tham gia cho đến khi vòng tiếp theo bắt đầu.
         </div>
       )}
 
@@ -300,17 +300,17 @@ const BidderSelectionGrid: React.FC<BidderSelectionGridProps> = ({
             let tooltipText = `${bidder.name}${bidder.nric ? ` - CMND/CCCD: ${bidder.nric}` : ''}`;
 
             if (isTimerEnded) {
-              tooltipText = 'Vòng đấu giá đã kết thúc. Không thể chọn người tham gia cho đến khi vòng tiếp theo bắt đầu.';
+              tooltipText = 'Vòng trả giá đã kết thúc. Không thể chọn người tham gia cho đến khi vòng tiếp theo bắt đầu.';
             } else if (isLastBidder && isDisabled) {
-              tooltipText = 'Người này vừa đấu giá, không thể đấu giá tiếp. Chọn để hủy lượt trả giá cuối cùng.';
+              tooltipText = 'Người này vừa trả giá, không thể trả giá tiếp. Chọn để hủy lượt trả giá cuối cùng.';
             } else if (isLastBidder) {
-              tooltipText = 'Người này vừa đấu giá. Chọn để hủy lượt trả giá cuối cùng.';
+              tooltipText = 'Người này vừa trả giá. Chọn để hủy lượt trả giá cuối cùng.';
             } else if (isDisabled) {
-              tooltipText = 'Người này không thể đấu giá lúc này.';
+              tooltipText = 'Người này không thể trả giá lúc này.';
             }
 
             if (isHighestBidder) {
-              tooltipText = `${tooltipText} (Người đấu giá cao nhất)`;
+              tooltipText = `${tooltipText} (Người trả giá cao nhất)`;
             }
 
             // Determine button colors based on state

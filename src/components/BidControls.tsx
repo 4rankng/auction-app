@@ -249,7 +249,7 @@ const BidControls: React.FC<BidControlsProps> = ({
       {/* Bid Method Selector - Horizontal tabs with smaller size */}
       <div className="bid-method-selector mb-3">
         <div className="d-flex justify-content-between align-items-center mb-2">
-          <span style={labelStyle}>Phương thức đấu giá</span>
+          <span style={labelStyle}>Phương thức trả giá</span>
           {validationError && (
             <div className="validation-error text-danger">
               <i className="bi bi-exclamation-triangle-fill me-1"></i>
@@ -442,7 +442,7 @@ const BidControls: React.FC<BidControlsProps> = ({
               className="form-control"
               value={customBidAmount}
               onChange={handleCustomBidChange}
-              placeholder="Nhập số tiền đấu giá"
+              placeholder="Nhập số tiền trả giá"
               style={{
                 fontFamily: 'Roboto, Arial, sans-serif',
                 fontSize: '14px',
@@ -485,7 +485,7 @@ const BidControls: React.FC<BidControlsProps> = ({
           aria-label="Trả giá"
         >
           <i className="bi bi-cash-coin me-md-2"></i>
-          <span className="d-none d-md-inline">ĐẤU GIÁ</span>
+          <span className="d-none d-md-inline">TRẢ GIÁ</span>
         </button>
 
         {/* Secondary Action Button - Hủy (Cancel) */}
@@ -496,7 +496,7 @@ const BidControls: React.FC<BidControlsProps> = ({
           aria-label="Hủy lượt trả giá cuối"
         >
           <i className="bi bi-x-circle me-md-2"></i>
-          <span className="d-none d-md-inline">HỦY ĐẤU GIÁ CUỐI</span>
+          <span className="d-none d-md-inline">HỦY LƯỢT TRẢ GIÁ CUỐI</span>
         </button>
       </div>
     </div>

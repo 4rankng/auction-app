@@ -54,14 +54,14 @@ class ExportExcelService {
    */
   private createAuctionInfoSheet(auction: Auction, bids: Bid[], bidders: Bidder[]): XLSX.WorkSheet {
     const auctionInfoData = [
-      ['Thông tin đấu giá', 'Giá trị'],
-      ['ID phiên đấu giá', auction.id || ''],
+      ['Thông tin trả giá', 'Giá trị'],
+      ['ID phiên trả giá', auction.id || ''],
       ['Mô tả', auction.description || ''],
       ['Đấu giá viên', auction.settings?.auctioneer || 'N/A'],
       ['Trạng thái', auction.status === 'ENDED' ? 'Đã kết thúc' : (auction.status === 'IN_PROGRESS' ? 'Đang diễn ra' : 'Chuẩn bị')],
       ['Giá khởi điểm', this.formatCurrency(auction.settings?.startingPrice || 0)],
       ['Bước giá', this.formatCurrency(auction.settings?.bidStep || 0)],
-      ['Thời gian đấu giá (giây)', auction.settings?.bidDuration?.toString() || ''],
+      ['Thời gian trả giá (giây)', auction.settings?.bidDuration?.toString() || ''],
       ['Người thắng cuộc', auction.result?.winnerName || 'Không có người thắng'],
       ['Giá thắng cuộc', this.formatCurrency(auction.result?.finalPrice || 0)],
       ['Thời gian bắt đầu', auction.startTime ? new Date(auction.startTime).toLocaleString('vi-VN') : 'N/A'],
@@ -181,7 +181,7 @@ class ExportExcelService {
 
       // Create and add auction info worksheet
       const wsInfo = this.createAuctionInfoSheet(auction, bids, bidders);
-      XLSX.utils.book_append_sheet(wb, wsInfo, "Thông tin đấu giá");
+      XLSX.utils.book_append_sheet(wb, wsInfo, "Thông tin trả giá");
 
       // Create and add bidders worksheet
       const wsBidders = this.createBiddersSheet(bidders, bids);
@@ -189,7 +189,7 @@ class ExportExcelService {
 
       // Create and add bid history worksheet
       const wsBids = this.createBidHistorySheet(bids, bidders);
-      XLSX.utils.book_append_sheet(wb, wsBids, "Lịch sử đấu giá");
+      XLSX.utils.book_append_sheet(wb, wsBids, "Lịch sử trả giá");
 
       // Generate Excel file
       const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });

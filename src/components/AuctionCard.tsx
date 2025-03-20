@@ -22,7 +22,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction }) => {
     <div className="card auction-card mb-3">
       <div className="card-header d-flex justify-content-between align-items-center">
         <span className={`badge ${auction.status === 'ENDED' ? 'bg-danger' : auction.status === 'IN_PROGRESS' ? 'bg-success' : 'bg-primary'}`}>
-          {auction.status === 'SETUP' ? 'Chuẩn bị' : auction.status === 'IN_PROGRESS' ? 'Đang đấu giá' : 'Kết thúc'}
+          {auction.status === 'SETUP' ? 'Chuẩn bị' : auction.status === 'IN_PROGRESS' ? 'Đang trả giá' : 'Kết thúc'}
         </span>
         {auction.createdDate && <small className="text-muted">{auction.createdDate}</small>}
       </div>
