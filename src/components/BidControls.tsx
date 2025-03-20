@@ -183,6 +183,9 @@ const BidControls: React.FC<BidControlsProps> = ({
       setCustomBidAmount('');
     }
 
+    // Reset steps to 1 after successful bid
+    onStepsChange(1);
+
     // Reset validation error
     setValidationError(null);
   };
