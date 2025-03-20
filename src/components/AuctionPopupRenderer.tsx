@@ -11,6 +11,10 @@ interface AuctionPopupRendererProps {
   bidStep: string;
   bidNumber: number;
   highestBidderId?: string;
+  bidders: Array<{
+    id: string;
+    name: string;
+  }>;
 
   companyName: string;
   auctionTitle: string;
@@ -141,6 +145,11 @@ const StyledContainer = styled.div`
   }
 
   .main-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
     font-size: 20px;
     color: #0275d8;
     font-weight: 600;
@@ -221,6 +230,11 @@ const StyledContainer = styled.div`
   }
 
   .info-label {
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
     font-size: 16px;
     color: #212529;
     font-weight: 500;
@@ -525,6 +539,10 @@ const globalStyles = `
     text-align: center;
   }
 
+  .bid-number {
+
+  }
+
   .stat-value {
     font-size: 20px;
     font-weight: bold;
@@ -603,6 +621,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
     bidStep,
     bidNumber,
     highestBidderId,
+    bidders,
 
     auctionTitle,
     highestBidAmount,
@@ -1005,10 +1024,10 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
                 <div className="auction-title-section">
                   <div className="title-column">
-                  <div className="subtitle" style={{ textAlign: 'center', width: '100%' }}>Phiên trả giá</div>
+                  <div className="subtitle" style={{ textAlign: 'center', width: '100%' }}>Phiên đấu giá</div>
                     <div className="main-title">{auctionTitle || "-"}</div>
                     <div className="auction-auctioneer" style={{ textAlign: 'center', width: '100%' }}>
-                      <span className="auctioneer-label">Trả giá viên:</span>
+                      <span className="auctioneer-label">Đấu giá viên:</span>
                       <span className="auctioneer-name">{auctioneer || "-"}</span>
                     </div>
                   </div>
@@ -1017,11 +1036,11 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
    <div className="info-row">
    <div className="info-item" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
   <div className="info-label">Giá Khởi Điểm:</div>
-  <div className="info-value">{startingPrice || "1.000.000.000 VND"}</div>
+  <div className="info-value">{startingPrice || ""}</div>
 </div>
 <div className="info-item" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                         <div className="info-label">Bước Giá:</div>
-                        <div className="info-value">{bidStep || "10.000.000 VND"}</div>
+                        <div className="info-value">{bidStep || ""}</div>
                       </div>
                     </div>
 
@@ -1036,8 +1055,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
     width: '100%', // Ensures it occupies the full row
   }}
 >
-  <div className="info-label">Lượt Trả Giá:</div>
-  <div className="info-value">{bidNumber + 1}</div>
+
 </div>
 
 
@@ -1048,11 +1066,11 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
                     <div className="winner-section">
                       <div className="winner-label">Người Trả Giá Cao Nhất</div>
                       <div className="winner-name">
-                        {winnerId || highestBidderId || "Không có ID"}
+                        {winnerId ? `${winnerId} - ${bidders?.find(b => b.id === winnerId)?.name || 'Không có'}` : "Không có"}
                       </div>
 
                       <div className="price-label">Giá Trả Cao Nhất</div>
-                      <div className="final-price">{finalPrice || highestBidAmount || "1.000.000.000 VND"}</div>
+                      <div className="final-price">{finalPrice || highestBidAmount || "- VND"}</div>
                     </div>
 
                     <div className="auction-stats">
@@ -1069,17 +1087,30 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
                   </div>
                 ) : (
                   <div className="auction-details">
-                    {/* Highest bidder and highest bid section */}
+                          <div id="bid-number" style={{
+                      width: '100%',
+                      textAlign: 'center',
+                      fontSize: '16px',
+                      color: '#212529',
+                      fontWeight: '500',
+                      marginTop: '5px',
+                      paddingTop: '5px',
+                      marginBottom: '10px',
+                      paddingBottom: '5px',
+                      backgroundColor: '#ffffff'
+                    }}>
+                      Lượt trả giá thứ: {bidNumber + 1}
+                    </div>
                     <div className="highest-bid-section">
                       <div className="highest-bidder-column">
                         <div className="highest-bidder-label">Người Trả Cao Nhất</div>
                         <div className="highest-bidder-value">
-                          {highestBidderId || "2"}
+                          {highestBidderId ? `${highestBidderId} - ${bidders?.find(b => b.id === highestBidderId)?.name || ''}` : "-"}
                         </div>
                       </div>
                       <div className="highest-bid-column">
                         <div className="highest-bid-label">Giá Trả Cao Nhất</div>
-                        <div className="highest-bid-amount">{highestBidAmount || "1.030.000.000 VND"}</div>
+                        <div className="highest-bid-amount">{highestBidAmount || "- VND"}</div>
                       </div>
                     </div>
 

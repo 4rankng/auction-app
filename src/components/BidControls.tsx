@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import './BidControls.css';
 import logger from '../services/loggerService';
 
@@ -47,6 +47,26 @@ interface BidControlsProps {
   isLastBidder?: boolean;
 }
 
+// Define action types for the reducer
+type CustomBidAction =
+  | { type: 'SET_AMOUNT'; payload: string }
+  | { type: 'CLEAR_AMOUNT' }
+  | { type: 'SYNC_WITH_PARENT'; payload: string };
+
+// Define reducer function
+const customBidReducer = (state: string, action: CustomBidAction): string => {
+  switch (action.type) {
+    case 'SET_AMOUNT':
+      return action.payload;
+    case 'CLEAR_AMOUNT':
+      return '';
+    case 'SYNC_WITH_PARENT':
+      return action.payload || '';
+    default:
+      return state;
+  }
+};
+
 /**
  * A reusable component for bid controls including name, price inputs and action buttons
  * Incorporates three bidding methods: Base Price, Incremental Steps, and Custom Bid
@@ -68,11 +88,20 @@ const BidControls: React.FC<BidControlsProps> = ({
   bidHistoryEmpty = true,
   isLastBidder = false
 }) => {
-  // State for custom bid amount
-  const [customBidAmount, setCustomBidAmount] = useState<string>('');
+  // Replace useState with useReducer for custom bid amount
+  const [customBidAmount, dispatch] = useReducer(customBidReducer, '');
 
   // State for validation errors
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Sync with parent state when bid method changes
+  useEffect(() => {
+    if (bidMethod === 'customPrice') {
+      dispatch({ type: 'SYNC_WITH_PARENT', payload: bidAmount });
+    } else {
+      dispatch({ type: 'CLEAR_AMOUNT' });
+    }
+  }, [bidMethod, bidAmount]);
 
   // Parse current price and bid increment to numbers for calculations
   const currentPriceValue = parseInt(currentPrice.replace(/\D/g, '')) || 0;
@@ -148,6 +177,7 @@ const BidControls: React.FC<BidControlsProps> = ({
     return true;
   };
 
+
   // Handle bid submission
   const handleSubmit = () => {
     // Calculate the bid amount based on the selected method
@@ -170,7 +200,7 @@ const BidControls: React.FC<BidControlsProps> = ({
       return;
     }
 
-    // Update the bid amount in the parent component
+    // Update the bid amount in the parent component only when submitting
     logger.info('Setting bid amount:', numericAmount);
     onBidAmountChange(numericAmount);
 
@@ -180,7 +210,7 @@ const BidControls: React.FC<BidControlsProps> = ({
 
     // Reset the form after successful submission
     if (bidMethod === 'customPrice') {
-      setCustomBidAmount('');
+      dispatch({ type: 'CLEAR_AMOUNT' });
     }
 
     // Reset steps to 1 after successful bid
@@ -211,35 +241,6 @@ const BidControls: React.FC<BidControlsProps> = ({
       if (bidMethod === 'stepPrice') {
         const stepPrice = (currentPriceValue + (bidIncrementValue * newSteps));
         onBidAmountChange(stepPrice.toLocaleString('vi-VN'));
-      }
-    }
-  };
-
-  // Handle custom bid amount change with formatting
-  const handleCustomBidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Get the raw value directly from the input
-    const inputValue = e.target.value;
-
-    // Remove non-numeric characters to get only the digits
-    const numericValue = inputValue.replace(/\D/g, '');
-
-    // Format with thousand separators without using parseInt
-    // This preserves the exact digits and their order
-    if (numericValue) {
-      // Use a number formatter to add thousand separators
-      const formattedValue = new Intl.NumberFormat('vi-VN').format(Number(numericValue));
-      setCustomBidAmount(formattedValue);
-
-      // Update parent's bid amount if we're in custom price mode
-      if (bidMethod === 'customPrice') {
-        onBidAmountChange(formattedValue);
-      }
-    } else {
-      setCustomBidAmount('');
-
-      // Clear parent's bid amount if we're in custom price mode
-      if (bidMethod === 'customPrice') {
-        onBidAmountChange('');
       }
     }
   };
@@ -444,14 +445,14 @@ const BidControls: React.FC<BidControlsProps> = ({
               type="text"
               className="form-control"
               value={customBidAmount}
-              onChange={handleCustomBidChange}
+
               placeholder="Nhập số tiền trả giá"
               style={{
                 fontFamily: 'Roboto, Arial, sans-serif',
                 fontSize: '14px',
                 padding: '8px 12px',
                 height: '38px',
-                borderColor: '#e0e0e0',
+                borderColor: validationError ? '#dc3545' : '#e0e0e0',
                 borderRadius: '4px 0 0 4px',
                 boxShadow: 'none',
                 transition: 'all 0.2s ease-in-out'

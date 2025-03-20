@@ -3,15 +3,15 @@ import logger from '../services/loggerService';
 import { databaseService } from '@services/databaseService';
 import { bidService } from '@services/bidService';
 import { Auction, Bidder, Bid, AuctionSettings } from '@types';
-import {  DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE } from '@utils/constants';
+import {  DEFAULT_BID_DURATION } from '@utils/constants';
 
 export function useAuction() {
   const [auction, setAuction] = useState<Auction | null>(null);
   const [bidders, setBidders] = useState<Bidder[]>([]);
   const [bids, setBids] = useState<Bid[]>([]);
   const [settings, setSettings] = useState<AuctionSettings>({
-    startingPrice: DEFAULT_STARTING_PRICE,
-    bidStep: DEFAULT_BID_STEP,
+    startingPrice: 0,
+    bidStep: 0,
     bidDuration: DEFAULT_BID_DURATION,
     auctioneer: "NA"
   });
@@ -146,7 +146,7 @@ export function useAuction() {
 
   const placeBid = async (bidderId: string, amount: number) => {
     try {
-      if (!auction) throw new Error('Không có phiên trả giá đang diễn ra');
+      if (!auction) throw new Error('Không có phiên đấu giá đang diễn ra');
       const newBid = await bidService.placeBid(auction.id, bidderId, amount);
       await refreshData(); // Refresh to get updated auction data
       return newBid;

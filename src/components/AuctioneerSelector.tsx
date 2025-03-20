@@ -22,6 +22,14 @@ const AuctioneerSelector: React.FC<AuctioneerSelectorProps> = ({ value, onChange
         setLoading(true);
         const data = await auctioneerService.getAuctioneers();
         setAuctioneers(data || []);
+
+        // If no value is provided and we have auctioneers, select the first one
+        if ((!value || value === "") && data && data.length > 0) {
+          const firstAuctioneer = data[0];
+          setSelectedId(firstAuctioneer.id);
+          onChange(firstAuctioneer.id, firstAuctioneer.name);
+          logger.info(`Auto-selected first auctioneer: ${firstAuctioneer.name} (${firstAuctioneer.id})`);
+        }
       } catch (err) {
         logger.error('Error loading auctioneers:', err);
       } finally {
@@ -38,7 +46,7 @@ const AuctioneerSelector: React.FC<AuctioneerSelectorProps> = ({ value, onChange
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [value, onChange]);
 
   const handleManageAuctioneers = () => {
     navigate('/auctioneers');
@@ -68,7 +76,7 @@ const AuctioneerSelector: React.FC<AuctioneerSelectorProps> = ({ value, onChange
 
   return (
     <div className="mb-3">
-      <div className="mb-2">Đấu Giá Viên</div>
+      <div className="mb-2">Đấu giá viên</div>
       <div className="d-flex align-items-center">
         <div className="flex-grow-1">
           <select

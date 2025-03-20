@@ -54,9 +54,9 @@ class ExportExcelService {
    */
   private createAuctionInfoSheet(auction: Auction, bids: Bid[], bidders: Bidder[]): XLSX.WorkSheet {
     const auctionInfoData = [
-      ['Thông tin trả giá', 'Giá trị'],
-      ['ID phiên trả giá', auction.id || ''],
-      ['Mô tả', auction.description || ''],
+      ['Thông tin đấu giá', 'Giá trị'],
+      ['ID phiên đấu giá', auction.id || ''],
+      ['Tên tài sản đấu giá', auction.description || ''],
       ['Đấu giá viên', auction.settings?.auctioneer || 'N/A'],
       ['Trạng thái', auction.status === 'ENDED' ? 'Đã kết thúc' : (auction.status === 'IN_PROGRESS' ? 'Đang diễn ra' : 'Chuẩn bị')],
       ['Giá khởi điểm', this.formatCurrency(auction.settings?.startingPrice || 0)],

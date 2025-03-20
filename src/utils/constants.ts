@@ -7,7 +7,7 @@ export const AUCTION_STATUS = {
 } as const;
 
 // Global company name
-export const COMPANY_NAME = 'Công Ty Đấu Giá HP.AUSERCO';
+export const COMPANY_NAME = 'CÔNG TY ĐẤU GIÁ HỢP DANH HP.AUSERCO';
 
 // Define auction status type from constants
 export type AuctionStatus = typeof AUCTION_STATUS[keyof typeof AUCTION_STATUS];
@@ -27,8 +27,6 @@ export type ToastPosition = typeof TOAST_POSITION[keyof typeof TOAST_POSITION];
 
 // Other common constants
 export const DEFAULT_BID_DURATION = 60; // Default bid duration in seconds
-export const DEFAULT_BID_STEP = 10000000; // Default bid step in VND
-export const DEFAULT_STARTING_PRICE = 1000000000; // Default starting price in VND
 export const DEFAULT_TOAST_DURATION = 2000; // Default toast duration in milliseconds
 
 

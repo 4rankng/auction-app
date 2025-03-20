@@ -224,7 +224,7 @@ const AuctionHistory: React.FC = () => {
       ) : error ? (
         <Alert variant="danger">{error}</Alert>
       ) : auctions.length === 0 ? (
-        <Alert variant="info">Không có phiên trả giá đã kết thúc</Alert>
+        <Alert variant="info">Không có phiên đấu giá đã kết thúc</Alert>
       ) : (
         <>
           <Card className="shadow-sm mb-4">

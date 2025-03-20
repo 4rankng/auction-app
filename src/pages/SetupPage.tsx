@@ -13,7 +13,7 @@ import { databaseService } from '@services/databaseService';
 import { errorService, ErrorType } from '@services/errorService';
 import { toastService } from '@services/toastService';
 import ToastContainer from '@components/ToastContainer';
-import { AUCTION_STATUS, DEFAULT_BID_DURATION, DEFAULT_BID_STEP, DEFAULT_STARTING_PRICE } from '@utils/constants';
+import { AUCTION_STATUS, DEFAULT_BID_DURATION } from '@utils/constants';
 import AuctioneerSelector from '@components/AuctioneerSelector';
 
 // Define the form input types to match BidderManagement
@@ -31,8 +31,8 @@ export default function SetupPage() {
 
   const DEFAULT_AUCTION_DETAILS = {
     description: "",
-    startingPrice: DEFAULT_STARTING_PRICE,
-    bidStep: DEFAULT_BID_STEP,
+    startingPrice: 0,
+    bidStep: 0,
     bidDuration: DEFAULT_BID_DURATION,
     auctioneer: "",
     auctioneerId: ""
@@ -47,8 +47,8 @@ export default function SetupPage() {
 
   // Store default values in a ref to avoid dependency issues
   const defaultSettingsRef = useRef({
-    startingPrice: DEFAULT_STARTING_PRICE,
-    bidStep: DEFAULT_BID_STEP,
+    startingPrice: 0,
+    bidStep: 0,
     bidDuration: DEFAULT_BID_DURATION,
     auctioneer: ""
   });
@@ -71,8 +71,8 @@ export default function SetupPage() {
           setAuctionDetails(prevDetails => ({
             ...prevDetails,
             description: setupAuction.description || "",
-            startingPrice: setupAuction.settings.startingPrice || DEFAULT_STARTING_PRICE,
-            bidStep: setupAuction.settings.bidStep || DEFAULT_BID_STEP,
+            startingPrice: setupAuction.settings.startingPrice || 0,
+            bidStep: setupAuction.settings.bidStep || 0,
             bidDuration: setupAuction.settings.bidDuration || DEFAULT_BID_DURATION,
             auctioneer: setupAuction.settings.auctioneer || "",
             auctioneerId: setupAuction.settings.auctioneerId || ""
@@ -182,7 +182,7 @@ export default function SetupPage() {
   // Handle adding a new bidder
   const handleAddBidder = async (bidderData: BidderFormInputs) => {
     if (!setupAuctionId) {
-      errorService.handleError('Không thể thêm người tham gia khi chưa thiết lập phiên trả giá', ErrorType.VALIDATION);
+      errorService.handleError('Không thể thêm người tham gia khi chưa thiết lập phiên đấu giá', ErrorType.VALIDATION);
       return;
     }
 
@@ -236,7 +236,7 @@ export default function SetupPage() {
 
     // Validate auctioneer
     if (!auctionDetails.auctioneer) {
-      return { isValid: false, errorMessage: 'Vui lòng chọn trả giá viên' };
+      return { isValid: false, errorMessage: 'Vui lòng chọn đấu giá viên' };
     }
 
     // Validate bidder list
@@ -272,9 +272,9 @@ export default function SetupPage() {
   const handleStartAuction = async () => {
     if (!setupAuctionId) {
       // Show toast message directly for this error
-      toastService.error('Không tìm thấy phiên trả giá để bắt đầu');
+      toastService.error('Không tìm thấy phiên đấu giá để bắt đầu');
 
-      errorService.handleError('Không tìm thấy phiên trả giá để bắt đầu', ErrorType.DATABASE);
+      errorService.handleError('Không tìm thấy phiên đấu giá để bắt đầu', ErrorType.DATABASE);
       setShowConfirmation(false);
       return;
     }
@@ -299,8 +299,8 @@ export default function SetupPage() {
       // Get the setup auction and update it
       const setupAuction = await databaseService.getAuctionById(setupAuctionId);
       if (!setupAuction) {
-        toastService.error('Không tìm thấy phiên trả giá để bắt đầu');
-        throw new Error('Không tìm thấy phiên trả giá để bắt đầu');
+        toastService.error('Không tìm thấy phiên đấu giá để bắt đầu');
+        throw new Error('Không tìm thấy phiên đấu giá để bắt đầu');
       }
 
       // Update the auction with final details
@@ -392,7 +392,7 @@ export default function SetupPage() {
           <div className="col-12 col-lg-6 mb-4">
             <div className="card outline-card h-100">
               <div className="card-header">
-                <h5 className="card-title mb-0">Tên cuộc trả giá</h5>
+                <h5 className="card-title mb-0">Tên cuộc đấu giá</h5>
               </div>
               <div className="card-body d-flex flex-column">
                 <div className="mb-3 flex-grow-1 d-flex">
@@ -417,20 +417,20 @@ export default function SetupPage() {
                 {/* First row: Giá Khởi Điểm and Bước Giá */}
                 <div className="row mb-3">
                   <div className="col-12 col-sm-6 mb-3 mb-sm-0">
-                    <label className="form-label">Giá Khởi Điểm</label>
+                    <label className="form-label">Giá khởi điểm</label>
                     <div className="input-group">
                       <input
                         type="text"
                         className="form-control"
                         value={auctionDetails.startingPrice.toLocaleString('vi-VN')}
                         onChange={(e) => handlePriceChange(e, 'startingPrice')}
-                        placeholder="1,000,000"
+                        placeholder=""
                       />
                       <span className="input-group-text">VND</span>
                     </div>
                   </div>
-                  <div className="col-12 col-sm-6">
-                    <label className="form-label">Bước Giá</label>
+                  <div className="col-12 col-sm-6" style={{ marginTop: '10px' }}>
+                    <label className="form-label">Bước giá</label>
                     <div className="input-group">
                       <input
                         type="text"
@@ -447,7 +447,7 @@ export default function SetupPage() {
                 {/* Second row: Thời Gian only - remove Vòng Đấu Giá */}
                 <div className="row mb-3">
                   <div className="col-6 col-sm-6">
-                    <label className="form-label">Thời Gian (giây)</label>
+                    <label className="form-label">Thời gian mỗi lần trả giá (giây)</label>
                     <input
                       type="number"
                       className="form-control"
@@ -653,17 +653,17 @@ export default function SetupPage() {
       {/* Confirmation Modal */}
       <Modal show={showConfirmation} onHide={handleCloseModal} centered className="mobile-friendly-modal">
         <Modal.Header closeButton>
-          <Modal.Title>Xác Nhận Bắt Đầu Đấu Giá</Modal.Title>
+          <Modal.Title>Xác nhận bắt đầu đấu giá</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p className="confirmation-description">Bạn có chắc chắn muốn bắt đầu phiên trả giá với thông tin sau?</p>
+          <p className="confirmation-description">Bạn có chắc chắn muốn bắt đầu phiên đấu giá với thông tin sau?</p>
 
           <ListGroup className="mb-3 auction-summary-list">
             <ListGroup.Item><strong>Tên:</strong> {auctionDetails.description}</ListGroup.Item>
             <ListGroup.Item><strong>Giá khởi điểm:</strong> {auctionDetails.startingPrice.toLocaleString('vi-VN')} VND</ListGroup.Item>
             <ListGroup.Item><strong>Bước giá:</strong> {auctionDetails.bidStep.toLocaleString('vi-VN')} VND</ListGroup.Item>
             <ListGroup.Item><strong>Thời gian:</strong> {auctionDetails.bidDuration} giây</ListGroup.Item>
-            <ListGroup.Item><strong>Đấu Giá Viên:</strong> {auctionDetails.auctioneer || 'Chưa chọn'}</ListGroup.Item>
+            <ListGroup.Item><strong>Đấu giá viên:</strong> {auctionDetails.auctioneer || 'Chưa chọn'}</ListGroup.Item>
             <ListGroup.Item><strong>Số người tham gia:</strong> {bidders.length}</ListGroup.Item>
           </ListGroup>
 
