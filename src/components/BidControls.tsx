@@ -35,6 +35,8 @@ interface BidControlsProps {
   currentPrice: string;
   bidIncrement: string;
   bidMethod: 'basePrice' | 'stepPrice' | 'customPrice';
+  steps: number;
+  onStepsChange: (steps: number) => void;
   onBidMethodChange: (method: 'basePrice' | 'stepPrice' | 'customPrice') => void;
   onBidAmountChange: (amount: string) => void;
   onPlaceBid: (amount: string) => void;
@@ -55,6 +57,8 @@ const BidControls: React.FC<BidControlsProps> = ({
   currentPrice,
   bidIncrement,
   bidMethod,
+  steps,
+  onStepsChange,
   onBidMethodChange,
   onBidAmountChange,
   onPlaceBid,
@@ -64,9 +68,6 @@ const BidControls: React.FC<BidControlsProps> = ({
   bidHistoryEmpty = true,
   isLastBidder = false
 }) => {
-  // State for number of steps when using incremental bidding
-  const [steps, setSteps] = useState<number>(1);
-
   // State for custom bid amount
   const [customBidAmount, setCustomBidAmount] = useState<string>('');
 
@@ -189,7 +190,7 @@ const BidControls: React.FC<BidControlsProps> = ({
   // Handle step increment/decrement
   const handleStepIncrement = () => {
     const newSteps = steps + 1;
-    setSteps(newSteps);
+    onStepsChange(newSteps);
 
     // Immediately update the bid amount if stepPrice method is selected
     if (bidMethod === 'stepPrice') {
@@ -201,7 +202,7 @@ const BidControls: React.FC<BidControlsProps> = ({
   const handleStepDecrement = () => {
     if (steps > 1) {
       const newSteps = steps - 1;
-      setSteps(newSteps);
+      onStepsChange(newSteps);
 
       // Immediately update the bid amount if stepPrice method is selected
       if (bidMethod === 'stepPrice') {
@@ -514,6 +515,7 @@ const arePropsEqual = (prevProps: BidControlsProps, nextProps: BidControlsProps)
   if (prevProps.bidHistoryEmpty !== nextProps.bidHistoryEmpty) return false;
   if (prevProps.isLastBidder !== nextProps.isLastBidder) return false;
   if (prevProps.bidMethod !== nextProps.bidMethod) return false;
+  if (prevProps.steps !== nextProps.steps) return false;
 
   // For function props, we assume they are stable (should be useCallback'd by parent)
   // If they're always changing reference, that's a problem in the parent component

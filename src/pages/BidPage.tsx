@@ -66,6 +66,9 @@ export const BidPage: React.FC = () => {
   // Add bidMethod state
   const [bidMethod, setBidMethod] = useState<'basePrice' | 'stepPrice' | 'customPrice'>('basePrice');
 
+  // Add state for bid steps
+  const [bidSteps, setBidSteps] = useState<number>(1);
+
   // Add state to control timer value sent to popup (separate from bidderTimeLeft)
   const [popupTimerValue, setPopupTimerValue] = useState<number>(0);
 
@@ -1131,6 +1134,12 @@ export const BidPage: React.FC = () => {
     setBidMethod(method);
   }, []);
 
+  // Create a wrapper for handling step changes
+  const handleStepsChange = useCallback((steps: number) => {
+    logger.info('Bid steps changed to:', steps);
+    setBidSteps(steps);
+  }, []);
+
   const handleExportData = async () => {
     if (!auction) return;
 
@@ -1411,6 +1420,8 @@ export const BidPage: React.FC = () => {
                 currentPrice={formattedCurrentPrice}
                 bidIncrement={formattedBidIncrement}
                 bidMethod={bidMethod}
+                steps={bidSteps}
+                onStepsChange={handleStepsChange}
                 onBidMethodChange={handleBidMethodChange}
                 onBidAmountChange={handleBidAmountChange}
                 onPlaceBid={handlePlaceBid}
