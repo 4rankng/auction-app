@@ -373,6 +373,8 @@ export const BidPage: React.FC = () => {
 
   // Add state to track elapsed time with manual updates
   const [elapsedTime, setElapsedTime] = useState<string>("00:00:00");
+  // Add a ref to store the last calculated elapsed time to avoid unnecessary state updates
+  const lastElapsedTimeRef = useRef<string>("00:00:00");
 
   // Update elapsed time every second
   useEffect(() => {
@@ -391,18 +393,23 @@ export const BidPage: React.FC = () => {
                   "hours:", hours, "minutes:", minutes, "seconds:", seconds,
                   "from duration (ms):", durationMs);
       setElapsedTime(finalTime);
+      lastElapsedTimeRef.current = finalTime;
       return; // Don't set up timer for ended auctions
     }
 
     // Initial update for active auctions
-    setElapsedTime(calculateElapsedTime());
+    const initialTime = calculateElapsedTime();
+    setElapsedTime(initialTime);
+    lastElapsedTimeRef.current = initialTime;
 
     // Set up interval to update every second for active auctions
     const intervalId = setInterval(() => {
-      setElapsedTime((prevElapsedTime) => {
-        const newElapsedTime = calculateElapsedTime();
-        return newElapsedTime !== prevElapsedTime ? newElapsedTime : prevElapsedTime;
-      });
+      const newElapsedTime = calculateElapsedTime();
+      // Only update state if the value actually changed
+      if (newElapsedTime !== lastElapsedTimeRef.current) {
+        setElapsedTime(newElapsedTime);
+        lastElapsedTimeRef.current = newElapsedTime;
+      }
     }, 1000);
 
     // Clean up on unmount or when auction ends
@@ -1220,7 +1227,7 @@ export const BidPage: React.FC = () => {
   const memoizedBidHistory = useMemo(() => bidHistory, [bidHistory]);
 
   // Wrap child components with React.memo to prevent unnecessary renders
-  const MemoizedAuctionHeader = React.memo(AuctionHeader);
+  // AuctionHeader is already memoized in its own file with a custom comparison function
   const MemoizedAuctionSummary = React.memo(AuctionSummary);
   const MemoizedBidderSelectionGrid = React.memo(BidderSelectionGrid);
   const MemoizedBidControls = React.memo(BidControls);
@@ -1276,7 +1283,7 @@ export const BidPage: React.FC = () => {
 
       <div className="card mb-3" style={{marginTop: '0rem'}}>
         {/* Auction Header Component */}
-        <MemoizedAuctionHeader
+        <AuctionHeader
           title={auctionDescription}
           elapsedTime={elapsedTime}
           onEndAuction={handleEndAuction}

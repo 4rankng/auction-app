@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import './AuctionHeader.css';
+import React, { useState } from 'react';
 import CompanyBanner from './CompanyBanner';
 
 // Add keyframes animation for the popup button
@@ -316,4 +316,33 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
   );
 };
 
-export default AuctionHeader;
+// Create a custom comparison function for React.memo that ignores elapsedTime changes
+const arePropsEqual = (prevProps: AuctionHeaderProps, nextProps: AuctionHeaderProps) => {
+  // Only check if elapsedTime is the only prop that changed
+  const isOnlyElapsedTimeChanged =
+    prevProps.title === nextProps.title &&
+    prevProps.totalBids === nextProps.totalBids &&
+    prevProps.isAuctionEnded === nextProps.isAuctionEnded &&
+    prevProps.auctioneer === nextProps.auctioneer &&
+    prevProps.onEndAuction === nextProps.onEndAuction &&
+    prevProps.onShowPopup === nextProps.onShowPopup &&
+    prevProps.elapsedTime !== nextProps.elapsedTime;
+
+  if (isOnlyElapsedTimeChanged) {
+    // If only the elapsedTime changed, prevent re-render
+    return true;
+  }
+
+  // Check equality for all other props except elapsedTime
+  return (
+    prevProps.title === nextProps.title &&
+    prevProps.totalBids === nextProps.totalBids &&
+    prevProps.isAuctionEnded === nextProps.isAuctionEnded &&
+    prevProps.auctioneer === nextProps.auctioneer &&
+    prevProps.onEndAuction === nextProps.onEndAuction &&
+    prevProps.onShowPopup === nextProps.onShowPopup
+  );
+};
+
+// Apply React.memo with the custom comparison function
+export default React.memo(AuctionHeader, arePropsEqual);
