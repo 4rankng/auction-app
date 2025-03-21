@@ -15,6 +15,7 @@ interface PopupConfig {
   top?: number;
   left?: number;
   preventAutoClose?: boolean; // Added option to prevent auto-close
+  fullscreen?: boolean; // Option for fullscreen mode
 }
 
 // Track active popup references with their configurations
@@ -43,7 +44,8 @@ export const openPopup = (url: string, name: string, config: PopupConfig = {}): 
     resizable = true,
     top = window.screen.height / 2 - 300, // Center vertically
     left = window.screen.width / 2 - 400, // Center horizontally
-    preventAutoClose = false // Default to false for backward compatibility
+    preventAutoClose = false, // Default to false for backward compatibility
+    fullscreen = false // Default to false for backward compatibility
   } = config;
 
   // Format window features string
@@ -58,7 +60,14 @@ export const openPopup = (url: string, name: string, config: PopupConfig = {}): 
     'status=no',
     'menubar=no',
     'location=no'
-  ].join(',');
+  ];
+
+  // Add fullscreen if specified
+  if (fullscreen) {
+    features.push('fullscreen=yes');
+  }
+
+  const featuresString = features.join(',');
 
   // Close existing popup with the same name
   closePopup(name);
@@ -66,7 +75,7 @@ export const openPopup = (url: string, name: string, config: PopupConfig = {}): 
   // Open the new popup
   try {
     logger.info(`Opening popup window '${name}'`);
-    const popupWindow = window.open(url, name, features);
+    const popupWindow = window.open(url, name, featuresString);
 
     // Check if popup was successfully created
     if (!popupWindow) {
@@ -77,6 +86,20 @@ export const openPopup = (url: string, name: string, config: PopupConfig = {}): 
     // Try to focus the window to bring it to the front
     try {
       popupWindow.focus();
+
+      // If fullscreen is requested, attempt to maximize the window after opening
+      if (fullscreen) {
+        try {
+          popupWindow.moveTo(0, 0);
+          popupWindow.resizeTo(
+            window.screen.availWidth,
+            window.screen.availHeight
+          );
+          logger.info("Maximized popup window dimensions");
+        } catch (e) {
+          logger.warn("Could not maximize popup window:", e);
+        }
+      }
     } catch (e) {
       logger.warn(`Could not focus popup window:`, e);
     }

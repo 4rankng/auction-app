@@ -8,15 +8,68 @@ const createPopupHtml = () => `
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Thông Tin Đấu Giá</title>
   <link rel="stylesheet" href="${window.location.origin}/index.css">
+  <style>
+    html, body {
+      height: 100vh;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #404040;
+    }
+    #auction-popup-root {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    #auction-popup-root > div {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
 </head>
 <body>
   <div id="auction-popup-root"></div>
   <script>
     // Make parent window variables accessible
     window.parentWindow = window.opener;
+
+    // Maximize window when loaded
+    window.addEventListener('load', function() {
+      try {
+        window.moveTo(0, 0);
+        window.resizeTo(
+          window.screen.availWidth,
+          window.screen.availHeight
+        );
+        console.log("Window maximized on load");
+
+        // Request fullscreen if supported
+        const docEl = document.documentElement;
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen().catch(err => {
+            console.log("Could not enter fullscreen mode:", err);
+          });
+        } else if (docEl.webkitRequestFullscreen) {
+          docEl.webkitRequestFullscreen();
+        } else if (docEl.mozRequestFullScreen) {
+          docEl.mozRequestFullScreen();
+        } else if (docEl.msRequestFullscreen) {
+          docEl.msRequestFullscreen();
+        }
+      } catch(e) {
+        console.error("Error maximizing window:", e);
+      }
+    });
   </script>
 </body>
 </html>
@@ -79,10 +132,14 @@ export const useAuctionPopup = (options: UseAuctionPopupOptions = {}) => {
 
     // We're using a blank popup that we'll fill with our content
     const popup = popupService.openPopup('about:blank', 'auction_display', {
-      width: 750,
-      height: 600,
+      width: window.screen.availWidth,
+      height: window.screen.availHeight,
       resizable: true,
-      preventAutoClose: true
+      preventAutoClose: true,
+      left: 0,
+      top: 0,
+      fullscreen: true,
+      scrollbars: true
     });
 
     if (popup) {

@@ -33,6 +33,11 @@ interface AuctionPopupRendererProps {
 const StyledContainer = styled.div`
   /* Base styles and fonts */
   font-family: 'Roboto', sans-serif;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   /* Background styling for the entire popup */
   html, body {
@@ -62,29 +67,93 @@ const StyledContainer = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #404040;
+    background-color: #ffffff;
   }
 
   /* Auction container */
   .auction-container {
-    max-width: 750px;
-    min-width: 750px;
     width: 100%;
-    border-radius: 8px;
+    max-width: 100%;
+    min-height: 100vh;
+    height: 100vh; /* Ensure it takes full viewport height */
+    border-radius: 0;
     box-shadow: none;
     border: none;
     background-color: #ffffff;
-    overflow: hidden;
-    margin: 0 auto;
+    overflow: auto;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
   }
 
+  /* Auction details - ensure it fits full width */
+  .auction-details {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    flex: 1;
+    min-height: calc(100vh - 215px); /* Subtract height of header, title section, info row */
+  }
 
+  /* Result container - ensure it fits full width */
+  .result-container {
+    width: 100%;
+    background-color: #ffffff;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+  }
 
-  /* Add styles for the auctioneer display */
+  /* Company banner */
+  .company-header {
+    width: 100%;
+    background-color: #0080ff;
+    color: white;
+    padding: 15px;
+    font-size: calc(16px + 1vmin);
+    font-weight: bold;
+    text-align: center;
+    border-radius: 0;
+  }
+
+  /* Auction title section */
+  .auction-title-section {
+    width: 100%;
+    padding: 15px 20px;
+    margin: 0;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* Main title */
+  .main-title {
+    font-size: calc(20px + 1vmin);
+    font-weight: 700;
+    margin: 10px 0;
+    color: #0275d8;
+  }
+
+  .subtitle {
+    font-size: calc(14px + 0.5vmin);
+    color: #6c757d;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+
+  /* Auction auctioneer */
   .auction-auctioneer {
-    margin-top: 0.3rem;
-    padding-left: 4px;
-    font-size: 0.95rem;
+    font-size: calc(14px + 0.5vmin);
+    margin-top: 5px;
     color: #6c757d;
   }
 
@@ -93,170 +162,105 @@ const StyledContainer = styled.div`
     margin-right: 0.5rem;
   }
 
-  .auctioneer-name {
-    font-weight: 500;
-  }
-
-  /* Override CompanyBanner styles for the popup */
-  .company-header.company-banner {
-    background-color: #0080ff;
-    color: white;
-    padding: 15px;
-    font-size: 20px;
-    font-weight: bold;
-    text-align: center;
-    border-radius: 8px 8px 0 0;
+  /* Info rows */
+  .info-row {
     width: 100%;
-  }
-
-  /* Company header */
-  .company-header {
-    background-color: #0080ff;
-    color: white;
-    padding: 15px;
-    font-size: 20px;
-    font-weight: bold;
-    text-align: center;
-    border-radius: 8px 8px 0 0;
-  }
-
-  /* Auction title section */
-  .auction-title-section {
+    padding: 12px 20px;
     background-color: #f8f9fa;
-    padding: 15px 20px;
     border-bottom: 1px solid #e9ecef;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: center;
+    gap: 40px;
   }
 
-  .title-column {
+  .info-item {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
+    align-items: center;
+    text-align: center;
   }
 
-  .subtitle {
-    font-size: 16px;
-    color: #6c757d;
-    margin-bottom: 10px;
+  .info-label {
+    font-size: calc(14px + 0.5vmin);
+    color: #212529;
     font-weight: 500;
   }
 
-  .main-title {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    font-size: 20px;
-    color: #0275d8;
-    font-weight: 600;
-    margin-bottom: 10px;
+  .info-value {
+    font-size: calc(14px + 0.5vmin);
+    color: #212529;
+    font-weight: 500;
   }
 
-  /* Update auctioneer column alignment */
-  .auctioneer-column {
+  /* Bid number display */
+  #bid-number {
+    width: 100%;
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    font-size: calc(14px + 0.5vmin);
+    color: #212529;
+    font-weight: 500;
+    margin-top: 10px;
+    padding-top: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    background-color: #ffffff;
   }
 
   /* Highest bid section */
   .highest-bid-section {
+    width: 100%;
+    padding: 15px 20px;
     background-color: #ffd6d9;
-    padding: 12px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    text-align: center;
     border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
   }
 
-  .highest-bidder-column {
-    text-align: center;
+  .highest-bidder-column,
+  .highest-bid-column {
     flex: 1;
+    text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
-  .highest-bidder-label {
-    font-size: 16px;
+  .highest-bidder-label,
+  .highest-bid-label {
+    font-size: calc(14px + 0.5vmin);
     color: #721c24;
     font-weight: 600;
     margin-bottom: 5px;
   }
 
   .highest-bidder-value {
-    font-size: 24px;
+    font-size: calc(18px + 0.8vmin);
     color: #212529;
     font-weight: 700;
   }
 
-  .highest-bid-column {
-    text-align: center;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .highest-bid-label {
-    font-size: 16px;
-    color: #721c24;
-    font-weight: 600;
-    margin-bottom: 5px;
-  }
-
   .highest-bid-amount {
-    font-size: 24px;
+    font-size: calc(18px + 0.8vmin);
     color: #dc3545;
     font-weight: 700;
   }
 
-  /* Info sections with simple labeled rows */
-  .info-row {
-    display: flex;
-    padding: 12px 20px;
-    border-bottom: 1px solid #e9ecef;
-  }
-
-  .info-item {
-    display: flex;
-    flex: 1;
-  }
-
-  .info-label {
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    width: 100%;
-    font-size: 16px;
-    color: #212529;
-    font-weight: 500;
-    margin-right: 8px;
-  }
-
-  .info-value {
-    font-size: 16px;
-    color: #212529;
-    font-weight: 500;
-  }
-
   /* Timer section */
   .timer-section {
-    padding: 15px 20px;
+    width: 100%;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    background-color: #f8f8f8;
+    flex-grow: 1;
+    margin-top: auto;
+    margin-bottom: 0;
   }
 
   .timer-label {
-    font-size: 18px;
+    font-size: calc(16px + 0.6vmin);
     color: #212529;
     font-weight: 600;
     margin-bottom: 15px;
@@ -266,7 +270,7 @@ const StyledContainer = styled.div`
   .timer-value {
     background-color: #dc3545;
     color: white;
-    font-size: 30px;
+    font-size: calc(24px + 1.2vmin);
     font-weight: bold;
     padding: 10px 35px;
     border-radius: 5px;
@@ -274,131 +278,106 @@ const StyledContainer = styled.div`
     text-align: center;
   }
 
-  /* Results styles */
-  .result-container {
-    background-color: #ffffff;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    flex: 1;
-    margin: 0;
-    box-shadow: none;
-    border-radius: 0 0 8px 8px;
-    min-height: 380px;
-  }
-
   .result-header {
-    font-size: 22px;
+    font-size: calc(18px + 1vmin);
     font-weight: bold;
     color: #28a745;
     margin: 20px 0;
     text-transform: uppercase;
     text-align: center;
     width: 100%;
-    border-radius: 8px;
   }
 
+  /* Winner section - make it wider */
   .winner-section {
     margin: 10px 0 20px 0;
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: none;
-    width: 90%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 800px;
   }
 
-  .winner-label {
-    font-size: 18px;
+  .winner-label, .price-label {
+    font-size: calc(14px + 0.6vmin);
     color: #212529;
     margin-bottom: 10px;
     text-align: center;
   }
 
   .winner-name {
-    font-size: 18px;
+    font-size: calc(16px + 0.8vmin);
     font-weight: 500;
     color: #0275d8;
     margin-bottom: 15px;
     text-align: center;
   }
 
-  .price-label {
-    font-size: 18px;
-    color: #212529;
-    margin-bottom: 10px;
-    text-align: center;
-  }
-
   .final-price {
-    font-size: 22px;
+    font-size: calc(18px + 1vmin);
     font-weight: bold;
     color: #28a745;
     margin-bottom: 15px;
     text-align: center;
   }
 
+  /* Auction stats - make it wider */
   .auction-stats {
     display: flex;
     justify-content: space-between;
-    gap: 2px;
-    width: 90%;
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
   }
 
   .stat-item {
     background-color: #fff;
     padding: 15px;
     border-radius: 8px;
-    box-shadow: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     flex: 1;
-    margin: 0;
   }
 
   .stat-label {
-    font-size: 16px;
+    font-size: calc(14px + 0.5vmin);
     color: #212529;
     margin-bottom: 8px;
     text-align: center;
   }
 
   .stat-value {
-    font-size: 20px;
+    font-size: calc(16px + 0.8vmin);
     font-weight: bold;
     color: #0275d8;
     text-align: center;
   }
 
-  /* Hide elements when auction is ended */
-  .hidden {
-    display: none;
-  }
-
-  /* Ensure bidding view has consistent height */
-  .auction-details {
-    display: flex;
-    flex-direction: column;
-    min-height: 380px;
-  }
-
-  /* Responsive adjustments */
-  @media (max-width: 500px) {
+  /* Responsive adjustments for projector display */
+  @media (min-width: 1200px) {
     .auction-container {
-      max-width: 95%;
+      max-width: 100%;
     }
 
-    .highest-bid-section {
-      flex-direction: column;
-      gap: 10px;
+    .main-title {
+      font-size: calc(24px + 1vmin);
     }
 
-    .info-row {
-      flex-direction: column;
-      gap: 10px;
+    .timer-value {
+      font-size: calc(30px + 1.2vmin);
+      padding: 15px 45px;
     }
 
-    .info-item {
-      margin-bottom: 8px;
+    .winner-section,
+    .auction-stats {
+      max-width: 80%;
+    }
+  }
+
+  @media (min-width: 1600px) {
+    .winner-section,
+    .auction-stats {
+      max-width: 70%;
     }
   }
 `;
@@ -410,10 +389,36 @@ const globalStyles = `
     font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #000000;
+    background-color: #ffffff;
     height: 100vh;
     width: 100vw;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* For projector readability */
+  * {
+    text-shadow: 0 0 1px rgba(0,0,0,0.1);
+  }
+
+  /* Improved contrast for readability */
+  .highest-bid-amount, .timer-value, .final-price {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+
+  /* Improved scaling for different screen sizes */
+  @media (min-width: 1600px) {
+    body {
+      font-size: 120%;
+    }
+  }
+
+  @media (min-width: 2400px) {
+    body {
+      font-size: 140%;
+    }
   }
 
   /* Styling for the auction ended state */
@@ -647,6 +652,66 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
   // Add a ref to track if we've handled auction end
   const endHandledRef = useRef<boolean>(false);
+
+  // Effect to maximize the window when loaded
+  useEffect(() => {
+    // Function to ensure the popup window is maximized
+    const maximizePopupWindow = () => {
+      try {
+        if (typeof window !== 'undefined' && window.opener) {
+          // We are in the popup window
+          window.moveTo(0, 0);
+          window.resizeTo(
+            window.screen.availWidth,
+            window.screen.availHeight
+          );
+
+          // Wait a moment, then try one more time to ensure it's maximized
+          setTimeout(() => {
+            window.moveTo(0, 0);
+            window.resizeTo(
+              window.screen.availWidth,
+              window.screen.availHeight
+            );
+
+            // Try to request fullscreen mode
+            const docEl = document.documentElement;
+            if (docEl.requestFullscreen) {
+              docEl.requestFullscreen().catch(err => {
+                logger.warn("Could not enter fullscreen mode:", err);
+              });
+            }
+
+            logger.info("Maximized popup window dimensions");
+          }, 500);
+        }
+      } catch (error) {
+        logger.error("Error maximizing popup window:", error);
+      }
+    };
+
+    // Call the function after a slight delay to ensure the window is already created
+    setTimeout(maximizePopupWindow, 300);
+
+    // Also set up a resize handler to ensure content looks good after resize
+    const handleResize = () => {
+      if (containerRef.current) {
+        // Force reflow by actually using the height value
+        const height = containerRef.current.offsetHeight;
+        containerRef.current.style.height = `${height}px`;
+        setTimeout(() => {
+          if (containerRef.current) {
+            containerRef.current.style.height = '';
+          }
+        }, 10);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // Remove the timer handling effect - we'll just use the prop directly
   // useEffect(() => {
@@ -1005,27 +1070,28 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
         <NewWindow
           title={isAuctionEnded ? "Kết Quả Đấu Giá" : "Thông Tin Đấu Giá"}
           features={{
-            width: 750,
-            height: 550,
-            left: 100,
-            top: 100,
-            resizable: false
+            width: window.screen.availWidth,
+            height: window.screen.availHeight,
+            left: 0,
+            top: 0,
+            resizable: true,
+            scrollbars: false,
           }}
           onUnload={handleClose}
           onBlock={() => logger.info("Popup was blocked!")}
           name="auction_display"
-          center="parent"
+          center="screen"
           copyStyles={false}
         >
           <StyleSheetManager target={containerRef.current?.ownerDocument?.head || document.head}>
             <StyledContainer ref={containerRef}>
-              <div className={`auction-container ${isAuctionEnded ? 'auction-ended-container' : ''}`}>
+              <div className={`auction-container ${isAuctionEnded ? 'auction-ended-container' : ''}`} style={{ width: '100%', maxWidth: '100%' }}>
                 <CompanyBanner className="company-header" companyName={companyName} />
 
                 <div className="auction-title-section">
                   <div className="title-column">
                   <div className="subtitle" style={{ textAlign: 'center', width: '100%' }}>Phiên đấu giá</div>
-                    <div className="main-title">{auctionTitle || "-"}</div>
+                    <div className="main-title" style={{ textAlign: 'center', width: '100%' }}>{auctionTitle || "-"}</div>
                     <div className="auction-auctioneer" style={{ textAlign: 'center', width: '100%' }}>
                       <span className="auctioneer-label">Đấu giá viên:</span>
                       <span className="auctioneer-name">{auctioneer || "-"}</span>
@@ -1087,18 +1153,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
                   </div>
                 ) : (
                   <div className="auction-details">
-                          <div id="bid-number" style={{
-                      width: '100%',
-                      textAlign: 'center',
-                      fontSize: '16px',
-                      color: '#212529',
-                      fontWeight: '500',
-                      marginTop: '5px',
-                      paddingTop: '5px',
-                      marginBottom: '10px',
-                      paddingBottom: '5px',
-                      backgroundColor: '#ffffff'
-                    }}>
+                          <div id="bid-number">
                       Lượt trả giá thứ: {bidNumber + 1}
                     </div>
                     <div className="highest-bid-section">
