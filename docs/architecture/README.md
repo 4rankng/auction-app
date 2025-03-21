@@ -175,18 +175,3 @@ src/
 - **User Authentication:** Add login functionality for auctioneers and participants.
 - **Analytics Dashboard:** Provide insights into auction performance.
 
-
-optimize the timerService to reduce unnecessary renders
-optimize the BidPage to reduce unnecessary renders and improve performance
-optimize the databaseService to improve localStorage operations by implementing an in-memory cache and debouncing writes.
-ptimize the bidService.ts with improved error handling and performance
-make one final improvement to webpack.config.js to ensure optimal bundling and code splitting
-
-
-# INSTRUCTIONS
-
-### Prevent unnecessary fetching of bid history
-1. remove all logic related to fetch data to bid history table
-2. implement a new logic
-- only fetch bid history data when page is loaded (including page refresh)
-- only fetch bid history data when a button in BidControl component is clicked
