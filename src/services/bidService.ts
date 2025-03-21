@@ -2,12 +2,128 @@ import { databaseService } from '@services/databaseService';
 import { Bid, Auction, AuctionStatus } from '@types';
 import * as formatUtils from '@utils/formatUtils';
 import logger from './loggerService';
+import { Subject, BehaviorSubject } from 'rxjs';
 
 // Auction status constants
 const AUCTION_STATUS = {
   SETUP: 'SETUP' as AuctionStatus,
   IN_PROGRESS: 'IN_PROGRESS' as AuctionStatus,
   ENDED: 'ENDED' as AuctionStatus
+};
+
+// Define the BidState interface to hold all bid control state
+export interface BidState {
+  bidderName: string;
+  currentPrice: string;
+  bidIncrement: string;
+  bidMethod: 'basePrice' | 'stepPrice' | 'customPrice';
+  steps: number;
+  isPlaceBidDisabled: boolean;
+  isCancelBidDisabled: boolean;
+  bidHistoryEmpty: boolean;
+  isLastBidder: boolean;
+  customAmount: string;
+}
+
+// Initial state for the bid controls
+const initialBidState: BidState = {
+  bidderName: '',
+  currentPrice: '0 VND',
+  bidIncrement: '0 VND',
+  bidMethod: 'basePrice',
+  steps: 1,
+  isPlaceBidDisabled: true,
+  isCancelBidDisabled: true,
+  bidHistoryEmpty: true,
+  isLastBidder: false,
+  customAmount: ''
+};
+
+// Create a BehaviorSubject to hold the current bid state
+const bidStateSubject = new BehaviorSubject<BidState>(initialBidState);
+
+// Event types
+export type BidEvent =
+  | { type: 'CUSTOM_AMOUNT_CHANGE'; payload: string }
+  | { type: 'STEP_CHANGE'; payload: number }
+  | { type: 'BID_METHOD_CHANGE'; payload: 'basePrice' | 'stepPrice' | 'customPrice' }
+  | { type: 'PLACE_BID'; payload: string }
+  | { type: 'CANCEL_BID' };
+
+// Create subjects for different events
+const bidEventSubject = new Subject<BidEvent>();
+
+// Methods to emit events
+const emitCustomAmountChange = (amount: string) => {
+  // Only emit the event, but don't update the state
+  // This prevents unwanted re-renders during typing
+  bidEventSubject.next({ type: 'CUSTOM_AMOUNT_CHANGE', payload: amount });
+
+  // We no longer update the state automatically on every keystroke
+  // This is now handled by the component on blur or submit
+  // const currentState = bidStateSubject.getValue();
+  // bidStateSubject.next({
+  //   ...currentState,
+  //   customAmount: amount
+  // });
+};
+
+const emitStepChange = (steps: number) => {
+  bidEventSubject.next({ type: 'STEP_CHANGE', payload: steps });
+
+  // Also update the state
+  const currentState = bidStateSubject.getValue();
+  bidStateSubject.next({
+    ...currentState,
+    steps
+  });
+};
+
+const emitBidMethodChange = (method: 'basePrice' | 'stepPrice' | 'customPrice') => {
+  bidEventSubject.next({ type: 'BID_METHOD_CHANGE', payload: method });
+
+  // Also update the state
+  const currentState = bidStateSubject.getValue();
+  bidStateSubject.next({
+    ...currentState,
+    bidMethod: method
+  });
+};
+
+const emitPlaceBid = (amount: string) => {
+  bidEventSubject.next({ type: 'PLACE_BID', payload: amount });
+};
+
+const emitCancelBid = () => {
+  bidEventSubject.next({ type: 'CANCEL_BID' });
+};
+
+// Methods to update bid state directly
+const updateBidState = (newState: Partial<BidState>) => {
+  const currentState = bidStateSubject.getValue();
+
+  // Check if any values actually changed before updating
+  let hasChanges = false;
+  for (const key in newState) {
+    if (Object.prototype.hasOwnProperty.call(newState, key)) {
+      const k = key as keyof BidState;
+      if (newState[k] !== currentState[k]) {
+        hasChanges = true;
+        break;
+      }
+    }
+  }
+
+  if (!hasChanges) {
+    logger.info('Skipping bidService state update - no changes detected');
+    return;
+  }
+
+  logger.info('Updating bidService state:', newState);
+  bidStateSubject.next({
+    ...currentState,
+    ...newState
+  });
 };
 
 class BidService {
@@ -161,6 +277,16 @@ class BidService {
   }
 
   /**
+   * Calculate a bid amount based on the current price, increment, and steps
+   */
+  public calculateStepPrice(currentPrice: string, bidIncrement: string, steps: number): string {
+    const currentPriceValue = this.parseCurrency(currentPrice);
+    const bidIncrementValue = this.parseCurrency(bidIncrement);
+    const calculatedAmount = currentPriceValue + (bidIncrementValue * steps);
+    return this.formatCurrency(calculatedAmount);
+  }
+
+  /**
    * Format a timestamp to a readable date string
    */
   public formatTimestamp(timestamp: number): string {
@@ -184,3 +310,22 @@ class BidService {
 
 // Export a singleton instance
 export const bidService = new BidService();
+
+// Service object to export
+const exportService = {
+  // State management
+  bidState: bidStateSubject.asObservable(),
+  updateBidState,
+
+  // Event subscription
+  onBidEvent: bidEventSubject.asObservable(),
+
+  // Event emitters
+  emitCustomAmountChange,
+  emitStepChange,
+  emitBidMethodChange,
+  emitPlaceBid,
+  emitCancelBid
+};
+
+export default exportService;

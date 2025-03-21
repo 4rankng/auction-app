@@ -12,10 +12,11 @@ import { useAuction } from '@hooks/useAuction';
 import useAuctionPopup from '@hooks/useAuctionPopup';
 import { Bid, AuctionStatus } from '@types';
 import './BidPage.css';
-import { bidService } from '@services/bidService';
 import { exportExcelService } from '@services/exportExcelService';
 import * as timerService from '@services/timerService';
 import { COMPANY_NAME } from '@utils/constants';
+import { bidService } from '@services/bidService';
+import bidEvents, { BidEvent } from '../services/bidService';
 
 // Interface for the bid history display format
 interface BidHistoryDisplay {
@@ -28,11 +29,16 @@ interface BidHistoryDisplay {
   bidNumber?: number; // Use bidNumber instead of round for continuous bidding
 }
 
+// Memoize components outside of the component function to prevent recreation on each render
+const MemoizedAuctionSummary = React.memo(AuctionSummary);
+const MemoizedBidderSelectionGrid = React.memo(BidderSelectionGrid);
+// BidControls is already memoized in its own file
+const MemoizedBidHistoryTable = React.memo(BidHistoryTable);
+const MemoizedAuctionResult = React.memo(AuctionResult);
+
 export const BidPage: React.FC = () => {
-  // Get auction data from useAuction hook - removed placeBid and removeBid
   const { auction, bidders, bids, loading: dataLoading, error: dataError, updateAuction, getAuctionById } = useAuction();
   const location = useLocation();
-
 
   const [isFromHistory, setIsFromHistory] = useState<boolean>(false);
 
@@ -817,7 +823,62 @@ export const BidPage: React.FC = () => {
     }
   }, [popupWindow, shouldShowPopup]);
 
-  const handlePlaceBid = async (directBidAmount?: string) => {
+  // Function to fetch the latest bid history from the database
+  const fetchLatestBidHistory = useCallback(async (auctionId: string) => {
+    try {
+      logger.info(`Fetching latest bid history for auction ${auctionId}`);
+
+      // Get latest bids using bidService
+      const latestBids = await bidService.getLatestBids(auctionId);
+      logger.info(`Found ${latestBids.length} bids for auction ${auctionId}`);
+
+      if (latestBids.length === 0) {
+        setBidHistory([]);
+        setLastBidderId(null);
+        setHighestBidderId(null);
+        return;
+      }
+
+      // Set the last bidder (newest bid)
+      setLastBidderId(latestBids[0].bidderId);
+
+      // Get the highest bid
+      const highestBid = await bidService.getHighestBid(auctionId);
+
+      if (highestBid) {
+        setHighestBidderId(highestBid.bidderId);
+
+        // Get bidder name from the bidders array
+        const bidderName = bidders.find(b => b.id === highestBid.bidderId)?.name || 'Unknown';
+        logger.info(`Highest bidder is ${bidderName} (ID: ${highestBid.bidderId}) with amount ${highestBid.amount}`);
+
+        // Update the current price based on the highest bid
+        setCurrentPrice(bidService.formatCurrency(highestBid.amount));
+      } else {
+        setHighestBidderId(null);
+
+        // If no bids, reset to starting price
+        if (auction?.settings) {
+          setCurrentPrice(bidService.formatCurrency(auction.settings.startingPrice || 0));
+        }
+      }
+
+      // Format the bids for display
+      const formattedBids = bidService.formatBidsForDisplay(latestBids, bidders);
+
+      logger.info('Updated bid history from bidService:', formattedBids);
+      setBidHistory(formattedBids);
+
+      // Increment refresh trigger to force BidHistoryTable to refresh
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      logger.error('Error fetching latest bid history:', error);
+      showToast(error instanceof Error ? error.message : 'Không thể tải lịch sử trả giá', 'error');
+    }
+  }, [bidders, auction, showToast, setBidHistory, setLastBidderId, setHighestBidderId, setCurrentPrice, setRefreshTrigger]);
+
+  // Handle bid submission
+  const handlePlaceBid = useCallback(async (directBidAmount?: string) => {
     logger.info('handlePlaceBid called with bidAmount:', bidAmount, 'directBidAmount:', directBidAmount);
 
     // Ensure we have a selected bidder and auction
@@ -904,63 +965,27 @@ export const BidPage: React.FC = () => {
       logger.error('Error placing bid:', error);
       showToast(error instanceof Error ? error.message : 'Không thể trả giá', 'error');
     }
-  };
+  }, [
+    bidAmount,
+    selectedBidder,
+    auction,
+    isAuctionEnded,
+    currentPrice,
+    bidIncrement,
+    bidders,
+    showToast,
+    setLastBidderId,
+    setHighestBidderId,
+    setCurrentPrice,
+    bidHistory.length,
+    setBidHistory,
+    setRefreshTrigger,
+    auctionId,
+    getAuctionById,
+    fetchLatestBidHistory
+  ]);
 
-  // Function to fetch the latest bid history from the database
-  const fetchLatestBidHistory = useCallback(async (auctionId: string) => {
-    try {
-      logger.info(`Fetching latest bid history for auction ${auctionId}`);
-
-      // Get latest bids using bidService
-      const latestBids = await bidService.getLatestBids(auctionId);
-      logger.info(`Found ${latestBids.length} bids for auction ${auctionId}`);
-
-      if (latestBids.length === 0) {
-        setBidHistory([]);
-        setLastBidderId(null);
-        setHighestBidderId(null);
-        return;
-      }
-
-      // Set the last bidder (newest bid)
-      setLastBidderId(latestBids[0].bidderId);
-
-      // Get the highest bid
-      const highestBid = await bidService.getHighestBid(auctionId);
-
-      if (highestBid) {
-        setHighestBidderId(highestBid.bidderId);
-
-        // Get bidder name from the bidders array
-        const bidderName = bidders.find(b => b.id === highestBid.bidderId)?.name || 'Unknown';
-        logger.info(`Highest bidder is ${bidderName} (ID: ${highestBid.bidderId}) with amount ${highestBid.amount}`);
-
-        // Update the current price based on the highest bid
-        setCurrentPrice(bidService.formatCurrency(highestBid.amount));
-      } else {
-        setHighestBidderId(null);
-
-        // If no bids, reset to starting price
-        if (auction?.settings) {
-          setCurrentPrice(bidService.formatCurrency(auction.settings.startingPrice || 0));
-        }
-      }
-
-      // Format the bids for display
-      const formattedBids = bidService.formatBidsForDisplay(latestBids, bidders);
-
-      logger.info('Updated bid history from bidService:', formattedBids);
-      setBidHistory(formattedBids);
-
-      // Increment refresh trigger to force BidHistoryTable to refresh
-      setRefreshTrigger(prev => prev + 1);
-    } catch (error) {
-      logger.error('Error fetching latest bid history:', error);
-      showToast(error instanceof Error ? error.message : 'Không thể tải lịch sử trả giá', 'error');
-    }
-  }, [bidders, auction, showToast]);
-
-  const handleCancelBid = async () => {
+  const handleCancelBid = useCallback(async () => {
     logger.info('handleCancelBid called');
 
     if (!auction) {
@@ -1057,7 +1082,20 @@ export const BidPage: React.FC = () => {
       logger.error('Error canceling bid:', error);
       showToast(error instanceof Error ? error.message : 'Không thể hủy trả giá', 'error', 'bottom-center');
     }
-  };
+  }, [
+    auction,
+    selectedBidder,
+    lastBidderId,
+    showToast,
+    setLastBidderId,
+    setHighestBidderId,
+    setCurrentPrice,
+    setBidHistory,
+    setRefreshTrigger,
+    auctionId,
+    getAuctionById,
+    fetchLatestBidHistory
+  ]);
 
   // Add missing state for Go Back confirmation modal
   const [showGoBackModal, setShowGoBackModal] = useState<boolean>(false);
@@ -1109,13 +1147,6 @@ export const BidPage: React.FC = () => {
     // The bid button will be disabled based on canBidderPlaceBid
     return [];
   }, [isAuctionEnded, bidders]);
-
-  // Create a wrapper for setBidAmount to add logging
-  const handleBidAmountChange = (amount: string) => {
-    logger.info('Bid amount changed to:', amount);
-    setBidAmount(amount);
-  };
-
 
   const handleExportData = async () => {
     if (!auction) return;
@@ -1226,26 +1257,156 @@ export const BidPage: React.FC = () => {
   // Memoize the bid history to avoid unnecessary re-renders
   const memoizedBidHistory = useMemo(() => bidHistory, [bidHistory]);
 
-  // Wrap child components with React.memo to prevent unnecessary renders
-  // AuctionHeader is already memoized in its own file with a custom comparison function
-  const MemoizedAuctionSummary = React.memo(AuctionSummary);
-  const MemoizedBidderSelectionGrid = React.memo(BidderSelectionGrid);
-  const MemoizedBidControls = React.memo(BidControls);
-  const MemoizedBidHistoryTable = React.memo(BidHistoryTable);
-  const MemoizedAuctionResult = React.memo(AuctionResult);
-
   // Add new state variables for bidMethod and steps
   const [bidMethod, setBidMethod] = useState<'basePrice' | 'stepPrice' | 'customPrice'>('basePrice');
   const [steps, setSteps] = useState<number>(1);
 
-  // Add handler functions for bidMethod and steps
-  const handleBidMethodChange = useCallback((method: 'basePrice' | 'stepPrice' | 'customPrice') => {
-    setBidMethod(method);
-  }, []);
+  // Initialize bidService state once when auction data is loaded
+  // Create a ref to store the previous state values for comparison
+  const previousStateRef = useRef({
+    bidderName: '',
+    currentPrice: '',
+    bidIncrement: '',
+    bidMethod: 'basePrice' as 'basePrice' | 'stepPrice' | 'customPrice',
+    steps: 1,
+    isPlaceBidDisabled: true,
+    isCancelBidDisabled: true,
+    bidHistoryEmpty: true,
+    isLastBidder: false
+  });
 
-  const handleStepsChange = useCallback((newSteps: number) => {
-    setSteps(newSteps);
-  }, []);
+  useEffect(() => {
+    if (auction && selectedBidder) {
+      // Create variables for the bid state values
+      const bidderName = `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}`;
+      const isDisabled = !selectedBidder || !canBidderPlaceBid(selectedBidder || '');
+      const isCancelDisabled = isCancelBidDisabled();
+      const bidHistoryEmpty = bids.length === 0;
+      const isLastBidder = selectedBidder === lastBidderId;
+
+      // Store new state to compare
+      const newState = {
+        bidderName,
+        currentPrice: formattedCurrentPrice,
+        bidIncrement: formattedBidIncrement,
+        bidMethod,
+        steps,
+        isPlaceBidDisabled: isDisabled,
+        isCancelBidDisabled: isCancelDisabled,
+        bidHistoryEmpty,
+        isLastBidder,
+        // Explicitly not including customAmount in state updates
+        // to prevent re-renders when typing
+      };
+
+      // Compare current values to previous values before updating
+      const prevState = previousStateRef.current;
+      const hasChanged =
+        prevState.bidderName !== newState.bidderName ||
+        prevState.currentPrice !== newState.currentPrice ||
+        prevState.bidIncrement !== newState.bidIncrement ||
+        prevState.bidMethod !== newState.bidMethod ||
+        prevState.steps !== newState.steps ||
+        prevState.isPlaceBidDisabled !== newState.isPlaceBidDisabled ||
+        prevState.isCancelBidDisabled !== newState.isCancelBidDisabled ||
+        prevState.bidHistoryEmpty !== newState.bidHistoryEmpty ||
+        prevState.isLastBidder !== newState.isLastBidder;
+
+      if (hasChanged) {
+        logger.info('Updating bidService state in BidPage with changed values');
+
+        // Update previous state ref with new values
+        previousStateRef.current = {...newState};
+
+        // Update bidService state with current auction data
+        // Explicitly NOT including customAmount in the state update
+        bidEvents.updateBidState(newState);
+      }
+    }
+  }, [auction, selectedBidder, bidders, formattedCurrentPrice, formattedBidIncrement, bidMethod, steps, lastBidderId, bids.length, canBidderPlaceBid, isCancelBidDisabled]);
+
+  // Subscribe to bid events from the service
+  useEffect(() => {
+    // Define handler functions without useCallback
+    const handleCustomAmountChange = (payload: string) => {
+      logger.info('BidPage received CUSTOM_AMOUNT_CHANGE:', payload);
+      // Only update the local state - don't propagate this to bidService state
+      // This prevents re-renders during typing
+      setBidAmount(payload);
+    };
+
+    const handleStepChange = (payload: number) => {
+      logger.info('BidPage received STEP_CHANGE:', payload);
+      setSteps(payload);
+      if (bidMethod === 'stepPrice') {
+        // Calculate bid amount based on steps
+        const currentPriceValue = auction?.currentPrice || 0;
+        const bidIncrementValue = auction?.settings?.bidStep || 0;
+        const calculatedAmount = (currentPriceValue + (bidIncrementValue * payload)).toLocaleString('vi-VN');
+        setBidAmount(calculatedAmount);
+      }
+
+      // Update bidService state with new steps value
+      bidEvents.updateBidState({ steps: payload });
+    };
+
+    const handleBidMethodChange = (payload: 'basePrice' | 'stepPrice' | 'customPrice') => {
+      logger.info('BidPage received BID_METHOD_CHANGE:', payload);
+      setBidMethod(payload);
+      // Reset bid amount when method changes
+      if (payload === 'basePrice') {
+        setBidAmount(formattedCurrentPrice);
+      } else if (payload === 'stepPrice') {
+        const currentPriceValue = auction?.currentPrice || 0;
+        const bidIncrementValue = auction?.settings?.bidStep || 0;
+        const calculatedAmount = (currentPriceValue + (bidIncrementValue * steps)).toLocaleString('vi-VN');
+        setBidAmount(calculatedAmount);
+      } else {
+        setBidAmount('');
+      }
+
+      // Update bidService state with new bid method
+      bidEvents.updateBidState({ bidMethod: payload });
+    };
+
+    const subscription = bidEvents.onBidEvent.subscribe((event: BidEvent) => {
+      switch (event.type) {
+        case 'CUSTOM_AMOUNT_CHANGE':
+          handleCustomAmountChange(event.payload);
+          break;
+
+        case 'STEP_CHANGE':
+          handleStepChange(event.payload);
+          break;
+
+        case 'BID_METHOD_CHANGE':
+          handleBidMethodChange(event.payload);
+          break;
+
+        case 'PLACE_BID':
+          logger.info('BidPage received PLACE_BID:', event.payload);
+          // For explicit custom bids, use the provided amount from the event
+          // This handles the case where customAmount was stored locally but not in the bidService
+          if (bidMethod === 'customPrice' && event.payload) {
+            // Place bid with the amount from the event (the localized value from the component)
+            handlePlaceBid(event.payload);
+          } else {
+            // Otherwise use the current bidAmount from state
+            handlePlaceBid(bidAmount);
+          }
+          break;
+
+        case 'CANCEL_BID':
+          logger.info('BidPage received CANCEL_BID');
+          // Handle canceling a bid
+          handleCancelBid();
+          break;
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => subscription.unsubscribe();
+  }, [auction, bidMethod, steps, formattedCurrentPrice, handlePlaceBid, handleCancelBid, setBidAmount, setSteps, setBidMethod, bidAmount]);
 
   if (loading) {
     return (
@@ -1402,23 +1563,7 @@ export const BidPage: React.FC = () => {
               />
 
               {/* Bid Controls Component */}
-              <MemoizedBidControls
-                bidderName={selectedBidder ? `${selectedBidder} - ${bidders.find(b => b.id === selectedBidder)?.name || ''}` : ''}
-                bidAmount={bidAmount}
-                currentPrice={formattedCurrentPrice}
-                bidIncrement={formattedBidIncrement}
-                bidMethod={bidMethod}
-                steps={steps}
-                onStepsChange={handleStepsChange}
-                onBidMethodChange={handleBidMethodChange}
-                onBidAmountChange={handleBidAmountChange}
-                onPlaceBid={handlePlaceBid}
-                onCancelBid={handleCancelBid}
-                isPlaceBidDisabled={!selectedBidder || !canBidderPlaceBid(selectedBidder || '')}
-                isCancelBidDisabled={isCancelBidDisabled()}
-                bidHistoryEmpty={memoizedBidHistory.length === 0}
-                isLastBidder={selectedBidder === lastBidderId}
-              />
+              <BidControls key="bid-controls" />
             </>
           )}
         </div>

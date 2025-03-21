@@ -24,6 +24,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.8.0",
     "react-scripts": "5.0.1",
+    "rxjs": "^7.8.2",
     "styled-components": "^6.1.15",
     "typescript": "^4.9.5",
     "xlsx": "^0.18.5",
@@ -36,7 +37,6 @@
     "eject": "react-scripts eject",
     "lint": "eslint src/**/*.{ts,tsx}",
     "lint:fix": "eslint src/**/*.{ts,tsx} --fix"
-
   },
   "eslintConfig": {
     "extends": [
