@@ -256,17 +256,24 @@ class BidService {
    * @returns Formatted bid history for display
    */
   public formatBidsForDisplay(bids: Bid[], bidders: any[]): any[] {
-    // Sort bids by timestamp (newest first)
-    const sortedBids = [...bids].sort((a, b) => b.timestamp - a.timestamp);
+    if (bids.length === 0) return [];
 
-    // Format each bid for display
-    return sortedBids.map((bid, index) => {
+    // First sort bids by timestamp (newest first)
+    const sortedByTime = [...bids].sort((a, b) => b.timestamp - a.timestamp);
+
+    // Start with max bid number for the newest bid
+    const maxBidNumber = sortedByTime.length;
+
+    // Format each bid for display with proper bid numbers
+    const formattedBids = sortedByTime.map((bid, index) => {
       const bidder = bidders.find(b => b.id === bid.bidderId);
       const bidderName = bidder ? `${bid.bidderId} - ${bidder.name}` : bid.bidderId;
 
+      // Calculate bid number (newest gets highest number)
+      const bidNumber = maxBidNumber - index;
+
       return {
-        id: index,
-        bidNumber: sortedBids.length - index, // Newest bid gets highest number
+        bidNumber: bidNumber,
         bidder: bidderName,
         amount: formatUtils.formatCurrency(bid.amount),
         timestamp: formatUtils.formatTimestamp(bid.timestamp),
@@ -274,6 +281,9 @@ class BidService {
         rawAmount: bid.amount
       };
     });
+
+    // Final sort by bid number (descending)
+    return formattedBids.sort((a, b) => b.bidNumber - a.bidNumber);
   }
 
   /**

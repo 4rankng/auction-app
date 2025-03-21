@@ -20,13 +20,12 @@ import bidEvents, { BidEvent } from '../services/bidService';
 
 // Interface for the bid history display format
 interface BidHistoryDisplay {
-  id: number;
+  bidNumber: number; // Make required and primary identifier
   bidder: string;
   amount: string;
   timestamp: string;
-  rawTimestamp?: number; // Add raw timestamp for sorting
-  rawAmount?: number; // Add raw amount for secondary sorting
-  bidNumber?: number; // Use bidNumber instead of round for continuous bidding
+  rawTimestamp?: number; // Raw timestamp for sorting
+  rawAmount?: number; // Raw amount for secondary sorting
 }
 
 // Memoize components outside of the component function to prevent recreation on each render
@@ -939,13 +938,12 @@ export const BidPage: React.FC = () => {
 
       // Create a new bid history entry and add it to the current bid history
       const newBidHistoryEntry: BidHistoryDisplay = {
-        id: Date.now(), // Use timestamp as temporary ID
+        bidNumber: Math.max(0, ...bidHistory.map(bid => bid.bidNumber || 0)) + 1,
         bidder: `${selectedBidder} - ${selectedBidderName}`,
         amount: bidService.formatCurrency(numericAmount),
         timestamp: bidService.formatTimestamp(Date.now()),
         rawTimestamp: Date.now(),
         rawAmount: numericAmount,
-        bidNumber: bidHistory.length + 1 // The new bid gets the next sequence number
       };
 
       // Update bid history immediately for a responsive UI
@@ -953,6 +951,19 @@ export const BidPage: React.FC = () => {
 
       // Increment refresh trigger to force BidHistoryTable to refresh
       setRefreshTrigger(prev => prev + 1);
+
+      // Stop and reset the timer after successful bid
+      logger.info('Stopping and resetting timer after successful bid');
+      const newTimerValue = auction?.settings?.bidDuration || 60;
+
+      // First stop the timer
+      stopTimer();
+
+      // Then reset it to the initial value
+      resetTimer(newTimerValue);
+
+      // Also update the popup timer value
+      setPopupTimerValue(newTimerValue);
 
       // Refresh data to get the updated auction and bids
       if (auctionId) {
@@ -977,12 +988,15 @@ export const BidPage: React.FC = () => {
     setLastBidderId,
     setHighestBidderId,
     setCurrentPrice,
-    bidHistory.length,
+    bidHistory,
     setBidHistory,
     setRefreshTrigger,
     auctionId,
     getAuctionById,
-    fetchLatestBidHistory
+    fetchLatestBidHistory,
+    stopTimer,
+    resetTimer,
+    setPopupTimerValue
   ]);
 
   const handleCancelBid = useCallback(async () => {

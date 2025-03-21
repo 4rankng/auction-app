@@ -2,8 +2,7 @@ import React, { useState, useCallback } from 'react';
 import logger from '../services/loggerService';
 
 interface BidHistory {
-  id: number;
-  bidNumber?: number;
+  bidNumber: number;
   bidder: string;
   amount: string;
   timestamp: string;
@@ -33,9 +32,17 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
 
   // Helper function to sort bid history with consistent rules
   const sortBidHistory = useCallback((bids: BidHistory[]): BidHistory[] => {
-    // First sort the bids
-    const sortedBids = [...bids].sort((a, b) => {
-      // Primary sort by timestamp (newest first)
+    // Sort bids by bidNumber (highest to lowest)
+    return [...bids].sort((a, b) => {
+      // Primary sort by bidNumber (highest to lowest)
+      const aBidNumber = a.bidNumber;
+      const bBidNumber = b.bidNumber;
+
+      if (aBidNumber !== bBidNumber) {
+        return bBidNumber - aBidNumber;
+      }
+
+      // Secondary sort by timestamp (newest first) if bidNumbers are identical
       const aTimestamp = a.rawTimestamp || 0;
       const bTimestamp = b.rawTimestamp || 0;
 
@@ -43,18 +50,12 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
         return bTimestamp - aTimestamp;
       }
 
-      // Secondary sort by amount (highest first) if timestamps are identical
+      // Tertiary sort by amount (highest first) if timestamps are identical
       const aAmount = a.rawAmount || extractNumericValue(a.amount);
       const bAmount = b.rawAmount || extractNumericValue(b.amount);
 
       return bAmount - aAmount;
     });
-
-    // Assign sequential bidNumbers to the sorted bids
-    return sortedBids.map((bid, index) => ({
-      ...bid,
-      bidNumber: sortedBids.length - index // Newest bid gets highest number
-    }));
   }, [extractNumericValue]);
 
   // Process the bidData to ensure it has all required fields
@@ -201,11 +202,11 @@ const BidHistoryTable: React.FC<BidHistoryTableProps> = ({
               </thead>
               <tbody>
                 {sortedBidHistory.map((bid, index) => (
-                  <tr key={bid.id || index} style={{
+                  <tr key={`bid-${bid.bidNumber}`} style={{
                     borderBottom: '1px solid #f2f2f2',
                     backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8f9fa'
                   }}>
-                    <td style={{ padding: '10px 16px' }}>{bid.bidNumber || sortedBidHistory.length - index}</td>
+                    <td style={{ padding: '10px 16px' }}>{bid.bidNumber}</td>
                     <td style={{ padding: '10px 16px' }}>{bid.bidder}</td>
                     <td style={{ padding: '10px 16px', color: '#6c8dae', fontWeight: '500' }}>{bid.amount}</td>
                     <td style={{ padding: '10px 16px', color: '#6c757d', fontSize: '13px' }}>{bid.timestamp}</td>
