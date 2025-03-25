@@ -75,7 +75,7 @@ const StyledContainer = styled.div`
     width: 100%;
     max-width: 100%;
     min-height: 100vh;
-    height: 100vh; /* Ensure it takes full viewport height */
+    height: 100vh;
     border-radius: 0;
     box-shadow: none;
     border: none;
@@ -87,36 +87,13 @@ const StyledContainer = styled.div`
     flex-direction: column;
   }
 
-  /* Auction details - ensure it fits full width */
-  .auction-details {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-    flex: 1;
-    min-height: calc(100vh - 215px); /* Subtract height of header, title section, info row */
-  }
-
-  /* Result container - ensure it fits full width */
-  .result-container {
-    width: 100%;
-    background-color: #ffffff;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    flex: 1;
-  }
-
-  /* Company banner */
+  /* Company header */
   .company-header {
     width: 100%;
     background-color: #0080ff;
     color: white;
-    padding: 15px;
-    font-size: calc(16px + 1vmin);
+    padding: 2.5vh;
+    font-size: calc(24px + 1vmin);
     font-weight: bold;
     text-align: center;
     border-radius: 0;
@@ -125,11 +102,12 @@ const StyledContainer = styled.div`
   /* Auction title section */
   .auction-title-section {
     width: 100%;
-    padding: 15px 20px;
+    padding: 2.5vh 20px;
     margin: 0;
     background-color: #f8f9fa;
     border-bottom: 1px solid #e9ecef;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -137,40 +115,40 @@ const StyledContainer = styled.div`
 
   /* Main title */
   .main-title {
-    font-size: calc(20px + 1vmin);
+    font-size: calc(28px + 1vmin);
     font-weight: 700;
-    margin: 10px 0;
+    margin: 1.5vh 0;
     color: #0275d8;
   }
 
   .subtitle {
-    font-size: calc(14px + 0.5vmin);
+    font-size: calc(18px + 0.5vmin);
     color: #6c757d;
-    margin-bottom: 5px;
+    margin-bottom: 1vh;
     font-weight: 500;
   }
 
   /* Auction auctioneer */
   .auction-auctioneer {
-    font-size: calc(14px + 0.5vmin);
-    margin-top: 5px;
+    font-size: calc(18px + 0.5vmin);
+    margin-top: 1vh;
     color: #6c757d;
   }
 
   .auctioneer-label {
     font-weight: 600;
-    margin-right: 0.5rem;
+    margin-right: 0.8rem;
   }
 
   /* Info rows */
   .info-row {
     width: 100%;
-    padding: 12px 20px;
+    padding: 2vh 20px;
     background-color: #f8f9fa;
     border-bottom: 1px solid #e9ecef;
     display: flex;
     justify-content: center;
-    gap: 40px;
+    gap: 5vw;
   }
 
   .info-item {
@@ -181,35 +159,34 @@ const StyledContainer = styled.div`
   }
 
   .info-label {
-    font-size: calc(14px + 0.5vmin);
+    font-size: calc(18px + 0.5vmin);
     color: #212529;
     font-weight: 500;
+    margin-bottom: 0.5vh;
   }
 
   .info-value {
-    font-size: calc(14px + 0.5vmin);
+    font-size: calc(20px + 0.5vmin);
     color: #212529;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   /* Bid number display */
   #bid-number {
     width: 100%;
     text-align: center;
-    font-size: calc(14px + 0.5vmin);
+    font-size: calc(20px + 0.5vmin);
     color: #212529;
     font-weight: 500;
-    margin-top: 10px;
-    padding-top: 10px;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
+    margin: 2vh 0;
+    padding: 2vh 0;
     background-color: #ffffff;
   }
 
   /* Highest bid section */
   .highest-bid-section {
     width: 100%;
-    padding: 15px 20px;
+    padding: 3vh 20px;
     background-color: #ffd6d9;
     border-bottom: 1px solid #e9ecef;
     display: flex;
@@ -228,20 +205,20 @@ const StyledContainer = styled.div`
 
   .highest-bidder-label,
   .highest-bid-label {
-    font-size: calc(14px + 0.5vmin);
+    font-size: calc(18px + 0.5vmin);
     color: #721c24;
     font-weight: 600;
-    margin-bottom: 5px;
+    margin-bottom: 1vh;
   }
 
   .highest-bidder-value {
-    font-size: calc(18px + 0.8vmin);
+    font-size: calc(24px + 0.8vmin);
     color: #212529;
     font-weight: 700;
   }
 
   .highest-bid-amount {
-    font-size: calc(18px + 0.8vmin);
+    font-size: calc(24px + 0.8vmin);
     color: #dc3545;
     font-weight: 700;
   }
@@ -249,7 +226,7 @@ const StyledContainer = styled.div`
   /* Timer section */
   .timer-section {
     width: 100%;
-    padding: 20px;
+    padding: 3vh 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -260,112 +237,124 @@ const StyledContainer = styled.div`
   }
 
   .timer-label {
-    font-size: calc(16px + 0.6vmin);
+    font-size: calc(20px + 0.6vmin);
     color: #212529;
     font-weight: 600;
-    margin-bottom: 15px;
+    margin-bottom: 2vh;
     text-align: center;
   }
 
   .timer-value {
     background-color: #dc3545;
     color: white;
-    font-size: calc(24px + 1.2vmin);
+    font-size: calc(32px + 1.2vmin);
     font-weight: bold;
-    padding: 10px 35px;
-    border-radius: 5px;
-    min-width: 120px;
+    padding: 2vh 4vw;
+    border-radius: 8px;
+    min-width: 180px;
     text-align: center;
   }
 
+  /* Result container styles */
+  .result-container {
+    width: 100%;
+    background-color: #ffffff;
+    padding: 3vh 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+  }
+
   .result-header {
-    font-size: calc(18px + 1vmin);
+    font-size: calc(24px + 1vmin);
     font-weight: bold;
     color: #28a745;
-    margin: 20px 0;
+    margin: 2vh 0;
     text-transform: uppercase;
     text-align: center;
     width: 100%;
   }
 
-  /* Winner section - make it wider */
+  /* Winner section */
   .winner-section {
-    margin: 10px 0 20px 0;
+    margin: 2vh 0 3vh 0;
     background-color: #fff;
-    padding: 20px;
+    padding: 3vh 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    width: 100%;
+    width: 90%;
     max-width: 800px;
   }
 
   .winner-label, .price-label {
-    font-size: calc(14px + 0.6vmin);
+    font-size: calc(18px + 0.6vmin);
     color: #212529;
-    margin-bottom: 10px;
+    margin-bottom: 1vh;
     text-align: center;
   }
 
   .winner-name {
-    font-size: calc(16px + 0.8vmin);
+    font-size: calc(22px + 0.8vmin);
     font-weight: 500;
     color: #0275d8;
-    margin-bottom: 15px;
+    margin-bottom: 2vh;
     text-align: center;
   }
 
   .final-price {
-    font-size: calc(18px + 1vmin);
+    font-size: calc(24px + 1vmin);
     font-weight: bold;
     color: #28a745;
-    margin-bottom: 15px;
+    margin-bottom: 2vh;
     text-align: center;
   }
 
-  /* Auction stats - make it wider */
+  /* Auction stats */
   .auction-stats {
     display: flex;
     justify-content: space-between;
-    gap: 20px;
-    width: 100%;
+    gap: 3vw;
+    width: 90%;
     max-width: 800px;
   }
 
   .stat-item {
     background-color: #fff;
-    padding: 15px;
+    padding: 2vh 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     flex: 1;
   }
 
   .stat-label {
-    font-size: calc(14px + 0.5vmin);
+    font-size: calc(16px + 0.5vmin);
     color: #212529;
-    margin-bottom: 8px;
+    margin-bottom: 1vh;
     text-align: center;
   }
 
   .stat-value {
-    font-size: calc(16px + 0.8vmin);
+    font-size: calc(20px + 0.8vmin);
     font-weight: bold;
     color: #0275d8;
     text-align: center;
   }
 
-  /* Responsive adjustments for projector display */
+  /* Responsive adjustments */
   @media (min-width: 1200px) {
     .auction-container {
       max-width: 100%;
     }
 
     .main-title {
-      font-size: calc(24px + 1vmin);
+      font-size: calc(32px + 1vmin);
     }
 
     .timer-value {
-      font-size: calc(30px + 1.2vmin);
-      padding: 15px 45px;
+      font-size: calc(36px + 1.2vmin);
+      padding: 2.5vh 5vw;
     }
 
     .winner-section,
@@ -1141,7 +1130,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
 
                     <div className="auction-stats">
                       <div className="stat-item">
-                        <div className="stat-label">Tổng Số Lượt Đấu Giá</div>
+                        <div className="stat-label">Tổng Số Lượt Trả Giá</div>
                         <div className="stat-value">{totalBids || bidNumber || "0"}</div>
                       </div>
 
