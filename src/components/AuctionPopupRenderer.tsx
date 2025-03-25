@@ -1143,7 +1143,7 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
                 ) : (
                   <div className="auction-details">
                           <div id="bid-number">
-                      Lượt trả giá thứ: {bidNumber + 1}
+                      Lượt trả giá thứ: {bidNumber === 0 ? "-" : bidNumber}
                     </div>
                     <div className="highest-bid-section">
                       <div className="highest-bidder-column">
