@@ -248,8 +248,21 @@ export const BidPage: React.FC = () => {
       localStorage.removeItem(timerValueKey);
       localStorage.removeItem(timerRunningKey);
       localStorage.removeItem(timerStartTimeKey);
+      // Also clean up the cancelled bid state
+      if (auction?.id) {
+        localStorage.removeItem(`auction_${auction.id}_cancelled_bid`);
+      }
     }
-  }, [isAuctionEnded, timerValueKey, timerRunningKey, timerStartTimeKey]);
+  }, [isAuctionEnded, timerValueKey, timerRunningKey, timerStartTimeKey, auction?.id]);
+
+  // Clean up localStorage when component unmounts or auction changes
+  useEffect(() => {
+    return () => {
+      if (auction?.id) {
+        localStorage.removeItem(`auction_${auction.id}_cancelled_bid`);
+      }
+    };
+  }, [auction?.id]);
 
   // Save timer state on window unload/navigation
   useEffect(() => {
@@ -892,7 +905,6 @@ export const BidPage: React.FC = () => {
       return;
     }
 
-
     // Use the direct bid amount if provided, otherwise use the state bidAmount
     let effectiveBidAmount = directBidAmount || bidAmount;
 
@@ -911,7 +923,6 @@ export const BidPage: React.FC = () => {
       return;
     }
 
-
     try {
       // Convert bid amount from formatted string to number
       const numericAmount = bidService.parseCurrency(effectiveBidAmount);
@@ -923,6 +934,10 @@ export const BidPage: React.FC = () => {
       logger.info(`Placing bid: ${numericAmount} VND by bidder ${selectedBidder} (${selectedBidderName})`);
       const newBid = await bidService.placeBid(auction.id, selectedBidder, numericAmount);
       logger.info('New bid placed successfully:', newBid);
+
+      // Reset the cancelled bid state since a new bid has been placed
+      setHasCancelledBid(false);
+      localStorage.removeItem(`auction_${auction.id}_cancelled_bid`);
 
       // Set this bidder as the last bidder
       setLastBidderId(selectedBidder);
@@ -999,6 +1014,30 @@ export const BidPage: React.FC = () => {
     setPopupTimerValue
   ]);
 
+  // Add state for cancel button clicked
+  const [hasCancelledBid, setHasCancelledBid] = useState<boolean>(() => {
+    // Initialize from localStorage if available
+    const storedValue = localStorage.getItem(`auction_${auctionId}_cancelled_bid`);
+    return storedValue === 'true';
+  });
+
+  // Check if cancel bid should be disabled
+  const isCancelBidDisabled = useCallback(() => {
+    // Always disable if already cancelled once
+    if (hasCancelledBid) return true;
+
+    // Can't cancel if there are no bids
+    if (bidHistory.length === 0) return true;
+
+    // Can't cancel if no bidder is selected
+    if (!selectedBidder) return true;
+
+    // Can't cancel if selected bidder is not the last bidder
+    if (selectedBidder !== lastBidderId) return true;
+
+    return false;
+  }, [bidHistory.length, selectedBidder, lastBidderId, hasCancelledBid]);
+
   const handleCancelBid = useCallback(async () => {
     logger.info('handleCancelBid called');
 
@@ -1020,7 +1059,7 @@ export const BidPage: React.FC = () => {
     if (selectedBidder && selectedBidder !== lastBidderId) {
       // If a bidder is selected but they're not the last bidder, show an error
       showToast('Chỉ có thể hủy lượt trả giá cuối cùng', 'error', 'bottom-center');
-        return;
+      return;
     }
 
     try {
@@ -1039,6 +1078,10 @@ export const BidPage: React.FC = () => {
       // Use bidService to cancel the bid
       await bidService.cancelBid(auction.id, lastBid.id);
       logger.info('Bid removed successfully');
+
+      // Set the cancelled state and persist to localStorage
+      setHasCancelledBid(true);
+      localStorage.setItem(`auction_${auction.id}_cancelled_bid`, 'true');
 
       // Get updated bids after cancellation
       const updatedBids = await bidService.getLatestBids(auction.id);
@@ -1138,17 +1181,6 @@ export const BidPage: React.FC = () => {
     // Timer restrictions are handled by the Bid button being disabled when timer isn't running
     return true;
   }, [lastBidderId, isAuctionEnded]);
-
-  // Check if cancel bid should be disabled
-  const isCancelBidDisabled = useCallback(() => {
-    // Can't cancel if there are no bids
-    if (bidHistory.length === 0) return true;
-
-    // Can't cancel if no bidder is selected and we're not the last bidder
-    if (!selectedBidder && !lastBidderId) return true;
-
-    return false;
-  }, [bidHistory.length, selectedBidder, lastBidderId]);
 
   // Get disabled bidders based on current action
   const getDisabledBidders = useCallback(() => {
