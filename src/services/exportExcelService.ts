@@ -10,10 +10,7 @@ class ExportExcelService {
    * Format a number to a currency string
    */
   private formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(amount || 0);
+    return new Intl.NumberFormat('vi-VN').format(amount || 0) + ' đ';
   }
 
   /**
