@@ -85,22 +85,34 @@ class ExportExcelService {
    */
   private createBiddersSheet(bidders: Bidder[], bids: Bid[]): XLSX.WorkSheet {
     // Format bidders data
-    const biddersHeaders = ['ID', 'Tên', 'CMND/CCCD', 'Nơi Cấp', 'Địa Chỉ', 'Lượt Đặt Giá'];
+    const biddersHeaders = ['ID', 'Tên', 'CMND/CCCD', 'Nơi Cấp', 'Địa Chỉ', 'Lượt Đặt Giá', 'Tổng Số Tiền'];
 
-    // Count bids per bidder
-    const bidCounts: { [key: string]: number } = {};
+    // Count bids and calculate total amount per bidder
+    const bidStats: { [key: string]: { count: number; totalAmount: number } } = {};
     bids.forEach(bid => {
-      bidCounts[bid.bidderId] = (bidCounts[bid.bidderId] || 0) + 1;
+      if (!bidStats[bid.bidderId]) {
+        bidStats[bid.bidderId] = { count: 0, totalAmount: 0 };
+      }
+      bidStats[bid.bidderId].count++;
+      bidStats[bid.bidderId].totalAmount += bid.amount;
     });
 
-    const biddersData = bidders.map(bidder => [
-      bidder.id,
-      bidder.name,
-      bidder.nric || '',
-      bidder.issuingAuthority || '',
-      bidder.address || '',
-      bidCounts[bidder.id] || 0
-    ]);
+    const biddersData = bidders
+      .map(bidder => ({
+        ...bidder,
+        bidCount: bidStats[bidder.id]?.count || 0,
+        totalAmount: bidStats[bidder.id]?.totalAmount || 0
+      }))
+      .sort((a, b) => b.totalAmount - a.totalAmount) // Sort by total amount in descending order
+      .map(bidder => [
+        bidder.id,
+        bidder.name,
+        bidder.nric || '',
+        bidder.issuingAuthority || '',
+        bidder.address || '',
+        bidder.bidCount,
+        this.formatCurrency(bidder.totalAmount)
+      ]);
 
     // Add headers to bidders data
     biddersData.unshift(biddersHeaders);
@@ -115,7 +127,8 @@ class ExportExcelService {
       { wch: 20 },  // NRIC
       { wch: 20 },  // Issuing Authority
       { wch: 30 },  // Address
-      { wch: 15 }   // Bid Count
+      { wch: 15 },  // Bid Count
+      { wch: 20 }   // Total Amount
     ];
 
     return wsBidders;
