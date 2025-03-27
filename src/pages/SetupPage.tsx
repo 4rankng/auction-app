@@ -562,18 +562,29 @@ export default function SetupPage() {
                   <table className="table table-striped table-hover">
                     <thead className="table-light">
                       <tr>
-                        <th style={{ width: '10%' }}>Mã Số</th>
-                        <th style={{ width: '25%' }}>Họ Tên</th>
-                        <th style={{ width: '65%' }}>CCCD/DKKD</th>
+                        <th style={{ width: '50px' }}>Mã Số</th>
+                        <th style={{ width: 'auto', minWidth: '120px' }}>Họ Tên</th>
+                        <th style={{ width: '140px' }}>CCCD/DKKD</th>
                       </tr>
                     </thead>
                     <tbody>
                       {bidders.length > 0 ? (
                         bidders.map((bidder) => (
                           <tr key={bidder.id}>
-                            <td className="text-nowrap">{bidder.id}</td>
-                            <td>{bidder.name}</td>
-                            <td className="text-nowrap">{bidder.nric}</td>
+                            <td style={{ fontSize: '14px' }}>{bidder.id}</td>
+                            <td style={{
+                              fontSize: '14px',
+                              whiteSpace: 'normal',
+                              wordBreak: 'break-word',
+                              minWidth: '120px'
+                            }}>{bidder.name}</td>
+                            <td style={{
+                              fontSize: '14px',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              maxWidth: '140px'
+                            }}>{bidder.nric}</td>
                           </tr>
                         ))
                       ) : (
