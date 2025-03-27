@@ -3,9 +3,7 @@ import React, { useState, useEffect } from 'react';
 interface Bidder {
   id: string;
   name: string;
-  nric?: string;
-  issuingAuthority?: string;
-  address?: string;
+  nric: string;
 }
 
 interface BidderSelectionGridProps {

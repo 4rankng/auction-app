@@ -66,9 +66,7 @@ export const parseBiddersFromExcel = async (file: File): Promise<Omit<Bidder, 'i
 
             // Validate and clean the data
             const name = String(row[1] || '').trim();
-            const address = String(row[2] || '').trim();
             const nric = String(row[3] || '').trim();
-            const phone = String(row[4] || '').trim();
 
             // Skip rows without required fields
             if (!name || !nric) {
@@ -78,10 +76,7 @@ export const parseBiddersFromExcel = async (file: File): Promise<Omit<Bidder, 'i
 
             let newBidder = {
               name,
-              address,
-              nric,
-              issuingAuthority: '', // Not provided in the Excel, using empty string
-              phone
+              nric
             }
             logger.info(`Thêm người tham gia ${i - headerRowIndex}: ${JSON.stringify(newBidder)}`);
             bidders.push(newBidder);

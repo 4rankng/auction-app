@@ -17,13 +17,10 @@ import { AUCTION_STATUS, DEFAULT_BID_DURATION } from '@utils/constants';
 import AuctioneerSelector from '@components/AuctioneerSelector';
 
 // Define the form input types to match BidderManagement
-type BidderFormInputs = {
+interface BidderFormData {
   name: string;
   nric: string;
-  id?: string;
-  issuingAuthority?: string;
-  address?: string;
-};
+}
 
 export default function SetupPage() {
   const navigate = useNavigate();
@@ -151,7 +148,11 @@ export default function SetupPage() {
 
       // Add each bidder from the Excel file
       for (const bidderInfo of bidderData) {
-        await databaseService.createBidder(setupAuctionId, bidderInfo);
+        const newBidder: Omit<Bidder, 'id'> = {
+          name: bidderInfo.name,
+          nric: bidderInfo.nric
+        };
+        await databaseService.createBidder(setupAuctionId, newBidder);
       }
 
       // Refresh bidders list
@@ -180,23 +181,19 @@ export default function SetupPage() {
   };
 
   // Handle adding a new bidder
-  const handleAddBidder = async (bidderData: BidderFormInputs) => {
+  const handleAddBidder = async (bidderData: BidderFormData) => {
     if (!setupAuctionId) {
       errorService.handleError('Không thể thêm người tham gia khi chưa thiết lập phiên đấu giá', ErrorType.VALIDATION);
       return;
     }
 
     try {
-      // Create bidder object with empty strings for optional fields
-      const bidderToCreate = {
-        id: bidderData.id || undefined,
+      const newBidder: Omit<Bidder, 'id'> = {
         name: bidderData.name,
-        nric: bidderData.nric,
-        issuingAuthority: bidderData.issuingAuthority || "", // Empty string if not provided
-        address: bidderData.address || "" // Empty string if not provided
+        nric: bidderData.nric
       };
 
-      await databaseService.createBidder(setupAuctionId, bidderToCreate);
+      await databaseService.createBidder(setupAuctionId, newBidder);
 
       // Refresh bidders list
       const updatedBidders = await databaseService.getBidders(setupAuctionId);
@@ -490,7 +487,7 @@ export default function SetupPage() {
                     const formData = new FormData(e.currentTarget);
                     const bidderData = {
                       name: formData.get('name') as string || '',
-                      nric: formData.get('nric') as string || '',
+                      nric: formData.get('nric') as string || ''
                     };
 
                     if (bidderData.name && bidderData.nric) {
@@ -517,7 +514,6 @@ export default function SetupPage() {
                           name="nric"
                           className="form-control"
                           required
-
                         />
                       </div>
                       <div className="col-12 col-md-4 d-flex flex-wrap gap-2">

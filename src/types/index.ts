@@ -2,13 +2,12 @@ export interface Bidder {
   id: string;
   name: string;
   nric: string;
-  issuingAuthority: string;
-  address: string;
-  phone?: string;
-  email?: string;
 }
 
-
+export interface BidderData {
+  name: string;
+  nric: string;
+}
 
 export type AuctionStatus = 'SETUP' | 'IN_PROGRESS' | 'ENDED';
 

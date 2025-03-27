@@ -85,7 +85,7 @@ class ExportExcelService {
    */
   private createBiddersSheet(bidders: Bidder[], bids: Bid[]): XLSX.WorkSheet {
     // Format bidders data
-    const biddersHeaders = ['ID', 'Tên', 'CMND/CCCD', 'Nơi Cấp', 'Địa Chỉ', 'Lượt Đặt Giá', 'Tổng Số Tiền'];
+    const biddersHeaders = ['ID', 'Tên', 'CMND/CCCD', 'Lượt Đặt Giá', 'Tổng Số Tiền'];
 
     // Count bids and calculate total amount per bidder
     const bidStats: { [key: string]: { count: number; totalAmount: number } } = {};
@@ -108,8 +108,6 @@ class ExportExcelService {
         bidder.id,
         bidder.name,
         bidder.nric || '',
-        bidder.issuingAuthority || '',
-        bidder.address || '',
         bidder.bidCount,
         this.formatCurrency(bidder.totalAmount)
       ]);
@@ -125,8 +123,6 @@ class ExportExcelService {
       { wch: 10 },  // ID
       { wch: 30 },  // Name
       { wch: 20 },  // NRIC
-      { wch: 20 },  // Issuing Authority
-      { wch: 30 },  // Address
       { wch: 15 },  // Bid Count
       { wch: 20 }   // Total Amount
     ];
