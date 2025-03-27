@@ -563,7 +563,7 @@ export default function SetupPage() {
                     <thead className="table-light">
                       <tr>
                         <th style={{ width: '20%' }}>Mã Số</th>
-                        <th style={{ width: '45%' }}>Tên</th>
+                        <th style={{ width: '45%' }}>Họ Tên</th>
                         <th style={{ width: '35%' }}>CCCD/DKKD</th>
                       </tr>
                     </thead>

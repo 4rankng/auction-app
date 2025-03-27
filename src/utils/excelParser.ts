@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import { Bidder } from '@types';
+import logger from '@services/loggerService';
 
 /**
  * Parses an Excel file to extract bidder data according to the specified format.
@@ -28,13 +29,17 @@ export const parseBiddersFromExcel = async (file: File): Promise<Omit<Bidder, 'i
         // Convert the sheet to JSON to make it easier to work with
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
 
+        const normalize = (text: string | undefined): string => {
+          if (!text) {
+            return "";
+          }
+          return text.normalize('NFC').trim().toLowerCase();
+        };
+
         // Find the row that contains "STT" as the first cell
         const headerRowIndex = jsonData.findIndex(row =>
-          row[0] === "STT" &&
-          row[1] === "Họ tên" &&
-          row[2] === "Địa chỉ" &&
-          row[3] === "Giấy CMND/CCCD/ĐKDN" &&
-          row[4] === "Số điện thoại"
+          normalize(row[0]) === "stt" &&
+          normalize(row[1]) === "họ tên"
         );
 
         if (headerRowIndex === -1) {
@@ -43,12 +48,12 @@ export const parseBiddersFromExcel = async (file: File): Promise<Omit<Bidder, 'i
 
         // Extract bidder data from rows below the header
         const bidders: Omit<Bidder, 'id'>[] = [];
-
+        logger.info(`Header Row: ${headerRowIndex}; Total Rows: ${jsonData.length}`);
         for (let i = headerRowIndex + 1; i < jsonData.length; i++) {
           const row = jsonData[i];
-
+          logger.info(`ProcessingRow ${i}: ${row}`);
           // Check if we've reached the end of the table (any empty cell)
-          if (!row || row.length < 5 || !row[0] || !row[1] || !row[2] || !row[3] || !row[4]) {
+          if (!row || !row[0] || row[0] === "") {
             break;
           }
 
