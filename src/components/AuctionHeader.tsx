@@ -201,7 +201,11 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
         </div>
 
         {/* Buttons Container */}
-        <div className="auction-header-actions" style={{ display: 'flex', gap: '12px', width: '100%' }}>
+        <div className="auction-header-actions" style={{
+          display: 'flex',
+          gap: '12px',
+          width: '100%'
+        }}>
           {/* Add button to show popup */}
           {onShowPopup && (
             <button
@@ -209,17 +213,20 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
               onClick={onShowPopup}
               style={{
                 ...popupButtonStyle,
-                width: `${buttonWidth * 1.5}px` // Make it wider to accommodate text
+                flex: 1, // Make it take equal space
+                width: 'auto' // Override fixed width
               }}
             >
               <i className="bi bi-display me-2 icon-man-hinh-phu"></i>
+              <span className="d-none d-md-inline"></span>
             </button>
           )}
 
           {isAuctionEnded ? (
             <div className="auction-ended-badge icon-button"
               style={{
-                width: `${buttonWidth}px`,
+                flex: 1, // Make it take equal space
+                width: 'auto', // Override fixed width
                 height: `${buttonHeight}px`,
                 backgroundColor: '#e0e0e0',
                 borderRadius: '4px',
@@ -234,15 +241,20 @@ const AuctionHeader: React.FC<AuctionHeaderProps> = ({
               }}
             >
               <i className="bi bi-stopwatch-fill me-2"></i>
+              <span className="d-none d-md-inline">Đã kết thúc</span>
             </div>
           ) : (
             <button
               className="btn end-auction-btn icon-button"
               onClick={handleOpenModal}
-              style={endButtonStyle}
+              style={{
+                ...endButtonStyle,
+                flex: 1, // Make it take equal space
+                width: 'auto' // Override fixed width
+              }}
             >
               <i className="bi bi-stop-circle icon-ket-thuc me-2"></i>
-
+              <span className="d-none d-md-inline"></span>
             </button>
           )}
         </div>
