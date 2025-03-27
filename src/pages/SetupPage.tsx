@@ -210,6 +210,25 @@ export default function SetupPage() {
     }
   };
 
+  // Handle deleting a bidder
+  const handleDeleteBidder = async (bidderId: string) => {
+    if (!setupAuctionId) {
+      toastService.error('Không thể xóa người tham gia khi chưa thiết lập phiên đấu giá');
+      return;
+    }
+
+    try {
+      await databaseService.deleteBidder(setupAuctionId, bidderId);
+      // Refresh bidders list
+      const updatedBidders = await databaseService.getBidders(setupAuctionId);
+      setBidders(updatedBidders);
+      toastService.success('Đã xóa người tham gia thành công');
+    } catch (error) {
+      logger.error('Error deleting bidder:', error);
+      toastService.error('Không thể xóa người tham gia. Vui lòng thử lại.');
+    }
+  };
+
   const validateAuctionSetup = (): { isValid: boolean; errorMessage?: string } => {
     // Validate auction description
     if (!auctionDetails.description.trim()) {
@@ -561,6 +580,7 @@ export default function SetupPage() {
                         <th style={{ width: '50px', whiteSpace: 'nowrap' }}>Mã Số</th>
                         <th style={{ width: '47%', minWidth: '200px' }}>Thành phần tham gia</th>
                         <th style={{ width: '47%', minWidth: '200px' }}>CCCD/DKKD</th>
+                        <th style={{ width: '80px', textAlign: 'center' }}>Thao tác</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -580,11 +600,23 @@ export default function SetupPage() {
                               wordBreak: 'break-word',
                               padding: '8px 12px'
                             }}>{bidder.nric}</td>
+                            <td style={{ textAlign: 'center' }}>
+                              <button
+                                className="btn btn-danger btn-sm"
+                                onClick={() => handleDeleteBidder(bidder.id)}
+                                style={{
+                                  padding: '4px 8px',
+                                  fontSize: '0.875rem'
+                                }}
+                              >
+                                <i className="bi bi-trash"></i>
+                              </button>
+                            </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={3} className="text-center py-3">
+                          <td colSpan={4} className="text-center py-3">
                             <div className="d-flex flex-column align-items-center py-4">
                               <i className="bi bi-people fs-1 text-muted mb-2"></i>
                               <p className="mb-0">Chưa có người tham gia. Thêm người tham gia bằng biểu mẫu ở trên hoặc nhập từ Excel.</p>
