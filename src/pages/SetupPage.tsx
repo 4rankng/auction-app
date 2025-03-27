@@ -562,9 +562,9 @@ export default function SetupPage() {
                   <table className="table table-striped table-hover">
                     <thead className="table-light">
                       <tr>
-                        <th style={{ width: '20%' }}>Mã Số</th>
-                        <th style={{ width: '45%' }}>Họ Tên</th>
-                        <th style={{ width: '35%' }}>CCCD/DKKD</th>
+                        <th style={{ width: '10%' }}>Mã Số</th>
+                        <th style={{ width: '25%' }}>Họ Tên</th>
+                        <th style={{ width: '65%' }}>CCCD/DKKD</th>
                       </tr>
                     </thead>
                     <tbody>
