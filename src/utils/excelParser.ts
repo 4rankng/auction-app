@@ -14,11 +14,10 @@ export const parseBiddersFromExcel = async (file: File): Promise<Omit<Bidder, 'i
     const reader = new FileReader();
     const bidders: Omit<Bidder, 'id'>[] = [];
 
-
     reader.onload = (e) => {
       try {
         if (!e.target?.result) {
-          throw new Error('Failed to read Excel file');
+          throw new Error('Không thể đọc tệp Excel');
         }
 
         const data = new Uint8Array(e.target.result as ArrayBuffer);
@@ -55,8 +54,6 @@ export const parseBiddersFromExcel = async (file: File): Promise<Omit<Bidder, 'i
             continue;
           }
 
-
-
           logger.info(`Sheet: ${sheetName}; Header Row: ${headerRowIndex + 1}; Total Rows: ${jsonData.length}`);
 
           for (let i = headerRowIndex + 1; i < jsonData.length; i++) {
@@ -73,6 +70,11 @@ export const parseBiddersFromExcel = async (file: File): Promise<Omit<Bidder, 'i
             const nric = String(row[3] || '').trim();
             const phone = String(row[4] || '').trim();
 
+            // Skip rows without required fields
+            if (!name || !nric) {
+              logger.warn(`Bỏ qua dòng ${i + 1} trong sheet "${sheetName}": Thiếu thông tin bắt buộc (tên hoặc CCCD/DKKD)`);
+              continue;
+            }
 
             let newBidder = {
               name,
@@ -81,7 +83,7 @@ export const parseBiddersFromExcel = async (file: File): Promise<Omit<Bidder, 'i
               issuingAuthority: '', // Not provided in the Excel, using empty string
               phone
             }
-            logger.info(`Add Bidder ${i - headerRowIndex}: ${JSON.stringify(newBidder)}`);
+            logger.info(`Thêm người tham gia ${i - headerRowIndex}: ${JSON.stringify(newBidder)}`);
             bidders.push(newBidder);
           }
 
@@ -93,16 +95,16 @@ export const parseBiddersFromExcel = async (file: File): Promise<Omit<Bidder, 'i
           break;
         }
         if (!found) {
-          throw Error("No valid bidder data found in the Excel file");
+          throw Error("Không tìm thấy dữ liệu người tham gia hợp lệ trong tệp Excel. Vui lòng kiểm tra lại định dạng bảng dữ liệu (phải có cột 'STT' và thông tin người tham gia).");
         }
       } catch (error) {
-        logger.error('Error parsing Excel file:', error);
+        logger.error('Lỗi khi xử lý tệp Excel:', error);
         reject(error);
       }
     };
 
     reader.onerror = () => {
-      reject(new Error("Error reading the Excel file"));
+      reject(new Error("Lỗi khi đọc tệp Excel. Vui lòng kiểm tra lại tệp và thử lại."));
     };
 
     reader.readAsArrayBuffer(file);
