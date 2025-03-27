@@ -39,6 +39,8 @@ export default function SetupPage() {
   const [importing, setImporting] = useState<boolean>(false);
   const [isStartingAuction, setIsStartingAuction] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<boolean>(false);
+  const [bidderToDelete, setBidderToDelete] = useState<Bidder | null>(null);
   const [setupAuctionId, setSetupAuctionId] = useState<string | null>(null);
   const [auctionDetails, setAuctionDetails] = useState(DEFAULT_AUCTION_DETAILS);
 
@@ -211,14 +213,20 @@ export default function SetupPage() {
   };
 
   // Handle deleting a bidder
-  const handleDeleteBidder = async (bidderId: string) => {
-    if (!setupAuctionId) {
+  const handleDeleteBidder = async (bidder: Bidder) => {
+    setBidderToDelete(bidder);
+    setShowDeleteConfirmation(true);
+  };
+
+  // Handle confirming bidder deletion
+  const handleConfirmDelete = async () => {
+    if (!setupAuctionId || !bidderToDelete) {
       toastService.error('Không thể xóa người tham gia khi chưa thiết lập phiên đấu giá');
       return;
     }
 
     try {
-      await databaseService.deleteBidder(setupAuctionId, bidderId);
+      await databaseService.deleteBidder(setupAuctionId, bidderToDelete.id);
       // Refresh bidders list
       const updatedBidders = await databaseService.getBidders(setupAuctionId);
       setBidders(updatedBidders);
@@ -226,6 +234,9 @@ export default function SetupPage() {
     } catch (error) {
       logger.error('Error deleting bidder:', error);
       toastService.error('Không thể xóa người tham gia. Vui lòng thử lại.');
+    } finally {
+      setShowDeleteConfirmation(false);
+      setBidderToDelete(null);
     }
   };
 
@@ -603,7 +614,7 @@ export default function SetupPage() {
                             <td style={{ textAlign: 'center' }}>
                               <button
                                 className="btn btn-danger btn-sm"
-                                onClick={() => handleDeleteBidder(bidder.id)}
+                                onClick={() => handleDeleteBidder(bidder)}
                                 style={{
                                   padding: '4px 8px',
                                   fontSize: '0.875rem'
@@ -752,6 +763,58 @@ export default function SetupPage() {
                   <span className="d-none d-md-inline">Bắt Đầu</span>
                 </>
               )}
+            </Button>
+          </div>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal show={showDeleteConfirmation} onHide={() => setShowDeleteConfirmation(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Xác nhận xóa người tham gia</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Bạn có chắc chắn muốn xóa người tham gia:</p>
+          <div className="alert alert-warning">
+            <strong>Tên:</strong> {bidderToDelete?.name}<br />
+            <strong>CCCD/DKKD:</strong> {bidderToDelete?.nric}
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <div className="d-flex w-100 gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setShowDeleteConfirmation(false)}
+              className="flex-grow-1 d-flex align-items-center justify-content-center"
+              style={{
+                backgroundColor: "#f8f9fa",
+                borderColor: "#d9e2ec",
+                color: "#6c8dae",
+                fontFamily: "Roboto, Arial, sans-serif",
+                fontWeight: "500",
+                transition: "all 0.3s ease-in-out",
+                minHeight: "44px"
+              }}
+            >
+              <i className="bi bi-x-circle me-md-2"></i>
+              <span className="d-none d-md-inline">Hủy</span>
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmDelete}
+              className="flex-grow-1 d-flex align-items-center justify-content-center"
+              style={{
+                backgroundColor: "#dc3545",
+                borderColor: "#dc3545",
+                fontFamily: "Roboto, Arial, sans-serif",
+                fontWeight: "500",
+                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+                transition: "all 0.3s ease-in-out",
+                minHeight: "44px"
+              }}
+            >
+              <i className="bi bi-trash me-md-2"></i>
+              <span className="d-none d-md-inline">Xóa</span>
             </Button>
           </div>
         </Modal.Footer>
