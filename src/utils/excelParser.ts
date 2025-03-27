@@ -15,7 +15,11 @@ export const parseBiddersFromExcel = async (file: File): Promise<Omit<Bidder, 'i
 
     reader.onload = (e) => {
       try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        if (!e.target?.result) {
+          throw new Error('Failed to read Excel file');
+        }
+
+        const data = new Uint8Array(e.target.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: 'array' });
 
         // Look for the sheet named "Đủ ĐK"
@@ -29,17 +33,24 @@ export const parseBiddersFromExcel = async (file: File): Promise<Omit<Bidder, 'i
         // Convert the sheet to JSON to make it easier to work with
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
 
-        const normalize = (text: string | undefined): string => {
-          if (!text) {
+        if (!jsonData || jsonData.length === 0) {
+          throw new Error('Excel file is empty or has invalid format');
+        }
+
+        const normalize = (text: any): string => {
+          if (text === undefined || text === null) {
             return "";
           }
-          return text.normalize('NFC').trim().toLowerCase();
+          // Convert to string and normalize
+          return String(text).normalize('NFC').trim().toLowerCase();
         };
 
         // Find the row that contains "STT" as the first cell
         const headerRowIndex = jsonData.findIndex(row =>
+          row &&
+          row.length >= 2 &&
           normalize(row[0]) === "stt" &&
-          normalize(row[1]) === "họ tên"
+          normalize(row[1]) !== ""
         );
 
         if (headerRowIndex === -1) {
@@ -49,20 +60,33 @@ export const parseBiddersFromExcel = async (file: File): Promise<Omit<Bidder, 'i
         // Extract bidder data from rows below the header
         const bidders: Omit<Bidder, 'id'>[] = [];
         logger.info(`Header Row: ${headerRowIndex}; Total Rows: ${jsonData.length}`);
+
         for (let i = headerRowIndex + 1; i < jsonData.length; i++) {
           const row = jsonData[i];
-          logger.info(`ProcessingRow ${i}: ${row}`);
-          // Check if we've reached the end of the table (any empty cell)
-          if (!row || !row[0] || row[0] === "") {
-            break;
+
+          // Skip empty rows or rows without required data
+          if (!row || !row[0] || !row[1]) {
+            continue;
+          }
+
+          // Validate and clean the data
+          const name = String(row[1] || '').trim();
+          const address = String(row[2] || '').trim();
+          const nric = String(row[3] || '').trim();
+          const phone = String(row[4] || '').trim();
+
+          // Skip rows without required fields
+          if (!name || !nric) {
+            logger.warn(`Skipping row ${i + 1}: Missing required fields (name or NRIC)`);
+            continue;
           }
 
           bidders.push({
-            name: row[1],
-            address: row[2],
-            nric: row[3],
+            name,
+            address,
+            nric,
             issuingAuthority: '', // Not provided in the Excel, using empty string
-            phone: row[4]
+            phone
           });
         }
 
@@ -72,6 +96,7 @@ export const parseBiddersFromExcel = async (file: File): Promise<Omit<Bidder, 'i
 
         resolve(bidders);
       } catch (error) {
+        logger.error('Error parsing Excel file:', error);
         reject(error);
       }
     };
