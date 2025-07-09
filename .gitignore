@@ -8,3 +8,6 @@ frontend/.env.production
 ./build
 src/build
 *build*
+
+# Local Netlify folder
+.netlify

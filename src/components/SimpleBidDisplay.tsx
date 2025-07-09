@@ -154,10 +154,14 @@ const globalStyles = `
 
 const SimpleBidDisplay: React.FC<SimpleBidDisplayProps> = ({ bidNumber, currentBidAmount }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  const [windowSize, setWindowSize] = useState({ 
+    width: typeof window !== 'undefined' ? window.innerWidth : 1920, 
+    height: typeof window !== 'undefined' ? window.innerHeight : 1080 
+  });
 
   // Text measurement utility using canvas for accurate width calculation
   const measureTextWidth = (text: string, fontSize: number, fontFamily: string = 'Roboto', fontWeight: string = '900') => {
+    if (typeof document === 'undefined') return 0;
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     if (!context) return 0;
@@ -233,6 +237,8 @@ const SimpleBidDisplay: React.FC<SimpleBidDisplayProps> = ({ bidNumber, currentB
 
   // Handle window resize and container resize to ensure responsive scaling
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleResize = () => {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     };
@@ -240,7 +246,7 @@ const SimpleBidDisplay: React.FC<SimpleBidDisplayProps> = ({ bidNumber, currentB
     // Use ResizeObserver to detect container size changes
     let resizeObserver: ResizeObserver | null = null;
 
-    if (containerRef.current) {
+    if (containerRef.current && typeof ResizeObserver !== 'undefined') {
       resizeObserver = new ResizeObserver(() => {
         handleResize();
       });
@@ -259,7 +265,7 @@ const SimpleBidDisplay: React.FC<SimpleBidDisplayProps> = ({ bidNumber, currentB
 
   // Additional effect to set up ResizeObserver when containerRef becomes available
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || typeof ResizeObserver === 'undefined' || typeof window === 'undefined') return;
 
     const resizeObserver = new ResizeObserver(() => {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
@@ -275,7 +281,7 @@ const SimpleBidDisplay: React.FC<SimpleBidDisplayProps> = ({ bidNumber, currentB
   // Enhanced font and style loading with delay to ensure DOM is ready
   useEffect(() => {
     const styleTimer = setTimeout(() => {
-      if (containerRef.current && containerRef.current.ownerDocument) {
+      if (containerRef.current?.ownerDocument) {
         const popupDocument = containerRef.current.ownerDocument;
 
         // Check if the font link is already in the document
