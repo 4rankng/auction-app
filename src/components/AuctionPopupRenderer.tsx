@@ -4,6 +4,7 @@ import NewWindow from 'react-new-window';
 import logger from '../services/loggerService';
 import styled from 'styled-components';
 import CompanyBanner from './CompanyBanner';
+import SimpleBidDisplay from './SimpleBidDisplay';
 
 interface AuctionPopupRendererProps {
   auctioneer: string;
@@ -662,7 +663,9 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
   } = props;
 
   const [isOpen, setIsOpen] = useState(true);
+  const [isSimpleDisplayOpen, setIsSimpleDisplayOpen] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
+  const simpleDisplayRef = useRef<HTMLDivElement>(null);
   // Add a ref to track if we've already created a popup window
   const popupCreatedRef = useRef<boolean>(false);
 
@@ -957,11 +960,19 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
       return;
     }
 
-    // Regular close behavior
+    // Regular close behavior - close both windows
     setIsOpen(false);
+    setIsSimpleDisplayOpen(false);
     if (onClose) {
       onClose();
     }
+  };
+
+  // Handle closing of simple display window
+  const handleSimpleDisplayClose = () => {
+    logger.info("AuctionPopupRenderer: Simple display closed");
+    setIsSimpleDisplayOpen(false);
+    // Don't close the main window when simple display is closed
   };
 
   // Add a specific effect to handle changes to isAuctionEnded that forces a re-render
@@ -1038,6 +1049,32 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
   // Only render the popup if it hasn't been created yet
   return (
     <>
+      {/* Simple Bid Display Window */}
+      {isSimpleDisplayOpen && (
+        <NewWindow
+          title="Bid Display"
+          features={{
+            width: Math.floor(window.screen.availWidth / 2),
+            height: Math.floor(window.screen.availHeight / 2),
+            left: window.screen.availWidth - Math.floor(window.screen.availWidth / 2),
+            top: 0,
+            resizable: true,
+            scrollbars: false,
+          }}
+          onUnload={handleSimpleDisplayClose}
+          onBlock={() => logger.info("Simple bid display popup was blocked!")}
+          name="simple_bid_display"
+          center="screen"
+          copyStyles={false}
+        >
+          <SimpleBidDisplay
+            bidNumber={bidNumber}
+            currentBidAmount={highestBidAmount}
+          />
+        </NewWindow>
+      )}
+
+      {/* Main Auction Display Window */}
       {isOpen && (
         <NewWindow
           title={isAuctionEnded ? "Kết Quả Đấu Giá" : "Thông Tin Đấu Giá"}
