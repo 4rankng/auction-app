@@ -665,7 +665,6 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
   const [isOpen, setIsOpen] = useState(true);
   const [isSimpleDisplayOpen, setIsSimpleDisplayOpen] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
-  const simpleDisplayRef = useRef<HTMLDivElement>(null);
   // Add a ref to track if we've already created a popup window
   const popupCreatedRef = useRef<boolean>(false);
 

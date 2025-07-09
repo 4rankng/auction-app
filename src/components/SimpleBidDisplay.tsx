@@ -276,7 +276,7 @@ const SimpleBidDisplay: React.FC<SimpleBidDisplayProps> = ({ bidNumber, currentB
     return () => {
       resizeObserver.disconnect();
     };
-  }, [containerRef.current]);
+  }, []);
 
   // Enhanced font and style loading with delay to ensure DOM is ready
   useEffect(() => {
