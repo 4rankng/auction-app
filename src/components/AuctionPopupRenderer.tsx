@@ -45,7 +45,7 @@ const StyledContainer = styled.div`
     width: 100vw;
     margin: 0;
     padding: 0;
-    background-color: #ffffff;
+    background-color: #f8f9fa;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -67,7 +67,7 @@ const StyledContainer = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ffffff;
+    background-color: #f8f9fa;
   }
 
   /* Auction container */
@@ -79,7 +79,7 @@ const StyledContainer = styled.div`
     border-radius: 0;
     box-shadow: none;
     border: none;
-    background-color: #ffffff;
+    background-color: #f8f9fa;
     overflow: auto;
     margin: 0;
     padding: 0;
@@ -171,16 +171,35 @@ const StyledContainer = styled.div`
     font-weight: 600;
   }
 
-  /* Bid number display */
-  #bid-number {
+  /* Bid anchor section - the prominent display */
+  .bid-anchor-section {
     width: 100%;
+    padding: 4vh 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: center;
+    gap: 8vw;
+  }
+  
+  .anchor-item {
     text-align: center;
-    font-size: calc(20px + 0.5vmin);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .anchor-label {
+    font-size: calc(40px + 1.5vmin);
+    font-weight: 800;
     color: #212529;
-    font-weight: 500;
-    margin: 2vh 0;
-    padding: 2vh 0;
-    background-color: #ffffff;
+    margin-bottom: 1vh;
+  }
+  
+  .anchor-value {
+    font-size: calc(42px + 1.8vmin);
+    font-weight: 800;
+    color: #0275d8;
   }
 
   /* Highest bid section */
@@ -258,7 +277,7 @@ const StyledContainer = styled.div`
   /* Result container styles */
   .result-container {
     width: 100%;
-    background-color: #ffffff;
+    background-color: #f8f9fa;
     padding: 3vh 20px;
     display: flex;
     flex-direction: column;
@@ -280,10 +299,10 @@ const StyledContainer = styled.div`
   /* Winner section */
   .winner-section {
     margin: 2vh 0 3vh 0;
-    background-color: #fff;
+    background-color: #f8f9fa;
     padding: 3vh 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: none;
     width: 90%;
     max-width: 800px;
   }
@@ -321,10 +340,10 @@ const StyledContainer = styled.div`
   }
 
   .stat-item {
-    background-color: #fff;
+    background-color: #f0f0f0;
     padding: 2vh 15px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: none;
     flex: 1;
   }
 
@@ -368,6 +387,24 @@ const StyledContainer = styled.div`
     .auction-stats {
       max-width: 70%;
     }
+
+    .anchor-label {
+      font-size: calc(44px + 1.8vmin);
+    }
+    
+    .anchor-value {
+      font-size: calc(46px + 2vmin);
+    }
+  }
+
+  @media (min-width: 2400px) {
+    .anchor-label {
+      font-size: calc(48px + 2vmin);
+    }
+    
+    .anchor-value {
+      font-size: calc(50px + 2.2vmin);
+    }
   }
 `;
 
@@ -378,7 +415,7 @@ const globalStyles = `
     font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #ffffff;
+    background-color: #f8f9fa;
     height: 100vh;
     width: 100vw;
     overflow: hidden;
@@ -387,14 +424,9 @@ const globalStyles = `
     align-items: center;
   }
 
-  /* For projector readability */
+  /* Flat design - no shadows */
   * {
-    text-shadow: 0 0 1px rgba(0,0,0,0.1);
-  }
-
-  /* Improved contrast for readability */
-  .highest-bid-amount, .timer-value, .final-price {
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    /* Pure flat design */
   }
 
   /* Improved scaling for different screen sizes */
@@ -412,7 +444,7 @@ const globalStyles = `
 
   /* Styling for the auction ended state */
   body.auction-ended .result-container {
-    background-color: #ffffff;
+    background-color: #f8f9fa;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -430,7 +462,7 @@ const globalStyles = `
     flex-direction: column;
     flex: 1;
     width: 100%;
-    background-color: #ffffff;
+    background-color: #f8f9fa;
   }
 
   /* Add auctioneer styles */
@@ -452,7 +484,7 @@ const globalStyles = `
 
   /* Ensure result container has proper styling */
   .result-container {
-    background-color: #ffffff;
+    background-color: #f8f9fa;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -473,7 +505,7 @@ const globalStyles = `
 
   .winner-section {
     margin: 10px 0 20px 0;
-    background-color: #fff;
+    background-color: #f8f9fa;
     padding: 20px;
     border-radius: 8px;
     box-shadow: none;
@@ -518,7 +550,7 @@ const globalStyles = `
   }
 
   .stat-item {
-    background-color: #fff;
+    background-color: #f0f0f0;
     padding: 15px;
     border-radius: 8px;
     box-shadow: none;
@@ -534,7 +566,8 @@ const globalStyles = `
   }
 
   .bid-number {
-
+    font-size: calc(28px + 1vmin);
+    font-weight: 700;
   }
 
   .stat-value {
@@ -702,56 +735,6 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
     };
   }, []);
 
-  // Remove the timer handling effect - we'll just use the prop directly
-  // useEffect(() => {
-  //   // For ended auctions, ensure timer is stopped and shows 0
-  //   if (isAuctionEnded) {
-  //     if (timerRef.current) {
-  //       clearInterval(timerRef.current);
-  //       timerRef.current = undefined;
-  //     }
-  //     setRemainingTime(0);
-  //     return;
-  //   }
-
-  //   // Check if timerValue has changed - this is the key optimization
-  //   if (timerValue !== undefined && timerValue !== prevTimerValueRef.current) {
-  //     logger.info("AuctionPopupRenderer: New timer value received:", timerValue);
-
-  //     // Update the state and ref with new value
-  //     setRemainingTime(timerValue);
-  //     prevTimerValueRef.current = timerValue;
-
-  //     // Clear existing timer
-  //     if (timerRef.current) {
-  //       clearInterval(timerRef.current);
-  //       timerRef.current = undefined;
-  //     }
-
-  //     // Start a new countdown if value is > 0
-  //     if (timerValue > 0) {
-  //       logger.info("AuctionPopupRenderer: Starting new countdown");
-  //       timerRef.current = setInterval(() => {
-  //         setRemainingTime(prev => {
-  //           const newValue = Math.max(0, prev - 1);
-  //           if (newValue === 0 && timerRef.current) {
-  //             clearInterval(timerRef.current);
-  //             timerRef.current = undefined;
-  //           }
-  //           return newValue;
-  //         });
-  //       }, 1000);
-  //     }
-  //   }
-
-  //   // Clean up on unmount
-  //   return () => {
-  //     if (timerRef.current) {
-  //       clearInterval(timerRef.current);
-  //       timerRef.current = undefined;
-  //     }
-  //   };
-  // }, [timerValue, isAuctionEnded]);
 
   // Remove the timer subscription which is causing conflicts
   useEffect(() => {
@@ -1142,8 +1125,16 @@ const AuctionPopupRenderer: React.FC<AuctionPopupRendererProps> = (props) => {
                   </div>
                 ) : (
                   <div className="auction-details">
-                          <div id="bid-number">
-                      Lượt trả giá thứ: {bidNumber === 0 ? "-" : bidNumber}
+                    {/* Prominent bid anchor section */}
+                    <div className="bid-anchor-section">
+                      <div className="anchor-item">
+                        <div className="anchor-label">Lượt trả giá thứ:</div>
+                        <div className="anchor-value">{bidNumber === 0 ? "-" : bidNumber}</div>
+                      </div>
+                      <div className="anchor-item">
+                        <div className="anchor-label">Giá trả:</div>
+                        <div className="anchor-value">{highestBidAmount || "- VND"}</div>
+                      </div>
                     </div>
                     <div className="highest-bid-section">
                       <div className="highest-bidder-column">
